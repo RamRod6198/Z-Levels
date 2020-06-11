@@ -88,7 +88,7 @@ namespace ZLevels
 			}
 			if (!GenStep_TerrainUpper.debug_WarnedMissingTerrain)
 			{
-				Log.Error(string.Concat(new object[]
+				ZLogger.Error(string.Concat(new object[]
 				{
 					"No terrain found in biome ",
 					map.Biome.defName,
@@ -96,7 +96,7 @@ namespace ZLevels
 					elevation,
 					", fertility=",
 					fertility
-				}), false);
+				}));
 				GenStep_TerrainUpper.debug_WarnedMissingTerrain = true;
 			}
 			return TerrainDefOf.Sand;
@@ -278,7 +278,7 @@ namespace ZLevels
 						}
 						if (num6 == -2147483648)
 						{
-							Log.ErrorOnce("Failed to find all necessary river flow data", 5273133, false);
+							ZLogger.ErrorOnce("Failed to find all necessary river flow data", true);
 						}
 						array[num5] = zero.x;
 						array[num5 + 1] = zero.y;

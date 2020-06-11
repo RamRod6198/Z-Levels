@@ -121,7 +121,7 @@ namespace ZLevels
 			terrainDef2 = TerrainThreshold.TerrainAtValue(map.Biome.terrainsByFertility, fertility);
 			if (terrainDef2 != null)
 			{
-				Log.Message("8 Terrain: " + terrainDef2 + " - Loc: " + c, true);
+				ZLogger.Message("8 Terrain: " + terrainDef2 + " - Loc: " + c, true);
 				return terrainDef2;
 			}
 			if (!debug_WarnedMissingTerrain)
@@ -259,10 +259,6 @@ namespace ZLevels
 									break;
 								}
 							}
-						}
-						if (num6 == int.MinValue)
-						{
-							Log.ErrorOnce("Failed to find all necessary river flow data", 5273133);
 						}
 						array[num5] = vector2.x;
 						array[num5 + 1] = vector2.y;

@@ -43,7 +43,7 @@ namespace ZLevels
                                                map.Biome.CommonalityOfAnimal(def) / def.wildGroupSize.Average);
                     if (pawnKindDef == null)
                     {
-                        Log.Error("No spawnable animals right now.", false);
+                        ZLogger.Error("No spawnable animals right now.");
                         result = false;
                     }
                     else
@@ -105,7 +105,7 @@ namespace ZLevels
                 }
                 else
                 {
-                    Log.Message("The map has no caves below to generate infestation");
+                    ZLogger.Message("The map has no caves below to generate infestation");
                 }
                 __result = false;
                 return false;

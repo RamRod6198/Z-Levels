@@ -45,13 +45,11 @@ namespace ZLevels
                         LocalTargetInfo obj2 = maps[i].physicalInteractionReservationManager.FirstReservationFor(__instance);
                         if (obj2.IsValid)
                         {
-                            Log.ErrorOnce(string.Format("Physical interaction reservation manager failed to clean up properly; {0} still reserving {1}", __instance.ToStringSafe<Pawn>(), obj2.ToStringSafe<LocalTargetInfo>()), 19586765 ^ __instance.thingIDNumber, false);
                             flag = true;
                         }
                         IAttackTarget attackTarget = maps[i].attackTargetReservationManager.FirstReservationFor(__instance);
                         if (attackTarget != null)
                         {
-                            Log.ErrorOnce(string.Format("Attack target reservation manager failed to clean up properly; {0} still reserving {1}", __instance.ToStringSafe<Pawn>(), attackTarget.ToStringSafe<IAttackTarget>()), 100495878 ^ __instance.thingIDNumber, false);
                             flag = true;
                         }
                         IntVec3 obj3 = maps[i].pawnDestinationReservationManager.FirstObsoleteReservationFor(__instance);

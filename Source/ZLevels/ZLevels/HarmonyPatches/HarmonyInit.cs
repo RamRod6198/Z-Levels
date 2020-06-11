@@ -19,7 +19,7 @@ namespace ZLevels
         }
 
         [HarmonyPatch(typeof(Log))]
-        [HarmonyPatch(nameof(Log.Error))]
+        [HarmonyPatch(nameof(ZLogger.Error))]
         static class Log_Error_Patch
         {
             [HarmonyPrefix]
@@ -33,7 +33,7 @@ namespace ZLevels
                     || text.Contains("clearing group grid square") // same
                     )
                 {
-                    //Log.Message("The error: " + text);
+                    //ZLogger.Message("The error: " + text);
                     return false;
                 }
                 return true;

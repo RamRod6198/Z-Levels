@@ -27,14 +27,14 @@ namespace ZLevels
                 {
                     Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    Log.Message("Weather decider: " + __result + " - " + ZTracker.GetMapInfo(map));
+                    ZLogger.Message("Weather decider: " + __result + " - " + ZTracker.GetMapInfo(map));
                     if (ZTracker.GetZIndexFor(map) == 0)
                     {
                         foreach (var map2 in ZTracker.GetAllMaps(map.Tile))
                         {
                             if (ZTracker.GetZIndexFor(map2) > 0)
                             {
-                                Log.Message("1 - " + ZTracker.GetMapInfo(map2) + " transitioting to " + __result);
+                                ZLogger.Message("1 - " + ZTracker.GetMapInfo(map2) + " transitioting to " + __result);
                                 map2.weatherManager.TransitionTo(__result);
                                 map2.weatherManager.curWeatherAge = map.weatherManager.curWeatherAge;
                             }
@@ -43,17 +43,17 @@ namespace ZLevels
                     else if (ZTracker.GetZIndexFor(map) > 0)
                     {
                         __result = map.weatherManager.curWeather;
-                        Log.Message("2 - " + ZTracker.GetMapInfo(map) + " transitioting to " + __result);
+                        ZLogger.Message("2 - " + ZTracker.GetMapInfo(map) + " transitioting to " + __result);
 
                         map.weatherManager.TransitionTo(__result);
                     }
                     else if (ZTracker.GetZIndexFor(map) < 0)
                     {
                         __result = WeatherDefOf.Clear;
-                        Log.Message("3 - " + ZTracker.GetMapInfo(map) + " transitioting to " + __result);
+                        ZLogger.Message("3 - " + ZTracker.GetMapInfo(map) + " transitioting to " + __result);
                         map.weatherManager.TransitionTo(__result);
                     }
-                    Log.Message("Changed weather for " + ZTracker.GetMapInfo(map) + " - " + __result);
+                    ZLogger.Message("Changed weather for " + ZTracker.GetMapInfo(map) + " - " + __result);
                 }
                 catch { };
             }
@@ -68,7 +68,7 @@ namespace ZLevels
                 {
                     Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    Log.Message("2 Weather decider: " + newWeather + " - " + ZTracker.GetMapInfo(map));
+                    ZLogger.Message("2 Weather decider: " + newWeather + " - " + ZTracker.GetMapInfo(map));
                     if (ZTracker.GetZIndexFor(map) == 0)
                     {
                         foreach (var map2 in ZTracker.GetAllMaps(map.Tile))
@@ -78,7 +78,7 @@ namespace ZLevels
                                 map2.weatherManager.lastWeather = __instance.curWeather;
                                 map2.weatherManager.curWeather = newWeather;
                                 map2.weatherManager.curWeatherAge = map.weatherManager.curWeatherAge;
-                                Log.Message("1.2 - " + ZTracker.GetMapInfo(map2) + " transitioting to " + newWeather);
+                                ZLogger.Message("1.2 - " + ZTracker.GetMapInfo(map2) + " transitioting to " + newWeather);
                             }
                         }
                     }
@@ -88,14 +88,14 @@ namespace ZLevels
                         __instance.lastWeather = playerMap.weatherManager.lastWeather;
                         __instance.curWeather = playerMap.weatherManager.curWeather;
                         __instance.curWeatherAge = playerMap.weatherManager.curWeatherAge;
-                        Log.Message("2.2 - " + ZTracker.GetMapInfo(map) + " transitioting to " + map.weatherManager.curWeather);
+                        ZLogger.Message("2.2 - " + ZTracker.GetMapInfo(map) + " transitioting to " + map.weatherManager.curWeather);
                     }
                     else if (ZTracker.GetZIndexFor(map) < 0)
                     {
                         __instance.lastWeather = __instance.curWeather;
                         __instance.curWeather = WeatherDefOf.Clear;
                         __instance.curWeatherAge = 0;
-                        Log.Message("3.2 - " + ZTracker.GetMapInfo(map) + " transitioting to " + WeatherDefOf.Clear);
+                        ZLogger.Message("3.2 - " + ZTracker.GetMapInfo(map) + " transitioting to " + WeatherDefOf.Clear);
                     }
                 }
                 catch { };

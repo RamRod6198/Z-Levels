@@ -50,7 +50,7 @@ namespace ZLevels
             //yield return new Toil
             //{
             //    initAction = delegate () {
-            //        Log.Message("this.pawn.CanReachImmediate(TargetA.Thing, PathEndMode.OnCell): "
+            //        ZLogger.Message("this.pawn.CanReachImmediate(TargetA.Thing, PathEndMode.OnCell): "
             //            + this.pawn.CanReachImmediate(TargetA.Thing, PathEndMode.OnCell), true);
             //    }
             //};

@@ -26,7 +26,7 @@ namespace ZLevels
                         || Find.WorldGrid[map.Tile].hilliness == Hilliness.Mountainous
                         || Find.WorldGrid[map.Tile].hilliness == Hilliness.Impassable))
             {
-                Log.Message("The map has caves below now");
+                ZLogger.Message("The map has caves below now");
                 this.hasCavesBelow = true;
             }
         }
@@ -40,7 +40,7 @@ namespace ZLevels
             //}
             if (this.ReFog)
             {
-                Log.Message("Refog" + this.map);
+                ZLogger.Message("Refog" + this.map);
                 FloodFillerFog.DebugRefogMap(this.map);
                 this.ReFog = false;
             }
@@ -62,7 +62,7 @@ namespace ZLevels
                     || Find.WorldGrid[map.Tile].hilliness == Hilliness.Mountainous
                     || Find.WorldGrid[map.Tile].hilliness == Hilliness.Impassable))
                 {
-                    Log.Message("The map has caves below now");
+                    ZLogger.Message("The map has caves below now");
                     this.hasCavesBelow = true;
                 }
             }

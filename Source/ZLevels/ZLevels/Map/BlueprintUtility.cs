@@ -114,7 +114,7 @@ namespace ZLevels
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("Error in map generating, cant spawn " + terrain.Key + " - " + ex);
+                        ZLogger.Error("Error in map generating, cant spawn " + terrain.Key + " - " + ex);
                     }
                 }
             }
@@ -133,7 +133,7 @@ namespace ZLevels
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("Error in map generating, cant spawn " + pawn + " - " + ex);
+                        ZLogger.Error("Error in map generating, cant spawn " + pawn + " - " + ex);
                     }
                 }
             }
@@ -155,7 +155,7 @@ namespace ZLevels
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("Error in map generating, cant spawn " + building + " - " + ex);
+                        ZLogger.Error("Error in map generating, cant spawn " + building + " - " + ex);
                     }
                 }
             }
@@ -197,7 +197,7 @@ namespace ZLevels
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("Error in map generating, cant spawn " + roof.Key + " - " + ex);
+                        ZLogger.Error("Error in map generating, cant spawn " + roof.Key + " - " + ex);
                     }
                 }
             }

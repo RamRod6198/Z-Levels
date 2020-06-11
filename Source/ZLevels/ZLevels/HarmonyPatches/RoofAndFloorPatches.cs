@@ -72,7 +72,10 @@ namespace ZLevels
                     var thingList = c.GetThingList(___map);
                     for (int i = thingList.Count - 1; i >= 0; i--)
                     {
-                        ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime);
+                        if (!(thingList[i] is Explosion))
+                        {
+                            ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime);
+                        }
                     }
                     return false;
                 }
@@ -113,11 +116,10 @@ namespace ZLevels
             }
         }
 
-
         [HarmonyPatch(typeof(RoofGrid), "SetRoof")]
         internal static class Patch_SetRoof
         {
-            private static void Postfix(RoofGrid __instance, ref IntVec3 c, ref RoofDef def)
+            private static void Prefix(RoofGrid __instance, ref IntVec3 c, ref RoofDef def)
             {
                 try
                 {
@@ -131,10 +133,32 @@ namespace ZLevels
                             upperMap.terrainGrid.SetTerrain(c, ZLevelsDefOf.ZL_RoofTerrain);
                         }
                     }
+                    else if (def == null)
+                    {
+                        Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
+                        if (c.GetRoof(map) == RoofDefOf.RoofConstructed)
+                        {
+                            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                            Map upperMap = ZTracker.GetUpperLevel(map.Tile, map);
+                            if (upperMap != null)
+                            {
+                                upperMap.terrainGrid.SetTerrain(c, ZLevelsDefOf.ZL_OutsideTerrain);
+                                var thingList = c.GetThingList(upperMap);
+                                for (int i = thingList.Count - 1; i >= 0; i--)
+                                {
+                                    if (!(thingList[i] is Explosion))
+                                    {
+                                        ZTracker.SimpleTeleportThing(thingList[i], c, map, false);
+                                    }
+                                }
+                                Log.Message("Removing roof " + c.GetRoof(map), true);
+                            }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
-                    //Log.Error("Error in Patch_SetRoof: " + ex);
+                    //ZLogger.Error("Error in Patch_SetRoof: " + ex);
                 };
             }
         }
@@ -159,7 +183,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Error in Patch_SetTerrain: " + ex);
+                    ZLogger.Error("Error in Patch_SetTerrain: " + ex);
                 };
             }
         }

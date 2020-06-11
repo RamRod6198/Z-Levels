@@ -58,7 +58,7 @@ namespace ZLevels
             }
             var opt2 = new FloatMenuOption(text, () =>
             {
-                Log.Message("Test");
+                ZLogger.Message("Test");
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
                 selPawn.jobs.StartJob(job, JobCondition.InterruptForced);
             }, MenuOptionPriority.Default, null, this);

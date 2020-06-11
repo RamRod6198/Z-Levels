@@ -23,7 +23,7 @@ namespace ZLevels
 				{
 					if (___cachedEntries[i].pawn == null && ___cachedEntries[i].map.Parent is MapParent_ZLevel)
 					{
-						//Log.Message("Rect: " + ___cachedDrawLocs[i].x + " - " + ___cachedDrawLocs[i].y + " - " 
+						//ZLogger.Message("Rect: " + ___cachedDrawLocs[i].x + " - " + ___cachedDrawLocs[i].y + " - " 
 						//	+ __instance.Size.x + " - " + __instance.Size.y);
 						Rect rect = new Rect(___cachedDrawLocs[i].x, ___cachedDrawLocs[i].y, 
 							__instance.Size.x / 2, __instance.Size.y / 2);
@@ -44,7 +44,7 @@ namespace ZLevels
 								if (map.listerThings.AllThings.Count > 0)
 								{
 									BlueprintUtility.SaveEverything(pathToWrite, map, "SavedMap");
-									Log.Message("Removing map: " + map);
+									ZLogger.Message("Removing map: " + map);
 								}
 								var parent = map.Parent as MapParent_ZLevel;
 								var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
@@ -58,7 +58,7 @@ namespace ZLevels
 									{
 										foreach (var d in ZTracker.ZLevelsTracker[map2.Tile].ZLevels)
 										{
-											Log.Message(map2 + ": " + d.Key + " - " + d.Value);
+											ZLogger.Message(map2 + ": " + d.Key + " - " + d.Value);
 										}
 									}
 								}

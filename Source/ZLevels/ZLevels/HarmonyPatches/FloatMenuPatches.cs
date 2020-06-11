@@ -63,7 +63,7 @@ namespace ZLevels
                                 ((Pawn)pawn).jobs.StartJob(job, JobCondition.InterruptForced);
                             }
                         }
-                        Log.Message("Choosen");
+                        ZLogger.Message("Choosen");
                     }
                 }
             }
@@ -175,7 +175,7 @@ namespace ZLevels
 
                                         if (building_Bed != null)
                                         {
-                                            Log.Message("Found bed: " + building_Bed);
+                                            ZLogger.Message("Found bed: " + building_Bed);
                                             Job captureJob = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
                                             captureJob.count = 1;
                                             ZTracker.BuildJobListFor(pawn, oldMap, oldMap, captureJob, null);
@@ -277,7 +277,7 @@ namespace ZLevels
 
                                         if (building_Bed != null)
                                         {
-                                            Log.Message("Found bed: " + building_Bed);
+                                            ZLogger.Message("Found bed: " + building_Bed);
                                             Job rescureJob = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
                                             rescureJob.count = 1;
                                             ZTracker.BuildJobListFor(pawn, oldMap, oldMap, rescureJob, null);

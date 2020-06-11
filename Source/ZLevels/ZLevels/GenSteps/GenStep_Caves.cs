@@ -186,7 +186,7 @@ namespace ZLevels
 			}
 			if (!tmpCells.Any())
 			{
-				Log.Warning("Could not find any valid edge cell.");
+				ZLogger.Warning("Could not find any valid edge cell.");
 				return group.RandomElement();
 			}
 			return tmpCells.RandomElement();

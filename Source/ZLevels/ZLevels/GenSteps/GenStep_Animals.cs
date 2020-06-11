@@ -35,7 +35,7 @@ namespace ZLevels
 							(mapParent.TotalInfestations[index].infestationPlace, map, 100,
 							(IntVec3 c) => c.Walkable(map), out loc))
 						{
-							Log.Message("Found loc: " + loc
+							ZLogger.Message("Found loc: " + loc
 								+ " origin place: " + mapParent.TotalInfestations[index].infestationPlace);
 							index++;
 						}
@@ -45,15 +45,15 @@ namespace ZLevels
 						}
 						if (!map.wildAnimalSpawner.SpawnRandomWildAnimalAt(loc))
 						{
-							Log.Message("Spawning in loc: " + loc);
+							ZLogger.Message("Spawning in loc: " + loc);
 							return;
 						}
-						Log.Message("Spawning in loc: " + loc);
+						ZLogger.Message("Spawning in loc: " + loc);
 						continue;
 					}
 					return;
 				}
-				Log.Error("Too many iterations.");
+				ZLogger.Error("Too many iterations.");
 			}
 		}
 	}
