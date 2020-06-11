@@ -26,14 +26,27 @@ namespace ZLevels
         {
             private static void Postfix(Skyfaller __result, ThingDef skyfaller, IntVec3 pos, Map map)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                var upperMap = ZTracker.ZLevelsTracker[map.Tile]
-                    .ZLevels.Values.OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
-                if (upperMap != null)
+                Log.Message("Spawning " + __result);
+
+                if (pos.Roofed(map))
                 {
-                    Log.Message(ZTracker.GetMapInfo(upperMap));
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var upperMap = ZTracker.ZLevelsTracker[map.Tile]
+                        .ZLevels.Values.Where(x => !pos.Roofed(x)
+                        && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
+                        .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
+                    if (upperMap != null)
+                    {
+                        ZTracker.SimpleTeleportThing(__result, pos, upperMap);
+                        Log.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
+                    }
+                    else
+                    {
+                        Log.Message("Cant find unroofed map for " + __result);
+                    }
+                    Log.Message("Roofed");
+
                 }
-                Log.Message("Skyfaller: " + __result);
             }
         }
 
@@ -44,14 +57,27 @@ namespace ZLevels
         {
             private static void Postfix(Skyfaller __result, ThingDef skyfaller, ThingDef innerThing, IntVec3 pos, Map map)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                var upperMap = ZTracker.ZLevelsTracker[map.Tile]
-                    .ZLevels.Values.OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
-                if (upperMap != null)
+                Log.Message("Spawning " + __result);
+
+                if (pos.Roofed(map))
                 {
-                    Log.Message(ZTracker.GetMapInfo(upperMap));
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var upperMap = ZTracker.ZLevelsTracker[map.Tile]
+                        .ZLevels.Values.Where(x => !pos.Roofed(x)
+                        && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
+                        .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault(); 
+                    if (upperMap != null)
+                    {
+                        ZTracker.SimpleTeleportThing(__result, pos, upperMap);
+                        Log.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
+                    }
+                    else
+                    {
+                        Log.Message("Cant find unroofed map for " + __result);
+                    }
+                    Log.Message("Roofed");
+
                 }
-                Log.Message("Skyfaller: " + __result);
             }
         }
 
@@ -62,14 +88,27 @@ namespace ZLevels
         {
             private static void Postfix(Skyfaller __result, ThingDef skyfaller, Thing innerThing, IntVec3 pos, Map map)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                var upperMap = ZTracker.ZLevelsTracker[map.Tile]
-                    .ZLevels.Values.OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
-                if (upperMap != null)
+                Log.Message("Spawning " + __result);
+
+                if (pos.Roofed(map))
                 {
-                    Log.Message(ZTracker.GetMapInfo(upperMap));
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var upperMap = ZTracker.ZLevelsTracker[map.Tile]
+                        .ZLevels.Values.Where(x => !pos.Roofed(x) 
+                        && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
+                        .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
+                    if (upperMap != null)
+                    {
+                        ZTracker.SimpleTeleportThing(__result, pos, upperMap);
+                        Log.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
+                    }
+                    else
+                    {
+                        Log.Message("Cant find unroofed map for " + __result);
+                    }
+                    Log.Message("Roofed");
+
                 }
-                Log.Message("Skyfaller: " + __result);
             }
         }
 
@@ -80,14 +119,25 @@ namespace ZLevels
         {
             private static void Postfix(Skyfaller __result, ThingDef skyfaller, IEnumerable<Thing> things, IntVec3 pos, Map map)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                var upperMap = ZTracker.ZLevelsTracker[map.Tile]
-                    .ZLevels.Values.OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
-                if (upperMap != null)
+                Log.Message("Spawning " + __result);
+                if (pos.Roofed(map))
                 {
-                    Log.Message(ZTracker.GetMapInfo(upperMap));
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var upperMap = ZTracker.ZLevelsTracker[map.Tile]
+                        .ZLevels.Values.Where(x => !pos.Roofed(x)
+                        && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
+                        .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault(); 
+                    if (upperMap != null)
+                    {
+                        ZTracker.SimpleTeleportThing(__result, pos, upperMap);
+                        Log.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
+                    }
+                    else
+                    {
+                        Log.Message("Cant find unroofed map for " + __result);
+                    }
+                    Log.Message("Roofed");
                 }
-                Log.Message("Skyfaller: " + __result);
             }
         }
     }

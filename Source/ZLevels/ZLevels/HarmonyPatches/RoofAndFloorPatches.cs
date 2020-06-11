@@ -74,6 +74,10 @@ namespace ZLevels
                     {
                         if (!(thingList[i] is Explosion))
                         {
+                            if (thingList[i].def.useHitPoints)
+                            {
+                                thingList[i].HitPoints -= 10;
+                            }
                             ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime);
                         }
                     }
@@ -107,6 +111,10 @@ namespace ZLevels
                         {
                             if (!(thingList[i] is Mineable))
                             {
+                                if (thingList[i].def.useHitPoints)
+                                {
+                                    thingList[i].HitPoints -= 10;
+                                }
                                 ZTracker.SimpleTeleportThing(thingList[i], __instance.Position, lowerMap, firstTime);
                             }
                         }
@@ -148,6 +156,10 @@ namespace ZLevels
                                 {
                                     if (!(thingList[i] is Explosion))
                                     {
+                                        if (thingList[i].def.useHitPoints)
+                                        {
+                                            thingList[i].HitPoints -= 10;
+                                        }
                                         ZTracker.SimpleTeleportThing(thingList[i], c, map, false);
                                     }
                                 }
