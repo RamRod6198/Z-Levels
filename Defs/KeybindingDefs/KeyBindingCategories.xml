@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<KeyBindingCategoryDef>
+		<defName>ZLevels</defName>
+		<label>ZLevels keybinding</label>
+		<description>ZLevels hotkeys</description>
+		<isGameUniversal>true</isGameUniversal>
+		<checkForConflicts>
+			<li>Development</li>
+			<li>Game</li>
+			<li>SelectionMisc</li>
+			<li>MainTabs</li>
+			<li>GameMapCamera</li>
+			<li>Architect</li>
+		</checkForConflicts>
+	</KeyBindingCategoryDef>
+
+</Defs>

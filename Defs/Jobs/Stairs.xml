@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<JobDef>
+		<defName>ZL_GoToStairs</defName>
+		<driverClass>ZLevels.JobDriver_GoToStairs</driverClass>
+		<reportString>traversing TargetA.</reportString>
+	</JobDef>
+
+	<JobDef>
+		<defName>ZL_HaulThingToStairs</defName>
+		<driverClass>ZLevels.JobDriver_HaulThingToStairs</driverClass>
+		<reportString>traversing TargetA.</reportString>
+	</JobDef>
+
+</Defs>

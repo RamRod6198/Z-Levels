@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+	<WorldObjectDef>
+		<defName>ZL_Upper</defName>
+		<label>Upper</label>
+		<description>Upper layer.</description>
+		<worldObjectClass>ZLevels.MapParent_ZLevel</worldObjectClass>
+		<texture>World/WorldObjects/JourneyDestination</texture>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconTexture>World/WorldObjects/Expanding/JourneyDestination</expandingIconTexture>
+		<expandingIconPriority>50</expandingIconPriority>
+		<expandMore>true</expandMore>
+		<mapGenerator>ZL_Upper</mapGenerator>
+		<canBePlayerHome>false</canBePlayerHome>
+	</WorldObjectDef>
+
+	<MapGeneratorDef>
+		<defName>ZL_Upper</defName>
+		<genSteps>
+			<li>ElevationFertility</li>
+			<li>TerrainUpper</li>
+			<li>FindLocationUnderground</li>
+			<li>Fog</li>
+		</genSteps>
+	</MapGeneratorDef>
+
+	<GenStepDef>
+		<defName>ElevationFertilityUpper</defName>
+		<order>10</order>
+		<genStep Class="ZLevels.GenStep_ElevationFertilityUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>TerrainUpper</defName>
+		<order>210</order>
+		<genStep Class="ZLevels.GenStep_TerrainUpper"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>FindLocationUpper</defName>
+		<order>600</order>
+		<genStep Class="ZLevels.GenStep_FindLocationUnderground"/>
+	</GenStepDef>
+
+</Defs>
