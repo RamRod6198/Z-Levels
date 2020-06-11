@@ -19,7 +19,7 @@ namespace ZLevels
         }
 
         [HarmonyPatch(typeof(Log))]
-        [HarmonyPatch(nameof(ZLogger.Error))]
+        [HarmonyPatch(nameof(Log.Error))]
         static class Log_Error_Patch
         {
             [HarmonyPrefix]
