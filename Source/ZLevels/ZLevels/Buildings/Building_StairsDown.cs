@@ -18,9 +18,13 @@ namespace ZLevels
             base.SpawnSetup(map, respawningAfterLoad);
             if (!respawningAfterLoad)
             {
+                if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
+                {
+                    this.Map.terrainGrid.SetTerrain(this.Position, ZLevelsDefOf.ZL_OutsideTerrainTwo);
+                }
                 var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                 Map mapBelow = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
-                if (mapBelow != null && this.def.defName == "FC_StairsDown")
+                if (mapBelow != null && mapBelow != this.Map && this.def.defName == "FC_StairsDown")
                 {
                     for (int i = mapBelow.thingGrid.ThingsListAt(this.Position).Count - 1; i >= 0; i--)
                     {
@@ -36,6 +40,7 @@ namespace ZLevels
                     if (this.Position.GetThingList(mapBelow).Where(x => x.def == ZLevelsDefOf.ZL_StairsUp).Count() == 0)
                     {
                         var stairsToSpawn = ThingMaker.MakeThing(ZLevelsDefOf.ZL_StairsUp, this.Stuff);
+                        mapBelow.terrainGrid.SetTerrain(this.Position, ZLevelsDefOf.ZL_OutsideTerrainTwo);
                         GenPlace.TryPlaceThing(stairsToSpawn, this.Position, mapBelow, ThingPlaceMode.Direct);
                         stairsToSpawn.SetFaction(this.Faction);
                     }
@@ -43,9 +48,25 @@ namespace ZLevels
                     AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapBelow.fogGrid, new object[]
                     { this.Position });
                 }
+                else if (mapBelow == this.Map)
+                {
+                    Log.Error("There was a mismatch of ZLevels indices. This is a serious error, report it to the mod developers");
+                    foreach (var map2 in ZTracker.GetAllMaps(this.Map.Tile))
+                    {
+                        Log.Message("Index: " + ZTracker.GetMapInfo(map2));
+                    }
+                }
             }
         }
 
+        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+        {
+            if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrainTwo)
+            {
+                this.Map.terrainGrid.SetTerrain(this.Position, ZLevelsDefOf.ZL_OutsideTerrain);
+            }
+            base.Destroy(mode);
+        }
         public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
         {
             var text = "GoDown".Translate();

@@ -23,6 +23,8 @@ namespace ZLevels
 
 		public static TerrainDef ZL_OutsideTerrain;
 
+		public static TerrainDef ZL_OutsideTerrainTwo;
+
 		public static TerrainDef ZL_RoofTerrain;
 
 		public static BiomeDef ZL_UndegroundBiome;

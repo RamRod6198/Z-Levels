@@ -633,7 +633,11 @@ namespace ZLevels
                 }
                 if (draft)
                 {
-                    pawnToTeleport2.drafter.Drafted = true;
+                    try
+                    {
+                        pawnToTeleport2.drafter.Drafted = true;
+                    }
+                    catch { }
                 }
             }
 
@@ -641,11 +645,15 @@ namespace ZLevels
             if (firstTime)
             {
                 ZLogger.Message("Map: " + mapToTeleport);
-                FloodFillerFog.DebugRefogMap(mapToTeleport);
-                foreach (var cell in mapToTeleport.AllCells)
+                try
                 {
-                    FloodFillerFog.FloodUnfog(cell, mapToTeleport);
+                    FloodFillerFog.DebugRefogMap(mapToTeleport);
+                    foreach (var cell in mapToTeleport.AllCells)
+                    {
+                        FloodFillerFog.FloodUnfog(cell, mapToTeleport);
+                    }
                 }
+                catch { };
             }
 
             FloodFillerFog.FloodUnfog(thingToTeleport.Position, mapToTeleport);
@@ -808,23 +816,30 @@ namespace ZLevels
             }
             if (draft)
             {
-                pawnToTeleport.drafter.Drafted = true;
+                try
+                {
+                    pawnToTeleport.drafter.Drafted = true;
+                }
+                catch { }
             }
             if (firstTime)
             {
-                ZLogger.Message("Map: " + mapToTeleport);
-                FloodFillerFog.DebugRefogMap(mapToTeleport);
-                foreach (var cell in mapToTeleport.AllCells)
+                try
                 {
-                    FloodFillerFog.FloodUnfog(cell, mapToTeleport);
+                    ZLogger.Message("Map: " + mapToTeleport);
+                    FloodFillerFog.DebugRefogMap(mapToTeleport);
+                    foreach (var cell in mapToTeleport.AllCells)
+                    {
+                        FloodFillerFog.FloodUnfog(cell, mapToTeleport);
+                    }
                 }
+                catch { };
             }
 
             FloodFillerFog.FloodUnfog(pawnToTeleport.Position, mapToTeleport);
             AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
             { pawnToTeleport.PositionHeld });
         }
-
         public Map CreateLowerLevel(Map origin, IntVec3 playerStartSpot)
         {
             var comp = origin.GetComponent<MapComponentZLevel>();
@@ -906,7 +921,7 @@ namespace ZLevels
                 newComp.Z_LevelIndex = comp.Z_LevelIndex + 1;
                 AdjustMapGeneration(newMap);
             }
-
+            newMap.terrainGrid.SetTerrain(playerStartSpot, ZLevelsDefOf.ZL_OutsideTerrainTwo);
             return newMap;
         }
 

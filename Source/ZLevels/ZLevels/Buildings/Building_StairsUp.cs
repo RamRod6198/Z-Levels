@@ -18,18 +18,40 @@ namespace ZLevels
             base.SpawnSetup(map, respawningAfterLoad);
             if (!respawningAfterLoad)
             {
+                if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
+                {
+                    this.Map.terrainGrid.SetTerrain(this.Position, ZLevelsDefOf.ZL_OutsideTerrainTwo);
+                }
                 var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                 Map mapUpper = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
-                if (mapUpper != null)
+                if (mapUpper != null && mapUpper != this.Map)
                 {
                     if (this.Position.GetThingList(mapUpper).Where(x => x.def == ZLevelsDefOf.ZL_StairsDown).Count() == 0)
                     {
+                        mapUpper.terrainGrid.SetTerrain(this.Position, ZLevelsDefOf.ZL_OutsideTerrainTwo);
                         var stairsToSpawn = ThingMaker.MakeThing(ZLevelsDefOf.ZL_StairsDown, this.Stuff);
                         GenPlace.TryPlaceThing(stairsToSpawn, this.Position, mapUpper, ThingPlaceMode.Direct);
                         stairsToSpawn.SetFaction(this.Faction);
                     }
                 }
+                else if (mapUpper == this.Map)
+                {
+                    Log.Error("There was a mismatch of ZLevels indices. This is a serious error, report it to the mod developers");
+                    foreach (var map2 in ZTracker.GetAllMaps(this.Map.Tile))
+                    {
+                        Log.Message("Index: " + ZTracker.GetMapInfo(map2));
+                    }
+                }
             }
+        }
+
+        public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+        {
+            if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrainTwo)
+            {
+                this.Map.terrainGrid.SetTerrain(this.Position, ZLevelsDefOf.ZL_OutsideTerrain);
+            }
+            base.Destroy(mode);
         }
         public override void Tick()
         {
