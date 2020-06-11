@@ -60,39 +60,55 @@ namespace ZLevels
                 initAction = () =>
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    if (TargetA.Thing is Building_StairsUp sup)
+                    if (TargetA.Thing is Building_StairsUp stairsUp)
                     {
+
                         Map map = ZTracker.GetUpperLevel(this.pawn.Map.Tile, this.pawn.Map);
                         if (map == null)
                         {
-                            Log.Error("Cant go up because map is null");
+                            map = ZTracker.CreateUpperLevel(this.pawn.Map, stairsUp.Position);
+                            if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
+                            {
+                                var comp = map.GetComponent<MapComponentZLevel>();
+                                comp.DoGeneration = true;
+                                comp.path = stairsUp.pathToPreset;
+                            }
+                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map, true, false, stairsUp.shouldSpawnStairsUpper);
+                            stairsUp.shouldSpawnStairsUpper = false;
                         }
                         else
                         {
-                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map);
+                            if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
+                            {
+                                var comp = map.GetComponent<MapComponentZLevel>();
+                                comp.DoGeneration = true;
+                                comp.path = stairsUp.pathToPreset;
+                            }
+                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map, false, false, stairsUp.shouldSpawnStairsUpper);
+                            stairsUp.shouldSpawnStairsUpper = false;
                         }
                     }
-                    if (TargetA.Thing is Building_StairsDown sdo)
+                    if (TargetA.Thing is Building_StairsDown stairsDown)
                     {
                         Map map = ZTracker.GetLowerLevel(this.pawn.Map.Tile, this.pawn.Map);
                         if (map == null)
                         {
-                            map = sdo.Create(this.pawn.Map);
-                            if (sdo.pathToPreset != null && sdo.pathToPreset.Length > 0)
+                            map = ZTracker.CreateLowerLevel(this.pawn.Map, stairsDown.Position);
+                            if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
                             {
                                 var comp = map.GetComponent<MapComponentZLevel>();
                                 comp.DoGeneration = true;
-                                comp.path = sdo.pathToPreset;
+                                comp.path = stairsDown.pathToPreset;
                             }
                             ZTracker.TeleportPawn(GetActor(), GetActor().Position, map);
                         }
                         else
                         {
-                            if (sdo.pathToPreset != null && sdo.pathToPreset.Length > 0)
+                            if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
                             {
                                 var comp = map.GetComponent<MapComponentZLevel>();
                                 comp.DoGeneration = true;
-                                comp.path = sdo.pathToPreset;
+                                comp.path = stairsDown.pathToPreset;
                             }
                             ZTracker.TeleportPawn(GetActor(), GetActor().Position, map);
                         }

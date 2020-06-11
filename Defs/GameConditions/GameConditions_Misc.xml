@@ -2,7 +2,7 @@
 <Defs>
 
   <GameConditionDef>
-    <defName>UndergroundCondition</defName>
+    <defName>ZL_UndergroundCondition</defName>
     <conditionClass>GameCondition_NoSunlight</conditionClass>
     <label>underground</label>
     <description>You went down to the dungeon.</description>

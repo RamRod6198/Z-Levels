@@ -103,50 +103,6 @@ namespace ZLevels
             }
         }
 
-        public Map Create(Map origin)
-        {
-            var comp = origin.GetComponent<MapComponentZLevel>();
-            var mapParent = (MapParent_ZLevel)WorldObjectMaker.MakeWorldObject(ZLevelsDefOf.ZL_Underground);
-
-            mapParent.Tile = origin.Tile;
-            mapParent.PlayerStartSpot = this.Position;
-            mapParent.TotalInfestations = comp.TotalInfestations;
-            mapParent.hasCaves = comp.hasCavesBelow.GetValueOrDefault(false);
-            Find.WorldObjects.Add(mapParent);
-
-            string seedString = Find.World.info.seedString;
-            Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
-
-            var pathToLoad = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
-                    "SavedMaps"), origin.Tile + " - " + (comp.Z_LevelIndex - 1) + ".xml");
-            FileInfo fileInfo = new FileInfo(pathToLoad);
-            Map newMap = null;
-            if (fileInfo.Exists)
-            {
-                Log.Message("Loading from " + pathToLoad);
-                newMap = MapGenerator.GenerateMap(origin.Size, mapParent, 
-                    ZLevelsDefOf.ZL_EmptyMap, mapParent.ExtraGenStepDefs, null);
-                BlueprintUtility.LoadEverything(newMap, pathToLoad);
-            }
-            else
-            {
-                newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef, mapParent.ExtraGenStepDefs, null);
-            }
-
-            Find.World.info.seedString = seedString;
-            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-            if (ZTracker.TryRegisterMap(newMap, comp.Z_LevelIndex - 1))
-            {
-                var newComp = newMap.GetComponent<MapComponentZLevel>();
-                newComp.Z_LevelIndex = comp.Z_LevelIndex - 1;
-            }
-            GameCondition_NoSunlight gameCondition_NoSunlight = 
-                (GameCondition_NoSunlight)GameConditionMaker.MakeCondition(ZLevelsDefOf.ZL_UndergroundCondition, -1);
-            gameCondition_NoSunlight.Permanent = true;
-            newMap.gameConditionManager.RegisterCondition(gameCondition_NoSunlight);
-            return newMap;
-        }
-
         public override void ExposeData()
         {
             base.ExposeData();

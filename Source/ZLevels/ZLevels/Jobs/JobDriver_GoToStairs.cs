@@ -31,7 +31,7 @@ namespace ZLevels
                         Map map = ZTracker.GetUpperLevel(this.pawn.Map.Tile, this.pawn.Map);
                         if (map == null)
                         {
-                            map = stairsUp.Create(this.pawn.Map);
+                            map = ZTracker.CreateUpperLevel(this.pawn.Map, stairsUp.Position);
                             if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
                             {
                                 var comp = map.GetComponent<MapComponentZLevel>();
@@ -59,7 +59,7 @@ namespace ZLevels
                         Map map = ZTracker.GetLowerLevel(this.pawn.Map.Tile, this.pawn.Map);
                         if (map == null)
                         {
-                            map = stairsDown.Create(this.pawn.Map);
+                            map = ZTracker.CreateLowerLevel(this.pawn.Map, stairsDown.Position);
                             if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
                             {
                                 var comp = map.GetComponent<MapComponentZLevel>();

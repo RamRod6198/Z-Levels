@@ -18,6 +18,102 @@ namespace ZLevels
     [StaticConstructorOnStartup]
     public static class RoofAndFloorPatches
     {
+
+        [HarmonyPatch(typeof(DamageWorker), "ExplosionDamageTerrain")]
+        internal static class Patch_ExplosionDamageTerrain
+        {
+            private static bool Prefix(DamageWorker __instance, Explosion explosion, IntVec3 c)
+            {
+                if (c.GetTerrain(explosion.Map) == ZLevelsDefOf.ZL_RoofTerrain)
+                {
+                    if ((float)explosion.GetDamageAmountAt(c) >= ZLevelsDefOf.ZL_RoofTerrain.destroyOnBombDamageThreshold)
+                    {
+                        explosion.Map.terrainGrid.Notify_TerrainDestroyed(c);
+                    }
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(TerrainGrid), "RemoveTopLayer")]
+        public static class DestroyedTerrain
+        {
+            public static bool Prefix(TerrainGrid __instance, IntVec3 c, bool doLeavings, Map ___map)
+            {
+                if (c.GetTerrain(___map) == ZLevelsDefOf.ZL_RoofTerrain)
+                {
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    int num = ___map.cellIndices.CellToIndex(c);
+                    if (doLeavings)
+                    {
+                        GenLeaving.DoLeavingsFor(__instance.topGrid[num], c, ___map);
+                    }
+                    TerrainDef[] underGrid = Traverse.Create(__instance).Field("underGrid").GetValue<TerrainDef[]>();
+                    if (underGrid[num] != null)
+                    {
+                        __instance.topGrid[num] = underGrid[num];
+                        underGrid[num] = null;
+                        Traverse.Create(__instance).Method("DoTerrainChangedEffects", new object[]
+                        {
+                            c
+                        }).GetValue();
+                    }
+                    __instance.SetTerrain(c, ZLevelsDefOf.ZL_OutsideTerrain);
+
+                    Map lowerMap = ZTracker.GetLowerLevel(___map.Tile, ___map);
+                    bool firstTime = false;
+                    if (lowerMap == null)
+                    {
+                        lowerMap = ZTracker.CreateLowerLevel(___map, c);
+                        firstTime = true;
+                    }
+                    lowerMap.roofGrid.SetRoof(c, null);
+                    var thingList = c.GetThingList(___map);
+                    for (int i = thingList.Count - 1; i >= 0; i--)
+                    {
+                        ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime);
+                    }
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Thing))]
+        [HarmonyPatch("SpawnSetup")]
+        public static class Patch_SpawnSetup
+        {
+            [HarmonyPostfix]
+            public static void Postfix(Thing __instance)
+            {
+                try
+                {
+                    if (__instance.Position.GetTerrain(__instance.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
+                    {
+                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        Map lowerMap = ZTracker.GetLowerLevel(__instance.Map.Tile, __instance.Map);
+                        bool firstTime = false;
+                        if (lowerMap == null)
+                        {
+                            lowerMap = ZTracker.CreateLowerLevel(__instance.Map, __instance.Position);
+                            firstTime = true;
+                        }
+                        var thingList = __instance.Position.GetThingList(__instance.Map);
+                        for (int i = thingList.Count - 1; i >= 0; i--)
+                        {
+                            if (!(thingList[i] is Mineable))
+                            {
+                                ZTracker.SimpleTeleportThing(thingList[i], __instance.Position, lowerMap, firstTime);
+                            }
+                        }
+                    }
+                }
+                catch { };
+            }
+        }
+
+
         [HarmonyPatch(typeof(RoofGrid), "SetRoof")]
         internal static class Patch_SetRoof
         {
@@ -38,8 +134,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Error in Patch_SetRoof: " + ex);
-
+                    //Log.Error("Error in Patch_SetRoof: " + ex);
                 };
             }
         }
@@ -59,26 +154,6 @@ namespace ZLevels
                         if (lowerMap != null && lowerMap.roofGrid.RoofAt(c) != RoofDefOf.RoofConstructed)
                         {
                             lowerMap.roofGrid.SetRoof(c, RoofDefOf.RoofConstructed);
-                        }
-                    }
-                    else if (newTerr == null)
-                    {
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                        Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-                        if (ZTracker.GetZIndexFor(map) > 0)
-                        {
-                            foreach (var t in c.GetThingList(map))
-                            {
-                                if (t is Pawn pawn)
-                                {
-                                    pawn.Kill(null);
-                                }
-                                else
-                                {
-                                    t.Destroy(DestroyMode.Refund);
-                                }
-                            }
-                            map.terrainGrid.SetTerrain(c, ZLevelsDefOf.ZL_OutsideTerrain);
                         }
                     }
                 }
