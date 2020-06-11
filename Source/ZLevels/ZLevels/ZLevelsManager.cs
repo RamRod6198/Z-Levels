@@ -556,7 +556,7 @@ namespace ZLevels
             }
             catch (Exception ex)
             {
-                Log.Error("Error in TryTakeFirstJob: " + ex);
+                Log.Message("Fail in TryTakeFirstJob: " + ex);
             }
             return false;
         }

@@ -107,7 +107,9 @@
 			<Plant_HealrootWild>0.5</Plant_HealrootWild>
 		</wildPlants>
 		<wildAnimals>
-
+			<Megascarab>1</Megascarab>
+			<Megaspider>0.3</Megaspider>
+			<Spelopede>0.15</Spelopede>
 		</wildAnimals>
 	</BiomeDef>
 </Defs>

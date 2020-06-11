@@ -136,7 +136,6 @@ namespace ZLevels
         {
             var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
             Map mapBelow = ZTracker.GetLowerLevel(map.Tile, map);
-            map.terrainGrid.SetTerrain(this.Position, TerrainDefOf.TileSandstone);
             RockNoises.Init(map);
 
             foreach (IntVec3 allCell in map.AllCells)

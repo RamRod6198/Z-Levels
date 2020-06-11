@@ -140,6 +140,10 @@ namespace ZLevels
                 var newComp = newMap.GetComponent<MapComponentZLevel>();
                 newComp.Z_LevelIndex = comp.Z_LevelIndex - 1;
             }
+            GameCondition_NoSunlight gameCondition_NoSunlight = 
+                (GameCondition_NoSunlight)GameConditionMaker.MakeCondition(ZLevelsDefOf.ZL_UndergroundCondition, -1);
+            gameCondition_NoSunlight.Permanent = true;
+            newMap.gameConditionManager.RegisterCondition(gameCondition_NoSunlight);
             return newMap;
         }
 

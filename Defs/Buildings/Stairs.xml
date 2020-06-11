@@ -5,7 +5,7 @@
 	<ThingDef Abstract="True" ParentName="FurnitureWithQualityBase" Name="StairsBase">
 		<description>Stairs.</description>
 		<altitudeLayer>Building</altitudeLayer>
-		<passability>PassThroughOnly</passability>
+		<passability>Standable</passability>
 		<fillPercent>0.15</fillPercent>
 		<building>
 			<isEdifice>false</isEdifice>
@@ -80,7 +80,7 @@
 		<pathCost>10</pathCost>
 	</ThingDef>
 
-	<!--ThingDef ParentName="StairsBase">
+	<ThingDef ParentName="StairsBase">
 		<defName>ZL_NaturalHole</defName>
 		<label>natural hole</label>
 		<description>natural hole.</description>
@@ -102,7 +102,7 @@
 		<fillPercent>0.0</fillPercent>
 		<staticSunShadowHeight>0.0</staticSunShadowHeight>
 		<pathCost>10</pathCost>
-	</ThingDef-->
+	</ThingDef>
 
 
 </Defs>

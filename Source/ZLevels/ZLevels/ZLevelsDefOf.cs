@@ -29,6 +29,8 @@ namespace ZLevels
 
 		public static BiomeDef ZL_UpperBiome;
 
+		public static GameConditionDef ZL_UndergroundCondition;
+
 		public static KeyBindingDef ZL_switchToUpperMap;
 
 		public static KeyBindingDef ZL_switchToLowerMap;
