@@ -143,7 +143,7 @@ namespace ZLevels
             	TerrainDef terrainDef = null;
             	if (mapBelow.roofGrid.RoofAt(allCell) != null && !mapBelow.roofGrid.RoofAt(allCell).isNatural)
             	{
-                    terrainDef = TerrainDefOf.TileSandstone;
+                    terrainDef = ZLevelsDefOf.ZL_RoofTerrain;
                 }
             	else if (allCell.GetEdifice(mapBelow) is Mineable rock && rock.Spawned && !rock.Destroyed
                     && mapBelow.roofGrid.RoofAt(allCell) != null 
