@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ModMetaData>
-	<name>Z-Levels</name>
+	<name>Z-Levels Beta</name>
 	<author>RamRod</author>
 	<packageId>ZLevels1.1</packageId>
 	<supportedVersions>
 		<li>1.1</li>
 	</supportedVersions>
-	<description>Placeholder</description>
+	<description>
+Add the ability to dig underground or build upwards!
+
+Requires new save.
+
+When building upwards you have to watch out for the floor collapsing similar to normal roof collapses. Upper floors need supports. When building lower watch out for dropping the montain roof on yourself. The stairs are in the structure tab.
+
+
+
+	-----
+	
+Known Bugs:Natural hole, this is found in the structures tab and it should be avoided, it is only used for infestations underground. Avoid it.
+Please report any bugs.
+
+
+This is a BETA so it might have issues.
+
+If you enjoy this mod please consider donating.
+	-----
+Patreon: https://www.patreon.com/RamRodMods
+Github: https://github.com/Zylleon/MapDesigner/releases/latest
+Discord: https://discord.gg/bDj7F8P
+ko-fi: https://ko-fi.com/ramrod6198
+
+</description>
 </ModMetaData>

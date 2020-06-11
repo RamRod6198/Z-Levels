@@ -5,10 +5,10 @@
 	<TerrainDef ParentName="FloorBase">
 		<defName>ZL_RoofTerrain</defName>
 		<label>roof</label>
-		<color>(126,104,94)</color>
+		<color>(108,78,55)</color>
 		<renderPrecedence>220</renderPrecedence>
-		<description>Carefully-cut and fit stone tiles for a castle feeling. They are pretty to look at, but they take a long time to lay.</description>
-		<texturePath>Terrain/Surfaces/TileStone</texturePath>
+		<description>Wood plank roofing. While it is quick to lay, not very sturdy.</description>
+		<texturePath>Terrain/Surfaces/WoodFloor</texturePath>
 		<statBases>
 			<Beauty>-1</Beauty>
 		</statBases>
