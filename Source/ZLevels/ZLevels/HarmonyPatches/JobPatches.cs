@@ -508,6 +508,205 @@ namespace ZLevels
             }
         }
 
+        [HarmonyPatch(typeof(JobGiver_GetRest), "TryGiveJob")]
+        public class JobGiver_GetRestPatch
+        {
+            [HarmonyPostfix]
+            private static void JobGiver_GetRestPostfix(JobGiver_GetFood __instance, ref Job __result, Pawn pawn)
+            {
+                try
+                {
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    if (pawn.def.race.Humanlike && (__result == null || __result.targetA.Thing == null) && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
+                    {
+                        Log.Message(pawn + " Original rest result: " + __result);
+                        if (ZTracker.jobTracker == null)
+                        {
+                            ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+                        }
+                        if (ZTracker.jobTracker.ContainsKey(pawn))
+                        {
+                            try
+                            {
+                                if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+                                {
+                                    if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
+                                    {
+                                        ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
+                                        pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
+                                        return;
+                                    }
+                                    else if (pawn.jobs.jobQueue[0].job.targetA.Thing.Map != pawn.Map)
+                                    {
+                                        ZTracker.ResetJobTrackerFor(pawn);
+                                    }
+                                    else
+                                    {
+                                        return;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                ZLogger.Message("Error2: " + ex);
+                            };
+                        }
+                        else
+                        {
+                            ZTracker.jobTracker[pawn] = new JobTracker();
+                        }
+                        if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
+                        // minimal job interval check per pawn is 200 ticks
+                        {
+                            return;
+                        }
+                        Job result;
+                        var oldMap = pawn.Map;
+                        var oldPosition = pawn.Position;
+                        bool select = false;
+
+                        foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+                        {
+                            if (otherMap != oldMap)
+                            {
+                                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
+                                {
+                                    return;
+                                }
+                                Log.Message("Searching rest job for " + pawn);
+                                var stairs = new List<Thing>();
+
+                                ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                    + " for " + ZTracker.GetMapInfo(oldMap));
+
+                                if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+                                {
+                                    Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                                    if (lowerMap != null)
+                                    {
+                                        ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
+                                        stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
+                                    }
+                                    else
+                                    {
+                                        ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
+                                    }
+                                }
+                                else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                                {
+                                    Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                                    if (upperMap != null)
+                                    {
+                                        ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
+                                        stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
+                                    }
+                                    else
+                                    {
+                                        ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                                    }
+                                }
+                                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
+                                // minimal job interval check per pawn is 200 ticks
+                                {
+                                    return;
+                                }
+
+                                if (stairs != null && stairs.Count() > 0)
+                                {
+                                    var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
+                                    var position = selectedStairs.Position;
+
+                                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                                    JobManagerPatches.manualDespawn = true;
+                                    pawn.DeSpawn();
+                                    JobManagerPatches.manualDespawn = false;
+                                    GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
+
+                                    RestCategory minCategory = Traverse.Create(__instance).Field("minCategory").GetValue<RestCategory>();
+                                    float maxLevelPercentage = Traverse.Create(__instance).Field("maxLevelPercentage").GetValue<float>();
+                                    result = JobGiver_GetRestPatch.TryGiveJob(pawn, minCategory, maxLevelPercentage);
+                                    if (result != null && result.targetA.Thing != null)
+                                    {
+                                        Log.Message(pawn + " gets rest job " + result);
+                                        ZLogger.Message("TryIssueJobPackage: " + pawn + " - map: " + ZTracker.GetMapInfo(pawn.Map)
+                                            + " - " + pawn.Position + " result " + result);
+                                        JobManagerPatches.manualDespawn = true;
+                                        pawn.DeSpawn();
+                                        JobManagerPatches.manualDespawn = false;
+                                        GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+                                        if (select) Find.Selector.Select(pawn);
+                                        ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result, null);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (pawn.Map != oldMap)
+                        {
+                            JobManagerPatches.manualDespawn = true;
+                            pawn.DeSpawn();
+                            JobManagerPatches.manualDespawn = false;
+                            GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+                            if (select) Find.Selector.Select(pawn);
+                        }
+                        try
+                        {
+                            ZTracker.jobTracker[pawn].lastTickRest = Find.TickManager.TicksGame;
+                        }
+                        catch { }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ZLogger.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+                }
+            }
+
+
+            private static Job TryGiveJob(Pawn pawn, RestCategory minCategory, float maxLevelPercentage = 1f)
+            {
+                Need_Rest rest = pawn.needs.rest;
+                if (rest == null || rest.CurCategory < minCategory || rest.CurLevelPercentage > maxLevelPercentage)
+                {
+                    return null;
+                }
+                if (RestUtility.DisturbancePreventsLyingDown(pawn))
+                {
+                    return null;
+                }
+                Lord lord = pawn.GetLord();
+                Building_Bed building_Bed;
+                if ((lord != null && lord.CurLordToil != null && !lord.CurLordToil.AllowRestingInBed) || pawn.IsWildMan())
+                {
+                    building_Bed = null;
+                }
+                else
+                {
+                    building_Bed = RestUtility.FindBedFor(pawn);
+                }
+                if (building_Bed != null)
+                {
+                    return JobMaker.MakeJob(JobDefOf.LayDown, building_Bed);
+                }
+                return JobMaker.MakeJob(JobDefOf.LayDown, FindGroundSleepSpotFor(pawn));
+            }
+
+            private static IntVec3 FindGroundSleepSpotFor(Pawn pawn)
+            {
+                Map map = pawn.Map;
+                for (int i = 0; i < 2; i++)
+                {
+                    int radius = (i == 0) ? 4 : 12;
+                    if (CellFinder.TryRandomClosewalkCellNear(pawn.Position, map, radius, out IntVec3 result, (IntVec3 x) => !x.IsForbidden(pawn) && !x.GetTerrain(map).avoidWander))
+                    {
+                        return result;
+                    }
+                }
+                return CellFinder.RandomClosewalkCellNearNotForbidden(pawn.Position, map, 4, pawn);
+            }
+        }
+
+
         [HarmonyPatch(typeof(JobGiver_Work), "TryIssueJobPackage")]
         public class TryIssueJobPackagePatch
         {
@@ -567,6 +766,7 @@ namespace ZLevels
                         ThinkResult result;
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
+                        bool select = false;
                         //ZLogger.Message("======================================");
                         foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
                         {
@@ -612,8 +812,6 @@ namespace ZLevels
                                 return;
                             }
                             bool goToOtherMap = false;
-                            bool select = false;
-
                             if (stairs != null && stairs.Count() > 0)
                             {
                                 var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
@@ -660,15 +858,15 @@ namespace ZLevels
                                 }
                                 break;
                             }
-                            else if (goToOtherMap)
-                            {
-                                JobManagerPatches.manualDespawn = true;
-                                pawn.DeSpawn();
-                                JobManagerPatches.manualDespawn = false;
-                                GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-                                if (select) Find.Selector.Select(pawn);
-                            }
+                        }
 
+                        if (pawn.Map != oldMap)
+                        {
+                            JobManagerPatches.manualDespawn = true;
+                            pawn.DeSpawn();
+                            JobManagerPatches.manualDespawn = false;
+                            GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+                            if (select) Find.Selector.Select(pawn);
                         }
                     }
                     try
