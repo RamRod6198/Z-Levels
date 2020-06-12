@@ -978,6 +978,23 @@ namespace ZLevels
                     {
                         terrainDef = ZLevelsDefOf.ZL_RoofTerrain;
                     }
+                    else if (mapBelow.roofGrid.RoofAt(allCell) != null 
+                        && mapBelow.roofGrid.RoofAt(allCell).isNatural)
+                    {
+                        if (allCell.GetEdifice(mapBelow) is Mineable rock && rock.def.building.isNaturalRock 
+                            && !rock.def.building.isResourceRock)
+                        {
+                            terrainDef = TerrainDef.Named(rock.def.defName + "_Rough");
+                            if (terrainDef == null)
+                            {
+                                terrainDef = TerrainDef.Named("Granite_Rough");
+                            }
+                        }
+                        else
+                        {
+                            terrainDef = TerrainDef.Named("Granite_Rough");
+                        }
+                    }
                     else if (allCell.GetEdifice(mapBelow) is Mineable rock && rock.Spawned && !rock.Destroyed
                         && mapBelow.roofGrid.RoofAt(allCell) != null
                         && (mapBelow.roofGrid.RoofAt(allCell) == RoofDefOf.RoofRockThick

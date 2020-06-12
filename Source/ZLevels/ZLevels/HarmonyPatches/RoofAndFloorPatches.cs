@@ -41,9 +41,9 @@ namespace ZLevels
         {
             public static bool Prefix(TerrainGrid __instance, IntVec3 c, bool doLeavings, Map ___map)
             {
-                if (c.GetTerrain(___map) == ZLevelsDefOf.ZL_RoofTerrain)
+                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                if (ZTracker.GetZIndexFor(___map) > 0)
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                     int num = ___map.cellIndices.CellToIndex(c);
                     if (doLeavings)
                     {
@@ -59,7 +59,10 @@ namespace ZLevels
                             c
                         }).GetValue();
                     }
-                    __instance.SetTerrain(c, ZLevelsDefOf.ZL_OutsideTerrain);
+                    if (c.GetTerrain(___map) == TerrainDefOf.Sand)
+                    {
+                        __instance.SetTerrain(c, ZLevelsDefOf.ZL_OutsideTerrain);
+                    }
 
                     Map lowerMap = ZTracker.GetLowerLevel(___map.Tile, ___map);
                     bool firstTime = false;
@@ -68,13 +71,17 @@ namespace ZLevels
                         lowerMap = ZTracker.CreateLowerLevel(___map, c);
                         firstTime = true;
                     }
-                    lowerMap.roofGrid.SetRoof(c, null);
+
                     var thingList = c.GetThingList(___map);
-                    for (int i = thingList.Count - 1; i >= 0; i--)
+                    if (thingList.Where(x => x is Blueprint || x is Frame).Count() == 0)
                     {
-                        if (!(thingList[i] is Explosion))
+                        for (int i = thingList.Count - 1; i >= 0; i--)
                         {
-                            ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime, 10);
+                            if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
+                            {
+                                //Log.Message(thingList[i] + " going down 1");
+                                ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime, 10);
+                            }
                         }
                     }
                     return false;
@@ -103,11 +110,15 @@ namespace ZLevels
                             firstTime = true;
                         }
                         var thingList = __instance.Position.GetThingList(__instance.Map);
-                        for (int i = thingList.Count - 1; i >= 0; i--)
+                        if (thingList.Where(x => x is Blueprint || x is Frame).Count() == 0)
                         {
-                            if (!(thingList[i] is Mineable))
+                            for (int i = thingList.Count - 1; i >= 0; i--)
                             {
-                                ZTracker.SimpleTeleportThing(thingList[i], __instance.Position, lowerMap, firstTime, 10);
+                                if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
+                                {
+                                    //Log.Message(thingList[i] + " going down 2");
+                                    ZTracker.SimpleTeleportThing(thingList[i], __instance.Position, lowerMap, firstTime, 10);
+                                }
                             }
                         }
                     }
@@ -128,7 +139,7 @@ namespace ZLevels
                         Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
                         var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                         var upperMap = ZTracker.GetUpperLevel(map.Tile, map);
-                        if (upperMap != null && upperMap.terrainGrid.TerrainAt(c) != ZLevelsDefOf.ZL_RoofTerrain)
+                        if (upperMap != null && upperMap.terrainGrid.TerrainAt(c) == ZLevelsDefOf.ZL_OutsideTerrain)
                         {
                             upperMap.terrainGrid.SetTerrain(c, ZLevelsDefOf.ZL_RoofTerrain);
                         }
@@ -146,8 +157,9 @@ namespace ZLevels
                                 var thingList = c.GetThingList(upperMap);
                                 for (int i = thingList.Count - 1; i >= 0; i--)
                                 {
-                                    if (!(thingList[i] is Explosion))
+                                    if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
                                     {
+                                        //Log.Message(thingList[i] + " going down 3");
                                         ZTracker.SimpleTeleportThing(thingList[i], c, map, false, 10);
                                     }
                                 }

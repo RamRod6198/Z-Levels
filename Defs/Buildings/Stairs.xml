@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
 
-	<!-- Stairs base -->
 	<ThingDef Abstract="True" ParentName="FurnitureWithQualityBase" Name="StairsBase">
 		<description>Stairs.</description>
 		<altitudeLayer>Building</altitudeLayer>
