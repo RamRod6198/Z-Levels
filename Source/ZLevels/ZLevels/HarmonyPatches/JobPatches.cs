@@ -198,8 +198,8 @@ namespace ZLevels
 
                                     float maxLevelPercentage = Traverse.Create(__instance).Field("maxLevelPercentage").GetValue<float>();
                                     HungerCategory minCategory = Traverse.Create(__instance).Field("minCategory").GetValue<HungerCategory>();
-                                    result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap, maxLevelPercentage, minCategory); 
-                                    
+                                    result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap, maxLevelPercentage, minCategory);
+
                                     if (result != null)
                                     {
                                         ZLogger.Message(pawn + " gets food job " + result);
@@ -308,7 +308,7 @@ namespace ZLevels
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                     ZLogger.Message(pawn + " Original joy result: " + __result);
-                    if (pawn.def.race.Humanlike && (__result == null || __result.def == JobDefOf.Meditate 
+                    if (pawn.def.race.Humanlike && (__result == null || __result.def == JobDefOf.Meditate
                         || __result.def.defName == "Skygaze") && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                     {
                         if (__result.def == JobDefOf.Meditate || __result.def.defName == "Skygaze")
@@ -423,7 +423,7 @@ namespace ZLevels
                                     bool CanDoDuringMedicalRest = Traverse.Create(__instance).Field("CanDoDuringMedicalRest").GetValue<bool>();
                                     DefMap<JoyGiverDef, float> joyGiverChances = Traverse.Create(__instance).Field("joyGiverChances").GetValue<DefMap<JoyGiverDef, float>>();
                                     result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, joyGiverChances);
-                                    if (result != null && result.def != JobDefOf.Meditate 
+                                    if (result != null && result.def != JobDefOf.Meditate
                                         && result.def.defName != "Skygaze")
                                     {
                                         ZLogger.Message(pawn + " gets joy job " + result);
@@ -1125,6 +1125,108 @@ namespace ZLevels
                 }
                 return RefuelWorkGiverUtility.RefuelJob(pawn, thing, forced, null, null);
             }
+
+            public static Job JobOnThing(WorkGiver_ConstructDeliverResourcesToBlueprints scanner, Pawn pawn, Thing t, bool forced = false)
+            {
+                if (t.Faction != pawn.Faction)
+                {
+                    return null;
+                }
+                Blueprint blueprint = t as Blueprint;
+                if (blueprint == null)
+                {
+                    return null;
+                }
+                if (GenConstruct.FirstBlockingThing(blueprint, pawn) != null)
+                {
+                    return GenConstruct.HandleBlockingThingJob(blueprint, pawn, forced);
+                }
+                bool flag = scanner.def.workType == WorkTypeDefOf.Construction;
+                if (!GenConstruct.CanConstruct(blueprint, pawn, flag, forced))
+                {
+                    return null;
+                }
+
+                if (!flag && blueprint.def.entityDefToBuild is TerrainDef && pawn.Map.terrainGrid.CanRemoveTopLayerAt(blueprint.Position))
+                {
+                    return null;
+                }
+                Job job = Traverse.Create(scanner).Method("RemoveExistingFloorJob", new object[]
+                {
+                    pawn, blueprint
+                }).GetValue<Job>();
+
+                if (job != null)
+                {
+                    return job;
+                }
+                var method = Traverse.Create(scanner).Method("ResourceDeliverJobFor", new object[]
+                {
+                    pawn, blueprint, true
+                });
+
+
+                Job job2 = method.GetValue<Job>();
+                if (job2 == null)
+                {
+                    var oldMap = pawn.Map;
+                    var oldPosition = pawn.Position;
+                    bool select = false;
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+
+                    //ZLogger.Message("======================================");
+                    foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+                    {
+                        if (otherMap != oldMap)
+                        {
+                            var stairs = otherMap.listerThings.AllThings.Where(x => x is Building_StairsDown
+                            || x is Building_StairsUp).ToList();
+
+                            if (stairs != null && stairs.Count() > 0)
+                            {
+                                var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
+                                var position = selectedStairs.Position;
+
+                                if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                                JobManagerPatches.manualDespawn = true;
+                                pawn.DeSpawn();
+                                JobManagerPatches.manualDespawn = false;
+                                GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
+                                job2 = method.GetValue<Job>();
+                                if (job2 != null)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (pawn.Map != oldMap)
+                    {
+                        JobManagerPatches.manualDespawn = true;
+                        pawn.DeSpawn();
+                        JobManagerPatches.manualDespawn = false;
+                        GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+                        if (select) Find.Selector.Select(pawn);
+                    }
+                }
+
+                if (job2 != null)
+                {
+                    return job2;
+                }
+                if (scanner.def.workType != WorkTypeDefOf.Hauling)
+                {
+                    Job job3 = Traverse.Create(scanner).Method("NoCostFrameMakeJobFor", new object[]
+                    {
+                        pawn, blueprint
+                    }).GetValue<Job>();
+                    if (job3 != null)
+                    {
+                        return job3;
+                    }
+                }
+                return null;
+            }
             public static ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams, JobGiver_Work instance, bool emergency, ref Map dest)
             {
                 if (emergency && pawn.mindState.priorityWork.IsPrioritized)
@@ -1159,7 +1261,6 @@ namespace ZLevels
                 var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                 for (int j = 0; j < list.Count; j++)
                 {
-
                     WorkGiver workGiver = list[j];
                     if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                     {
@@ -1182,11 +1283,13 @@ namespace ZLevels
                         scanner = (workGiver as WorkGiver_Scanner);
                         if (scanner != null)
                         {
-
                             if (scanner.def.scanThings)
                             {
                                 Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) &&
                                 scanner.HasJobOnThing(pawn, t);
+
+                                Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn) &&
+                                    JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn, t) != null;
 
                                 Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn) &&
                                 TryIssueJobPackagePatch.HasJobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null;
@@ -1322,7 +1425,15 @@ namespace ZLevels
                                         catch { };
 
                                     }
-
+                                    else if (scanner is WorkGiver_ConstructDeliverResourcesToBlueprints)
+                                    {
+                                        thing = GenClosest.ClosestThingReachable
+                                            (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
+                                            scanner.PathEndMode, TraverseParms.For(pawn,
+                                            scanner.MaxPathDanger(pawn)), 9999f, deliverResourcesValidator,
+                                            enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
+                                            enumerable != null);
+                                    }
                                     else
                                     {
                                         thing = GenClosest.ClosestThingReachable
@@ -1481,6 +1592,13 @@ namespace ZLevels
                                 Traverse.Create(pawn).Field("mapIndexOrState")
                                     .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
                             }
+                        }
+                        else if (scannerWhoProvidedTarget is WorkGiver_ConstructDeliverResourcesToBlueprints scanner2)
+                        {
+                            job3 = (!bestTargetOfLastPriority.HasThing) ?
+                                scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
+                                : JobOnThing(scanner2, pawn, bestTargetOfLastPriority.Thing);
+                            dest = job3.targetB.Thing.Map;
                         }
                         else
                         {
