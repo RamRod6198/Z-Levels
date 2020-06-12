@@ -672,6 +672,31 @@ namespace ZLevels
             { thingToTeleport.PositionHeld });
         }
 
+        //public void ZLevelsFixer(int tile)
+        //{
+        //    int num = 0;
+        //    while (true && num < 100)
+        //    {
+        //        var brokenLevel = this.ZLevelsTracker[tile].ZLevels.Where(x => x.Value == null).FirstOrDefault();
+        //        if (brokenLevel.Value == null)
+        //        {
+        //            Log.Message("brokenLevel: " + brokenLevel);
+        //            Log.Message("Removing by key: " + brokenLevel.Key);
+        //            this.ZLevelsTracker[tile].ZLevels.Remove(brokenLevel.Key);
+        //            var newLevels = new Dictionary<int, Map>();
+        //        }
+        //        else
+        //        {
+        //            foreach (var map in this.ZLevelsTracker[tile].ZLevels)
+        //            {
+        //                Log.Message("New level: " + this.GetMapInfo(map.Value));
+        //            }
+        //            break;
+        //        }
+        //        num++;
+        //    }
+        //}
+
         public void TeleportPawn(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, bool spawnStairsBelow = false, bool spawnStairsUpper = false)
         {
             //ZLogger.Message("Trying to teleport to " + mapToTeleport);
@@ -712,7 +737,7 @@ namespace ZLevels
                 {
                     var stairs = this.GetLowerLevel(mapToTeleport.Tile, mapToTeleport)?.thingGrid?
                         .ThingsListAt(cellToTeleport)?.Where(x => x is Building_StairsUp)?.FirstOrDefault();
-                    if (stairs.Stuff != null)
+                    if (stairs != null && stairs.Stuff != null)
                     {
                         var thingToMake = ZLevelsDefOf.ZL_StairsDown;
                         if (cellToTeleport.GetThingList(mapToTeleport).Where(x => x.def == thingToMake).Count() == 0)
@@ -731,48 +756,51 @@ namespace ZLevels
                     var stairs = pawnToTeleport.Map.thingGrid.ThingsListAt(cellToTeleport)?
                         .Where(x => x is Building_StairsDown)?.FirstOrDefault();
                     ZLogger.Message("Stairs: " + stairs);
-                    if (stairs.Stuff != null)
+                    if (stairs != null)
                     {
-                        var thingToMake = ZLevelsDefOf.ZL_StairsUp;
-                        if (cellToTeleport.GetThingList(mapToTeleport).Where(x => x.def == thingToMake).Count() == 0)
+                        if (stairs.Stuff != null)
                         {
-                            var newStairs = ThingMaker.MakeThing(thingToMake, stairs.Stuff);
-                            newStairs.SetFaction(stairs.Faction);
-                            GenPlace.TryPlaceThing(newStairs, cellToTeleport, mapToTeleport, ThingPlaceMode.Direct);
-                        }
-                    }
-                    else if (stairs.def.defName == ZLevelsDefOf.ZL_NaturalHole.defName)
-                    {
-                        foreach (var thing in pawnToTeleport.Map.listerThings.AllThings)
-                        {
-                            if (thing is Building_StairsDown naturalHole && naturalHole.def.defName == ZLevelsDefOf.ZL_NaturalHole.defName)
+                            var thingToMake = ZLevelsDefOf.ZL_StairsUp;
+                            if (cellToTeleport.GetThingList(mapToTeleport).Where(x => x.def == thingToMake).Count() == 0)
                             {
-                                var infestatorsPlace = IntVec3.Invalid;
-                                Thing pawn = null;
-                                if (naturalHole?.infestationData?.infestators != null)
+                                var newStairs = ThingMaker.MakeThing(thingToMake, stairs.Stuff);
+                                newStairs.SetFaction(stairs.Faction);
+                                GenPlace.TryPlaceThing(newStairs, cellToTeleport, mapToTeleport, ThingPlaceMode.Direct);
+                            }
+                        }
+                        else if (stairs.def.defName == ZLevelsDefOf.ZL_NaturalHole.defName)
+                        {
+                            foreach (var thing in pawnToTeleport.Map.listerThings.AllThings)
+                            {
+                                if (thing is Building_StairsDown naturalHole && naturalHole.def.defName == ZLevelsDefOf.ZL_NaturalHole.defName)
                                 {
-                                    Predicate<Thing> validator = delegate (Thing t)
+                                    var infestatorsPlace = IntVec3.Invalid;
+                                    Thing pawn = null;
+                                    if (naturalHole?.infestationData?.infestators != null)
                                     {
-                                        return naturalHole.infestationData.infestators.Contains(((Pawn)t).kindDef);
-                                    };
-                                    pawn = GenClosest.ClosestThing_Global(naturalHole.Position,
-                                        mapToTeleport.mapPawns.AllPawns, 99999f, validator);
-                                }
-                                if (pawn != null)
-                                {
-                                    infestatorsPlace = pawn.Position;
-                                    var tunnel = mapToTeleport.pathFinder.FindPath
-                                        (naturalHole.Position, pawn, TraverseParms.For
-                                        (TraverseMode.PassAllDestroyableThings, Danger.Deadly),
-                                        PathEndMode.OnCell);
-                                    if (tunnel?.NodesReversed != null && tunnel.NodesReversed.Count > 0)
-                                    {
-                                        foreach (var tile in tunnel.NodesReversed)
+                                        Predicate<Thing> validator = delegate (Thing t)
                                         {
-                                            var building = tile.GetFirstBuilding(mapToTeleport);
-                                            if (building != null)
+                                            return naturalHole.infestationData.infestators.Contains(((Pawn)t).kindDef);
+                                        };
+                                        pawn = GenClosest.ClosestThing_Global(naturalHole.Position,
+                                            mapToTeleport.mapPawns.AllPawns, 99999f, validator);
+                                    }
+                                    if (pawn != null)
+                                    {
+                                        infestatorsPlace = pawn.Position;
+                                        var tunnel = mapToTeleport.pathFinder.FindPath
+                                            (naturalHole.Position, pawn, TraverseParms.For
+                                            (TraverseMode.PassAllDestroyableThings, Danger.Deadly),
+                                            PathEndMode.OnCell);
+                                        if (tunnel?.NodesReversed != null && tunnel.NodesReversed.Count > 0)
+                                        {
+                                            foreach (var tile in tunnel.NodesReversed)
                                             {
-                                                building.DeSpawn(DestroyMode.WillReplace);
+                                                var building = tile.GetFirstBuilding(mapToTeleport);
+                                                if (building != null)
+                                                {
+                                                    building.DeSpawn(DestroyMode.WillReplace);
+                                                }
                                             }
                                         }
                                     }
@@ -782,7 +810,7 @@ namespace ZLevels
                     }
                 }
             }
-
+            
             //var jobs = pawnToTeleport.jobs.jobQueue.ToList().ListFullCopy();
             try
             {
@@ -851,6 +879,7 @@ namespace ZLevels
             AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
             { pawnToTeleport.PositionHeld });
         }
+
         public Map CreateLowerLevel(Map origin, IntVec3 playerStartSpot)
         {
             var comp = origin.GetComponent<MapComponentZLevel>();
@@ -938,35 +967,43 @@ namespace ZLevels
 
         public void AdjustMapGeneration(Map map)
         {
-            Map mapBelow = this.GetLowerLevel(map.Tile, map);
-            RockNoises.Init(map);
-
-            foreach (IntVec3 allCell in map.AllCells)
+            try
             {
-                TerrainDef terrainDef = null;
-                if (mapBelow.roofGrid.RoofAt(allCell) != null && !mapBelow.roofGrid.RoofAt(allCell).isNatural)
+                Map mapBelow = this.GetLowerLevel(map.Tile, map);
+                RockNoises.Init(map);
+                foreach (IntVec3 allCell in map.AllCells)
                 {
-                    terrainDef = ZLevelsDefOf.ZL_RoofTerrain;
+                    TerrainDef terrainDef = null;
+                    if (mapBelow.roofGrid.RoofAt(allCell) != null && !mapBelow.roofGrid.RoofAt(allCell).isNatural)
+                    {
+                        terrainDef = ZLevelsDefOf.ZL_RoofTerrain;
+                    }
+                    else if (allCell.GetEdifice(mapBelow) is Mineable rock && rock.Spawned && !rock.Destroyed
+                        && mapBelow.roofGrid.RoofAt(allCell) != null
+                        && (mapBelow.roofGrid.RoofAt(allCell) == RoofDefOf.RoofRockThick
+                        || mapBelow.roofGrid.RoofAt(allCell) == RoofDefOf.RoofRockThin))
+                    {
+                        try
+                        {
+                            terrainDef = rock.def.building.naturalTerrain;
+                            GenSpawn.Spawn(GenStep_RocksFromGridUnderground.RockDefAt(allCell), allCell, map);
+                            map.roofGrid.SetRoof(allCell, allCell.GetRoof(mapBelow));
+                        }
+                        catch { };
+
+                    }
+                    if (terrainDef != null)
+                    {
+                        map.terrainGrid.SetTerrain(allCell, terrainDef);
+                    }
                 }
-                else if (allCell.GetEdifice(mapBelow) is Mineable rock && rock.Spawned && !rock.Destroyed
-                    && mapBelow.roofGrid.RoofAt(allCell) != null
-                    && (mapBelow.roofGrid.RoofAt(allCell) == RoofDefOf.RoofRockThick
-                    || mapBelow.roofGrid.RoofAt(allCell) == RoofDefOf.RoofRockThin))
-                {
-                    terrainDef = rock.def.building.naturalTerrain;
-                    GenSpawn.Spawn(GenStep_RocksFromGridUnderground.RockDefAt(allCell), allCell, map);
-                    map.roofGrid.SetRoof(allCell, allCell.GetRoof(mapBelow));
-                }
-                if (terrainDef != null)
-                {
-                    map.terrainGrid.SetTerrain(allCell, terrainDef);
-                }
+                GenStep_ScatterLumpsMineableUnderground genStep_ScatterLumpsMineable = new GenStep_ScatterLumpsMineableUnderground();
+                genStep_ScatterLumpsMineable.maxValue = float.MaxValue;
+                float num3 = 15f;
+                genStep_ScatterLumpsMineable.countPer10kCellsRange = new FloatRange(num3, num3);
+                genStep_ScatterLumpsMineable.Generate(map, default(GenStepParams));
             }
-            GenStep_ScatterLumpsMineableUnderground genStep_ScatterLumpsMineable = new GenStep_ScatterLumpsMineableUnderground();
-            genStep_ScatterLumpsMineable.maxValue = float.MaxValue;
-            float num3 = 15f;
-            genStep_ScatterLumpsMineable.countPer10kCellsRange = new FloatRange(num3, num3);
-            genStep_ScatterLumpsMineable.Generate(map, default(GenStepParams));
+            catch { };
         }
 
         public override void StartedNewGame()
