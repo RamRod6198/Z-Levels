@@ -680,8 +680,8 @@ namespace ZLevels
         //        var brokenLevel = this.ZLevelsTracker[tile].ZLevels.Where(x => x.Value == null).FirstOrDefault();
         //        if (brokenLevel.Value == null)
         //        {
-        //            Log.Message("brokenLevel: " + brokenLevel);
-        //            Log.Message("Removing by key: " + brokenLevel.Key);
+        //            ZLogger.Message("brokenLevel: " + brokenLevel);
+        //            ZLogger.Message("Removing by key: " + brokenLevel.Key);
         //            this.ZLevelsTracker[tile].ZLevels.Remove(brokenLevel.Key);
         //            var newLevels = new Dictionary<int, Map>();
         //        }
@@ -689,7 +689,7 @@ namespace ZLevels
         //        {
         //            foreach (var map in this.ZLevelsTracker[tile].ZLevels)
         //            {
-        //                Log.Message("New level: " + this.GetMapInfo(map.Value));
+        //                ZLogger.Message("New level: " + this.GetMapInfo(map.Value));
         //            }
         //            break;
         //        }

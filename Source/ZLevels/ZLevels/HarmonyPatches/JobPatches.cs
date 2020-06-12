@@ -30,12 +30,12 @@ namespace ZLevels
         //        {
         //            new Harmony("test.test.tst").Patch(type.GetMethod("TryGiveJob", BindingFlags.Instance | BindingFlags.NonPublic
         //                | BindingFlags.GetField), null, new HarmonyMethod(method), null);
-        //            Log.Message("Patch: " + type);
+        //            ZLogger.Message("Patch: " + type);
         //        }
         //
         //        catch (Exception ex)
         //        {
-        //            Log.Message("Error patching: " + ex);
+        //            ZLogger.Message("Error patching: " + ex);
         //        }
         //    }
         //
@@ -45,7 +45,7 @@ namespace ZLevels
         //{
         //    if (__result != null && pawn.def.race.Humanlike)
         //    {
-        //        Log.Message(__instance + " - " + __result + " - " + pawn, true);
+        //        ZLogger.Message(__instance + " - " + __result + " - " + pawn, true);
         //    }
         //}
 
@@ -147,7 +147,7 @@ namespace ZLevels
                                 {
                                     return;
                                 }
-                                Log.Message("Searching joy job for " + pawn);
+                                ZLogger.Message("Searching joy job for " + pawn);
                                 var stairs = new List<Thing>();
 
                                 ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
@@ -202,7 +202,7 @@ namespace ZLevels
                                     
                                     if (result != null)
                                     {
-                                        Log.Message(pawn + " gets food job " + result);
+                                        ZLogger.Message(pawn + " gets food job " + result);
                                         ZLogger.Message("TryIssueJobPackage: " + pawn + " - map: " + ZTracker.GetMapInfo(pawn.Map)
                                             + " - " + pawn.Position + " result " + result);
                                         JobManagerPatches.manualDespawn = true;
@@ -307,7 +307,7 @@ namespace ZLevels
                 try
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    Log.Message(pawn + " Original joy result: " + __result);
+                    ZLogger.Message(pawn + " Original joy result: " + __result);
                     if (pawn.def.race.Humanlike && (__result == null || __result.def == JobDefOf.Meditate 
                         || __result.def.defName == "Skygaze") && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                     {
@@ -371,7 +371,7 @@ namespace ZLevels
                                 {
                                     return;
                                 }
-                                Log.Message("Searching joy job for " + pawn);
+                                ZLogger.Message("Searching joy job for " + pawn);
                                 var stairs = new List<Thing>();
 
                                 ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
@@ -426,7 +426,7 @@ namespace ZLevels
                                     if (result != null && result.def != JobDefOf.Meditate 
                                         && result.def.defName != "Skygaze")
                                     {
-                                        Log.Message(pawn + " gets joy job " + result);
+                                        ZLogger.Message(pawn + " gets joy job " + result);
                                         ZLogger.Message("TryIssueJobPackage: " + pawn + " - map: " + ZTracker.GetMapInfo(pawn.Map)
                                             + " - " + pawn.Position + " result " + result);
                                         JobManagerPatches.manualDespawn = true;
@@ -519,7 +519,7 @@ namespace ZLevels
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                     if (pawn.def.race.Humanlike && (__result == null || __result.targetA.Thing == null) && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                     {
-                        Log.Message(pawn + " Original rest result: " + __result);
+                        ZLogger.Message(pawn + " Original rest result: " + __result);
                         if (ZTracker.jobTracker == null)
                         {
                             ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
@@ -573,7 +573,7 @@ namespace ZLevels
                                 {
                                     return;
                                 }
-                                Log.Message("Searching rest job for " + pawn);
+                                ZLogger.Message("Searching rest job for " + pawn);
                                 var stairs = new List<Thing>();
 
                                 ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
@@ -627,7 +627,7 @@ namespace ZLevels
                                     result = JobGiver_GetRestPatch.TryGiveJob(pawn, minCategory, maxLevelPercentage);
                                     if (result != null && result.targetA.Thing != null)
                                     {
-                                        Log.Message(pawn + " gets rest job " + result);
+                                        ZLogger.Message(pawn + " gets rest job " + result);
                                         ZLogger.Message("TryIssueJobPackage: " + pawn + " - map: " + ZTracker.GetMapInfo(pawn.Map)
                                             + " - " + pawn.Position + " result " + result);
                                         JobManagerPatches.manualDespawn = true;

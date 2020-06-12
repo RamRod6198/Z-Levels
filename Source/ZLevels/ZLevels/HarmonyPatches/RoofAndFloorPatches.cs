@@ -151,7 +151,7 @@ namespace ZLevels
                                         ZTracker.SimpleTeleportThing(thingList[i], c, map, false, 10);
                                     }
                                 }
-                                Log.Message("Removing roof " + c.GetRoof(map), true);
+                                ZLogger.Message("Removing roof " + c.GetRoof(map), true);
                             }
                         }
                     }

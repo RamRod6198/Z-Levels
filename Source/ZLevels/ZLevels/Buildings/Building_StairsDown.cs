@@ -50,10 +50,10 @@ namespace ZLevels
                 }
                 else if (mapBelow == this.Map)
                 {
-                    Log.Error("There was a mismatch of ZLevels indices. This is a serious error, report it to the mod developers");
+                    ZLogger.Error("There was a mismatch of ZLevels indices. This is a serious error, report it to the mod developers");
                     foreach (var map2 in ZTracker.GetAllMaps(this.Map.Tile))
                     {
-                        Log.Message("Index: " + ZTracker.GetMapInfo(map2));
+                        ZLogger.Message("Index: " + ZTracker.GetMapInfo(map2));
                     }
                 }
             }

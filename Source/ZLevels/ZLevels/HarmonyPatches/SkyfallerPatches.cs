@@ -26,7 +26,7 @@ namespace ZLevels
         {
             private static void Postfix(Skyfaller __result, ThingDef skyfaller, IntVec3 pos, Map map)
             {
-                Log.Message("Spawning " + __result);
+                ZLogger.Message("Spawning " + __result);
 
                 if (pos.Roofed(map))
                 {
@@ -38,13 +38,13 @@ namespace ZLevels
                     if (upperMap != null)
                     {
                         ZTracker.SimpleTeleportThing(__result, pos, upperMap);
-                        Log.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
+                        ZLogger.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
                     }
                     else
                     {
-                        Log.Message("Cant find unroofed map for " + __result);
+                        ZLogger.Message("Cant find unroofed map for " + __result);
                     }
-                    Log.Message("Roofed");
+                    ZLogger.Message("Roofed");
 
                 }
             }
@@ -57,7 +57,7 @@ namespace ZLevels
         {
             private static void Postfix(Skyfaller __result, ThingDef skyfaller, ThingDef innerThing, IntVec3 pos, Map map)
             {
-                Log.Message("Spawning " + __result);
+                ZLogger.Message("Spawning " + __result);
 
                 if (pos.Roofed(map))
                 {
@@ -69,13 +69,13 @@ namespace ZLevels
                     if (upperMap != null)
                     {
                         ZTracker.SimpleTeleportThing(__result, pos, upperMap);
-                        Log.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
+                        ZLogger.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
                     }
                     else
                     {
-                        Log.Message("Cant find unroofed map for " + __result);
+                        ZLogger.Message("Cant find unroofed map for " + __result);
                     }
-                    Log.Message("Roofed");
+                    ZLogger.Message("Roofed");
 
                 }
             }
@@ -88,7 +88,7 @@ namespace ZLevels
         {
             private static void Postfix(Skyfaller __result, ThingDef skyfaller, Thing innerThing, IntVec3 pos, Map map)
             {
-                Log.Message("Spawning " + __result);
+                ZLogger.Message("Spawning " + __result);
 
                 if (pos.Roofed(map))
                 {
@@ -100,13 +100,13 @@ namespace ZLevels
                     if (upperMap != null)
                     {
                         ZTracker.SimpleTeleportThing(__result, pos, upperMap);
-                        Log.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
+                        ZLogger.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
                     }
                     else
                     {
-                        Log.Message("Cant find unroofed map for " + __result);
+                        ZLogger.Message("Cant find unroofed map for " + __result);
                     }
-                    Log.Message("Roofed");
+                    ZLogger.Message("Roofed");
 
                 }
             }
@@ -119,7 +119,7 @@ namespace ZLevels
         {
             private static void Postfix(Skyfaller __result, ThingDef skyfaller, IEnumerable<Thing> things, IntVec3 pos, Map map)
             {
-                Log.Message("Spawning " + __result);
+                ZLogger.Message("Spawning " + __result);
                 if (pos.Roofed(map))
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
@@ -130,13 +130,13 @@ namespace ZLevels
                     if (upperMap != null)
                     {
                         ZTracker.SimpleTeleportThing(__result, pos, upperMap);
-                        Log.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
+                        ZLogger.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
                     }
                     else
                     {
-                        Log.Message("Cant find unroofed map for " + __result);
+                        ZLogger.Message("Cant find unroofed map for " + __result);
                     }
-                    Log.Message("Roofed");
+                    ZLogger.Message("Roofed");
                 }
             }
         }
