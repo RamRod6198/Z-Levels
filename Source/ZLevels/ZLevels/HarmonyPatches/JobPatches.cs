@@ -23,40 +23,57 @@ namespace ZLevels
         //static JobManagerPatches()
         //{
         //    MethodInfo method = typeof(JobManagerPatches).GetMethod("LogScanner");
-        //    MethodInfo method2 = typeof(JobManagerPatches).GetMethod("LogScanner2");
-        //    foreach (Type type in GenTypes.AllSubclasses(typeof(WorkGiver_Scanner)))
+        //    //MethodInfo method2 = typeof(JobManagerPatches).GetMethod("LogScanner2");
+        //    foreach (Type type in GenTypes.AllSubclasses(typeof(ThinkNode_JobGiver)))
         //    {
-        //        MethodInfo getMethod = type.GetMethod("PotentialWorkThingsGlobal");
         //        try
         //        {
-        //            new Harmony("test.test.tst").Patch(getMethod, null, new HarmonyMethod(method), null, null);
-        //            ZLogger.Message("Patching: " + type);
+        //            new Harmony("test.test.tst").Patch(type.GetMethod("TryGiveJob", BindingFlags.Instance | BindingFlags.NonPublic
+        //                | BindingFlags.GetField), null, new HarmonyMethod(method), null);
+        //            Log.Message("Patch: " + type);
         //        }
-        //        catch { }
         //
-        //        MethodInfo getMethod2 = type.GetProperty("PotentialWorkThingRequest").GetGetMethod(false);
-        //        try
+        //        catch (Exception ex)
         //        {
-        //            new Harmony("test.test.tst").Patch(getMethod2, null, new HarmonyMethod(method2), null, null);
-        //            ZLogger.Message("Patching: " + type);
+        //            Log.Message("Error patching: " + ex);
         //        }
-        //        catch { }
+        //        //Log.Message("Method 1: " + method);
+        //        //MethodInfo getMethod = type.GetMethod("TryGiveJob");
+        //        //try
+        //        //{
+        //        //    Log.Message("Method: " + getMethod);
+        //        //    new Harmony("test.test.tst").Patch(getMethod, null, new HarmonyMethod(method), null, null);
+        //        //    ZLogger.Message("Patching: " + type);
+        //        //}
+        //        //catch (Exception ex)
+        //        //{
+        //        //    Log.Message("Error patching: " + ex);
+        //        //}
+        //
+        //        //MethodInfo getMethod2 = type.GetProperty("PotentialWorkThingRequest").GetGetMethod(false);
+        //        //try
+        //        //{
+        //        //    new Harmony("test.test.tst").Patch(getMethod2, null, new HarmonyMethod(method2), null, null);
+        //        //    ZLogger.Message("Patching: " + type);
+        //        //}
+        //        //catch { }
         //    }
         //
         //}
         //
-        //public static void LogScanner(IEnumerable<Thing> __result, Pawn pawn, WorkGiver_Scanner __instance)
+        //public static void LogScanner()
         //{
-        //    if (__result != null)
-        //    {
-        //        ZLogger.Message(pawn + " - " + __instance.def + " - count: " + __result.Count());
-        //    }
-        //    else
-        //    {
-        //        ZLogger.Message(pawn + " - " + __instance.def + " - null count");
-        //    }
+        //    Log.Message("Test");
+        //    //if (__result != null)
+        //    //{
+        //    //    ZLogger.Message(pawn + " - " + __result);
+        //    //}
+        //    //else
+        //    //{
+        //    //    ZLogger.Message(pawn + " - null job");
+        //    //}
         //}
-        //
+        
         //public static void LogScanner2(ThingRequest __result, WorkGiver_Scanner __instance)
         //{
         //    ZLogger.Message(__instance.def + " - __result: " + __result);
