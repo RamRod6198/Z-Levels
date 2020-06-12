@@ -1598,7 +1598,6 @@ namespace ZLevels
                             job3 = (!bestTargetOfLastPriority.HasThing) ?
                                 scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                 : JobOnThing(scanner2, pawn, bestTargetOfLastPriority.Thing);
-                            dest = job3.targetB.Thing.Map;
                         }
                         else
                         {
