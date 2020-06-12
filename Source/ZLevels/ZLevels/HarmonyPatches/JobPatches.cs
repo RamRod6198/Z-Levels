@@ -20,59 +20,60 @@ namespace ZLevels
     {
         public static bool manualDespawn = false;
 
-        // static JobManagerPatches()
-        // {
-        //     MethodInfo method = typeof(JobManagerPatches).GetMethod("LogScanner");
-        //     //MethodInfo method2 = typeof(JobManagerPatches).GetMethod("LogScanner2");
-        //     foreach (Type type in GenTypes.AllSubclasses(typeof(ThinkNode_JobGiver)))
-        //     {
-        //         try
-        //         {
-        //             new Harmony("test.test.tst").Patch(type.GetMethod("TryGiveJob", BindingFlags.Instance | BindingFlags.NonPublic
-        //                 | BindingFlags.GetField), null, new HarmonyMethod(method), null);
-        //             Log.Message("Patch: " + type);
-        //         }
-        // 
-        //         catch (Exception ex)
-        //         {
-        //             Log.Message("Error patching: " + ex);
-        //         }
-        //         //Log.Message("Method 1: " + method);
-        //         //MethodInfo getMethod = type.GetMethod("TryGiveJob");
-        //         //try
-        //         //{
-        //         //    Log.Message("Method: " + getMethod);
-        //         //    new Harmony("test.test.tst").Patch(getMethod, null, new HarmonyMethod(method), null, null);
-        //         //    ZLogger.Message("Patching: " + type);
-        //         //}
-        //         //catch (Exception ex)
-        //         //{
-        //         //    Log.Message("Error patching: " + ex);
-        //         //}
-        // 
-        //         //MethodInfo getMethod2 = type.GetProperty("PotentialWorkThingRequest").GetGetMethod(false);
-        //         //try
-        //         //{
-        //         //    new Harmony("test.test.tst").Patch(getMethod2, null, new HarmonyMethod(method2), null, null);
-        //         //    ZLogger.Message("Patching: " + type);
-        //         //}
-        //         //catch { }
-        //     }
-        // 
-        // }
-        // 
-        // public static void LogScanner(Job __result, Pawn pawn)
-        // {
-        //     if (__result != null)
-        //     {
-        //         ZLogger.Message(pawn + " - " + __result);
-        //     }
-        //     else
-        //     {
-        //         ZLogger.Message(pawn + " - null job");
-        //     }
-        // }
-        //
+        static JobManagerPatches()
+        {
+            MethodInfo method = typeof(JobManagerPatches).GetMethod("LogScanner");
+            //MethodInfo method2 = typeof(JobManagerPatches).GetMethod("LogScanner2");
+            foreach (Type type in GenTypes.AllSubclasses(typeof(ThinkNode_JobGiver)))
+            {
+                try
+                {
+                    new Harmony("test.test.tst").Patch(type.GetMethod("TryGiveJob", BindingFlags.Instance | BindingFlags.NonPublic
+                        | BindingFlags.GetField), null, new HarmonyMethod(method), null);
+                    Log.Message("Patch: " + type);
+                }
+        
+                catch (Exception ex)
+                {
+                    Log.Message("Error patching: " + ex);
+                }
+                //Log.Message("Method 1: " + method);
+                //MethodInfo getMethod = type.GetMethod("TryGiveJob");
+                //try
+                //{
+                //    Log.Message("Method: " + getMethod);
+                //    new Harmony("test.test.tst").Patch(getMethod, null, new HarmonyMethod(method), null, null);
+                //    ZLogger.Message("Patching: " + type);
+                //}
+                //catch (Exception ex)
+                //{
+                //    Log.Message("Error patching: " + ex);
+                //}
+        
+                //MethodInfo getMethod2 = type.GetProperty("PotentialWorkThingRequest").GetGetMethod(false);
+                //try
+                //{
+                //    new Harmony("test.test.tst").Patch(getMethod2, null, new HarmonyMethod(method2), null, null);
+                //    ZLogger.Message("Patching: " + type);
+                //}
+                //catch { }
+            }
+        
+        }
+        
+        public static void LogScanner()
+        {
+            Log.Message("Test");
+            //if (__result != null)
+            //{
+            //    ZLogger.Message(pawn + " - " + __result);
+            //}
+            //else
+            //{
+            //    ZLogger.Message(pawn + " - null job");
+            //}
+        }
+        
         //public static void LogScanner2(ThingRequest __result, WorkGiver_Scanner __instance)
         //{
         //    ZLogger.Message(__instance.def + " - __result: " + __result);

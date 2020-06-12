@@ -38,30 +38,33 @@ namespace ZLevels
 							if (Input.GetMouseButtonDown(0) && ___cachedEntries[i].map != null)
 							{
 								Map map = ___cachedEntries[i].map;
-								var comp = map.GetComponent<MapComponentZLevel>();
-								var pathToWrite = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
-									"SavedMaps"), map.Tile + " - " + comp.Z_LevelIndex + ".xml");
-								if (map.listerThings.AllThings.Count > 0)
+								Find.WindowStack.Add(new Dialog_MessageBox("ZAbandonConfirmation".Translate(), "Yes".Translate(), delegate ()
 								{
-									BlueprintUtility.SaveEverything(pathToWrite, map, "SavedMap");
-									ZLogger.Message("Removing map: " + map);
-								}
-								var parent = map.Parent as MapParent_ZLevel;
-								var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-								parent.Abandon();
-								ZTracker.ZLevelsTracker[map.Tile].ZLevels.Remove(comp.Z_LevelIndex);
-								
-								foreach (var map2 in Find.Maps)
-								{
-									var comp2 = map2.GetComponent<MapComponentZLevel>();
-									if (ZTracker.ZLevelsTracker[map2.Tile] != null)
+									var comp = map.GetComponent<MapComponentZLevel>();
+									var pathToWrite = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
+										"SavedMaps"), map.Tile + " - " + comp.Z_LevelIndex + ".xml");
+									if (map.listerThings.AllThings.Count > 0)
 									{
-										foreach (var d in ZTracker.ZLevelsTracker[map2.Tile].ZLevels)
+										BlueprintUtility.SaveEverything(pathToWrite, map, "SavedMap");
+										ZLogger.Message("Removing map: " + map);
+									}
+									var parent = map.Parent as MapParent_ZLevel;
+									var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+									parent.Abandon();
+									ZTracker.ZLevelsTracker[map.Tile].ZLevels.Remove(comp.Z_LevelIndex);
+
+									foreach (var map2 in Find.Maps)
+									{
+										var comp2 = map2.GetComponent<MapComponentZLevel>();
+										if (ZTracker.ZLevelsTracker[map2.Tile] != null)
 										{
-											ZLogger.Message(map2 + ": " + d.Key + " - " + d.Value);
+											foreach (var d in ZTracker.ZLevelsTracker[map2.Tile].ZLevels)
+											{
+												ZLogger.Message(map2 + ": " + d.Key + " - " + d.Value);
+											}
 										}
 									}
-								}
+								}, "No".Translate(), null, null, false, null, null));
 							}
 						}
 					}
