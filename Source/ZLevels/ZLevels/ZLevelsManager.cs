@@ -976,6 +976,22 @@ namespace ZLevels
             return newMap;
         }
 
+        private bool SurroundedWithRock(IntVec3 c, Map map)
+        {
+            int num = 0;
+            foreach (var cell in GenAdj.CellsAdjacentCardinal(c, Rot4.South, new IntVec2(1, 1)))
+            {
+                if (GenGrid.InBounds(cell, map) && cell.GetFirstBuilding(map) is Mineable)
+                {
+                    num++;
+                    if (num >= 2)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         public void AdjustMapGeneration(Map map)
         {
             try
@@ -1006,16 +1022,30 @@ namespace ZLevels
                             terrainDef = TerrainDef.Named("Granite_Rough");
                         }
                     }
-                    else if (allCell.GetEdifice(mapBelow) is Mineable rock && rock.Spawned && !rock.Destroyed
+                    if (allCell.GetEdifice(mapBelow) is Mineable rock2 && rock2.Spawned && !rock2.Destroyed
                         && mapBelow.roofGrid.RoofAt(allCell) != null
                         && (mapBelow.roofGrid.RoofAt(allCell) == RoofDefOf.RoofRockThick
                         || mapBelow.roofGrid.RoofAt(allCell) == RoofDefOf.RoofRockThin))
                     {
                         try
                         {
-                            terrainDef = rock.def.building.naturalTerrain;
-                            GenSpawn.Spawn(GenStep_RocksFromGridUnderground.RockDefAt(allCell), allCell, map);
-                            map.roofGrid.SetRoof(allCell, allCell.GetRoof(mapBelow));
+                            try
+                            {
+                                if (terrainDef == ZLevelsDefOf.ZL_RoofTerrain)
+                                {
+                                    terrainDef = rock2.def.building.naturalTerrain;
+                                }
+                            }
+                            catch { };
+                            GenSpawn.Spawn(rock2.def, allCell, map);
+                            if (SurroundedWithRock(allCell, map))
+                            {
+                                map.roofGrid.SetRoof(allCell, allCell.GetRoof(mapBelow));
+                            }
+                            else
+                            {
+                                map.roofGrid.SetRoof(allCell, null);
+                            }
                         }
                         catch { };
 
