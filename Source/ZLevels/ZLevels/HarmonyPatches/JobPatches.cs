@@ -1227,7 +1227,10 @@ namespace ZLevels
                                                 foreach (IntVec3 intVec in zone.Key.cells)
                                                 {
                                                     var newPosition = (intVec - zone.Key.Position) + pawn.Position;
-                                                    newZone.cells.Add(newPosition);
+                                                    if (newPosition.GetZone(pawn.Map) == null)
+                                                    {
+                                                        newZone.cells.Add(newPosition);
+                                                    }
                                                 }
                                                 newZone.zoneManager = pawn.Map.zoneManager;
                                                 pawn.Map.zoneManager.RegisterZone(newZone);
