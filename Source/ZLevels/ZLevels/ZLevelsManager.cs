@@ -571,7 +571,7 @@ namespace ZLevels
             }
         }
 
-        public void SimpleTeleportThing(Thing thingToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false)
+        public void SimpleTeleportThing(Thing thingToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, int dealDamage = 0)
         {
             if (mapToTeleport.thingGrid.ThingsListAt(cellToTeleport).Any())
             {
@@ -638,6 +638,17 @@ namespace ZLevels
                         pawnToTeleport2.drafter.Drafted = true;
                     }
                     catch { }
+                }
+            }
+            if (dealDamage > 0)
+            {
+                if (thingToTeleport.def.useHitPoints)
+                {
+                    thingToTeleport.HitPoints -= dealDamage;
+                }
+                else if (thingToTeleport is Pawn pawn)
+                {
+                    pawn.TakeDamage(new DamageInfo(DamageDefOf.Blunt, dealDamage));
                 }
             }
 

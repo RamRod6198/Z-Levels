@@ -74,11 +74,7 @@ namespace ZLevels
                     {
                         if (!(thingList[i] is Explosion))
                         {
-                            if (thingList[i].def.useHitPoints)
-                            {
-                                thingList[i].HitPoints -= 10;
-                            }
-                            ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime);
+                            ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime, 10);
                         }
                     }
                     return false;
@@ -111,11 +107,7 @@ namespace ZLevels
                         {
                             if (!(thingList[i] is Mineable))
                             {
-                                if (thingList[i].def.useHitPoints)
-                                {
-                                    thingList[i].HitPoints -= 10;
-                                }
-                                ZTracker.SimpleTeleportThing(thingList[i], __instance.Position, lowerMap, firstTime);
+                                ZTracker.SimpleTeleportThing(thingList[i], __instance.Position, lowerMap, firstTime, 10);
                             }
                         }
                     }
@@ -156,11 +148,7 @@ namespace ZLevels
                                 {
                                     if (!(thingList[i] is Explosion))
                                     {
-                                        if (thingList[i].def.useHitPoints)
-                                        {
-                                            thingList[i].HitPoints -= 10;
-                                        }
-                                        ZTracker.SimpleTeleportThing(thingList[i], c, map, false);
+                                        ZTracker.SimpleTeleportThing(thingList[i], c, map, false, 10);
                                     }
                                 }
                                 Log.Message("Removing roof " + c.GetRoof(map), true);
