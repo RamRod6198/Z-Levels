@@ -29,7 +29,7 @@
 			<drawSize>(3, 3)</drawSize>
 		</graphicData>
 		<statBases>
-			<MaxHitPoints>75</MaxHitPoints>
+			<MaxHitPoints>375</MaxHitPoints>
 			<WorkToBuild>1000</WorkToBuild>
 			<Mass>5</Mass>
 			<Flammability>1.0</Flammability>
@@ -60,7 +60,7 @@
 			<drawSize>(3, 3)</drawSize>
 		</graphicData>
 		<statBases>
-			<MaxHitPoints>75</MaxHitPoints>
+			<MaxHitPoints>375</MaxHitPoints>
 			<WorkToBuild>1000</WorkToBuild>
 			<Mass>5</Mass>
 			<Flammability>1.0</Flammability>
@@ -92,7 +92,7 @@
 			<drawSize>(3, 3)</drawSize>
 		</graphicData>
 		<statBases>
-			<MaxHitPoints>75</MaxHitPoints>
+			<MaxHitPoints>375</MaxHitPoints>
 			<Mass>5</Mass>
 			<Flammability>1.0</Flammability>
 			<Beauty>3</Beauty>
