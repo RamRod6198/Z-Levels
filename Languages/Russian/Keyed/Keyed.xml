@@ -3,7 +3,7 @@
 
   <ZAbandonConfirmation>Вы уверены, что хотите отказаться от карты? Затем её можно восстановить из сохраненного пресета.</ZAbandonConfirmation>
   <ZAbandonPermanentlyConfirmation>Вы уверены, что хотите навсегда отказаться от карты? Она не может быть восстановлена позже из предустановки.</ZAbandonPermanentlyConfirmation>
-  <GoUP>Подниматься</GoUP>
-  <GoDown>Опускаться</GoDown>
+  <GoUP>Поднятся</GoUP>
+  <GoDown>Спустится</GoDown>
 
 </LanguageData>
