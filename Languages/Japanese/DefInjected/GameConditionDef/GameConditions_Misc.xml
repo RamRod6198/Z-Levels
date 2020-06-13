@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <ZL_UndergroundCondition.label>地下空間</ZL_UndergroundCondition.label>
+  <ZL_UndergroundCondition.description>あなたは地下に広がるダンジョンに向かった.</ZL_UndergroundCondition.description>
+  <ZL_UndergroundCondition.endMessage>日食は終わろうとしている.</ZL_UndergroundCondition.endMessage>
+  <ZL_UndergroundCondition.letterText>この惑星にある月のひとつが,太陽をさえぎる位置にきました.日食の始まりです.</ZL_UndergroundCondition.letterText>
+
+</LanguageData>
