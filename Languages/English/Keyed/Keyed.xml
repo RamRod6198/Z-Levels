@@ -2,6 +2,7 @@
 <LanguageData>
 
 	<ZAbandonConfirmation>Are you sure you want to abandon the map? It can then be restored from the saved preset.</ZAbandonConfirmation>
+	<ZAbandonPermanentlyConfirmation>Are you sure you want to permamently abandon the map? It cannot be restored later from the preset.</ZAbandonPermanentlyConfirmation>
 	<GoUP>Go Up</GoUP>
 	<GoDown>Go Down</GoDown>
 

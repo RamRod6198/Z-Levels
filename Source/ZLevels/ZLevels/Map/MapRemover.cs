@@ -25,8 +25,8 @@ namespace ZLevels
 					{
 						//ZLogger.Message("Rect: " + ___cachedDrawLocs[i].x + " - " + ___cachedDrawLocs[i].y + " - " 
 						//	+ __instance.Size.x + " - " + __instance.Size.y);
-						Rect rect = new Rect(___cachedDrawLocs[i].x, ___cachedDrawLocs[i].y, 
-							__instance.Size.x / 2, __instance.Size.y / 2);
+						Rect rect = new Rect(___cachedDrawLocs[i].x + (__instance.Size.x / 2f),
+							___cachedDrawLocs[i].y + (__instance.Size.y / 2f), __instance.Size.x / 2, __instance.Size.y / 2);
 						Texture2D AbandonButtonTex = ContentFinder<Texture2D>.Get("UI/Buttons/Abandon", true);
 						Matrix4x4 matrix = GUI.matrix;
 						Color color2 = GUI.color;
@@ -48,6 +48,42 @@ namespace ZLevels
 										BlueprintUtility.SaveEverything(pathToWrite, map, "SavedMap");
 										ZLogger.Message("Removing map: " + map);
 									}
+									var parent = map.Parent as MapParent_ZLevel;
+									var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+									parent.Abandon();
+									ZTracker.ZLevelsTracker[map.Tile].ZLevels.Remove(comp.Z_LevelIndex);
+
+									foreach (var map2 in Find.Maps)
+									{
+										var comp2 = map2.GetComponent<MapComponentZLevel>();
+										if (ZTracker.ZLevelsTracker[map2.Tile] != null)
+										{
+											foreach (var d in ZTracker.ZLevelsTracker[map2.Tile].ZLevels)
+											{
+												ZLogger.Message(map2 + ": " + d.Key + " - " + d.Value);
+											}
+										}
+									}
+								}, "No".Translate(), null, null, false, null, null));
+							}
+							else if (Input.GetMouseButtonDown(1) && ___cachedEntries[i].map != null)
+							{
+								Map map = ___cachedEntries[i].map;
+								Find.WindowStack.Add(new Dialog_MessageBox("ZAbandonPermanentlyConfirmation".Translate(), "Yes".Translate(), delegate ()
+								{
+									var comp = map.GetComponent<MapComponentZLevel>();
+									try
+									{
+										var pathToDelete = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
+										"SavedMaps"), map.Tile + " - " + comp.Z_LevelIndex + ".xml");
+										var file = new FileInfo(pathToDelete);
+										file.Delete();
+									}
+									catch
+									{
+
+									}
+
 									var parent = map.Parent as MapParent_ZLevel;
 									var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
 									parent.Abandon();
