@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <ZL_StairsUp.label>Лестница вверх</ZL_StairsUp.label>
+  <ZL_StairsUp.description>Лестница.</ZL_StairsUp.description>
+
+  <ZL_StairsDown.label>Лестница вниз</ZL_StairsDown.label>
+  <ZL_StairsDown.description>Лестница.</ZL_StairsDown.description>
+
+  <ZL_NaturalHole.label>Естественная дыра</ZL_NaturalHole.label>
+  <ZL_NaturalHole.description>естественная дыра.</ZL_NaturalHole.description>
+
+
+</LanguageData>
