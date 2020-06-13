@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
+using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
@@ -92,6 +93,8 @@ namespace ZLevels
                 }
             }
         }
+
+        [SyncMethod(SyncContext.None)]
         public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
         {
             var text = "GoUP".Translate();
