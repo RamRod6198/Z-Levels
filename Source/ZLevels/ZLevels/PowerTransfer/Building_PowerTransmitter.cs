@@ -11,9 +11,7 @@ namespace ZLevels
     {
         public override void ExposeData()
         {
-            Log.Message("Building_PowerTransmitter : Building - ExposeData - base.ExposeData(); - 1", true);
             base.ExposeData();
-            Log.Message("Building_PowerTransmitter : Building - ExposeData - Scribe_Values.Look<int>(ref this.ticksToExplode, \"ticksToExplode\", 0, false); - 2", true);
             Scribe_Values.Look<int>(ref this.ticksToExplode, "ticksToExplode", 0, false);
         }
 
@@ -30,6 +28,53 @@ namespace ZLevels
         public override void Tick()
         {
             base.Tick();
+            var upperMap = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
+            var lowerMap = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
+            if (upperMap != null && (this.upperTransmitter == null || !this.upperTransmitter.Spawned))
+            {
+                foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
+                {
+                    foreach (var t in pos.GetThingList(upperMap))
+                    {
+                        if (t.TryGetComp<CompPowerTransmitter>() != null)
+                        {
+                            upperTransmitter = t;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (lowerMap != null && (this.lowerTransmitter == null || !this.lowerTransmitter.Spawned))
+            {
+                foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
+                {
+                    foreach (var t in pos.GetThingList(lowerMap))
+                    {
+                        if (t.TryGetComp<CompPowerTransmitter>() != null)
+                        {
+                            lowerTransmitter = t;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            //if (upperTransmitter != null && upperTransmitter.Spawned 
+            //    && lowerTransmitter != null && lowerTransmitter.Spawned)
+            //{
+            //    Log.Message("Stored energy: " + this.GetComp<CompPowerTransmitterTest>().StoredEnergy);
+            //}
+            //else if (upperTransmitter != null && upperTransmitter.Spawned
+            //    && (lowerTransmitter == null || !lowerTransmitter.Spawned))
+            //{
+            //    Log.Message("Stored energy: " + this.GetComp<CompPowerTransmitterTest>().StoredEnergy);
+            //}
+            //else if ((upperTransmitter == null || !upperTransmitter.Spawned)
+            //    && lowerTransmitter != null && lowerTransmitter.Spawned)
+            //{
+            //    Log.Message("Stored energy: " + this.GetComp<CompPowerTransmitterTest>().StoredEnergy);
+            //}
+
             if (this.ticksToExplode > 0)
             {
                 if (this.wickSustainer == null)
@@ -53,14 +98,10 @@ namespace ZLevels
 
         public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
-            Log.Message("Building_PowerTransmitter : Building - PostApplyDamage - base.PostApplyDamage(dinfo, totalDamageDealt); - 18", true);
             base.PostApplyDamage(dinfo, totalDamageDealt);
-            Log.Message("Building_PowerTransmitter : Building - PostApplyDamage - if (!base.Destroyed && this.ticksToExplode == 0 && dinfo.Def == DamageDefOf.Flame && Rand.Value < 0.05f && base.GetComp<CompPowerBattery>().StoredEnergy > 500f) - 19", true);
             if (!base.Destroyed && this.ticksToExplode == 0 && dinfo.Def == DamageDefOf.Flame && Rand.Value < 0.05f && base.GetComp<CompPowerBattery>().StoredEnergy > 500f)
             {
-                Log.Message("Building_PowerTransmitter : Building - PostApplyDamage - this.ticksToExplode = Rand.Range(70, 150); - 20", true);
                 this.ticksToExplode = Rand.Range(70, 150);
-                Log.Message("Building_PowerTransmitter : Building - PostApplyDamage - this.StartWickSustainer(); - 21", true);
                 this.StartWickSustainer();
             }
         }
@@ -68,13 +109,18 @@ namespace ZLevels
         private void StartWickSustainer()
         {
             SoundInfo info = SoundInfo.InMap(this, MaintenanceType.PerTick);
-            Log.Message("Building_PowerTransmitter : Building - StartWickSustainer - this.wickSustainer = SoundDefOf.HissSmall.TrySpawnSustainer(info); - 23", true);
             this.wickSustainer = SoundDefOf.HissSmall.TrySpawnSustainer(info);
         }
 
         private int ticksToExplode;
 
+        public ZLevelsManager ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+
         private Sustainer wickSustainer;
+
+        Thing upperTransmitter;
+
+        Thing lowerTransmitter;
 
         private static readonly Vector2 BarSize = new Vector2(1.3f, 0.4f);
 

@@ -29,6 +29,20 @@ namespace ZLevels
             this.CheckHotkeys();
         }
 
+        //public override void GameComponentTick()
+        //{
+        //    base.GameComponentTick();
+        //    if (Find.TickManager.TicksGame % 60 == 0)
+        //    {
+        //        foreach (var data in this.ZLevelsTracker)
+        //        {
+        //            foreach (var mapData in data.Value.ZLevels)
+        //            {
+        //                Log.Message(data.Key + " - " + mapData.Key + " - " + this.GetMapInfo(mapData.Value));
+        //            }
+        //        }
+        //    }
+        //}
         public void CheckHotkeys()
         {
             bool keyDownEvent = ZLevelsDefOf.ZL_switchToUpperMap.KeyDownEvent;
@@ -156,6 +170,7 @@ namespace ZLevels
 
         public int GetZIndexFor(Map map)
         {
+            this.ZLevelsFixer(map.Tile);
             var comp = map.GetComponent<MapComponentZLevel>();
             return comp.Z_LevelIndex;
         }
@@ -206,7 +221,7 @@ namespace ZLevels
         //            {
         //                ZLogger.Message(this.GetMapInfo(d.Value) + " - " + d.Value.weatherManager.curWeather
         //                    + " - " + d.Value.weatherManager.curWeatherAge + " - " + d.Value.weatherManager.lastWeather);
-        //                
+        //
         //            }
         //        }
         //        ZLogger.Message("========================");
@@ -683,6 +698,16 @@ namespace ZLevels
             { thingToTeleport.PositionHeld });
         }
 
+        public void ZLevelsFixer(int tile)
+        {
+            if (this.ZLevelsTracker[tile]?.ZLevels[0]?.listerThings == null)
+            {
+                var map = Find.WorldObjects.MapParents.Where(x => x.Tile == tile 
+                && x.HasMap && x.Map.IsPlayerHome).FirstOrDefault().Map;
+                this.ZLevelsTracker[tile].ZLevels[0] = map;
+            }
+        }
+
         //public void ZLevelsFixer(int tile)
         //{
         //    int num = 0;
@@ -892,7 +917,7 @@ namespace ZLevels
                     "Let the Z-Levels developers know about it and attach your Hugslib log during " +
                     "when the wrong map was created.\n" +
                     "This window will be removed from the mod as soon as the Z-levels are stable. " +
-                    "Thank you for understanding.\n-------------\n";
+                    "Thank you for understanding.\n------------\n";
 
                 foreach (var map in this.GetAllMaps(mapToTeleport.Tile))
                 {
@@ -953,6 +978,7 @@ namespace ZLevels
             //        }
             //    }
             //}
+
         }
 
         public Map CreateLowerLevel(Map origin, IntVec3 playerStartSpot)
@@ -1043,7 +1069,7 @@ namespace ZLevels
                         mapParent.ExtraGenStepDefs, null);
                 }
             }
-            catch 
+            catch
             {
                 newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef,
                     mapParent.ExtraGenStepDefs, null);

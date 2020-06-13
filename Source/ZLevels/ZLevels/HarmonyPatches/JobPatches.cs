@@ -297,7 +297,6 @@ namespace ZLevels
             }
         }
 
-
         [HarmonyPatch(typeof(JobGiver_GetJoy), "TryGiveJob")]
         public class JobGiver_GetJoyPatch
         {
@@ -662,7 +661,6 @@ namespace ZLevels
                 }
             }
 
-
             private static Job TryGiveJob(Pawn pawn, RestCategory minCategory, float maxLevelPercentage = 1f)
             {
                 Need_Rest rest = pawn.needs.rest;
@@ -705,7 +703,6 @@ namespace ZLevels
                 return CellFinder.RandomClosewalkCellNearNotForbidden(pawn.Position, map, 4, pawn);
             }
         }
-
 
         [HarmonyPatch(typeof(JobGiver_Work), "TryIssueJobPackage")]
         public class TryIssueJobPackagePatch
@@ -1164,7 +1161,6 @@ namespace ZLevels
                 {
                     pawn, blueprint, true
                 });
-
 
                 Job job2 = method.GetValue<Job>();
                 if (job2 == null)
