@@ -32,6 +32,7 @@ namespace ZLevels
                     || text.Contains("overwriting slot group square") // not really an error, this is what z-level needs to look for things for hauling
                     || text.Contains("clearing group grid square") // same
                     || text.Contains("threw exception while executing toil's finish action (0), jobDriver=RimWorld.JobDriver_LayDown")
+                    || text.Contains("threw exception while executing toil's finish action (1), jobDriver=RimWorld.JobDriver_LayDown")
                     )
                 {
                     //ZLogger.Message("The error: " + text);

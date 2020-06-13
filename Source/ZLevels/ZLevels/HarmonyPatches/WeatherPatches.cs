@@ -55,7 +55,10 @@ namespace ZLevels
                     }
                     ZLogger.Message("Changed weather for " + ZTracker.GetMapInfo(map) + " - " + __result);
                 }
-                catch { };
+                catch (Exception ex)
+                {
+                    Log.Error("[Z-Levels] Patch_ChooseNextWeather patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                }
             }
         }
 
@@ -98,7 +101,10 @@ namespace ZLevels
                         ZLogger.Message("3.2 - " + ZTracker.GetMapInfo(map) + " transitioting to " + WeatherDefOf.Clear);
                     }
                 }
-                catch { };
+                catch (Exception ex)
+                {
+                    Log.Error("[Z-Levels] Patch_TransitionTo patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                }
             }
         }
 
@@ -124,7 +130,10 @@ namespace ZLevels
                         return false;
                     }
                 }
-                catch { };
+                catch (Exception ex)
+                {
+                    Log.Error("[Z-Levels] Patch_WeatherManager patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                }
                 return true;
             }
         }

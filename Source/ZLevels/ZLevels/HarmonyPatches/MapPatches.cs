@@ -26,15 +26,22 @@ namespace ZLevels
             {
                 if (__instance.ParentHolder is MapParent_ZLevel)
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    if (ZTracker.GetZIndexFor(__instance) < 0)
+                    try
                     {
-                        __result = ZLevelsDefOf.ZL_UndegroundBiome;
+                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        if (ZTracker.GetZIndexFor(__instance) < 0)
+                        {
+                            __result = ZLevelsDefOf.ZL_UndegroundBiome;
+                        }
+                        else if (ZTracker.GetZIndexFor(__instance) > 0)
+                        {
+                            __result = ZLevelsDefOf.ZL_UpperBiome;
+                        }
                     }
-                    else if (ZTracker.GetZIndexFor(__instance) > 0)
+                    catch (Exception ex)
                     {
-                        __result = ZLevelsDefOf.ZL_UpperBiome;
-                    }
+                        Log.Error("[Z-Levels] MapBiomePostfix patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                    };
                 }
             }
         }
@@ -46,16 +53,23 @@ namespace ZLevels
             [HarmonyPrefix]
             private static bool Prefix(ExitMapGrid __instance, ref bool __result)
             {
-                Map map = (Map)typeof(ExitMapGrid).GetField("map", BindingFlags.Instance | BindingFlags.Static
-                    | BindingFlags.Public | BindingFlags.NonPublic).GetValue(__instance);
-                if (map != null)
+                try
                 {
-                    if (map.ParentHolder is MapParent_ZLevel)
+                    Map map = (Map)typeof(ExitMapGrid).GetField("map", BindingFlags.Instance | BindingFlags.Static
+                            | BindingFlags.Public | BindingFlags.NonPublic).GetValue(__instance);
+                    if (map != null)
                     {
-                        __result = false;
-                        return false;
+                        if (map.ParentHolder is MapParent_ZLevel)
+                        {
+                            __result = false;
+                            return false;
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    Log.Error("[Z-Levels] ExitCells_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                };
                 return true;
             }
         }
