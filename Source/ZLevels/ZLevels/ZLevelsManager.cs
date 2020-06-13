@@ -904,33 +904,46 @@ namespace ZLevels
 
             string seedString = Find.World.info.seedString;
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
-
-            var pathToLoad = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
-                    "SavedMaps"), origin.Tile + " - " + (comp.Z_LevelIndex - 1) + ".xml");
-            FileInfo fileInfo = new FileInfo(pathToLoad);
             Map newMap = null;
-            if (fileInfo.Exists)
+            try
             {
-                ZLogger.Message("Loading from " + pathToLoad);
-                newMap = MapGenerator.GenerateMap(origin.Size, mapParent,
-                    ZLevelsDefOf.ZL_EmptyMap, mapParent.ExtraGenStepDefs, null);
-                BlueprintUtility.LoadEverything(newMap, pathToLoad);
+                var pathToLoad = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
+                    "SavedMaps"), origin.Tile + " - " + (comp.Z_LevelIndex - 1) + ".xml");
+                FileInfo fileInfo = new FileInfo(pathToLoad);
+                if (fileInfo.Exists)
+                {
+                    ZLogger.Message("Loading from " + pathToLoad);
+                    newMap = MapGenerator.GenerateMap(origin.Size, mapParent,
+                        ZLevelsDefOf.ZL_EmptyMap, mapParent.ExtraGenStepDefs, null);
+                    BlueprintUtility.LoadEverything(newMap, pathToLoad);
+                }
+                else
+                {
+                    newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef, mapParent.ExtraGenStepDefs, null);
+                }
             }
-            else
+            catch
             {
                 newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef, mapParent.ExtraGenStepDefs, null);
             }
 
             Find.World.info.seedString = seedString;
-            if (this.TryRegisterMap(newMap, comp.Z_LevelIndex - 1))
+            try
             {
-                var newComp = newMap.GetComponent<MapComponentZLevel>();
-                newComp.Z_LevelIndex = comp.Z_LevelIndex - 1;
+                if (this.TryRegisterMap(newMap, comp.Z_LevelIndex - 1))
+                {
+                    var newComp = newMap.GetComponent<MapComponentZLevel>();
+                    newComp.Z_LevelIndex = comp.Z_LevelIndex - 1;
+                }
+                GameCondition_NoSunlight gameCondition_NoSunlight =
+                    (GameCondition_NoSunlight)GameConditionMaker.MakeCondition(ZLevelsDefOf.ZL_UndergroundCondition, -1);
+                gameCondition_NoSunlight.Permanent = true;
+                newMap.gameConditionManager.RegisterCondition(gameCondition_NoSunlight);
             }
-            GameCondition_NoSunlight gameCondition_NoSunlight =
-                (GameCondition_NoSunlight)GameConditionMaker.MakeCondition(ZLevelsDefOf.ZL_UndergroundCondition, -1);
-            gameCondition_NoSunlight.Permanent = true;
-            newMap.gameConditionManager.RegisterCondition(gameCondition_NoSunlight);
+            catch
+            {
+
+            }
             return newMap;
         }
 
@@ -947,32 +960,49 @@ namespace ZLevels
 
             string seedString = Find.World.info.seedString;
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
-
-            var pathToLoad = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
-                "SavedMaps"), origin.Tile + " - " + (comp.Z_LevelIndex + 1) + ".xml");
-            FileInfo fileInfo = new FileInfo(pathToLoad);
             Map newMap = null;
-            if (fileInfo.Exists)
+            try
             {
-                ZLogger.Message("Loading from " + pathToLoad);
-                newMap = MapGenerator.GenerateMap(origin.Size, mapParent, ZLevelsDefOf.ZL_EmptyMap
-                    , mapParent.ExtraGenStepDefs, null);
-                BlueprintUtility.LoadEverything(newMap, pathToLoad);
+                var pathToLoad = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
+                    "SavedMaps"), origin.Tile + " - " + (comp.Z_LevelIndex + 1) + ".xml");
+                FileInfo fileInfo = new FileInfo(pathToLoad);
+                if (fileInfo.Exists)
+                {
+                    ZLogger.Message("Loading from " + pathToLoad);
+                    newMap = MapGenerator.GenerateMap(origin.Size, mapParent, ZLevelsDefOf.ZL_EmptyMap
+                        , mapParent.ExtraGenStepDefs, null);
+                    BlueprintUtility.LoadEverything(newMap, pathToLoad);
+                }
+                else
+                {
+                    newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef,
+                        mapParent.ExtraGenStepDefs, null);
+                }
             }
-            else
+            catch 
             {
                 newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef,
                     mapParent.ExtraGenStepDefs, null);
-            }
-
+            };
             Find.World.info.seedString = seedString;
-            if (this.TryRegisterMap(newMap, comp.Z_LevelIndex + 1))
+            try
             {
-                var newComp = newMap.GetComponent<MapComponentZLevel>();
-                newComp.Z_LevelIndex = comp.Z_LevelIndex + 1;
-                AdjustMapGeneration(newMap);
+                if (this.TryRegisterMap(newMap, comp.Z_LevelIndex + 1))
+                {
+                    var newComp = newMap.GetComponent<MapComponentZLevel>();
+                    newComp.Z_LevelIndex = comp.Z_LevelIndex + 1;
+                    AdjustMapGeneration(newMap);
+                }
             }
-            newMap.terrainGrid.SetTerrain(playerStartSpot, ZLevelsDefOf.ZL_OutsideTerrainTwo);
+            catch
+            {
+
+            }
+            try
+            {
+                newMap.terrainGrid.SetTerrain(playerStartSpot, ZLevelsDefOf.ZL_OutsideTerrainTwo);
+            }
+            catch { }
             return newMap;
         }
 

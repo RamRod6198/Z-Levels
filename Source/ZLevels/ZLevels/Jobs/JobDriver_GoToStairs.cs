@@ -38,8 +38,7 @@ namespace ZLevels
                                 comp.DoGeneration = true;
                                 comp.path = stairsUp.pathToPreset;
                             }
-                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map, true, false, stairsUp.shouldSpawnStairsUpper);
-                            stairsUp.shouldSpawnStairsUpper = false;
+                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map, true, false, true);
                         }
                         else
                         {
@@ -66,8 +65,7 @@ namespace ZLevels
                                 comp.DoGeneration = true;
                                 comp.path = stairsDown.pathToPreset;
                             }
-                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map, true, stairsDown.shouldSpawnStairsBelow);
-                            stairsDown.shouldSpawnStairsBelow = false;
+                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map, true, true);
                         }
                         else
                         {

@@ -1318,7 +1318,7 @@ namespace ZLevels
                                     }
 
                                     List<Zone_Stockpile> copiedZones = new List<Zone_Stockpile>();
-
+                                    IntVec3 newPosition2 = IntVec3.Invalid;
                                     foreach (Map map in allMaps)
                                     {
                                         foreach (var zone in allZones)
@@ -1333,6 +1333,13 @@ namespace ZLevels
                                                     if (newPosition.GetZone(pawn.Map) == null)
                                                     {
                                                         newZone.cells.Add(newPosition);
+                                                    }
+                                                    else if (CellFinder.TryFindRandomCellNear
+                                                        (newPosition, map, 1000, (IntVec3 c) => c.Walkable(map)
+                                                        && c.GetZone(map) == null && GenGrid.InBounds(c, map)
+                                                        , out newPosition2))
+                                                    {
+                                                        newZone.cells.Add(newPosition2);
                                                     }
                                                 }
                                                 newZone.zoneManager = pawn.Map.zoneManager;
