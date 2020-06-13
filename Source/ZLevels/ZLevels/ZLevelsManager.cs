@@ -900,15 +900,15 @@ namespace ZLevels
                     {
                         if (this.GetZIndexFor(map) < 0)
                         {
-                            text += "Empty map - " + this.GetMapInfo(map) + " - Underground\n";
+                            text += "Map - " + this.GetMapInfo(map) + " - Underground\n";
                         }
                         else if (this.GetZIndexFor(map) > 0)
                         {
-                            text += "Empty map - " + this.GetMapInfo(map) + " - Upper level\n";
+                            text += "Map - " + this.GetMapInfo(map) + " - Upper level\n";
                         }
                         else
                         {
-                            text += "Empty map - " + this.GetMapInfo(map) + " - Normal player map\n";
+                            text += "Map - " + this.GetMapInfo(map) + " - Normal player map\n";
                         }
                     }
                     else if (map != null)
