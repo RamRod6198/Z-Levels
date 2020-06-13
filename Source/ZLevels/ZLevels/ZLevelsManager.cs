@@ -886,7 +886,7 @@ namespace ZLevels
                 catch { };
                 var text = "You have created a new level! Congratulation! However, due to the fact that the " +
                     "Z-Levels are in beta stage and have bugs, it is necessary to check if the information below " +
-                    "is correct. Check if the underground levels and the upper levels " +
+                    "is correct. Check if the underground levels, normal player map and the upper levels " +
                     "in which the pawns are located, are indicated correctly or if the list does not have null maps. " +
                     "If this is not so, then this is a bug and Z-Levels were created incorrectly. " +
                     "Let the Z-Levels developers know about it and attach your Hugslib log during " +
