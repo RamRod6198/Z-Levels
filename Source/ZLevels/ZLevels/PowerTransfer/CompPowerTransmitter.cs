@@ -1,13 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace ZLevels
 {
-    public class CompPowerTransmitter : CompPower
+    public class CompPowerZTransmitter : CompPowerPlant
     {
+
+        protected override float DesiredPowerOutput
+        {
+            get
+            {
+                float num = this.powerOutputInt;
+                this.PowerOn = false;
+                Log.Message(this.test + " - num: " + num + " - watt: " + this.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick);
+                return this.powerOutputInt;
+            }
+        }
+
+
+        public float GetPowerOutput()
+        {
+            return this.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
+        }
         public float AmountCanAccept
         {
             get
@@ -16,7 +34,7 @@ namespace ZLevels
                 {
                     return 0f;
                 }
-                CompProperties_PowerTransmitter props = this.Props;
+                CompProperties_PowerZTransmitter props = this.Props;
                 return (props.storedEnergyMax - this.storedEnergy) / props.efficiency;
             }
         }
@@ -41,11 +59,11 @@ namespace ZLevels
             }
         }
 
-        public new CompProperties_PowerTransmitter Props
+        public new CompProperties_PowerZTransmitter Props
         {
             get
             {
-                return (CompProperties_PowerTransmitter)this.props;
+                return (CompProperties_PowerZTransmitter)this.props;
             }
         }
 
@@ -53,7 +71,7 @@ namespace ZLevels
         {
             base.PostExposeData();
             Scribe_Values.Look<float>(ref this.storedEnergy, "storedPower", 0f, false);
-            CompProperties_PowerTransmitter props = this.Props;
+            CompProperties_PowerZTransmitter props = this.Props;
             if (this.storedEnergy > props.storedEnergyMax)
             {
                 this.storedEnergy = props.storedEnergyMax;
@@ -63,13 +81,11 @@ namespace ZLevels
         public override void CompTick()
         {
             base.CompTick();
-            this.DrawPower(Mathf.Min(5f * CompPower.WattsToWattDaysPerTick, this.storedEnergy));
         }
+        
 
         public void AddEnergy(float amount)
         {
-            Log.Message("AddPower: " + amount);
-
             if (amount < 0f)
             {
                 Log.Error("Cannot add negative energy " + amount, false);
@@ -85,7 +101,6 @@ namespace ZLevels
 
         public void DrawPower(float amount)
         {
-            Log.Message("DrawPower: " + amount);
             this.storedEnergy -= amount;
             if (this.storedEnergy < 0f)
             {
@@ -110,9 +125,10 @@ namespace ZLevels
 
         public override string CompInspectStringExtra()
         {
-            CompProperties_PowerTransmitter props = this.Props;
+            CompProperties_PowerZTransmitter props = this.Props;
             string text = "PowerBatteryStored".Translate() + ": " + this.storedEnergy.ToString("F0") + " / " + props.storedEnergyMax.ToString("F0") + " Wd";
-            text += "\n" + "PowerBatteryEfficiency".Translate() + ": " + (props.efficiency * 100f).ToString("F0") + "%";
+            text += "\n" + "PowerBatteryEfficiency".Translate() + ": " + 
+                (props.efficiency * 100f).ToString("F0") + "%";
             if (this.storedEnergy > 0f)
             {
                 text += "\n" + "SelfDischarging".Translate() + ": " + 5f.ToString("F0") + " W";
@@ -151,6 +167,8 @@ namespace ZLevels
         }
 
         private float storedEnergy;
+
+        public string test = "";
 
         private const float SelfDischargingWatts = 5f;
     }

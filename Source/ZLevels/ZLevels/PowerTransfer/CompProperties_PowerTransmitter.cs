@@ -4,11 +4,11 @@ using Verse;
 
 namespace ZLevels
 {
-	public class CompProperties_PowerTransmitter : CompProperties_Power
+	public class CompProperties_PowerZTransmitter : CompProperties_Power
 	{
-		public CompProperties_PowerTransmitter()
+		public CompProperties_PowerZTransmitter()
 		{
-			this.compClass = typeof(CompPowerTransmitter);
+			this.compClass = typeof(CompPowerZTransmitter);
 		}
 
 		public float storedEnergyMax = 1000f;
