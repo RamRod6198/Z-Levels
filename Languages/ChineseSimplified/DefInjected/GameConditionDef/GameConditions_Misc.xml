@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <ZL_UndergroundCondition.label>地下</ZL_UndergroundCondition.label>
+  <ZL_UndergroundCondition.description>你进入了地牢。</ZL_UndergroundCondition.description>
+  <ZL_UndergroundCondition.endMessage>日食即将结束。</ZL_UndergroundCondition.endMessage>
+  <ZL_UndergroundCondition.letterText>这颗行星的一颗卫星在太阳前方绕轨道运行。日食已经开始了。</ZL_UndergroundCondition.letterText>
+
+
+</LanguageData>

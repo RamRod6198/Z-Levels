@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <ZL_StairsUp.label>上楼楼梯</ZL_StairsUp.label>
+  <ZL_StairsUp.description>楼梯。</ZL_StairsUp.description>
+
+  <ZL_StairsDown.label>下楼楼梯</ZL_StairsDown.label>
+  <ZL_StairsDown.description>楼梯。</ZL_StairsDown.description>
+
+  <ZL_NaturalHole.label>天然洞穴</ZL_NaturalHole.label>
+  <ZL_NaturalHole.description>天然洞穴。</ZL_NaturalHole.description>
+
+
+</LanguageData>
