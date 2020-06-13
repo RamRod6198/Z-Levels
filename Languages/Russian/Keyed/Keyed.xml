@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <ZAbandonConfirmation>Вы уверены, что хотите отказаться от карты? Затем её можно восстановить из сохраненного пресета.</ZAbandonConfirmation>
+  <ZAbandonPermanentlyConfirmation>Вы уверены, что хотите навсегда отказаться от карты? Она не может быть восстановлена позже из предустановки.</ZAbandonPermanentlyConfirmation>
+  <GoUP>Поднятся</GoUP>
+  <GoDown>Спустится</GoDown>
+
+</LanguageData>
