@@ -14,10 +14,7 @@ namespace ZLevels
         {
             get
             {
-                float num = this.powerOutputInt;
-                this.PowerOn = false;
-                Log.Message(this.test + " - num: " + num + " - watt: " + this.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick);
-                return this.powerOutputInt;
+                return 0f;
             }
         }
 

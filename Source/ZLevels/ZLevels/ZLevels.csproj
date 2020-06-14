@@ -302,6 +302,7 @@
   <ItemGroup>
     <Compile Include="ActiveArea.cs" />
     <Compile Include="HarmonyPatches\CombatPatches.cs" />
+    <Compile Include="HarmonyPatches\ResourceCounterPatch.cs" />
     <Compile Include="HarmonyPatches\SkyfallerPatches.cs" />
     <Compile Include="Map\BiomeWorker_NeverSpawn.cs" />
     <Compile Include="Map\BlueprintUtility.cs" />
