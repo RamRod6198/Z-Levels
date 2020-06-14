@@ -14,7 +14,7 @@ namespace ZLevels
         {
             get
             {
-                return 0f;
+                return this.powerOutputInt;
             }
         }
 
