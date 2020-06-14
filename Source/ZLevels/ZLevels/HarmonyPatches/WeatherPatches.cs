@@ -12,6 +12,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
+using Verse.Sound;
 
 namespace ZLevels
 {
@@ -134,6 +135,28 @@ namespace ZLevels
                         map.weatherManager.lastWeather = lastWeather;
                         curWeatherDuration = weatherDef.durationRange.RandomInRange;
                         map.weatherManager.curWeatherAge = Rand.Range(0, curWeatherDuration);
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("[Z-Levels] Patch_WeatherManager patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(WeatherEvent_LightningStrike), "FireEvent")]
+        internal static class Patch_FireEvent
+        {
+            private static bool Prefix(WeatherEvent_LightningStrike __instance)
+            {
+                try
+                {
+                    Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(map.Tile) && ZTracker.GetZIndexFor(map) > 0)
+                    {
                         return false;
                     }
                 }

@@ -33,149 +33,151 @@ namespace ZLevels
         public override void Tick()
         {
             base.Tick();
-            var upperMap = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
-            var lowerMap = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
-            if (upperMap != null && (this.upperTransmitter == null || !this.upperTransmitter.Spawned))
+            if (this.GetComp<CompPowerZTransmitter>().PowerNet != null)
             {
-                foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
+                var upperMap = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
+                var lowerMap = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
+                if (upperMap != null && (this.upperTransmitter == null || !this.upperTransmitter.Spawned))
                 {
-                    foreach (var t in pos.GetThingList(upperMap))
+                    foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
                     {
-                        if (t.TryGetComp<CompPowerTransmitter>() != null)
+                        foreach (var t in pos.GetThingList(upperMap))
                         {
-                            upperTransmitter = t;
-                            break;
+                            if (t.TryGetComp<CompPowerTransmitter>() != null)
+                            {
+                                upperTransmitter = t;
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            if (lowerMap != null && (this.lowerTransmitter == null || !this.lowerTransmitter.Spawned))
-            {
-                foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
+                if (lowerMap != null && (this.lowerTransmitter == null || !this.lowerTransmitter.Spawned))
                 {
-                    foreach (var t in pos.GetThingList(lowerMap))
+                    foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
                     {
-                        if (t.TryGetComp<CompPowerTransmitter>() != null)
+                        foreach (var t in pos.GetThingList(lowerMap))
                         {
-                            lowerTransmitter = t;
-                            break;
+                            if (t.TryGetComp<CompPowerTransmitter>() != null)
+                            {
+                                lowerTransmitter = t;
+                                break;
+                            }
                         }
                     }
                 }
-            }
 
-            if (upperTransmitter != null && upperTransmitter.Spawned
-                && lowerTransmitter != null && lowerTransmitter.Spawned)
-            {
-                var upperComp = upperTransmitter.TryGetComp<CompPowerTransmitter>();
-                var lowerComp = lowerTransmitter.TryGetComp<CompPowerTransmitter>();
-                var baseComp = this.GetComp<CompPowerZTransmitter>();
-
-                var upperPowerComp = (CompPowerZTransmitter)upperComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
-                if (upperPowerComp == null)
+                if (upperTransmitter != null && upperTransmitter.Spawned
+                    && lowerTransmitter != null && lowerTransmitter.Spawned)
                 {
-                    upperPowerComp = new CompPowerZTransmitter();
-                    upperPowerComp.parent = this;
-                    upperPowerComp.Initialize(new CompProperties_PowerZTransmitter
-                    {
-                        storedEnergyMax = 1000f,
-                        efficiency = 0.7f
-                    });
-                    upperPowerComp.powerOutputInt = 0;
-                    upperPowerComp.PowerOn = true;
-                    upperComp.PowerNet.powerComps.Add(upperPowerComp);
-                }
+                    var upperComp = upperTransmitter.TryGetComp<CompPowerTransmitter>();
+                    var lowerComp = lowerTransmitter.TryGetComp<CompPowerTransmitter>();
+                    var baseComp = this.GetComp<CompPowerZTransmitter>();
 
-                var lowerPowerComp = (CompPowerZTransmitter)lowerComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
-                if (lowerPowerComp == null)
+                    var upperPowerComp = (CompPowerZTransmitter)upperComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
+                    if (upperPowerComp == null)
+                    {
+                        upperPowerComp = new CompPowerZTransmitter();
+                        upperPowerComp.parent = this;
+                        upperPowerComp.Initialize(new CompProperties_PowerZTransmitter
+                        {
+                            storedEnergyMax = 1000f,
+                            efficiency = 0.7f
+                        });
+                        upperPowerComp.powerOutputInt = 0;
+                        upperPowerComp.PowerOn = true;
+                        upperComp.PowerNet.powerComps.Add(upperPowerComp);
+                    }
+
+                    var lowerPowerComp = (CompPowerZTransmitter)lowerComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
+                    if (lowerPowerComp == null)
+                    {
+                        lowerPowerComp = new CompPowerZTransmitter();
+                        lowerPowerComp.parent = this;
+                        lowerPowerComp.Initialize(new CompProperties_PowerZTransmitter
+                        {
+                            storedEnergyMax = 1000f,
+                            efficiency = 0.7f
+                        });
+                        lowerPowerComp.powerOutputInt = 0;
+                        lowerPowerComp.PowerOn = true;
+                        lowerComp.PowerNet.powerComps.Add(lowerPowerComp);
+                    }
+
+                    var origBase = (baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                        - baseComp.powerOutputInt;
+
+                    var origUpper = (upperComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                        - upperPowerComp.powerOutputInt;
+
+                    var origLower = (lowerComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                        - lowerPowerComp.powerOutputInt;
+
+                    var newValue = (origBase + origUpper + origLower) / 3;
+                    baseComp.powerOutputInt = newValue - origBase;
+                    upperPowerComp.powerOutputInt = newValue - origUpper;
+                    lowerPowerComp.powerOutputInt = newValue - origLower;
+                }
+                else if (upperTransmitter != null && upperTransmitter.Spawned
+                    && (lowerTransmitter == null || !lowerTransmitter.Spawned))
                 {
-                    lowerPowerComp = new CompPowerZTransmitter();
-                    lowerPowerComp.parent = this;
-                    lowerPowerComp.Initialize(new CompProperties_PowerZTransmitter
+                    var comp = upperTransmitter.TryGetComp<CompPowerTransmitter>();
+                    var baseComp = this.GetComp<CompPowerZTransmitter>();
+
+                    var powerComp = (CompPowerZTransmitter)comp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
+                    if (powerComp == null)
                     {
-                        storedEnergyMax = 1000f,
-                        efficiency = 0.7f
-                    });
-                    lowerPowerComp.powerOutputInt = 0;
-                    lowerPowerComp.PowerOn = true;
-                    lowerComp.PowerNet.powerComps.Add(lowerPowerComp);
+                        powerComp = new CompPowerZTransmitter();
+                        powerComp.parent = this;
+                        powerComp.Initialize(new CompProperties_PowerZTransmitter
+                        {
+                            storedEnergyMax = 1000f,
+                            efficiency = 0.7f
+                        });
+                        powerComp.powerOutputInt = 0;
+                        powerComp.PowerOn = true;
+                        comp.PowerNet.powerComps.Add(powerComp);
+                    }
+
+                    var orig1 = (baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                        - baseComp.powerOutputInt;
+                    var orig2 = (comp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                        - powerComp.powerOutputInt;
+
+                    var newValue = (orig1 + orig2) / 2;
+                    baseComp.powerOutputInt = newValue - orig1;
+                    powerComp.powerOutputInt = newValue - orig2;
                 }
-
-                var origBase = (baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
-                    - baseComp.powerOutputInt;
-
-                var origUpper = (upperComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
-                    - upperPowerComp.powerOutputInt;
-
-                var origLower = (lowerComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
-                    - lowerPowerComp.powerOutputInt;
-
-                var newValue = (origBase + origUpper + origLower) / 3;
-                baseComp.powerOutputInt = newValue - origBase;
-                upperPowerComp.powerOutputInt = newValue - origUpper;
-                lowerPowerComp.powerOutputInt = newValue - origLower;
-            }
-            else if (upperTransmitter != null && upperTransmitter.Spawned
-                && (lowerTransmitter == null || !lowerTransmitter.Spawned))
-            {
-                var comp = upperTransmitter.TryGetComp<CompPowerTransmitter>();
-                var baseComp = this.GetComp<CompPowerZTransmitter>();
-
-                var powerComp = (CompPowerZTransmitter)comp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
-                if (powerComp == null)
+                else if ((upperTransmitter == null || !upperTransmitter.Spawned)
+                    && lowerTransmitter != null && lowerTransmitter.Spawned)
                 {
-                    powerComp = new CompPowerZTransmitter();
-                    powerComp.parent = this;
-                    powerComp.Initialize(new CompProperties_PowerZTransmitter
+                    var comp = lowerTransmitter.TryGetComp<CompPowerTransmitter>();
+                    var baseComp = this.GetComp<CompPowerZTransmitter>();
+
+                    var powerComp = (CompPowerZTransmitter)comp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
+                    if (powerComp == null)
                     {
-                        storedEnergyMax = 1000f,
-                        efficiency = 0.7f
-                    });
-                    powerComp.powerOutputInt = 0;
-                    powerComp.PowerOn = true;
-                    comp.PowerNet.powerComps.Add(powerComp);
+                        powerComp = new CompPowerZTransmitter();
+                        powerComp.parent = this;
+                        powerComp.Initialize(new CompProperties_PowerZTransmitter
+                        {
+                            storedEnergyMax = 1000f,
+                            efficiency = 0.7f
+                        });
+                        powerComp.powerOutputInt = 0;
+                        powerComp.PowerOn = true;
+                        comp.PowerNet.powerComps.Add(powerComp);
+                    }
+
+                    var orig1 = (baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                        - baseComp.powerOutputInt;
+                    var orig2 = (comp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                        - powerComp.powerOutputInt;
+
+                    var newValue = (orig1 + orig2) / 2;
+                    baseComp.powerOutputInt = newValue - orig1;
+                    powerComp.powerOutputInt = newValue - orig2;
                 }
-
-                var orig1 = (baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
-                    - baseComp.powerOutputInt;
-                var orig2 = (comp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
-                    - powerComp.powerOutputInt;
-
-                var newValue = (orig1 + orig2) / 2;
-                baseComp.powerOutputInt = newValue - orig1;
-                powerComp.powerOutputInt = newValue - orig2;
             }
-            else if ((upperTransmitter == null || !upperTransmitter.Spawned)
-                && lowerTransmitter != null && lowerTransmitter.Spawned)
-            {
-                var comp = lowerTransmitter.TryGetComp<CompPowerTransmitter>();
-                var baseComp = this.GetComp<CompPowerZTransmitter>();
-
-                var powerComp = (CompPowerZTransmitter)comp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
-                if (powerComp == null)
-                {
-                    powerComp = new CompPowerZTransmitter();
-                    powerComp.parent = this;
-                    powerComp.Initialize(new CompProperties_PowerZTransmitter
-                    {
-                        storedEnergyMax = 1000f,
-                        efficiency = 0.7f
-                    });
-                    powerComp.powerOutputInt = 0;
-                    powerComp.PowerOn = true;
-                    comp.PowerNet.powerComps.Add(powerComp);
-                }
-
-                var orig1 = (baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
-                    - baseComp.powerOutputInt;
-                var orig2 = (comp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
-                    - powerComp.powerOutputInt;
-
-                var newValue = (orig1 + orig2) / 2;
-                baseComp.powerOutputInt = newValue - orig1;
-                powerComp.powerOutputInt = newValue - orig2;
-            }
-
             if (this.ticksToExplode > 0)
             {
                 if (this.wickSustainer == null)
@@ -223,5 +225,5 @@ namespace ZLevels
 
         Thing lowerTransmitter;
 
-	}
+    }
 }
