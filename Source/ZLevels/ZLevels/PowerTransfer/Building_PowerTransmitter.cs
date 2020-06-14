@@ -79,36 +79,57 @@ namespace ZLevels
                 var comp = upperTransmitter.TryGetComp<CompPowerTransmitter>();
                 var baseComp = this.GetComp<CompPowerZTransmitter>();
 
-                //var powerComp = (CompPowerZTransmitter)comp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
-                //if (powerComp == null)
-                //{
-                //    powerComp = new CompPowerZTransmitter();
-                //    powerComp.parent = this;
-                //    powerComp.Initialize(new CompProperties_PowerZTransmitter
-                //    {
-                //        storedEnergyMax = 1000f,
-                //        efficiency = 0.7f
-                //    });
-                //    if (baseComp.powerOutputInt > 0)
-                //    {
-                //        Log.Message("baseComp.powerOutputInt: " + baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick);
-                //        powerComp.powerOutputInt = baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
-                //    }
-                //    powerComp.PowerOn = true;
-                //    comp.PowerNet.powerComps.Add(powerComp);
-                //}
-                //else
-                //{
-                //    Log.Message("baseComp.powerOutputInt: " + baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick);
-                //    powerComp.powerOutputInt = baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
-                //    powerComp.PowerOn = true;
-                //}
+                var powerComp = (CompPowerZTransmitter)comp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
+                if (powerComp == null)
+                {
+                    powerComp = new CompPowerZTransmitter();
+                    powerComp.parent = this;
+                    powerComp.Initialize(new CompProperties_PowerZTransmitter
+                    {
+                        storedEnergyMax = 1000f,
+                        efficiency = 0.7f
+                    });
+                    powerComp.PowerOn = true;
+                    comp.PowerNet.powerComps.Add(powerComp);
+                }
+                else
+                {
+                    Log.Message("baseComp.powerOutputInt: " + baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick);
+                    powerComp.powerOutputInt = baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
+                    powerComp.PowerOn = true;
+                }
 
                 var orig1 = baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
                 var orig2 = comp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
                 var newValue = (orig1 + orig2) / 2;
-                Log.Message("Map 1: orig value: " + orig1 + " new value: " + newValue);
-                Log.Message("Map 2: orig value: " + orig2 + " new value: " + newValue);
+                if (orig1 > newValue)
+                {
+                    baseComp.powerOutputInt = -(orig1 - newValue);
+                    Log.Message("Map 1: orig value: " + orig1 + " new value: " + newValue + " - " + -(orig1 - newValue));
+                }
+                else if (newValue > orig1)
+                {
+                    baseComp.powerOutputInt = orig1 - newValue;
+                    Log.Message("Map 1: orig value: " + orig1 + " new value: " + newValue + " - " + (newValue - orig1));
+                }
+                else
+                {
+                    Log.Message("Map 1: orig value: " + orig1 + " new value: " + newValue + " - " + 0);
+                }
+                if (orig2 > newValue)
+                {
+                    powerComp.powerOutputInt = -(orig2 - newValue);
+                    Log.Message("Map 2: orig value: " + orig2 + " new value: " + newValue + " - " + -(orig2 - newValue));
+                }
+                else if (newValue > orig2)
+                {
+                    powerComp.powerOutputInt = newValue - orig2;
+                    Log.Message("Map 2: orig value: " + orig2 + " new value: " + newValue + " - " + (newValue - orig2));
+                }
+                else
+                {
+                    Log.Message("Map 2: orig value: " + orig2 + " new value: " + newValue + " - " + 0);
+                }
                 //this.PowerNetTest(this.GetComp<CompPowerZTransmitter>().PowerNet);
                 //Log.Message("Map: " + this.GetComp<CompPowerZTransmitter>().PowerNet.Map);
                 //if (Find.TickManager.TicksGame % 60 == 0)

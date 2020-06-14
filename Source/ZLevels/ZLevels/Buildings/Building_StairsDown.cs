@@ -70,8 +70,7 @@ namespace ZLevels
             base.Destroy(mode);
         }
 
-        [SyncMethod(SyncContext.None)]
-        public static void GiveJob(Pawn pawn, Thing stairs)
+        public void GiveJob(Pawn pawn, Thing stairs)
         {
             Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, stairs);
             pawn.jobs.StartJob(job, JobCondition.InterruptForced);
