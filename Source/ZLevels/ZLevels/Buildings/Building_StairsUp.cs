@@ -95,6 +95,13 @@ namespace ZLevels
         }
 
         [SyncMethod(SyncContext.None)]
+        public void GiveJob(Pawn pawn)
+        {
+            Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
+            pawn.jobs.StartJob(job, JobCondition.InterruptForced);
+        }
+
+        [SyncMethod(SyncContext.None)]
         public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
         {
             var text = "GoUP".Translate();
@@ -106,9 +113,7 @@ namespace ZLevels
                 }
             }
             var opt2 = new FloatMenuOption(text, () => {
-                    ZLogger.Message("Test");
-                    Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
-                    selPawn.jobs.StartJob(job, JobCondition.InterruptForced);
+                this.GiveJob(selPawn);
                 }, MenuOptionPriority.Default, null, this);
             yield return opt2;
 
