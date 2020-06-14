@@ -63,9 +63,9 @@ namespace ZLevels
                         __instance.ClearAllReservations(true);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    Log.Error("[Z-Levels] Patch_VerifyReservations patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
                 }
                 return false;
             }
@@ -80,11 +80,18 @@ namespace ZLevels
         {
             public static void Prefix(Pawn_PathFollower __instance, Pawn pawn, IntVec3 c, ref int __result)
             {
-                if (c.GetTerrain(pawn.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
+                try
                 {
-                    pawn.pather.StopDead();
+                    if (c.GetTerrain(pawn.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
+                    {
+                        pawn.pather.StopDead();
+                        __result = 100000;
+                    }
                 }
-                __result = 100000;
+                catch (Exception ex)
+                {
+                    Log.Error("[Z-Levels] CostToMoveIntoCell_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                }
             }
         }
 
@@ -95,14 +102,22 @@ namespace ZLevels
             [HarmonyPrefix]
             public static bool Prefix()
             {
-                if (JobManagerPatches.manualDespawn == true)
+                try
                 {
-                    return false;
+                    if (JobManagerPatches.manualDespawn == true)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    return true;
+                    Log.Error("[Z-Levels] Pawn_JobTracker_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
                 }
+                return true;
             }
         }
 
@@ -113,14 +128,22 @@ namespace ZLevels
             [HarmonyPrefix]
             public static bool Prefix()
             {
-                if (JobManagerPatches.manualDespawn == true)
+                try
                 {
-                    return false;
+                    if (JobManagerPatches.manualDespawn == true)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    return true;
+                    Log.Error("[Z-Levels] Pawn_JobTracker_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
                 }
+                return true;
             }
         }
 
@@ -131,14 +154,22 @@ namespace ZLevels
             [HarmonyPrefix]
             public static bool Prefix()
             {
-                if (JobManagerPatches.manualDespawn == true)
+                try
                 {
-                    return false;
+                    if (JobManagerPatches.manualDespawn == true)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    return true;
+                    Log.Error("[Z-Levels] Pawn_ClearAllReservations_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
                 }
+                return true;
             }
         }
     }

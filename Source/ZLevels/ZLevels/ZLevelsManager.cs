@@ -29,6 +29,20 @@ namespace ZLevels
             this.CheckHotkeys();
         }
 
+        //public override void GameComponentTick()
+        //{
+        //    base.GameComponentTick();
+        //    if (Find.TickManager.TicksGame % 60 == 0)
+        //    {
+        //        foreach (var data in this.ZLevelsTracker)
+        //        {
+        //            foreach (var mapData in data.Value.ZLevels)
+        //            {
+        //                Log.Message(data.Key + " - " + mapData.Key + " - " + this.GetMapInfo(mapData.Value));
+        //            }
+        //        }
+        //    }
+        //}
         public void CheckHotkeys()
         {
             bool keyDownEvent = ZLevelsDefOf.ZL_switchToUpperMap.KeyDownEvent;
@@ -156,6 +170,7 @@ namespace ZLevels
 
         public int GetZIndexFor(Map map)
         {
+            this.ZLevelsFixer(map.Tile);
             var comp = map.GetComponent<MapComponentZLevel>();
             return comp.Z_LevelIndex;
         }
@@ -206,7 +221,7 @@ namespace ZLevels
         //            {
         //                ZLogger.Message(this.GetMapInfo(d.Value) + " - " + d.Value.weatherManager.curWeather
         //                    + " - " + d.Value.weatherManager.curWeatherAge + " - " + d.Value.weatherManager.lastWeather);
-        //                
+        //
         //            }
         //        }
         //        ZLogger.Message("========================");
@@ -683,6 +698,16 @@ namespace ZLevels
             { thingToTeleport.PositionHeld });
         }
 
+        public void ZLevelsFixer(int tile)
+        {
+            if (this.ZLevelsTracker[tile]?.ZLevels[0]?.listerThings == null)
+            {
+                var map = Find.WorldObjects.MapParents.Where(x => x.Tile == tile 
+                && x.HasMap && x.Map.IsPlayerHome).FirstOrDefault().Map;
+                this.ZLevelsTracker[tile].ZLevels[0] = map;
+            }
+        }
+
         //public void ZLevelsFixer(int tile)
         //{
         //    int num = 0;
@@ -884,11 +909,76 @@ namespace ZLevels
                     }
                 }
                 catch { };
+                var text = "You have created a new level! Congratulation! However, due to the fact that the " +
+                    "Z-Levels are in beta stage and have bugs, it is necessary to check if the information below " +
+                    "is correct. Check if the underground levels, normal player map and the upper levels " +
+                    "in which the pawns are located, are indicated correctly or if the list does not have null maps. " +
+                    "If this is not so, then this is a bug and Z-Levels were created incorrectly. " +
+                    "Let the Z-Levels developers know about it and attach your Hugslib log during " +
+                    "when the wrong map was created.\n" +
+                    "This window will be removed from the mod as soon as the Z-levels are stable. " +
+                    "Thank you for understanding.\n------------\n";
+
+                foreach (var map in this.GetAllMaps(mapToTeleport.Tile))
+                {
+                    if (map.mapPawns.AllPawns.Where(x => x.IsColonist).Count() == 0)
+                    {
+                        if (this.GetZIndexFor(map) < 0)
+                        {
+                            text += "Map - " + this.GetMapInfo(map) + " - Underground\n";
+                        }
+                        else if (this.GetZIndexFor(map) > 0)
+                        {
+                            text += "Map - " + this.GetMapInfo(map) + " - Upper level\n";
+                        }
+                        else
+                        {
+                            text += "Map - " + this.GetMapInfo(map) + " - Normal player map\n";
+                        }
+                    }
+                    else if (map != null)
+                    {
+                        foreach (var pawn in map.mapPawns.AllPawns.Where(x => x.IsColonist))
+                        {
+                            if (this.GetZIndexFor(map) < 0)
+                            {
+                                text += pawn + " - " + this.GetMapInfo(map) + " - Underground\n";
+                            }
+                            else if (this.GetZIndexFor(map) > 0)
+                            {
+                                text += pawn + " - " + this.GetMapInfo(map) + " - Upper level\n";
+                            }
+                            else
+                            {
+                                text += pawn + " - " + this.GetMapInfo(map) + " - Normal player map\n";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        text += "Null map - " + this.GetMapInfo(map) + " - Broken map, report the devs about it\n";
+                    }
+                }
+                Find.WindowStack.Add(new Dialog_MessageBox(text, "Close".Translate(),
+                null, null, null, null, false, null, null));
             }
 
             FloodFillerFog.FloodUnfog(pawnToTeleport.Position, mapToTeleport);
             AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
             { pawnToTeleport.PositionHeld });
+
+            //foreach (var map2 in Find.Maps)
+            //{
+            //    var comp2 = map2.GetComponent<MapComponentZLevel>();
+            //    if (this.ZLevelsTracker[map2.Tile] != null)
+            //    {
+            //        foreach (var d in this.ZLevelsTracker[map2.Tile].ZLevels)
+            //        {
+            //            Log.Message(map2 + ": " + d.Key + " - " + this.GetMapInfo(d.Value));
+            //        }
+            //    }
+            //}
+
         }
 
         public Map CreateLowerLevel(Map origin, IntVec3 playerStartSpot)
@@ -979,7 +1069,7 @@ namespace ZLevels
                         mapParent.ExtraGenStepDefs, null);
                 }
             }
-            catch 
+            catch
             {
                 newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef,
                     mapParent.ExtraGenStepDefs, null);
@@ -1102,14 +1192,51 @@ namespace ZLevels
         public override void LoadedGame()
         {
             base.LoadedGame();
-            foreach (var test in this.ZLevelsTracker)
+            try
             {
-                ZLogger.Message("Test: " + test);
-                foreach (var d in test.Value.ZLevels)
+                foreach (var test in this.ZLevelsTracker)
                 {
-                    ZLogger.Message("d: " + d);
+                    Log.Message("Z-Levels start");
+                    foreach (var d in test.Value.ZLevels)
+                    {
+                        if (d.Key < 0)
+                        {
+                            Log.Message("Registered map: " + this.GetMapInfo(d.Value) + " - Underground");
+                        }
+                        else if (d.Key > 0)
+                        {
+                            Log.Message("Registered map: " + this.GetMapInfo(d.Value) + " - Upper level");
+                        }
+                        else
+                        {
+                            Log.Message("Registered map: " + this.GetMapInfo(d.Value) + " - Normal player map");
+                        }
+                    }
                 }
             }
+            catch { };
+            try
+            {
+                foreach (var pawn in PawnsFinder.AllMaps)
+                {
+                    if (pawn.Spawned && pawn.Map != null)
+                    {
+                        if (this.GetZIndexFor(pawn.Map) < 0)
+                        {
+                            Log.Message("Registered map: " + this.GetMapInfo(pawn.Map) + " - Underground");
+                        }
+                        else if (this.GetZIndexFor(pawn.Map) > 0)
+                        {
+                            Log.Message("Registered map: " + this.GetMapInfo(pawn.Map) + " - Upper level");
+                        }
+                        else
+                        {
+                            Log.Message("Registered map: " + this.GetMapInfo(pawn.Map) + " - Normal player map");
+                        }
+                    }
+                }
+            }
+            catch { };
         }
 
         public override void ExposeData()

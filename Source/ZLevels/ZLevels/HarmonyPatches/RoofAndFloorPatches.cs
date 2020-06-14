@@ -41,50 +41,57 @@ namespace ZLevels
         {
             public static bool Prefix(TerrainGrid __instance, IntVec3 c, bool doLeavings, Map ___map)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                if (ZTracker.GetZIndexFor(___map) > 0)
+                try
                 {
-                    int num = ___map.cellIndices.CellToIndex(c);
-                    if (doLeavings)
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    if (ZTracker.GetZIndexFor(___map) > 0)
                     {
-                        GenLeaving.DoLeavingsFor(__instance.topGrid[num], c, ___map);
-                    }
-                    TerrainDef[] underGrid = Traverse.Create(__instance).Field("underGrid").GetValue<TerrainDef[]>();
-                    if (underGrid[num] != null)
-                    {
-                        __instance.topGrid[num] = underGrid[num];
-                        underGrid[num] = null;
-                        Traverse.Create(__instance).Method("DoTerrainChangedEffects", new object[]
+                        int num = ___map.cellIndices.CellToIndex(c);
+                        if (doLeavings)
                         {
-                            c
-                        }).GetValue();
-                    }
-                    if (c.GetTerrain(___map) == TerrainDefOf.Sand)
-                    {
-                        __instance.SetTerrain(c, ZLevelsDefOf.ZL_OutsideTerrain);
-                    }
-
-                    Map lowerMap = ZTracker.GetLowerLevel(___map.Tile, ___map);
-                    bool firstTime = false;
-                    if (lowerMap == null)
-                    {
-                        lowerMap = ZTracker.CreateLowerLevel(___map, c);
-                        firstTime = true;
-                    }
-
-                    var thingList = c.GetThingList(___map);
-                    if (thingList.Where(x => x is Blueprint || x is Frame).Count() == 0)
-                    {
-                        for (int i = thingList.Count - 1; i >= 0; i--)
+                            GenLeaving.DoLeavingsFor(__instance.topGrid[num], c, ___map);
+                        }
+                        TerrainDef[] underGrid = Traverse.Create(__instance).Field("underGrid").GetValue<TerrainDef[]>();
+                        if (underGrid[num] != null)
                         {
-                            if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
+                            __instance.topGrid[num] = underGrid[num];
+                            underGrid[num] = null;
+                            Traverse.Create(__instance).Method("DoTerrainChangedEffects", new object[]
                             {
-                                //Log.Message(thingList[i] + " going down 1");
-                                ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime, 10);
+                            c
+                            }).GetValue();
+                        }
+                        if (c.GetTerrain(___map) == TerrainDefOf.Sand)
+                        {
+                            __instance.SetTerrain(c, ZLevelsDefOf.ZL_OutsideTerrain);
+                        }
+
+                        Map lowerMap = ZTracker.GetLowerLevel(___map.Tile, ___map);
+                        bool firstTime = false;
+                        if (lowerMap == null)
+                        {
+                            lowerMap = ZTracker.CreateLowerLevel(___map, c);
+                            firstTime = true;
+                        }
+
+                        var thingList = c.GetThingList(___map);
+                        if (thingList.Where(x => x is Blueprint || x is Frame).Count() == 0)
+                        {
+                            for (int i = thingList.Count - 1; i >= 0; i--)
+                            {
+                                if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
+                                {
+                                    //Log.Message(thingList[i] + " going down 1");
+                                    ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime, 10);
+                                }
                             }
                         }
+                        return false;
                     }
-                    return false;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("[Z-Levels] DestroyedTerrain patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
                 }
                 return true;
             }
@@ -123,7 +130,10 @@ namespace ZLevels
                         }
                     }
                 }
-                catch { };
+                catch (Exception ex)
+                {
+                    Log.Error("[Z-Levels] Patch_SpawnSetup patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                }
             }
         }
 

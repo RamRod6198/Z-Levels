@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.Noise;
 using Verse.Sound;
 
 namespace ZLevels
@@ -30,6 +33,96 @@ namespace ZLevels
         public override void Tick()
         {
             base.Tick();
+            var upperMap = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
+            var lowerMap = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
+            if (upperMap != null && (this.upperTransmitter == null || !this.upperTransmitter.Spawned))
+            {
+                foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
+                {
+                    foreach (var t in pos.GetThingList(upperMap))
+                    {
+                        if (t.TryGetComp<CompPowerTransmitter>() != null)
+                        {
+                            upperTransmitter = t;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (lowerMap != null && (this.lowerTransmitter == null || !this.lowerTransmitter.Spawned))
+            {
+                foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
+                {
+                    foreach (var t in pos.GetThingList(lowerMap))
+                    {
+                        if (t.TryGetComp<CompPowerTransmitter>() != null)
+                        {
+                            lowerTransmitter = t;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (upperTransmitter != null && upperTransmitter.Spawned
+                && lowerTransmitter != null && lowerTransmitter.Spawned)
+            {
+                Log.Message("1 Stored energy: " + this.GetComp<CompPowerZTransmitter>().PowerNet.CurrentEnergyGainRate());
+            }
+            else if (upperTransmitter != null && upperTransmitter.Spawned
+                && (lowerTransmitter == null || !lowerTransmitter.Spawned))
+            {
+                //Log.Message(this + "2 Stored energy: " + this.GetComp<CompPowerZTransmitter>().PowerNet.CurrentEnergyGainRate());
+                //Log.Message(this + "2 Stored energy: " + this.GetComp<CompPowerZTransmitter>().PowerNet.CurrentStoredEnergy());
+                //Log.Message(upperTransmitter + "2 Stored energy: " + upperTransmitter.TryGetComp<CompPowerTransmitter>().PowerNet.CurrentEnergyGainRate());
+                //Log.Message(upperTransmitter + "2 Stored energy: " + upperTransmitter.TryGetComp<CompPowerTransmitter>().PowerNet.CurrentStoredEnergy());
+                var comp = upperTransmitter.TryGetComp<CompPowerTransmitter>();
+                var baseComp = this.GetComp<CompPowerZTransmitter>();
+
+                //var powerComp = (CompPowerZTransmitter)comp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
+                //if (powerComp == null)
+                //{
+                //    powerComp = new CompPowerZTransmitter();
+                //    powerComp.parent = this;
+                //    powerComp.Initialize(new CompProperties_PowerZTransmitter
+                //    {
+                //        storedEnergyMax = 1000f,
+                //        efficiency = 0.7f
+                //    });
+                //    if (baseComp.powerOutputInt > 0)
+                //    {
+                //        Log.Message("baseComp.powerOutputInt: " + baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick);
+                //        powerComp.powerOutputInt = baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
+                //    }
+                //    powerComp.PowerOn = true;
+                //    comp.PowerNet.powerComps.Add(powerComp);
+                //}
+                //else
+                //{
+                //    Log.Message("baseComp.powerOutputInt: " + baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick);
+                //    powerComp.powerOutputInt = baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
+                //    powerComp.PowerOn = true;
+                //}
+
+                var orig1 = baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
+                var orig2 = comp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
+                var newValue = (orig1 + orig2) / 2;
+                Log.Message("Map 1: orig value: " + orig1 + " new value: " + newValue);
+                Log.Message("Map 2: orig value: " + orig2 + " new value: " + newValue);
+                //this.PowerNetTest(this.GetComp<CompPowerZTransmitter>().PowerNet);
+                //Log.Message("Map: " + this.GetComp<CompPowerZTransmitter>().PowerNet.Map);
+                //if (Find.TickManager.TicksGame % 60 == 0)
+                //{
+                //    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+                //}
+
+            }
+            else if ((upperTransmitter == null || !upperTransmitter.Spawned)
+                && lowerTransmitter != null && lowerTransmitter.Spawned)
+            {
+                Log.Message("3 Stored energy: " + this.GetComp<CompPowerZTransmitter>().PowerNet.CurrentEnergyGainRate());
+            }
+
             if (this.ticksToExplode > 0)
             {
                 if (this.wickSustainer == null)
@@ -53,14 +146,10 @@ namespace ZLevels
 
         public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
-            Log.Message("Building_PowerTransmitter : Building - PostApplyDamage - base.PostApplyDamage(dinfo, totalDamageDealt); - 18", true);
             base.PostApplyDamage(dinfo, totalDamageDealt);
-            Log.Message("Building_PowerTransmitter : Building - PostApplyDamage - if (!base.Destroyed && this.ticksToExplode == 0 && dinfo.Def == DamageDefOf.Flame && Rand.Value < 0.05f && base.GetComp<CompPowerBattery>().StoredEnergy > 500f) - 19", true);
             if (!base.Destroyed && this.ticksToExplode == 0 && dinfo.Def == DamageDefOf.Flame && Rand.Value < 0.05f && base.GetComp<CompPowerBattery>().StoredEnergy > 500f)
             {
-                Log.Message("Building_PowerTransmitter : Building - PostApplyDamage - this.ticksToExplode = Rand.Range(70, 150); - 20", true);
                 this.ticksToExplode = Rand.Range(70, 150);
-                Log.Message("Building_PowerTransmitter : Building - PostApplyDamage - this.StartWickSustainer(); - 21", true);
                 this.StartWickSustainer();
             }
         }
@@ -68,24 +157,18 @@ namespace ZLevels
         private void StartWickSustainer()
         {
             SoundInfo info = SoundInfo.InMap(this, MaintenanceType.PerTick);
-            Log.Message("Building_PowerTransmitter : Building - StartWickSustainer - this.wickSustainer = SoundDefOf.HissSmall.TrySpawnSustainer(info); - 23", true);
             this.wickSustainer = SoundDefOf.HissSmall.TrySpawnSustainer(info);
         }
 
         private int ticksToExplode;
 
+        public ZLevelsManager ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+
         private Sustainer wickSustainer;
 
-        private static readonly Vector2 BarSize = new Vector2(1.3f, 0.4f);
+        Thing upperTransmitter;
 
-        private const float MinEnergyToExplode = 500f;
+        Thing lowerTransmitter;
 
-        private const float EnergyToLoseWhenExplode = 400f;
-
-        private const float ExplodeChancePerDamage = 0.05f;
-
-        private static readonly Material BatteryBarFilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.9f, 0.85f, 0.2f), false);
-
-        private static readonly Material BatteryBarUnfilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.3f, 0.3f, 0.3f), false);
-    }
+	}
 }

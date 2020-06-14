@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
+using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
 using Verse.AI;
+
 
 namespace ZLevels
 {
@@ -67,6 +69,8 @@ namespace ZLevels
             }
             base.Destroy(mode);
         }
+
+        [SyncMethod(SyncContext.None)]
         public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
         {
             var text = "GoDown".Translate();

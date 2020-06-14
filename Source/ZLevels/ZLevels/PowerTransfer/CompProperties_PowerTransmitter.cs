@@ -4,11 +4,11 @@ using Verse;
 
 namespace ZLevels
 {
-	public class CompProperties_PowerTransmitterTest : CompProperties_Power
+	public class CompProperties_PowerZTransmitter : CompProperties_Power
 	{
-		public CompProperties_PowerTransmitterTest()
+		public CompProperties_PowerZTransmitter()
 		{
-			this.compClass = typeof(CompPowerTransmitterTest);
+			this.compClass = typeof(CompPowerZTransmitter);
 		}
 
 		public float storedEnergyMax = 1000f;
@@ -16,3 +16,4 @@ namespace ZLevels
 		public float efficiency = 0.7f;
 	}
 }
+

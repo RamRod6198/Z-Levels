@@ -297,7 +297,6 @@ namespace ZLevels
             }
         }
 
-
         [HarmonyPatch(typeof(JobGiver_GetJoy), "TryGiveJob")]
         public class JobGiver_GetJoyPatch
         {
@@ -662,7 +661,6 @@ namespace ZLevels
                 }
             }
 
-
             private static Job TryGiveJob(Pawn pawn, RestCategory minCategory, float maxLevelPercentage = 1f)
             {
                 Need_Rest rest = pawn.needs.rest;
@@ -705,7 +703,6 @@ namespace ZLevels
                 return CellFinder.RandomClosewalkCellNearNotForbidden(pawn.Position, map, 4, pawn);
             }
         }
-
 
         [HarmonyPatch(typeof(JobGiver_Work), "TryIssueJobPackage")]
         public class TryIssueJobPackagePatch
@@ -1165,7 +1162,6 @@ namespace ZLevels
                     pawn, blueprint, true
                 });
 
-
                 Job job2 = method.GetValue<Job>();
                 if (job2 == null)
                 {
@@ -1316,7 +1312,7 @@ namespace ZLevels
                                             allZones[(Zone_Stockpile)zone] = map;
                                         }
                                     }
-
+                                    
                                     List<Zone_Stockpile> copiedZones = new List<Zone_Stockpile>();
                                     IntVec3 newPosition2 = IntVec3.Invalid;
                                     foreach (Map map in allMaps)
@@ -1330,14 +1326,14 @@ namespace ZLevels
                                                 foreach (IntVec3 intVec in zone.Key.cells)
                                                 {
                                                     var newPosition = (intVec - zone.Key.Position) + pawn.Position;
-                                                    if (newPosition.GetZone(pawn.Map) == null)
+                                                    if (newPosition.GetZone(pawn.Map) == null && newPosition.GetSlotGroup(pawn.Map) == null)
                                                     {
                                                         newZone.cells.Add(newPosition);
                                                     }
                                                     else if (CellFinder.TryFindRandomCellNear
                                                         (newPosition, map, 1000, (IntVec3 c) => c.Walkable(map)
-                                                        && c.GetZone(map) == null && GenGrid.InBounds(c, map)
-                                                        , out newPosition2))
+                                                        && c.GetZone(map) == null && c.GetSlotGroup(pawn.Map) == null 
+                                                        && GenGrid.InBounds(c, map), out newPosition2))
                                                     {
                                                         newZone.cells.Add(newPosition2);
                                                     }
@@ -1349,7 +1345,7 @@ namespace ZLevels
                                             }
                                         }
                                     }
-
+                                    
                                     foreach (var t in pawn.Map.listerThings.AllThings.Where(x => x.def.EverHaulable))
                                     {
                                         pawn.Map.listerHaulables.RecalcAllInCell(t.Position);
