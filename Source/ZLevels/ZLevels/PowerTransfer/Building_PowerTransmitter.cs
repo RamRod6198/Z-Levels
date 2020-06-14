@@ -33,7 +33,9 @@ namespace ZLevels
         public override void Tick()
         {
             base.Tick();
-            if (this.GetComp<CompPowerZTransmitter>().PowerNet != null)
+            var baseComp = this.GetComp<CompPowerZTransmitter>();
+            if (baseComp != null && baseComp.PowerNet.powerComps
+                .Where(x => x is CompPowerZTransmitter comp && comp.parent != this).Count() == 0)
             {
                 var upperMap = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
                 var lowerMap = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
@@ -71,7 +73,6 @@ namespace ZLevels
                 {
                     var upperComp = upperTransmitter.TryGetComp<CompPowerTransmitter>();
                     var lowerComp = lowerTransmitter.TryGetComp<CompPowerTransmitter>();
-                    var baseComp = this.GetComp<CompPowerZTransmitter>();
 
                     var upperPowerComp = (CompPowerZTransmitter)upperComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
                     if (upperPowerComp == null)
@@ -121,7 +122,6 @@ namespace ZLevels
                     && (lowerTransmitter == null || !lowerTransmitter.Spawned))
                 {
                     var comp = upperTransmitter.TryGetComp<CompPowerTransmitter>();
-                    var baseComp = this.GetComp<CompPowerZTransmitter>();
 
                     var powerComp = (CompPowerZTransmitter)comp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
                     if (powerComp == null)
@@ -151,7 +151,6 @@ namespace ZLevels
                     && lowerTransmitter != null && lowerTransmitter.Spawned)
                 {
                     var comp = lowerTransmitter.TryGetComp<CompPowerTransmitter>();
-                    var baseComp = this.GetComp<CompPowerZTransmitter>();
 
                     var powerComp = (CompPowerZTransmitter)comp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
                     if (powerComp == null)
