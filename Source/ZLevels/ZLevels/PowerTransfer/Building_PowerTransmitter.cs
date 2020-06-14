@@ -67,7 +67,53 @@ namespace ZLevels
             if (upperTransmitter != null && upperTransmitter.Spawned
                 && lowerTransmitter != null && lowerTransmitter.Spawned)
             {
-                Log.Message("1 Stored energy: " + this.GetComp<CompPowerZTransmitter>().PowerNet.CurrentEnergyGainRate());
+                var upperComp = upperTransmitter.TryGetComp<CompPowerTransmitter>();
+                var lowerComp = lowerTransmitter.TryGetComp<CompPowerTransmitter>();
+                var baseComp = this.GetComp<CompPowerZTransmitter>();
+
+                var upperPowerComp = (CompPowerZTransmitter)upperComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
+                if (upperPowerComp == null)
+                {
+                    upperPowerComp = new CompPowerZTransmitter();
+                    upperPowerComp.parent = this;
+                    upperPowerComp.Initialize(new CompProperties_PowerZTransmitter
+                    {
+                        storedEnergyMax = 1000f,
+                        efficiency = 0.7f
+                    });
+                    upperPowerComp.powerOutputInt = 0;
+                    upperPowerComp.PowerOn = true;
+                    upperComp.PowerNet.powerComps.Add(upperPowerComp);
+                }
+
+                var lowerPowerComp = (CompPowerZTransmitter)lowerComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
+                if (lowerPowerComp == null)
+                {
+                    lowerPowerComp = new CompPowerZTransmitter();
+                    lowerPowerComp.parent = this;
+                    lowerPowerComp.Initialize(new CompProperties_PowerZTransmitter
+                    {
+                        storedEnergyMax = 1000f,
+                        efficiency = 0.7f
+                    });
+                    lowerPowerComp.powerOutputInt = 0;
+                    lowerPowerComp.PowerOn = true;
+                    lowerComp.PowerNet.powerComps.Add(lowerPowerComp);
+                }
+
+                var origBase = (baseComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                    - baseComp.powerOutputInt;
+
+                var origUpper = (upperComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                    - upperPowerComp.powerOutputInt;
+
+                var origLower = (lowerComp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick)
+                    - lowerPowerComp.powerOutputInt;
+
+                var newValue = (origBase + origUpper + origLower) / 3;
+                baseComp.powerOutputInt = newValue - origBase;
+                upperPowerComp.powerOutputInt = newValue - origUpper;
+                lowerPowerComp.powerOutputInt = newValue - origLower;
             }
             else if (upperTransmitter != null && upperTransmitter.Spawned
                 && (lowerTransmitter == null || !lowerTransmitter.Spawned))
