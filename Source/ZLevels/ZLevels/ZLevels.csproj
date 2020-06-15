@@ -338,6 +338,8 @@
     <Compile Include="PowerTransfer\CompPowerZTransmitter.cs" />
     <Compile Include="PowerTransfer\CompProperties_PowerZTransmitter.cs" />
     <Compile Include="PowerTransfer\Building_PowerTransmitter.cs" />
+    <Compile Include="PowerTransfer\PowerData.cs" />
+    <Compile Include="PowerTransfer\PowerNetsTick_Patch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZLevelData.cs" />
     <Compile Include="ZLevelsDefOf.cs" />
