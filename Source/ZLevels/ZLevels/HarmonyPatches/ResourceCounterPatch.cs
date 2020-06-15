@@ -103,6 +103,10 @@ namespace ZLevels
 
             public static bool IfInResourceCounter(bool __result, Event ev, Designator_Build instance, ThingDef thingDef2)
             {
+                if (DebugSettings.godMode)
+                {
+                    return true;
+                }
                 BuildableDef entDef = Traverse.Create(instance).Field("entDef").GetValue<BuildableDef>();
                 ThingDef thingDef = entDef as ThingDef;
                 if (thingDef2.IsStuff && thingDef2.stuffProps.CanMake(thingDef) 

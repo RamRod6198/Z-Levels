@@ -69,5 +69,6 @@ namespace ZLevels
             yield break;
         }
 
+        public Thing transmitter;
     }
 }
