@@ -49,8 +49,6 @@
 		<comps>
 			<li Class="ZLevels.CompProperties_PowerZTransmitter">
 				<transmitsPower>true</transmitsPower>
-				<storedEnergyMax>1000</storedEnergyMax>
-				<efficiency>0.7</efficiency>
 				<shortCircuitInRain>true</shortCircuitInRain>
 			</li>
 		</comps>

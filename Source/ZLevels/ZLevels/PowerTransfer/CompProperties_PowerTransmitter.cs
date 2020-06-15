@@ -10,10 +10,6 @@ namespace ZLevels
 		{
 			this.compClass = typeof(CompPowerZTransmitter);
 		}
-
-		public float storedEnergyMax = 1000f;
-
-		public float efficiency = 0.7f;
 	}
 }
 
