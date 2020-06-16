@@ -185,20 +185,20 @@ namespace ZLevels
                                     }
                                 }
                             }
-                            if (building_Bed == null)
-                            {
-                                Messages.Message("CannotCapture".Translate() + ": " + "NoPrisonerBed".Translate(), victim, MessageTypeDefOf.RejectInput, false);
-                                return;
-                            }
-                            Job job = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
-                            job.count = 1;
-                            pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-                            PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Capturing, KnowledgeAmount.Total);
-                            if (victim.Faction != null && victim.Faction != Faction.OfPlayer && !victim.Faction.def.hidden && !victim.Faction.HostileTo(Faction.OfPlayer) && !victim.IsPrisonerOfColony)
-                            {
-                                Messages.Message("MessageCapturingWillAngerFaction".Translate(victim.Named("PAWN"))
-                                    .AdjustedFor(victim, "PAWN", true), victim, MessageTypeDefOf.CautionInput, false);
-                            }
+                        }
+                        if (building_Bed == null)
+                        {
+                            Messages.Message("CannotCapture".Translate() + ": " + "NoPrisonerBed".Translate(), victim, MessageTypeDefOf.RejectInput, false);
+                            return;
+                        }
+                        Job job = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
+                        job.count = 1;
+                        pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+                        PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Capturing, KnowledgeAmount.Total);
+                        if (victim.Faction != null && victim.Faction != Faction.OfPlayer && !victim.Faction.def.hidden && !victim.Faction.HostileTo(Faction.OfPlayer) && !victim.IsPrisonerOfColony)
+                        {
+                            Messages.Message("MessageCapturingWillAngerFaction".Translate(victim.Named("PAWN"))
+                                .AdjustedFor(victim, "PAWN", true), victim, MessageTypeDefOf.CautionInput, false);
                         }
                     }, MenuOptionPriority.RescueOrCapture, null, victim, 0f, null, null), pawn, victim, "ReservedBy");
                 return floatOption;
