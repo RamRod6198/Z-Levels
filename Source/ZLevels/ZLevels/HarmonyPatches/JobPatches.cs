@@ -307,10 +307,10 @@ namespace ZLevels
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                     ZLogger.Message(pawn + " Original joy result: " + __result);
-                    if (pawn.def.race.Humanlike && (__result == null || __result.def == JobDefOf.Meditate
+                    if (pawn.def.race.Humanlike && (__result == null || __result?.def?.defName == "Meditate"
                         || __result.def.defName == "Skygaze") && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                     {
-                        if (__result?.def == JobDefOf.Meditate || __result?.def?.defName == "Skygaze")
+                        if (__result?.def?.defName == "Meditate" || __result?.def?.defName == "Skygaze")
                         {
                             if (Rand.Chance(0.1f))
                             {
@@ -422,7 +422,7 @@ namespace ZLevels
                                     bool CanDoDuringMedicalRest = Traverse.Create(__instance).Field("CanDoDuringMedicalRest").GetValue<bool>();
                                     DefMap<JoyGiverDef, float> joyGiverChances = Traverse.Create(__instance).Field("joyGiverChances").GetValue<DefMap<JoyGiverDef, float>>();
                                     result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, joyGiverChances);
-                                    if (result != null && result.def != JobDefOf.Meditate
+                                    if (result != null && result?.def?.defName == "Meditate"
                                         && result.def.defName != "Skygaze")
                                     {
                                         ZLogger.Message(pawn + " gets joy job " + result);
