@@ -13,6 +13,11 @@ namespace ZLevels
         public IntVec3 PlayerStartSpot = IntVec3.Invalid;
 
         public bool hasCaves = false;
+
+        public int Z_LevelIndex = 0;
+
+        public bool finishedGeneration = true;
+
         public List<InfestationData> TotalInfestations;
         public MapParent_ZLevel()
         {

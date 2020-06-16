@@ -25,18 +25,32 @@ namespace ZLevels
             [HarmonyPostfix]
             private static void MapBiomePostfix(Map __instance, ref BiomeDef __result)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                if (__instance.ParentHolder is MapParent_ZLevel)
+                if (__instance.ParentHolder is MapParent_ZLevel parent)
                 {
                     try
                     {
-                        if (ZTracker.GetZIndexFor(__instance) < 0)
+                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        if (parent.finishedGeneration == true)
                         {
-                            __result = ZLevelsDefOf.ZL_UndegroundBiome;
+                            if (ZTracker.GetZIndexFor(__instance) < 0)
+                            {
+                                __result = ZLevelsDefOf.ZL_UndegroundBiome;
+                            }
+                            else if (ZTracker.GetZIndexFor(__instance) > 0)
+                            {
+                                __result = ZLevelsDefOf.ZL_UpperBiome;
+                            }
                         }
-                        else if (ZTracker.GetZIndexFor(__instance) > 0)
+                        else
                         {
-                            __result = ZLevelsDefOf.ZL_UpperBiome;
+                            if (parent.Z_LevelIndex < 0)
+                            {
+                                __result = ZLevelsDefOf.ZL_UndegroundBiome;
+                            }
+                            else if (parent.Z_LevelIndex > 0)
+                            {
+                                __result = ZLevelsDefOf.ZL_UpperBiome;
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -44,7 +58,6 @@ namespace ZLevels
                         Log.Error("[Z-Levels] MapBiomePostfix patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
                     };
                 }
-                ZLogger.Message(ZTracker.GetMapInfo(__instance) + " has " + __result + " biome");
             }
         }
 
