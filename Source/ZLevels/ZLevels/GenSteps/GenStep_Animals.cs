@@ -53,7 +53,7 @@ namespace ZLevels
 					}
 					return;
 				}
-				ZLogger.Error("Too many iterations.");
+				Log.Error("Too many iterations.");
 			}
 		}
 	}

@@ -32,15 +32,15 @@ namespace ZLevels
                         | BindingFlags.GetField), null, new HarmonyMethod(method), null);
                     ZLogger.Message("Patch: " + type);
                 }
-        
+
                 catch (Exception ex)
                 {
                     ZLogger.Message("Error patching: " + ex);
                 }
             }
-        
+
         }
-        
+
         public static void LogScanner(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
         {
             if (__result != null && pawn.def.race.Humanlike)
@@ -48,14 +48,14 @@ namespace ZLevels
                 ZLogger.Message(__instance + " - " + __result + " - " + pawn, true);
             }
         }
-        
+
         public static void LogScanner2(ThingRequest __result, WorkGiver_Scanner __instance)
         {
             ZLogger.Message(__instance.def + " - __result: " + __result);
             //throw new Exception("TEST");
         }
-        
-        
+
+
         [HarmonyPatch(typeof(JobQueue), "EnqueueFirst")]
         internal static class Patch_JobQueue
         {
@@ -64,7 +64,7 @@ namespace ZLevels
                 ZLogger.Message("Switching to " + j, true);
             }
         }
-        
+
         [HarmonyPatch(typeof(JobQueue), "EnqueueLast")]
         internal static class Patch_JobQueue2
         {
@@ -73,7 +73,7 @@ namespace ZLevels
                 ZLogger.Message("Switching to " + j, true);
             }
         }
-        
+
         [HarmonyPatch(typeof(JobGiver_Work), "GiverTryGiveJobPrioritized")]
         internal static class Patch_JobGiver_Work
         {
@@ -82,7 +82,7 @@ namespace ZLevels
                 ZLogger.Message("Switching to " + pawn, true);
             }
         }
-    
+
         [HarmonyPatch(typeof(JobGiver_GetFood), "TryGiveJob")]
         public class JobGiver_GetFoodPatch
         {
@@ -233,7 +233,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    ZLogger.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+                    Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
                 }
             }
             private static Job TryGiveJob(Pawn pawn, bool forceScanWholeMap, float maxLevelPercentage, HungerCategory minCategory)
@@ -310,7 +310,7 @@ namespace ZLevels
                     if (pawn.def.race.Humanlike && (__result == null || __result.def == JobDefOf.Meditate
                         || __result.def.defName == "Skygaze") && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                     {
-                        if (__result.def == JobDefOf.Meditate || __result.def.defName == "Skygaze")
+                        if (__result?.def == JobDefOf.Meditate || __result?.def?.defName == "Skygaze")
                         {
                             if (Rand.Chance(0.1f))
                             {
@@ -456,7 +456,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    ZLogger.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+                    Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
                 }
             }
             public static Job TryGiveJob(Pawn pawn, bool CanDoDuringMedicalRest, DefMap<JoyGiverDef, float> joyGiverChances)
@@ -661,7 +661,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    ZLogger.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+                    Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
                 }
             }
 
@@ -878,7 +878,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    ZLogger.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+                    Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
                 }
             }
 
@@ -1316,7 +1316,7 @@ namespace ZLevels
                                             allZones[(Zone_Stockpile)zone] = map;
                                         }
                                     }
-                                    
+
                                     List<Zone_Stockpile> copiedZones = new List<Zone_Stockpile>();
                                     IntVec3 newPosition2 = IntVec3.Invalid;
                                     foreach (Map map in allMaps)
@@ -1336,7 +1336,7 @@ namespace ZLevels
                                                     }
                                                     else if (CellFinder.TryFindRandomCellNear
                                                         (newPosition, map, 1000, (IntVec3 c) => c.Walkable(map)
-                                                        && c.GetZone(map) == null && c.GetSlotGroup(pawn.Map) == null 
+                                                        && c.GetZone(map) == null && c.GetSlotGroup(pawn.Map) == null
                                                         && GenGrid.InBounds(c, map), out newPosition2))
                                                     {
                                                         newZone.cells.Add(newPosition2);
@@ -1349,7 +1349,7 @@ namespace ZLevels
                                             }
                                         }
                                     }
-                                    
+
                                     foreach (var t in pawn.Map.listerThings.AllThings.Where(x => x.def.EverHaulable))
                                     {
                                         pawn.Map.listerHaulables.RecalcAllInCell(t.Position);
@@ -1527,7 +1527,7 @@ namespace ZLevels
                     }
                     catch (Exception ex)
                     {
-                        ZLogger.Error(string.Concat(pawn, " threw exception in WorkGiver ", workGiver.def.defName, ": ", ex.ToString()));
+                        Log.Error(string.Concat(pawn, " threw exception in WorkGiver ", workGiver.def.defName, ": ", ex.ToString()));
                     }
                     finally
                     {
@@ -1618,7 +1618,7 @@ namespace ZLevels
                             job3.workGiverDef = scannerWhoProvidedTarget.def;
                             return new ThinkResult(job3, instance, list[j].def.tagToGive);
                         }
-                        //ZLogger.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
+                        //Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
                     }
                     num = workGiver.def.priorityInType;
                 }
@@ -1703,7 +1703,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    ZLogger.Error(string.Concat(pawn, " threw exception in GiverTryGiveJobTargeted on WorkGiver ", giver.def.defName, ": ", ex.ToString()));
+                    Log.Error(string.Concat(pawn, " threw exception in GiverTryGiveJobTargeted on WorkGiver ", giver.def.defName, ": ", ex.ToString()));
                 }
                 return null;
             }

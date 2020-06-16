@@ -180,7 +180,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    //ZLogger.Error("Error in Patch_SetRoof: " + ex);
+                    //Log.Error("Error in Patch_SetRoof: " + ex);
                 };
             }
         }
@@ -205,7 +205,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    ZLogger.Error("Error in Patch_SetTerrain: " + ex);
+                    Log.Error("Error in Patch_SetTerrain: " + ex);
                 };
             }
         }

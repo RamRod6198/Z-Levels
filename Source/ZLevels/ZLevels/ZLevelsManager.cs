@@ -163,7 +163,7 @@ namespace ZLevels
             }
             catch
             {
-                ZLogger.Error("GetAllMaps returned null on " + tile);
+                Log.Error("GetAllMaps returned null on " + tile);
                 return null;
             }
         }

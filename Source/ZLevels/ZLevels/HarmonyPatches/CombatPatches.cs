@@ -46,7 +46,7 @@
 //			Verb verb = searcher.CurrentEffectiveVerb;
 //			if (verb == null)
 //			{
-//				ZLogger.Error("BestAttackTarget with " + searcher.ToStringSafe<IAttackTargetSearcher>() + " who has no attack verb.", false);
+//				Log.Error("BestAttackTarget with " + searcher.ToStringSafe<IAttackTargetSearcher>() + " who has no attack verb.", false);
 //				return null;
 //			}
 //			bool onlyTargetMachines = verb.IsEMP();
@@ -567,7 +567,7 @@
 //			Verb currentEffectiveVerb = searcher.CurrentEffectiveVerb;
 //			if (currentEffectiveVerb == null)
 //			{
-//				ZLogger.Error("BestShootTargetFromCurrentPosition with " + searcher.ToStringSafe<IAttackTargetSearcher>() + " who has no attack verb.", false);
+//				Log.Error("BestShootTargetFromCurrentPosition with " + searcher.ToStringSafe<IAttackTargetSearcher>() + " who has no attack verb.", false);
 //				return null;
 //			}
 //			return CombatPatches.BestAttackTarget(searcher, flags, validator, Mathf.Max(minDistance, currentEffectiveVerb.verbProps.minRange), Mathf.Min(maxDistance, currentEffectiveVerb.verbProps.range), default(IntVec3), float.MaxValue, false, false);

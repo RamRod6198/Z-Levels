@@ -37,7 +37,7 @@ namespace ZLevels
                 }
                 else if (mapUpper == this.Map)
                 {
-                    ZLogger.Error("There was a mismatch of ZLevels indices. This is a serious error, report it to the mod developers");
+                    Log.Error("There was a mismatch of ZLevels indices. This is a serious error, report it to the mod developers");
                     foreach (var map2 in ZTracker.GetAllMaps(this.Map.Tile))
                     {
                         ZLogger.Message("Index: " + ZTracker.GetMapInfo(map2));

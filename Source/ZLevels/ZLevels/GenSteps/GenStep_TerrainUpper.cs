@@ -88,7 +88,7 @@ namespace ZLevels
 			}
 			if (!GenStep_TerrainUpper.debug_WarnedMissingTerrain)
 			{
-				ZLogger.Error(string.Concat(new object[]
+				Log.Error(string.Concat(new object[]
 				{
 					"No terrain found in biome ",
 					map.Biome.defName,

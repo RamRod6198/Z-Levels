@@ -46,7 +46,7 @@ namespace ZLevels
                                                    map.Biome.CommonalityOfAnimal(def) / def.wildGroupSize.Average);
                         if (pawnKindDef == null)
                         {
-                            ZLogger.Error("No spawnable animals right now.");
+                            Log.Error("No spawnable animals right now.");
                             result = false;
                         }
                         else
