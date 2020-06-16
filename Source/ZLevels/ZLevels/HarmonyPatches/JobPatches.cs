@@ -48,7 +48,7 @@ namespace ZLevels
         //        ZLogger.Message(__instance + " - " + __result + " - " + pawn, true);
         //    }
         //}
-
+        //
         //public static void LogScanner2(ThingRequest __result, WorkGiver_Scanner __instance)
         //{
         //    ZLogger.Message(__instance.def + " - __result: " + __result);
@@ -64,7 +64,7 @@ namespace ZLevels
         //        ZLogger.Message("Switching to " + j, true);
         //    }
         //}
-
+        //
         //[HarmonyPatch(typeof(JobQueue), "EnqueueLast")]
         //internal static class Patch_JobQueue2
         //{
@@ -73,7 +73,7 @@ namespace ZLevels
         //        ZLogger.Message("Switching to " + j, true);
         //    }
         //}
-        //
+        
         //[HarmonyPatch(typeof(JobGiver_Work), "GiverTryGiveJobPrioritized")]
         //internal static class Patch_JobGiver_Work
         //{
@@ -554,11 +554,11 @@ namespace ZLevels
                         {
                             ZTracker.jobTracker[pawn] = new JobTracker();
                         }
-                        if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
-                        // minimal job interval check per pawn is 200 ticks
-                        {
-                            return;
-                        }
+                        //if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
+                        //// minimal job interval check per pawn is 200 ticks
+                        //{
+                        //    return;
+                        //}
                         Job result;
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
@@ -568,10 +568,10 @@ namespace ZLevels
                         {
                             if (otherMap != oldMap)
                             {
-                                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
-                                {
-                                    return;
-                                }
+                                //if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
+                                //{
+                                //    return;
+                                //}
                                 ZLogger.Message("Searching rest job for " + pawn);
                                 var stairs = new List<Thing>();
 
@@ -604,11 +604,11 @@ namespace ZLevels
                                         ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
                                     }
                                 }
-                                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
-                                // minimal job interval check per pawn is 200 ticks
-                                {
-                                    return;
-                                }
+                                //if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
+                                //// minimal job interval check per pawn is 200 ticks
+                                //{
+                                //    return;
+                                //}
 
                                 if (stairs != null && stairs.Count() > 0)
                                 {

@@ -509,51 +509,55 @@ namespace ZLevels
                 if (this.jobTracker.ContainsKey(pawn) && this.jobTracker[pawn].activeJobs?.Count() > 0)
                 {
 
-                    //try
-                    //{
-                    //    foreach (var d in this.jobTracker)
-                    //    {
-                    //        foreach (var t in d.Value.activeJobs)
-                    //        {
-                    //            ZLogger.Message("Active jobs 1: " + d.Key + " - " + t);
-                    //        }
-                    //        foreach (var t in d.Key.jobs.jobQueue)
-                    //        {
-                    //            ZLogger.Message("Active jobQueue 1: " + d.Key + " - " + t.job);
-                    //        }
-                    //        ZLogger.Message("========================");
-                    //    }
-                    //}
-                    //catch { }
+                    try
+                    {
+                        foreach (var d in this.jobTracker)
+                        {
+                            foreach (var t in d.Value.activeJobs)
+                            {
+                                ZLogger.Message("Active jobs 1: " + d.Key + " - " + t);
+                            }
+                            foreach (var t in d.Key.jobs.jobQueue)
+                            {
+                                ZLogger.Message("Active jobQueue 1: " + d.Key + " - " + t.job);
+                            }
+                            ZLogger.Message("========================");
+                        }
+                    }
+                    catch { }
 
                     Job job = this.jobTracker[pawn].activeJobs[0];
                     if (job?.def != null)
                     {
-                        ZLogger.Message(pawn + " taking job " + job + " in " + this.GetMapInfo(pawn.Map));
                         if (job == this.jobTracker[pawn].mainJob)
                         {
                             if (pawn?.carryTracker?.CarriedThing != null)
                             {
-                                //ZLogger.Message("this.jobTracker[pawn].mainJob: " + this.jobTracker[pawn].mainJob.targetB.Thing);
-                                //ZLogger.Message("pawn?.carryTracker?.CarriedThing: " + pawn?.carryTracker?.CarriedThing);
+                                ZLogger.Message("this.jobTracker[pawn].mainJob: " + this.jobTracker[pawn].mainJob.targetB.Thing);
+                                ZLogger.Message("pawn?.carryTracker?.CarriedThing: " + pawn?.carryTracker?.CarriedThing);
                                 Thing newThing;
                                 pawn.carryTracker.TryDropCarriedThing
                                 (pawn.Position, ThingPlaceMode.Direct, out newThing);
-                                //ZLogger.Message("newThing: " + newThing);
-                                //ZLogger.Message("this.jobTracker[pawn].mainJob: " +
-                                //    this.jobTracker[pawn].mainJob.targetB.Thing);
-                                //ZLogger.Message("Same things: "
-                                //    + (newThing == this.jobTracker[pawn].mainJob.targetB.Thing).ToString());
+                                ZLogger.Message("newThing: " + newThing);
+                                ZLogger.Message("this.jobTracker[pawn].mainJob: " +
+                                    this.jobTracker[pawn].mainJob.targetB.Thing);
+                                ZLogger.Message("Same things: "
+                                    + (newThing == this.jobTracker[pawn].mainJob.targetB.Thing).ToString());
                             }
                             if (job.TryMakePreToilReservations(pawn, false))
                             {
-                                pawn.jobs.jobQueue.EnqueueLast(this.jobTracker[pawn].mainJob);
+                                ZLogger.Message(pawn + " taking job " + job + " in " + this.GetMapInfo(pawn.Map));
+                                pawn.jobs.jobQueue.EnqueueFirst(this.jobTracker[pawn].mainJob);
                             }
-                            //ZLogger.Message("pawn.jobs.jobQueue.EnqueueFirst: " + job);
+                            else
+                            {
+                                ZLogger.Message(pawn + " failed " + job);
+                            }
                         }
                         else
                         {
-                            pawn.jobs.jobQueue.EnqueueLast(job);
+                            ZLogger.Message(pawn + " taking job " + job + " in " + this.GetMapInfo(pawn.Map));
+                            pawn.jobs.jobQueue.EnqueueFirst(job);
                         }
                         this.jobTracker[pawn].activeJobs.RemoveAt(0);
                     }
@@ -563,22 +567,22 @@ namespace ZLevels
                         this.ResetJobs(pawn);
                         //Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
                     }
-                    //try
-                    //{
-                    //    foreach (var d in this.jobTracker)
-                    //    {
-                    //        foreach (var t in d.Value.activeJobs)
-                    //        {
-                    //            ZLogger.Message("Active jobs 2: " + d.Key + " - " + t);
-                    //        }
-                    //        foreach (var t in d.Key.jobs.jobQueue)
-                    //        {
-                    //            ZLogger.Message("Active jobQueue 2: " + d.Key + " - " + t.job);
-                    //        }
-                    //        ZLogger.Message("========================");
-                    //    }
-                    //}
-                    //catch { }
+                    try
+                    {
+                        foreach (var d in this.jobTracker)
+                        {
+                            foreach (var t in d.Value.activeJobs)
+                            {
+                                ZLogger.Message("Active jobs 2: " + d.Key + " - " + t);
+                            }
+                            foreach (var t in d.Key.jobs.jobQueue)
+                            {
+                                ZLogger.Message("Active jobQueue 2: " + d.Key + " - " + t.job);
+                            }
+                            ZLogger.Message("========================");
+                        }
+                    }
+                    catch { }
                     return true;
                 }
             }

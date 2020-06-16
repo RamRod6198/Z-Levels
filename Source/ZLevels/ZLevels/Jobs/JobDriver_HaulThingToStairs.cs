@@ -60,6 +60,7 @@ namespace ZLevels
                 initAction = () =>
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    Pawn pawn = GetActor();
                     if (TargetA.Thing is Building_StairsUp stairsUp)
                     {
 
@@ -73,7 +74,7 @@ namespace ZLevels
                                 comp.DoGeneration = true;
                                 comp.path = stairsUp.pathToPreset;
                             }
-                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map, true, false, stairsUp.shouldSpawnStairsUpper);
+                            ZTracker.TeleportPawn(pawn, pawn.Position, map, true, false, stairsUp.shouldSpawnStairsUpper);
                             stairsUp.shouldSpawnStairsUpper = false;
                         }
                         else
@@ -84,7 +85,7 @@ namespace ZLevels
                                 comp.DoGeneration = true;
                                 comp.path = stairsUp.pathToPreset;
                             }
-                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map, false, false, stairsUp.shouldSpawnStairsUpper);
+                            ZTracker.TeleportPawn(pawn, pawn.Position, map, false, false, stairsUp.shouldSpawnStairsUpper);
                             stairsUp.shouldSpawnStairsUpper = false;
                         }
                     }
@@ -100,7 +101,7 @@ namespace ZLevels
                                 comp.DoGeneration = true;
                                 comp.path = stairsDown.pathToPreset;
                             }
-                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map);
+                            ZTracker.TeleportPawn(pawn, pawn.Position, map);
                         }
                         else
                         {
@@ -110,9 +111,17 @@ namespace ZLevels
                                 comp.DoGeneration = true;
                                 comp.path = stairsDown.pathToPreset;
                             }
-                            ZTracker.TeleportPawn(GetActor(), GetActor().Position, map);
+                            ZTracker.TeleportPawn(pawn, pawn.Position, map);
                         }
                     }
+                    try
+                    {
+                        ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame + 201;
+                        ZTracker.jobTracker[pawn].lastTickFood = Find.TickManager.TicksGame + 201;
+                        ZTracker.jobTracker[pawn].lastTickJoy = Find.TickManager.TicksGame + 201;
+                        ZTracker.jobTracker[pawn].lastTickRest = Find.TickManager.TicksGame + 201;
+                    }
+                    catch { };
                 }
             };
         }
