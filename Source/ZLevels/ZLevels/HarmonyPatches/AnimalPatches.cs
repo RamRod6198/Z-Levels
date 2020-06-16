@@ -51,7 +51,7 @@ namespace ZLevels
                         }
                         else
                         {
-                            Log.Message("pawnKindDef: " + pawnKindDef);
+                            ZLogger.Message("Spawning animal: " + pawnKindDef + " in biome: " + map.Biome);
                             int randomInRange = pawnKindDef.wildGroupSize.RandomInRange;
                             int radius = Mathf.CeilToInt(Mathf.Sqrt((float)pawnKindDef.wildGroupSize.max));
                             if (map.Parent is MapParent_ZLevel && !loc.Walkable(map))
