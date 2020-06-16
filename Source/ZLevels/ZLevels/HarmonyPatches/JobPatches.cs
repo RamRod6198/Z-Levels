@@ -20,69 +20,69 @@ namespace ZLevels
     {
         public static bool manualDespawn = false;
 
-        //static JobManagerPatches()
-        //{
-        //    MethodInfo method = typeof(JobManagerPatches).GetMethod("LogScanner");
-        //    //MethodInfo method2 = typeof(JobManagerPatches).GetMethod("LogScanner2");
-        //    foreach (Type type in GenTypes.AllSubclasses(typeof(ThinkNode_JobGiver)))
-        //    {
-        //        try
-        //        {
-        //            new Harmony("test.test.tst").Patch(type.GetMethod("TryGiveJob", BindingFlags.Instance | BindingFlags.NonPublic
-        //                | BindingFlags.GetField), null, new HarmonyMethod(method), null);
-        //            ZLogger.Message("Patch: " + type);
-        //        }
-        //
-        //        catch (Exception ex)
-        //        {
-        //            ZLogger.Message("Error patching: " + ex);
-        //        }
-        //    }
-        //
-        //}
-        //
-        //public static void LogScanner(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
-        //{
-        //    if (__result != null && pawn.def.race.Humanlike)
-        //    {
-        //        ZLogger.Message(__instance + " - " + __result + " - " + pawn, true);
-        //    }
-        //}
-        //
-        //public static void LogScanner2(ThingRequest __result, WorkGiver_Scanner __instance)
-        //{
-        //    ZLogger.Message(__instance.def + " - __result: " + __result);
-        //    //throw new Exception("TEST");
-        //}
-        //
-        //
-        //[HarmonyPatch(typeof(JobQueue), "EnqueueFirst")]
-        //internal static class Patch_JobQueue
-        //{
-        //    private static void Postfix(Job j, JobTag? tag = null)
-        //    {
-        //        ZLogger.Message("Switching to " + j, true);
-        //    }
-        //}
-        //
-        //[HarmonyPatch(typeof(JobQueue), "EnqueueLast")]
-        //internal static class Patch_JobQueue2
-        //{
-        //    private static void Postfix(Job j, JobTag? tag = null)
-        //    {
-        //        ZLogger.Message("Switching to " + j, true);
-        //    }
-        //}
+        static JobManagerPatches()
+        {
+            MethodInfo method = typeof(JobManagerPatches).GetMethod("LogScanner");
+            //MethodInfo method2 = typeof(JobManagerPatches).GetMethod("LogScanner2");
+            foreach (Type type in GenTypes.AllSubclasses(typeof(ThinkNode_JobGiver)))
+            {
+                try
+                {
+                    new Harmony("test.test.tst").Patch(type.GetMethod("TryGiveJob", BindingFlags.Instance | BindingFlags.NonPublic
+                        | BindingFlags.GetField), null, new HarmonyMethod(method), null);
+                    ZLogger.Message("Patch: " + type);
+                }
         
-        //[HarmonyPatch(typeof(JobGiver_Work), "GiverTryGiveJobPrioritized")]
-        //internal static class Patch_JobGiver_Work
-        //{
-        //    private static void Postfix(Pawn pawn, WorkGiver giver, IntVec3 cell)
-        //    {
-        //        ZLogger.Message("Switching to " + pawn, true);
-        //    }
-        //}
-
+                catch (Exception ex)
+                {
+                    ZLogger.Message("Error patching: " + ex);
+                }
+            }
+        
+        }
+        
+        public static void LogScanner(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
+        {
+            if (__result != null && pawn.def.race.Humanlike)
+            {
+                ZLogger.Message(__instance + " - " + __result + " - " + pawn, true);
+            }
+        }
+        
+        public static void LogScanner2(ThingRequest __result, WorkGiver_Scanner __instance)
+        {
+            ZLogger.Message(__instance.def + " - __result: " + __result);
+            //throw new Exception("TEST");
+        }
+        
+        
+        [HarmonyPatch(typeof(JobQueue), "EnqueueFirst")]
+        internal static class Patch_JobQueue
+        {
+            private static void Postfix(Job j, JobTag? tag = null)
+            {
+                ZLogger.Message("Switching to " + j, true);
+            }
+        }
+        
+        [HarmonyPatch(typeof(JobQueue), "EnqueueLast")]
+        internal static class Patch_JobQueue2
+        {
+            private static void Postfix(Job j, JobTag? tag = null)
+            {
+                ZLogger.Message("Switching to " + j, true);
+            }
+        }
+        
+        [HarmonyPatch(typeof(JobGiver_Work), "GiverTryGiveJobPrioritized")]
+        internal static class Patch_JobGiver_Work
+        {
+            private static void Postfix(Pawn pawn, WorkGiver giver, IntVec3 cell)
+            {
+                ZLogger.Message("Switching to " + pawn, true);
+            }
+        }
+    
         [HarmonyPatch(typeof(JobGiver_GetFood), "TryGiveJob")]
         public class JobGiver_GetFoodPatch
         {
@@ -554,12 +554,12 @@ namespace ZLevels
                         {
                             ZTracker.jobTracker[pawn] = new JobTracker();
                         }
-                        //if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
-                        //// minimal job interval check per pawn is 200 ticks
-                        //{
-                        //    return;
-                        //}
-                        Job result;
+                        if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
+                        // minimal job interval check per pawn is 200 ticks
+                        {
+                            return;
+                        }
+                        Job result = null;
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
                         bool select = false;
@@ -568,10 +568,10 @@ namespace ZLevels
                         {
                             if (otherMap != oldMap)
                             {
-                                //if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
-                                //{
-                                //    return;
-                                //}
+                                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
+                                {
+                                    return;
+                                }
                                 ZLogger.Message("Searching rest job for " + pawn);
                                 var stairs = new List<Thing>();
 
@@ -604,11 +604,11 @@ namespace ZLevels
                                         ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
                                     }
                                 }
-                                //if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
-                                //// minimal job interval check per pawn is 200 ticks
-                                //{
-                                //    return;
-                                //}
+                                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
+                                // minimal job interval check per pawn is 200 ticks
+                                {
+                                    return;
+                                }
 
                                 if (stairs != null && stairs.Count() > 0)
                                 {
@@ -635,6 +635,7 @@ namespace ZLevels
                                         GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
                                         if (select) Find.Selector.Select(pawn);
                                         ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result, null);
+                                        ZTracker.jobTracker[pawn].lastTickRest = Find.TickManager.TicksGame + 200;
                                         break;
                                     }
                                 }
@@ -648,11 +649,14 @@ namespace ZLevels
                             GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
                             if (select) Find.Selector.Select(pawn);
                         }
-                        try
+                        if (result == null || result.targetA.Thing == null)
                         {
-                            ZTracker.jobTracker[pawn].lastTickRest = Find.TickManager.TicksGame;
+                            try
+                            {
+                                ZTracker.jobTracker[pawn].lastTickRest = Find.TickManager.TicksGame + 200;
+                            }
+                            catch { }
                         }
-                        catch { }
                     }
                 }
                 catch (Exception ex)

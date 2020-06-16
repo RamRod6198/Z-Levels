@@ -8,6 +8,7 @@
 		<fillPercent>0.15</fillPercent>
 		<building>
 			<isEdifice>false</isEdifice>
+			<ai_neverTrashThis>true</ai_neverTrashThis>
 		</building>	
 		<pathCost>60</pathCost>
 		<canOverlapZones>false</canOverlapZones>

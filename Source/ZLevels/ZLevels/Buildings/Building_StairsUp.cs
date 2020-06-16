@@ -12,7 +12,7 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class Building_StairsUp : Building
+    public class Building_StairsUp : Building, IAttackTarget
     {
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
@@ -129,6 +129,34 @@ namespace ZLevels
 
         public string pathToPreset = "";
         public bool shouldSpawnStairsUpper = true;
+
+        Thing IAttackTarget.Thing
+        {
+            get
+            {
+                return this;
+            }
+        }
+        public LocalTargetInfo TargetCurrentlyAimingAt
+        {
+            get
+            {
+                return LocalTargetInfo.Invalid;
+            }
+        }
+
+        public float TargetPriorityFactor
+        {
+            get
+            {
+                return 0f;
+            }
+        }
+
+        public bool ThreatDisabled(IAttackTargetSearcher disabledFor)
+        {
+            return true;
+        }
     }
 }
 
