@@ -107,11 +107,10 @@ namespace ZLevels
                     var upperMap = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
                     var lowerMap = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
 
-                    if (upperMap != null && this.upperPowerComp == null)
+                    if (upperMap != null && this.upperPowerComp == null && Find.TickManager.TicksGame % 200 == 0)
                     {
-                        foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
+                        foreach (var pos in GenRadial.RadialCellsAround(this.Position, 3f, true))
                         {
-                            Log.Message(this + " search things", true);
                             foreach (var t in pos.GetThingList(upperMap))
                             {
                                 if (t.TryGetComp<CompPowerTransmitter>() != null)
@@ -139,9 +138,9 @@ namespace ZLevels
                             }
                         }
                     }
-                    if (lowerMap != null && this.lowerPowerComp == null)
+                    if (lowerMap != null && this.lowerPowerComp == null && Find.TickManager.TicksGame % 200 == 0)
                     {
-                        foreach (var pos in GenRadial.RadialCellsAround(this.Position, 5f, true))
+                        foreach (var pos in GenRadial.RadialCellsAround(this.Position, 3f, true))
                         {
                             foreach (var t in pos.GetThingList(lowerMap))
                             {

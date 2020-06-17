@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -43,6 +44,66 @@ namespace ZLevels
         //        }
         //    }
         //}
+
+        public void Select(object obj, bool playSound = true, bool forceDesignatorDeselect = true)
+        {
+            if (obj == null)
+            {
+                Log.Error("Cannot select null.", false);
+                return;
+            }
+            Thing thing = obj as Thing;
+            if (thing == null && !(obj is Zone))
+            {
+                Log.Error("Tried to select " + obj + " which is neither a Thing nor a Zone.", false);
+                return;
+            }
+            if (thing != null && thing.Destroyed)
+            {
+                Log.Error("Cannot select destroyed thing.", false);
+                return;
+            }
+            Pawn pawn = obj as Pawn;
+            if (pawn != null && pawn.IsWorldPawn())
+            {
+                Log.Error("Cannot select world pawns.", false);
+                return;
+            }
+            if (forceDesignatorDeselect)
+            {
+                Find.DesignatorManager.Deselect();
+            }
+            if (Find.Selector.SelectedZone != null && !(obj is Zone))
+            {
+                Find.Selector.ClearSelection();
+            }
+            if (obj is Zone && Find.Selector.SelectedZone == null)
+            {
+                Find.Selector.ClearSelection();
+            }
+            Map map = (thing != null) ? thing.Map : ((Zone)obj).Map;
+
+            List<object> selected = Traverse.Create(Find.Selector).Field("selected").GetValue<List<object>>();
+
+            for (int i = selected.Count - 1; i >= 0; i--)
+            {
+                Thing thing2 = selected[i] as Thing;
+                if (((thing2 != null) ? thing2.Map : ((Zone)selected[i]).Map) != map)
+                {
+                    //Find.Selector.Deselect(selected[i]);
+                }
+            }
+            if (selected.Count >= 200)
+            {
+                return;
+            }
+            if (!Find.Selector.IsSelected(obj))
+            {
+                selected.Add(obj);
+                SelectionDrawer.Notify_Selected(obj);
+            }
+            Traverse.Create(Find.Selector).Field("selected").SetValue(selected);
+        }
         public void CheckHotkeys()
         {
             bool keyDownEvent = ZLevelsDefOf.ZL_switchToUpperMap.KeyDownEvent;
@@ -51,9 +112,15 @@ namespace ZLevels
                 Map mapToSwitch = this.GetUpperLevel(Find.CurrentMap.Tile, Find.CurrentMap);
                 if (mapToSwitch != null)
                 {
+                    var selectedObjects = Find.Selector.SelectedObjects.ListFullCopy();
                     var pos = Current.Game.CurrentMap.rememberedCameraPos.rootPos;
                     Current.Game.CurrentMap = mapToSwitch;
                     Find.CameraDriver.JumpToCurrentMapLoc(pos);
+
+                    //foreach (var select in selectedObjects)
+                    //{
+                    //    this.Select(select);
+                    //}
                 }
                 Event.current.Use();
             }
@@ -63,9 +130,17 @@ namespace ZLevels
                 Map mapToSwitch = this.GetLowerLevel(Find.CurrentMap.Tile, Find.CurrentMap);
                 if (mapToSwitch != null)
                 {
+                    var selectedObjects = Find.Selector.SelectedObjects.ListFullCopy();
+
                     var pos = Current.Game.CurrentMap.rememberedCameraPos.rootPos;
                     Current.Game.CurrentMap = mapToSwitch;
                     Find.CameraDriver.JumpToCurrentMapLoc(pos);
+
+                    //foreach (var select in selectedObjects)
+                    //{
+                    //    Log.Message("Select");
+                    //    this.Select(select);
+                    //}
                 }
                 Event.current.Use();
             }
@@ -164,6 +239,28 @@ namespace ZLevels
             catch
             {
                 Log.Error("GetAllMaps returned null on " + tile);
+                return null;
+            }
+        }
+
+        public List<Map> GetAllMaps(Map oldMap)
+        {
+            List<Map> maps = new List<Map>();
+            try
+            {
+                foreach (var map in this.ZLevelsTracker[oldMap.Tile].ZLevels.Values)
+                {
+                    if (map != oldMap)
+                    {
+                        maps.Add(map);
+                    }
+                }
+                maps.Add(oldMap);
+                return maps;
+            }
+            catch
+            {
+                Log.Error("GetAllMaps returned null on " + oldMap.Tile);
                 return null;
             }
         }

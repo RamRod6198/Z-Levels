@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -307,6 +308,75 @@ namespace ZLevels
                 return floatOption;
             }
         }
+
+        //[HarmonyPatch(typeof(FloatMenuMakerMap))]
+        //[HarmonyPatch("TryMakeFloatMenu")]
+        //public class TryMakeFloatMenu_Transpiler
+        //{
+        //    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        //    {
+        //        var foundCurrentMapMethod = false;
+        //        int startIndex = -1, endIndex = -1;
+        //
+        //        var codes = new List<CodeInstruction>(instructions);
+        //        for (int i = 0; i < codes.Count; i++)
+        //        {
+        //
+        //            if (codes[i].opcode == OpCodes.Ret)
+        //            {
+        //                if (foundCurrentMapMethod)
+        //                {
+        //                    Log.Error("END " + i);
+        //            
+        //                    endIndex = i; // include current 'ret'
+        //                    break;
+        //                }
+        //                else
+        //                {
+        //                    Log.Error("START " + (i + 1));
+        //            
+        //                    startIndex = i + 1; // exclude current 'ret'
+        //            
+        //                    for (int j = startIndex; j < codes.Count; j++)
+        //                    {
+        //                        if (codes[j].opcode == OpCodes.Ret)
+        //                            break;
+        //                        var strOperand = codes[j].ToString();
+        //                        if (strOperand != null)
+        //                        {
+        //                            Log.Message(strOperand);
+        //                        }
+        //                        if (strOperand != null && strOperand.Contains("CurrentMap"))
+        //                        {
+        //                            Log.Message("Found");
+        //                            foundCurrentMapMethod = true;
+        //                            break;
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        if (startIndex > -1 && endIndex > -1)
+        //        {
+        //            Log.Message("Remove");
+        //            // we cannot remove the first code of our range since some jump actually jumps to
+        //            // it, so we replace it with a no-op instead of fixing that jump (easier).
+        //            codes[startIndex].opcode = OpCodes.Nop;
+        //            codes.RemoveRange(startIndex + 1, endIndex - startIndex - 1);
+        //        }
+        //
+        //        return codes.AsEnumerable();
+        //    }
+        //}
+        //
+        //[HarmonyPatch(typeof(FloatMenuMakerMap), "ChoicesAtFor")]
+        //internal static class Patch_ChoicesAtFor
+        //{
+        //    private static void Postfix()
+        //    {
+        //        Log.Message("Run");
+        //    }
+        //}
     }
 }
 

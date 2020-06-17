@@ -20,68 +20,61 @@ namespace ZLevels
     {
         public static bool manualDespawn = false;
 
-        static JobManagerPatches()
-        {
-            MethodInfo method = typeof(JobManagerPatches).GetMethod("LogScanner");
-            //MethodInfo method2 = typeof(JobManagerPatches).GetMethod("LogScanner2");
-            foreach (Type type in GenTypes.AllSubclasses(typeof(ThinkNode_JobGiver)))
-            {
-                try
-                {
-                    new Harmony("test.test.tst").Patch(type.GetMethod("TryGiveJob", BindingFlags.Instance | BindingFlags.NonPublic
-                        | BindingFlags.GetField), null, new HarmonyMethod(method), null);
-                    ZLogger.Message("Patch: " + type);
-                }
-
-                catch (Exception ex)
-                {
-                    ZLogger.Message("Error patching: " + ex);
-                }
-            }
-
-        }
-
-        public static void LogScanner(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
-        {
-            if (__result != null && pawn.def.race.Humanlike)
-            {
-                ZLogger.Message(__instance + " - " + __result + " - " + pawn, true);
-            }
-        }
-
-        public static void LogScanner2(ThingRequest __result, WorkGiver_Scanner __instance)
-        {
-            ZLogger.Message(__instance.def + " - __result: " + __result);
-            //throw new Exception("TEST");
-        }
-
-
-        [HarmonyPatch(typeof(JobQueue), "EnqueueFirst")]
-        internal static class Patch_JobQueue
-        {
-            private static void Postfix(Job j, JobTag? tag = null)
-            {
-                ZLogger.Message("Switching to " + j, true);
-            }
-        }
-
-        [HarmonyPatch(typeof(JobQueue), "EnqueueLast")]
-        internal static class Patch_JobQueue2
-        {
-            private static void Postfix(Job j, JobTag? tag = null)
-            {
-                ZLogger.Message("Switching to " + j, true);
-            }
-        }
-
-        [HarmonyPatch(typeof(JobGiver_Work), "GiverTryGiveJobPrioritized")]
-        internal static class Patch_JobGiver_Work
-        {
-            private static void Postfix(Pawn pawn, WorkGiver giver, IntVec3 cell)
-            {
-                ZLogger.Message("Switching to " + pawn, true);
-            }
-        }
+        //static JobManagerPatches()
+        //{
+        //    MethodInfo method = typeof(JobManagerPatches).GetMethod("LogScanner");
+        //    //MethodInfo method2 = typeof(JobManagerPatches).GetMethod("LogScanner2");
+        //    foreach (Type type in GenTypes.AllSubclasses(typeof(ThinkNode_JobGiver)))
+        //    {
+        //        try
+        //        {
+        //            new Harmony("test.test.tst").Patch(type.GetMethod("TryGiveJob", BindingFlags.Instance | BindingFlags.NonPublic
+        //                | BindingFlags.GetField), null, new HarmonyMethod(method), null);
+        //            ZLogger.Message("Patch: " + type);
+        //        }
+        //
+        //        catch (Exception ex)
+        //        {
+        //            ZLogger.Message("Error patching: " + ex);
+        //        }
+        //    }
+        //
+        //}
+        //
+        //public static void LogScanner(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
+        //{
+        //    if (__result != null && pawn.def.race.Humanlike)
+        //    {
+        //        ZLogger.Message(__instance + " - " + __result + " - " + pawn, true);
+        //    }
+        //}
+        //
+        //[HarmonyPatch(typeof(JobQueue), "EnqueueFirst")]
+        //internal static class Patch_JobQueue
+        //{
+        //    private static void Postfix(Job j, JobTag? tag = null)
+        //    {
+        //        ZLogger.Message("Switching to " + j, true);
+        //    }
+        //}
+        //
+        //[HarmonyPatch(typeof(JobQueue), "EnqueueLast")]
+        //internal static class Patch_JobQueue2
+        //{
+        //    private static void Postfix(Job j, JobTag? tag = null)
+        //    {
+        //        ZLogger.Message("Switching to " + j, true);
+        //    }
+        //}
+        //
+        //[HarmonyPatch(typeof(JobGiver_Work), "GiverTryGiveJobPrioritized")]
+        //internal static class Patch_JobGiver_Work
+        //{
+        //    private static void Postfix(Pawn pawn, WorkGiver giver, IntVec3 cell)
+        //    {
+        //        ZLogger.Message("Switching to " + pawn, true);
+        //    }
+        //}
 
         [HarmonyPatch(typeof(JobGiver_GetFood), "TryGiveJob")]
         public class JobGiver_GetFoodPatch
@@ -361,11 +354,12 @@ namespace ZLevels
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
                         bool select = false;
-
                         foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
                         {
                             if (otherMap != oldMap)
                             {
+                                ZLogger.Message(pawn + " - other map: " + otherMap);
+
                                 if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickJoy < 200)
                                 {
                                     return;
@@ -768,63 +762,69 @@ namespace ZLevels
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
                         bool select = false;
+
+                        ZLogger.Message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        ZLogger.Message(pawn + " - old map: " + oldMap);
                         //ZLogger.Message("======================================");
-                        foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+                        foreach (var otherMap in ZTracker.GetAllMaps(oldMap))
                         {
+                            ZLogger.Message(pawn + " - other map: " + otherMap);
                             if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
                             // minimal job interval check per pawn is 200 ticks
                             {
                                 return;
                             }
-                            var stairs = new List<Thing>();
 
                             ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
 
-                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                if (lowerMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                if (upperMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
                             if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
                             // minimal job interval check per pawn is 200 ticks
                             {
                                 return;
                             }
-                            bool goToOtherMap = false;
-                            if (stairs != null && stairs.Count() > 0)
+                            if (oldMap != otherMap)
                             {
-                                var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
-                                var position = selectedStairs.Position;
+                                var stairs = new List<Thing>();
+                                if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+                                {
+                                    Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                                    if (lowerMap != null)
+                                    {
+                                        ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
+                                        stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
+                                    }
+                                    else
+                                    {
+                                        ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
+                                    }
+                                }
+                                else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                                {
+                                    Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                                    if (upperMap != null)
+                                    {
+                                        ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
+                                        stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
+                                    }
+                                    else
+                                    {
+                                        ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                                    }
+                                }
+                                if (stairs != null && stairs.Count() > 0)
+                                {
+                                    var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
+                                    var position = selectedStairs.Position;
 
-                                if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                                JobManagerPatches.manualDespawn = true;
-                                pawn.DeSpawn();
-                                JobManagerPatches.manualDespawn = false;
-                                GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-                                goToOtherMap = true;
+                                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                                    JobManagerPatches.manualDespawn = true;
+                                    pawn.DeSpawn();
+                                    JobManagerPatches.manualDespawn = false;
+                                    GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
+                                }
                             }
+
 
                             //try
                             //{
@@ -840,7 +840,7 @@ namespace ZLevels
                                 ZLogger.Message("TryIssueJobPackage: " + pawn + " - map: " + ZTracker.GetMapInfo(pawn.Map)
                                     + " - " + pawn.Position + " result " + result.Job);
 
-                                if (goToOtherMap)
+                                if (pawn.Map != oldMap)
                                 {
                                     JobManagerPatches.manualDespawn = true;
                                     pawn.DeSpawn();
@@ -891,10 +891,9 @@ namespace ZLevels
 
             public static bool TryFindBestBetterStoreCellFor(Thing t, Pawn carrier, Map mapToSearch, StoragePriority currentPriority, Faction faction, out IntVec3 foundCell, ref Map dest, bool needAccurateResult = true)
             {
-                Zone_Stockpile zoneDest = null;
                 bool result = true;
-                //ZLogger.Message(t + " priority: " + currentPriority + " - checking on " + carrier + " _ " + mapToSearch +
-                //    " --------------------------------------- start", true);
+                ZLogger.Message(t + " priority: " + currentPriority + " - checking on " + carrier + " _ " + mapToSearch +
+                    " --------------------------------------- start", true);
 
                 var allZones = new Dictionary<Zone_Stockpile, Map>();
                 var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
@@ -925,42 +924,27 @@ namespace ZLevels
                 for (int i = 0; i < count; i++)
                 {
                     SlotGroup slotGroup = allGroupsListInPriorityOrder[i];
-                    //ZLogger.Message("Checking: " + carrier + " - " + carrier.Map + " - " + slotGroup.parent + " - " + slotGroup.parent.Map);
+                    ZLogger.Message("Checking: " + carrier + " - " + carrier.Map + " - " + slotGroup.parent + " - " + slotGroup.parent.Map);
                     StoragePriority priority = slotGroup.Settings.Priority;
                     if (priority < storagePriority || priority <= currentPriority)
                     {
                         break;
                     }
-                    zoneDest = slotGroup.parent as Zone_Stockpile;
                     TryIssueJobPackagePatch.TryFindBestBetterStoreCellForWorker
                     (t, carrier, mapToSearch, faction, slotGroup, needAccurateResult,
-                    ref invalid, ref num, ref storagePriority, slotGroup.parent.Map);
+                    ref invalid, ref num, ref storagePriority, slotGroup.parent.Map, ref dest);
                 }
-
                 if (!invalid.IsValid)
                 {
                     foundCell = IntVec3.Invalid;
                     result = false;
-                }
-                else
-                {
-                    dest = zoneDest.Map;
-                    try
-                    {
-                        ZLogger.Message("RESULT: " + carrier + " - " + zoneDest + " - " + ZTracker.GetMapInfo(zoneDest.Map) + " accepts " + t, true);
-
-                    }
-                    catch (Exception ex)
-                    {
-                        ZLogger.Message("Cant find result: " + ex);
-                    }
                 }
                 foundCell = invalid;
 
                 return result;
             }
 
-            private static void TryFindBestBetterStoreCellForWorker(Thing t, Pawn carrier, Map map, Faction faction, SlotGroup slotGroup, bool needAccurateResult, ref IntVec3 closestSlot, ref float closestDistSquared, ref StoragePriority foundPriority, Map oldMap)
+            private static void TryFindBestBetterStoreCellForWorker(Thing t, Pawn carrier, Map map, Faction faction, SlotGroup slotGroup, bool needAccurateResult, ref IntVec3 closestSlot, ref float closestDistSquared, ref StoragePriority foundPriority, Map oldMap, ref Map dest)
             {
                 if (slotGroup == null)
                 {
@@ -970,16 +954,15 @@ namespace ZLevels
                 {
                     return;
                 }
+                ZLogger.Message("Analyzing: " + slotGroup.parent);
+                ZLogger.Message(slotGroup.parent + " - " + slotGroup.parent.Map + " accepts " + t + " - " + t.Map, true);
+
                 if (slotGroup.HeldThings.Contains(t))
                 {
-                    //ZLogger.Message(t + " already in stockpile " + slotGroup.parent);
+                    ZLogger.Message(t + " already in stockpile " + slotGroup.parent);
                     return;
                 }
-                //ZLogger.Message(t + " map " + t.Map + " - " + slotGroup.parent + " map " + slotGroup.parent.Map, true);
-                //foreach (var test in slotGroup.HeldThings)
-                //{
-                //    ZLogger.Message(test + " in " + slotGroup.parent, true);
-                //}
+                ZLogger.Message(t + " map " + t.Map + " - " + slotGroup.parent + " map " + slotGroup.parent.Map, true);
 
                 IntVec3 a = t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld;
                 List<IntVec3> cellsList = slotGroup.CellsList;
@@ -993,9 +976,10 @@ namespace ZLevels
                 {
                     num = 0;
                 }
+                IntVec3 intVec = IntVec3.Invalid;
                 for (int i = 0; i < count; i++)
                 {
-                    IntVec3 intVec = cellsList[i];
+                    intVec = cellsList[i];
                     float num2 = (float)(a - intVec).LengthHorizontalSquared;
                     if (num2 <= closestDistSquared && IsGoodStoreCell(intVec, map, t, carrier, faction, oldMap))
                     {
@@ -1006,6 +990,19 @@ namespace ZLevels
                         {
                             break;
                         }
+                    }
+                }
+                if (intVec.IsValid)
+                {
+                    dest = slotGroup.parent.Map;
+                    try
+                    {
+                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        ZLogger.Message("RESULT: " + carrier + " - " + slotGroup.parent + " - " + ZTracker.GetMapInfo(slotGroup.parent.Map) + " accepts " + t + " in " + ZTracker.GetMapInfo(dest), true);
+                    }
+                    catch (Exception ex)
+                    {
+                        ZLogger.Message("Cant find result: " + ex);
                     }
                 }
             }
@@ -1307,12 +1304,14 @@ namespace ZLevels
 
                                 if (scanner is WorkGiver_HaulGeneral)
                                 {
+                                    ZLogger.Message(pawn + " - pawn.map: " + pawn.Map);
                                     var allZones = new Dictionary<Zone_Stockpile, Map>();
                                     var allMaps = ZTracker.GetAllMaps(pawn.Map.Tile);
                                     foreach (Map map in allMaps)
                                     {
                                         foreach (var zone in map.zoneManager.AllZones.Where(x => x is Zone_Stockpile))
                                         {
+                                            ZLogger.Message("Adding " + zone + " in " + ZTracker.GetMapInfo(zone.Map) + " - " + ZTracker.GetMapInfo(map));
                                             allZones[(Zone_Stockpile)zone] = map;
                                         }
                                     }
@@ -1327,6 +1326,7 @@ namespace ZLevels
                                             {
                                                 var newZone = new Zone_Stockpile();
                                                 newZone.settings = zone.Key.settings;
+                                                newZone.label = zone.Key.label + " - Copy";
                                                 foreach (IntVec3 intVec in zone.Key.cells)
                                                 {
                                                     var newPosition = (intVec - zone.Key.Position) + pawn.Position;
@@ -1343,6 +1343,7 @@ namespace ZLevels
                                                     }
                                                 }
                                                 newZone.zoneManager = pawn.Map.zoneManager;
+                                                ZLogger.Message("Registering " + newZone + " in " + ZTracker.GetMapInfo(pawn.Map));
                                                 pawn.Map.zoneManager.RegisterZone(newZone);
                                                 //ZLogger.Message("Adding " + newZone + " to " + ZTracker.GetMapInfo(pawn.Map));
                                                 copiedZones.Add(newZone);
@@ -1392,17 +1393,24 @@ namespace ZLevels
                                 {
                                     if (scanner is WorkGiver_HaulGeneral)
                                     {
+                                        thing = GenClosest.ClosestThingReachable
+                                            (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
+                                            scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)),
+                                            9999f, haulingValidator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
+                                            enumerable != null);
                                         try
                                         {
-                                            ZLogger.Message("Try get thing from enumerable: " + enumerable.Count(), true);
-                                            thing = GenClosest.ClosestThingReachable
-                                                (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
-                                                scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)),
-                                                9999f, null, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
-                                                enumerable != null);
+                                            if (enumerable != null)
+                                            {
+                                                ZLogger.Message("Try get thing from enumerable: " + enumerable.Count(), true);
+                                            }
                                             if (thing != null)
                                             {
                                                 ZLogger.Message("Get thing: " + thing + " in " + thing.Map + " for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true);
+                                            }
+                                            else
+                                            {
+                                                ZLogger.Message("Cant get thing for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true);
                                             }
                                         }
                                         catch (Exception ex)
