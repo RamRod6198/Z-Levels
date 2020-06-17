@@ -109,10 +109,16 @@ namespace ZLevels
                 }
                 BuildableDef entDef = Traverse.Create(instance).Field("entDef").GetValue<BuildableDef>();
                 ThingDef thingDef = entDef as ThingDef;
-                if (thingDef2.IsStuff && thingDef2.stuffProps.CanMake(thingDef) 
-                    && instance.Map.resourceCounter.AllCountedAmounts[thingDef2] > 0)
+                if (thingDef2.IsStuff && thingDef2.stuffProps.CanMake(thingDef))
                 {
-                    return true;
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    foreach (var map in ZTracker.GetAllMaps(instance.Map))
+                    {
+                        if (map.listerThings.ThingsOfDef(thingDef2).Count > 0)
+                        {
+                            return true;
+                        }
+                    }
                 }
                 return false;
             }
