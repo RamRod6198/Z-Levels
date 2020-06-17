@@ -30,10 +30,11 @@ namespace ZLevels
             this.CheckHotkeys();
         }
 
+
         //public override void GameComponentTick()
         //{
         //    base.GameComponentTick();
-        //    if (Find.TickManager.TicksGame % 60 == 0)
+        //    if (Find.TickManager.TicksGame % 600 == 0)
         //    {
         //        foreach (var data in this.ZLevelsTracker)
         //        {

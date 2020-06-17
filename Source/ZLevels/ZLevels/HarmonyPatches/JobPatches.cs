@@ -20,6 +20,183 @@ namespace ZLevels
     {
         public static bool manualDespawn = false;
 
+        //public static Thing Spawn(Thing newThing, IntVec3 loc, Map map, Rot4 rot, bool respawningAfterLoad = false)
+        //{
+        //    Log.Message("JobManagerPatches - Spawn - if (map == null) - 1", true);
+        //    if (map == null)
+        //    {
+        //        Log.Message("JobManagerPatches - Spawn - Log.Error(\"Tried to spawn \" + newThing.ToStringSafe() + \" in a null map.\"); - 2", true);
+        //        Log.Error("Tried to spawn " + newThing.ToStringSafe() + " in a null map.");
+        //        Log.Message("JobManagerPatches - Spawn - return null; - 3", true);
+        //        return null;
+        //    }
+        //    Log.Message("JobManagerPatches - Spawn - if (!loc.InBounds(map)) - 4", true);
+        //    if (!loc.InBounds(map))
+        //    {
+        //        Log.Message("JobManagerPatches - Spawn - Log.Error(string.Concat(\"Tried to spawn \", newThing.ToStringSafe(), \" out of bounds at \", loc, \".\")); - 5", true);
+        //        Log.Error(string.Concat("Tried to spawn ", newThing.ToStringSafe(), " out of bounds at ", loc, "."));
+        //        Log.Message("JobManagerPatches - Spawn - return null; - 6", true);
+        //        return null;
+        //    }
+        //    Log.Message("JobManagerPatches - Spawn - if (newThing.def.randomizeRotationOnSpawn) - 7", true);
+        //    if (newThing.def.randomizeRotationOnSpawn)
+        //    {
+        //        Log.Message("JobManagerPatches - Spawn - rot = Rot4.Random; - 8", true);
+        //        rot = Rot4.Random;
+        //    }
+        //    CellRect occupiedRect = GenAdj.OccupiedRect(loc, rot, newThing.def.Size);
+        //    Log.Message("JobManagerPatches - Spawn - if (!occupiedRect.InBounds(map)) - 10", true);
+        //    if (!occupiedRect.InBounds(map))
+        //    {
+        //        Log.Message("JobManagerPatches - Spawn - Log.Error(string.Concat(\"Tried to spawn \", newThing.ToStringSafe(), \" out of bounds at \", loc, \" (out of bounds because size is \", newThing.def.Size, \").\")); - 11", true);
+        //        Log.Error(string.Concat("Tried to spawn ", newThing.ToStringSafe(), " out of bounds at ", loc, " (out of bounds because size is ", newThing.def.Size, ")."));
+        //        Log.Message("JobManagerPatches - Spawn - return null; - 12", true);
+        //        return null;
+        //    }
+        //    Log.Message("JobManagerPatches - Spawn - if (newThing.Spawned) - 13", true);
+        //    if (newThing.Spawned)
+        //    {
+        //        Log.Message("JobManagerPatches - Spawn - Log.Error(string.Concat(\"Tried to spawn \", newThing, \" but it's already spawned.\")); - 14", true);
+        //        Log.Error(string.Concat("Tried to spawn ", newThing, " but it's already spawned."));
+        //        Log.Message("JobManagerPatches - Spawn - return newThing; - 15", true);
+        //        return newThing;
+        //    }
+        //
+        //    //if (newThing.def.category == ThingCategory.Item)
+        //    //{
+        //    //    foreach (IntVec3 item in occupiedRect)
+        //    //    {
+        //    //        foreach (Thing item2 in item.GetThingList(map).ToList())
+        //    //        {
+        //    //            if (item2 != newThing && item2.def.category == ThingCategory.Item)
+        //    //            {
+        //    //                item2.DeSpawn();
+        //    //                if (!GenPlace.TryPlaceThing(item2, item, map, ThingPlaceMode.Near, null, (IntVec3 x) => !occupiedRect.Contains(x)))
+        //    //                {
+        //    //                    item2.Destroy();
+        //    //                }
+        //    //            }
+        //    //        }
+        //    //    }
+        //    //}
+        //    newThing.Rotation = rot;
+        //    Log.Message("JobManagerPatches - Spawn - newThing.Position = loc; - 24", true);
+        //    newThing.Position = loc;
+        //    Log.Message("JobManagerPatches - Spawn - if (newThing.holdingOwner != null) - 25", true);
+        //    if (newThing.holdingOwner != null)
+        //    {
+        //        Log.Message("JobManagerPatches - Spawn - newThing.holdingOwner.Remove(newThing); - 26", true);
+        //        newThing.holdingOwner.Remove(newThing);
+        //    }
+        //    newThing.SpawnSetup(map, respawningAfterLoad);
+        //    Log.Message("JobManagerPatches - Spawn - if (newThing.Spawned && newThing.stackCount == 0) - 28", true);
+        //    if (newThing.Spawned && newThing.stackCount == 0)
+        //    {
+        //        Log.Message("JobManagerPatches - Spawn - Log.Error(\"Spawned thing with 0 stackCount: \" + newThing); - 29", true);
+        //        Log.Error("Spawned thing with 0 stackCount: " + newThing);
+        //        Log.Message("JobManagerPatches - Spawn - newThing.Destroy(); - 30", true);
+        //        newThing.Destroy();
+        //        Log.Message("JobManagerPatches - Spawn - return null; - 31", true);
+        //        return null;
+        //    }
+        //    Log.Message("JobManagerPatches - Spawn - if (newThing.def.passability == Traversability.Impassable) - 32", true);
+        //    if (newThing.def.passability == Traversability.Impassable)
+        //    {
+        //        Log.Message("JobManagerPatches - Spawn - foreach (IntVec3 item3 in occupiedRect) - 33", true);
+        //        foreach (IntVec3 item3 in occupiedRect)
+        //        {
+        //            Log.Message("JobManagerPatches - Spawn - foreach (Thing item4 in item3.GetThingList(map).ToList()) - 34", true);
+        //            foreach (Thing item4 in item3.GetThingList(map).ToList())
+        //            {
+        //                Log.Message("JobManagerPatches - Spawn - if (item4 != newThing) - 35", true);
+        //                if (item4 != newThing)
+        //                {
+        //                    Log.Message("JobManagerPatches - Spawn - (item4 as Pawn)?.pather.TryRecoverFromUnwalkablePosition(error: false); - 36", true);
+        //                    (item4 as Pawn)?.pather.TryRecoverFromUnwalkablePosition(error: false);
+        //                }
+        //            }
+        //        }
+        //        return newThing;
+        //    }
+        //    return newThing;
+        //}
+        //
+        //public static void DeSpawn(Thing thingToDespawn, DestroyMode mode = DestroyMode.Vanish)
+        //{
+        //    Traverse.Create(thingToDespawn).Field("mapIndexOrState")
+        //            .SetValue((sbyte)-1);
+        //
+        //    //Map map = thingToDespawn.Map;
+        //    //thingToDespawn.Spawned
+        //    //RegionListersUpdater.DeregisterInRegions(this, map);
+        //    //map.spawnedThings.Remove(this);
+        //    //map.listerThings.Remove(this);
+        //    //map.thingGrid.Deregister(this, false);
+        //    //map.coverGrid.DeRegister(this);
+        //    //if (this.def.receivesSignals)
+        //    //{
+        //    //    Find.SignalManager.DeregisterReceiver(this);
+        //    //}
+        //    //map.tooltipGiverList.Notify_ThingDespawned(this);
+        //    //if (this.def.graphicData != null && this.def.graphicData.Linked)
+        //    //{
+        //    //    map.linkGrid.Notify_LinkerCreatedOrDestroyed(this);
+        //    //    map.mapDrawer.MapMeshDirty(this.Position, MapMeshFlag.Things, true, false);
+        //    //}
+        //    //Find.Selector.Deselect(this);
+        //    //this.DirtyMapMesh(map);
+        //    //if (this.def.drawerType != DrawerType.MapMeshOnly)
+        //    //{
+        //    //    map.dynamicDrawManager.DeRegisterDrawable(this);
+        //    //}
+        //    //Region validRegionAt_NoRebuild = map.regionGrid.GetValidRegionAt_NoRebuild(this.Position);
+        //    //Room room = (validRegionAt_NoRebuild == null) ? null : validRegionAt_NoRebuild.Room;
+        //    //if (room != null)
+        //    //{
+        //    //    room.Notify_ContainedThingSpawnedOrDespawned(this);
+        //    //}
+        //    //if (this.def.AffectsRegions)
+        //    //{
+        //    //    map.regionDirtyer.Notify_ThingAffectingRegionsDespawned(this);
+        //    //}
+        //    //if (this.def.pathCost != 0 || this.def.passability == Traversability.Impassable)
+        //    //{
+        //    //    map.pathGrid.RecalculatePerceivedPathCostUnderThing(this);
+        //    //}
+        //    //if (this.def.AffectsReachability)
+        //    //{
+        //    //    map.reachability.ClearCache();
+        //    //}
+        //    //Find.TickManager.DeRegisterAllTickabilityFor(this);
+        //    //this.mapIndexOrState = -1;
+        //    //if (this.def.category == ThingCategory.Item)
+        //    //{
+        //    //    map.listerHaulables.Notify_DeSpawned(this);
+        //    //    map.listerMergeables.Notify_DeSpawned(this);
+        //    //}
+        //    //map.attackTargetsCache.Notify_ThingDespawned(this);
+        //    //map.physicalInteractionReservationManager.ReleaseAllForTarget(this);
+        //    //StealAIDebugDrawer.Notify_ThingChanged(this);
+        //    //IHaulDestination haulDestination = this as IHaulDestination;
+        //    //if (haulDestination != null)
+        //    //{
+        //    //    map.haulDestinationManager.RemoveHaulDestination(haulDestination);
+        //    //}
+        //    //if (this is IThingHolder && Find.ColonistBar != null)
+        //    //{
+        //    //    Find.ColonistBar.MarkColonistsDirty();
+        //    //}
+        //    //if (this.def.category == ThingCategory.Item)
+        //    //{
+        //    //    SlotGroup slotGroup = this.Position.GetSlotGroup(map);
+        //    //    if (slotGroup != null && slotGroup.parent != null)
+        //    //    {
+        //    //        slotGroup.parent.Notify_LostThing(this);
+        //    //    }
+        //    //}
+        //    //QuestUtility.SendQuestTargetSignals(this.questTags, "Despawned", this.Named("SUBJECT"));
+        //}
+
         //static JobManagerPatches()
         //{
         //    MethodInfo method = typeof(JobManagerPatches).GetMethod("LogScanner");
@@ -1088,27 +1265,35 @@ namespace ZLevels
                     var origMap = thing.Map;
                     var origMap2 = pawn.Map;
                     bool select = false;
+
                     foreach (var map in ZTracker.GetAllMaps(pawn.Map.Tile))
                     {
-                        Traverse.Create(thing).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(map));
-
-                        Traverse.Create(pawn).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(map));
-
-                        Job job = Traverse.Create(scanner).Method("StartOrResumeBillJob", new object[]
-                        {
-                            pawn, billGiver
-                        }).GetValue<Job>();
-                        if (job != null)
+                        try
                         {
                             Traverse.Create(thing).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(origMap));
+                                .SetValue((sbyte)Find.Maps.IndexOf(map));
 
                             Traverse.Create(pawn).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
+                                .SetValue((sbyte)Find.Maps.IndexOf(map));
 
-                            return job;
+                            Job job = Traverse.Create(scanner).Method("StartOrResumeBillJob", new object[]
+                            {
+                            pawn, billGiver
+                            }).GetValue<Job>();
+                            if (job != null)
+                            {
+                                Traverse.Create(thing).Field("mapIndexOrState")
+                                    .SetValue((sbyte)Find.Maps.IndexOf(origMap));
+
+                                Traverse.Create(pawn).Field("mapIndexOrState")
+                                    .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
+
+                                return job;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("Z-Levels failed to process HasJobOnThing of DoBill workgiver. Report about it to devs and provide Hugslib log. Error: " + ex);
                         }
                     }
                     Traverse.Create(thing).Field("mapIndexOrState")
@@ -1580,27 +1765,34 @@ namespace ZLevels
                                 var origMap2 = pawn.Map;
                                 foreach (var tempMap in ZTracker.GetAllMaps(pawn.Map.Tile))
                                 {
-                                    Traverse.Create(bestTargetOfLastPriority.Thing).Field("mapIndexOrState")
-                                        .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
-                                    Traverse.Create(pawn).Field("mapIndexOrState")
-                                        .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
-                                    ZLogger.Message("JobOnThing: " + bestTargetOfLastPriority.Thing + " searching in "
-                                        + bestTargetOfLastPriority.Thing.Map);
-                                    job3 = scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
-                                    if (job3 != null)
+                                    try
                                     {
-                                        foreach (var t in job3.targetQueueB)
+                                        Traverse.Create(bestTargetOfLastPriority.Thing).Field("mapIndexOrState")
+                                            .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
+                                        Traverse.Create(pawn).Field("mapIndexOrState")
+                                            .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
+
+                                        ZLogger.Message("JobOnThing: " + bestTargetOfLastPriority.Thing + " searching in "
+                                            + bestTargetOfLastPriority.Thing.Map);
+
+                                        job3 = scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
+                                        if (job3 != null)
                                         {
-                                            ZLogger.Message(ZTracker.GetMapInfo(tempMap) + " - Job2: " + job3 + " target: " + t);
+                                            break;
                                         }
-                                        break;
+                                        else
+                                        {
+                                            ZLogger.Message("No job in " + ZTracker.GetMapInfo(tempMap) + " for " + bestTargetOfLastPriority.Thing
+                                                + " - " + bestTargetOfLastPriority.Thing.Map);
+                                        }
                                     }
-                                    else
+                                    catch (Exception ex)
                                     {
-                                        ZLogger.Message("No job in " + ZTracker.GetMapInfo(tempMap) + " for " + bestTargetOfLastPriority.Thing
-                                            + " - " + bestTargetOfLastPriority.Thing.Map);
+                                        Log.Error("Z-Levels failed to process DoBill workgiver. Report about it to Z-Levels devs and provide Hugslib log. Error: " + ex, true);
                                     }
+
                                 }
+
                                 Traverse.Create(bestTargetOfLastPriority.Thing).Field("mapIndexOrState")
                                     .SetValue((sbyte)Find.Maps.IndexOf(origMap));
 
