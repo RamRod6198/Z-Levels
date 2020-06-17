@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <ZL_PowerTransmitterColumn.label>電力中継柱</ZL_PowerTransmitterColumn.label>
+  <ZL_PowerTransmitterColumn.description>屋根を支えられる電柱です。上下の階層に電気を伝達します。</ZL_PowerTransmitterColumn.description>
+  <Blueprint_ZL_PowerTransmitterColumn.label>電力中継柱 (設計)</Blueprint_ZL_PowerTransmitterColumn.label>
+  <Frame_ZL_PowerTransmitterColumn.label>電力中継柱 (施工)</Frame_ZL_PowerTransmitterColumn.label>
+  <Frame_ZL_PowerTransmitterColumn.description>屋根を支えられる電柱です。上下の階層に電気を伝達します。</Frame_ZL_PowerTransmitterColumn.description>
+
+</LanguageData>
