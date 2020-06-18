@@ -112,7 +112,7 @@ namespace ZLevels
                 if (thingDef2.IsStuff && thingDef2.stuffProps.CanMake(thingDef))
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    foreach (var map in ZTracker.GetAllMaps(instance.Map))
+                    foreach (var map in ZTracker.GetAllMaps(instance.Map.Tile))
                     {
                         if (map.listerThings.ThingsOfDef(thingDef2).Count > 0)
                         {

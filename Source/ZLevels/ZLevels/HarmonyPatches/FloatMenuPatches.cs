@@ -119,7 +119,7 @@ namespace ZLevels
                             var oldPosition1 = pawn.Position;
                             var oldPosition2 = victim.Position;
                             var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                            foreach (var otherMap in ZTracker.GetAllMaps(pawn.Map.Tile))
+                            foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(pawn.Map))
                             {
                                 if (oldMap != otherMap)
                                 {
@@ -222,7 +222,7 @@ namespace ZLevels
                             var oldPosition1 = pawn.Position;
                             var oldPosition2 = victim.Position;
                             var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                            foreach (var otherMap in ZTracker.GetAllMaps(pawn.Map.Tile))
+                            foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(pawn.Map))
                             {
                                 if (oldMap != otherMap)
                                 {

@@ -40,7 +40,7 @@ namespace ZLevels
         //        {
         //            Log.Message("======================");
         //            foreach (var mapData in data.Value.ZLevels.Values.OrderBy(x => 
-        //            Mathf.Abs(this.GetZIndexFor(x)) / 2))
+        //            (int)Mathf.Abs(this.GetZIndexFor(x) - 4)))
         //            {
         //                Log.Message(data.Key + " - " + mapData + " - " + this.GetMapInfo(mapData));
         //            }
@@ -251,24 +251,21 @@ namespace ZLevels
             }
         }
 
-        public List<Map> GetAllMaps(Map oldMap)
+        public List<Map> GetAllMapsInClosestOrder(Map pawnMap)
         {
             List<Map> maps = new List<Map>();
             try
             {
-                foreach (var map in this.ZLevelsTracker[oldMap.Tile].ZLevels.Values)
+                foreach (var map in this.ZLevelsTracker[pawnMap.Tile].ZLevels.Values.OrderBy(x =>
+                (int)Mathf.Abs(this.GetZIndexFor(x) - this.GetZIndexFor(pawnMap))))
                 {
-                    if (map != oldMap)
-                    {
-                        maps.Add(map);
-                    }
+                    maps.Add(map);
                 }
-                maps.Add(oldMap);
                 return maps;
             }
             catch
             {
-                Log.Error("GetAllMaps returned null on " + oldMap.Tile);
+                Log.Error("GetAllMaps returned null on " + pawnMap);
                 return null;
             }
         }

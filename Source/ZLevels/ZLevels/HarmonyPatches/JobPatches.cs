@@ -778,7 +778,7 @@ namespace ZLevels
                         var oldPosition = pawn.Position;
                         bool select = false;
 
-                        foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                         {
                             if (otherMap != oldMap)
                             {
@@ -786,10 +786,9 @@ namespace ZLevels
                                 {
                                     return;
                                 }
-                                ZLogger.Message("Searching joy job for " + pawn);
                                 var stairs = new List<Thing>();
 
-                                ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                ZLogger.Message("Searching food job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                     + " for " + ZTracker.GetMapInfo(oldMap));
 
                                 if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
@@ -1015,7 +1014,7 @@ namespace ZLevels
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
                         bool select = false;
-                        foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                         {
                             if (otherMap != oldMap)
                             {
@@ -1025,10 +1024,10 @@ namespace ZLevels
                                 {
                                     return;
                                 }
-                                ZLogger.Message("Searching joy job for " + pawn);
+
                                 var stairs = new List<Thing>();
 
-                                ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                ZLogger.Message("Searching joy job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                     + " for " + ZTracker.GetMapInfo(oldMap));
 
                                 if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
@@ -1233,20 +1232,19 @@ namespace ZLevels
                         var oldPosition = pawn.Position;
                         bool select = false;
 
-                        foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                         {
                             if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
                             {
                                 return false;
                             }
-                            ZLogger.Message("Searching rest job for " + pawn);
+
+                            ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                + " for " + ZTracker.GetMapInfo(oldMap));
 
                             if (otherMap != oldMap)
                             {
                                 var stairs = new List<Thing>();
-
-                                ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
-                                    + " for " + ZTracker.GetMapInfo(oldMap));
 
                                 if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
                                 {
@@ -1479,7 +1477,7 @@ namespace ZLevels
                         ZLogger.Message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         ZLogger.Message(pawn + " - old map: " + oldMap);
                         //ZLogger.Message("======================================");
-                        foreach (var otherMap in ZTracker.GetAllMaps(oldMap))
+                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                         {
                             ZLogger.Message(pawn + " - other map: " + otherMap);
                             if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
