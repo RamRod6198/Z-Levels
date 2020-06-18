@@ -82,6 +82,8 @@ namespace ZLevels
                     }
                     try
                     {
+                        ZLogger.Message("5 lastTick");
+
                         ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame + 201;
                         ZTracker.jobTracker[pawn].lastTickFood = Find.TickManager.TicksGame + 201;
                         ZTracker.jobTracker[pawn].lastTickJoy = Find.TickManager.TicksGame + 201;

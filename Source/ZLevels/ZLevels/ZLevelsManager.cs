@@ -34,13 +34,20 @@ namespace ZLevels
         //public override void GameComponentTick()
         //{
         //    base.GameComponentTick();
-        //    if (Find.TickManager.TicksGame % 600 == 0)
+        //    if (Find.TickManager.TicksGame % 60 == 0)
         //    {
         //        foreach (var data in this.ZLevelsTracker)
         //        {
-        //            foreach (var mapData in data.Value.ZLevels)
+        //            Log.Message("======================");
+        //            foreach (var mapData in data.Value.ZLevels.Values.OrderBy(x => 
+        //            Mathf.Abs(this.GetZIndexFor(x)) / 2))
         //            {
-        //                Log.Message(data.Key + " - " + mapData.Key + " - " + this.GetMapInfo(mapData.Value));
+        //                Log.Message(data.Key + " - " + mapData + " - " + this.GetMapInfo(mapData));
+        //            }
+        //            Log.Message("-------------------");
+        //            foreach (var mapData in data.Value.ZLevels.Values)
+        //            {
+        //                Log.Message(data.Key + " - " + mapData + " - " + this.GetMapInfo(mapData));
         //            }
         //        }
         //    }

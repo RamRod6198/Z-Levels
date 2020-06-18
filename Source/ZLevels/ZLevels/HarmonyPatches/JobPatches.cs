@@ -220,9 +220,13 @@ namespace ZLevels
         //
         //public static void LogScanner(ThinkNode_JobGiver __instance, Job __result, Pawn pawn)
         //{
-        //    if (__result != null && pawn.def.race.Humanlike)
+        //    //if (__result != null && pawn.def.race.Humanlike)
+        //    //{
+        //    //    ZLogger.Message(__instance + " - " + __result + " - " + pawn, true);
+        //    //}
+        //    if (pawn.Faction == Faction.OfPlayer && !pawn.def.race.Humanlike)
         //    {
-        //        ZLogger.Message(__instance + " - " + __result + " - " + pawn, true);
+        //        Log.Message(__instance + " - " + __result + " - " + pawn, true);
         //    }
         //}
         //
@@ -252,6 +256,456 @@ namespace ZLevels
         //        ZLogger.Message("Switching to " + pawn, true);
         //    }
         //}
+
+        //[HarmonyPatch(typeof(JobGiver_AIFollowMaster), "TryGiveJob")]
+        //public class JobGiver_AIFollowMasterPatch
+        //{
+        //    [HarmonyPostfix]
+        //    private static void JobGiver_AIFollowMasterPostfix(JobGiver_AIFollowMaster __instance, ref Job __result, Pawn pawn)
+        //    {
+        //        try
+        //        {
+        //            Log.Message("JobGiver_AIFollowPawnPostfix: " + __result + " - " + pawn, true);
+        //            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+        //            if (__result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
+        //            {
+        //                if (ZTracker.jobTracker == null)
+        //                {
+        //                    ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+        //                }
+        //                if (ZTracker.jobTracker.ContainsKey(pawn))
+        //                {
+        //                    try
+        //                    {
+        //                        if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+        //                        {
+        //                            if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
+        //                            {
+        //                                ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
+        //                                pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
+        //                                return;
+        //                            }
+        //                            else if (pawn.jobs.jobQueue[0].job.targetA.Thing.Map != pawn.Map)
+        //                            {
+        //                                ZTracker.ResetJobTrackerFor(pawn);
+        //                            }
+        //                            else
+        //                            {
+        //                                return;
+        //                            }
+        //                        }
+        //                    }
+        //                    catch (Exception ex)
+        //                    {
+        //                        ZLogger.Message("Error2: " + ex);
+        //                    };
+        //                }
+        //                else
+        //                {
+        //                    ZTracker.jobTracker[pawn] = new JobTracker();
+        //                }
+        //                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
+        //                // minimal job interval check per pawn is 200 ticks
+        //                {
+        //                    return;
+        //                }
+        //                Job result = null;
+        //                var oldMap = pawn.Map;
+        //                var oldPosition = pawn.Position;
+        //                bool select = false;
+        //
+        //                foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+        //                {
+        //                    if (otherMap != oldMap)
+        //                    {
+        //                        if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
+        //                        {
+        //                            return;
+        //                        }
+        //                        ZLogger.Message("Searching figth job for " + pawn);
+        //                        var stairs = new List<Thing>();
+        //
+        //                        ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+        //                            + " for " + ZTracker.GetMapInfo(oldMap));
+        //
+        //                        if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+        //                        {
+        //                            Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+        //                            if (lowerMap != null)
+        //                            {
+        //                                ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
+        //                                stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
+        //                            }
+        //                            else
+        //                            {
+        //                                ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
+        //                            }
+        //                        }
+        //                        else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+        //                        {
+        //                            Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+        //                            if (upperMap != null)
+        //                            {
+        //                                ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
+        //                                stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
+        //                            }
+        //                            else
+        //                            {
+        //                                ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+        //                            }
+        //                        }
+        //                        if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
+        //                        // minimal job interval check per pawn is 200 ticks
+        //                        {
+        //                            return;
+        //                        }
+        //
+        //                        if (stairs != null && stairs.Count() > 0)
+        //                        {
+        //                            var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
+        //                            var position = selectedStairs.Position;
+        //
+        //                            if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+        //                            JobManagerPatches.manualDespawn = true;
+        //                            pawn.DeSpawn();
+        //                            JobManagerPatches.manualDespawn = false;
+        //                            GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
+        //
+        //                            result = JobGiver_AIFollowMasterPatch.TryGiveJob(pawn, __instance);
+        //
+        //                            if (result != null)
+        //                            {
+        //                                ZLogger.Message(pawn + " gets food job " + result);
+        //                                ZLogger.Message("TryIssueJobPackage: " + pawn + " - map: " + ZTracker.GetMapInfo(pawn.Map)
+        //                                    + " - " + pawn.Position + " result " + result);
+        //                                JobManagerPatches.manualDespawn = true;
+        //                                pawn.DeSpawn();
+        //                                JobManagerPatches.manualDespawn = false;
+        //                                GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+        //                                if (select) Find.Selector.Select(pawn);
+        //                                ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result, null);
+        //                                break;
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //                if (pawn.Map != oldMap)
+        //                {
+        //                    JobManagerPatches.manualDespawn = true;
+        //                    pawn.DeSpawn();
+        //                    JobManagerPatches.manualDespawn = false;
+        //                    GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+        //                    if (select) Find.Selector.Select(pawn);
+        //                }
+        //                try
+        //                {
+        //                    ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame;
+        //                }
+        //                catch { }
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+        //        }
+        //    }
+        //
+        //    public static Job TryGiveJob(Pawn pawn, JobGiver_AIFollowMaster __instance)
+        //    {
+        //        Pawn followee = Traverse.Create(__instance).Method("GetFollowee", new object[]
+        //                            {
+        //                                pawn
+        //                            }).GetValue<Pawn>();
+        //        if (followee == null)
+        //        {
+        //            return null;
+        //        }
+        //        if (!followee.Spawned || !pawn.CanReach(followee, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+        //        {
+        //            return null;
+        //        }
+        //
+        //        float radius = Traverse.Create(__instance).Method("GetRadius", new object[]
+        //                        {
+        //                            pawn
+        //                        }).GetValue<float>();
+        //        if (!JobDriver_FollowClose.FarEnoughAndPossibleToStartJob(pawn, followee, radius))
+        //        {
+        //            return null;
+        //        }
+        //        Job job = JobMaker.MakeJob(JobDefOf.FollowClose, followee);
+        //        job.expiryInterval = Traverse.Create(__instance).Field("FollowJobExpireInterval").GetValue<int>(); ;
+        //        job.checkOverrideOnExpire = true;
+        //        job.followRadius = radius;
+        //        return job;
+        //    }
+        //}
+
+        //[HarmonyPatch(typeof(JobGiver_ConfigurableHostilityResponse), "TryGiveJob")]
+        //public class JobGiver_ConfigurableHostilityResponsePatch
+        //{
+        //    [HarmonyPostfix]
+        //    private static void JobGiver_ConfigurableHostilityResponsePostfix(JobGiver_ConfigurableHostilityResponse __instance, ref Job __result, Pawn pawn)
+        //    {
+        //        try
+        //        {
+        //            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+        //            if (pawn.def.race.Humanlike && pawn.Faction != Faction.OfPlayer && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
+        //            {
+        //                if (ZTracker.jobTracker == null)
+        //                {
+        //                    ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+        //                }
+        //                if (ZTracker.jobTracker.ContainsKey(pawn))
+        //                {
+        //                    try
+        //                    {
+        //                        if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+        //                        {
+        //                            if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
+        //                            {
+        //                                ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
+        //                                pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
+        //                                return;
+        //                            }
+        //                            else if (pawn.jobs.jobQueue[0].job.targetA.Thing.Map != pawn.Map)
+        //                            {
+        //                                ZTracker.ResetJobTrackerFor(pawn);
+        //                            }
+        //                            else
+        //                            {
+        //                                return;
+        //                            }
+        //                        }
+        //                    }
+        //                    catch (Exception ex)
+        //                    {
+        //                        ZLogger.Message("Error2: " + ex);
+        //                    };
+        //                }
+        //                else
+        //                {
+        //                    ZTracker.jobTracker[pawn] = new JobTracker();
+        //                }
+        //                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
+        //                // minimal job interval check per pawn is 200 ticks
+        //                {
+        //                    return;
+        //                }
+        //
+        //                Map playerMap = ZTracker.GetMapByIndex(pawn.Map.Tile, 0);
+        //                if (pawn.Map != playerMap)
+        //                {
+        //                    ZTracker.BuildJobListFor(pawn, pawn.Map, playerMap, JobMaker.MakeJob(JobDefOf.Wait_Combat, JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange, true), null);
+        //                    try
+        //                    {
+        //                        ZLogger.Message("3 lastTick");
+        //                        ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame;
+        //                    }
+        //                    catch { }
+        //                }
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+        //        }
+        //    }
+        //}
+        //
+        //[HarmonyPatch(typeof(JobGiver_AIGotoNearestHostile), "TryGiveJob")]
+        //public class JobGiver_AIGotoNearestHostilePatch
+        //{
+        //    [HarmonyPostfix]
+        //    private static void JobGiver_AIGotoNearestHostilePostfix(JobGiver_AIGotoNearestHostile __instance, ref Job __result, Pawn pawn)
+        //    {
+        //        try
+        //        {
+        //            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+        //            if (pawn.def.race.Humanlike && pawn.Faction != Faction.OfPlayer && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
+        //            {
+        //                if (ZTracker.jobTracker == null)
+        //                {
+        //                    ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+        //                }
+        //                if (ZTracker.jobTracker.ContainsKey(pawn))
+        //                {
+        //                    try
+        //                    {
+        //                        if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+        //                        {
+        //                            if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
+        //                            {
+        //                                ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
+        //                                pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
+        //                                return;
+        //                            }
+        //                            else if (pawn.jobs.jobQueue[0].job.targetA.Thing.Map != pawn.Map)
+        //                            {
+        //                                ZTracker.ResetJobTrackerFor(pawn);
+        //                            }
+        //                            else
+        //                            {
+        //                                return;
+        //                            }
+        //                        }
+        //                    }
+        //                    catch (Exception ex)
+        //                    {
+        //                        ZLogger.Message("Error2: " + ex);
+        //                    };
+        //                }
+        //                else
+        //                {
+        //                    ZTracker.jobTracker[pawn] = new JobTracker();
+        //                }
+        //                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
+        //                // minimal job interval check per pawn is 200 ticks
+        //                {
+        //                    return;
+        //                }
+        //                Job result = null;
+        //                var oldMap = pawn.Map;
+        //                var oldPosition = pawn.Position;
+        //                bool select = false;
+        //
+        //                foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+        //                {
+        //                    if (otherMap != oldMap)
+        //                    {
+        //                        if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
+        //                        {
+        //                            return;
+        //                        }
+        //                        ZLogger.Message("Searching figth job for " + pawn);
+        //                        var stairs = new List<Thing>();
+        //
+        //                        ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+        //                            + " for " + ZTracker.GetMapInfo(oldMap));
+        //
+        //                        if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+        //                        {
+        //                            Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+        //                            if (lowerMap != null)
+        //                            {
+        //                                ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
+        //                                stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
+        //                            }
+        //                            else
+        //                            {
+        //                                ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
+        //                            }
+        //                        }
+        //                        else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+        //                        {
+        //                            Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+        //                            if (upperMap != null)
+        //                            {
+        //                                ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
+        //                                stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
+        //                            }
+        //                            else
+        //                            {
+        //                                ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+        //                            }
+        //                        }
+        //                        if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
+        //                        // minimal job interval check per pawn is 200 ticks
+        //                        {
+        //                            return;
+        //                        }
+        //
+        //                        if (stairs != null && stairs.Count() > 0)
+        //                        {
+        //                            var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
+        //                            var position = selectedStairs.Position;
+        //
+        //                            if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+        //                            JobManagerPatches.manualDespawn = true;
+        //                            pawn.DeSpawn();
+        //                            JobManagerPatches.manualDespawn = false;
+        //                            GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
+        //
+        //                            result = JobGiver_AIGotoNearestHostilePatch.TryGiveJob(pawn);
+        //
+        //                            if (result != null)
+        //                            {
+        //                                ZLogger.Message(pawn + " gets food job " + result);
+        //                                ZLogger.Message("TryIssueJobPackage: " + pawn + " - map: " + ZTracker.GetMapInfo(pawn.Map)
+        //                                    + " - " + pawn.Position + " result " + result);
+        //                                JobManagerPatches.manualDespawn = true;
+        //                                pawn.DeSpawn();
+        //                                JobManagerPatches.manualDespawn = false;
+        //                                GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+        //                                if (select) Find.Selector.Select(pawn);
+        //                                ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result, null);
+        //                                break;
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //                if (pawn.Map != oldMap)
+        //                {
+        //                    JobManagerPatches.manualDespawn = true;
+        //                    pawn.DeSpawn();
+        //                    JobManagerPatches.manualDespawn = false;
+        //                    GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+        //                    if (select) Find.Selector.Select(pawn);
+        //                }
+        //                if (result == null)
+        //                {
+        //                    Map playerMap = ZTracker.GetMapByIndex(oldMap.Tile, 0);
+        //                    if (pawn.Map != playerMap)
+        //                    {
+        //                        ZTracker.BuildJobListFor(pawn, oldMap, playerMap, JobMaker.MakeJob(JobDefOf.Wait_Combat, JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange, true), null);
+        //                    }
+        //                }
+        //                try
+        //                {
+        //                    ZLogger.Message("4 lastTick");
+        //                    ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame;
+        //                }
+        //                catch { }
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+        //        }
+        //    }
+        //
+        //    public static Job TryGiveJob(Pawn pawn)
+        //    {
+        //        float num = float.MaxValue;
+        //        Thing thing = null;
+        //        List<IAttackTarget> potentialTargetsFor = pawn.Map.attackTargetsCache.GetPotentialTargetsFor(pawn);
+        //        for (int i = 0; i < potentialTargetsFor.Count; i++)
+        //        {
+        //            IAttackTarget attackTarget = potentialTargetsFor[i];
+        //            if (!attackTarget.ThreatDisabled(pawn) && AttackTargetFinder.IsAutoTargetable(attackTarget))
+        //            {
+        //                Thing thing2 = (Thing)attackTarget;
+        //                int num2 = thing2.Position.DistanceToSquared(pawn.Position);
+        //                if ((float)num2 < num && pawn.CanReach(thing2, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+        //                {
+        //                    num = (float)num2;
+        //                    thing = thing2;
+        //                }
+        //            }
+        //        }
+        //        if (thing != null)
+        //        {
+        //            Job job = JobMaker.MakeJob(JobDefOf.Goto, thing);
+        //            job.checkOverrideOnExpire = true;
+        //            job.expiryInterval = 500;
+        //            job.collideWithPawns = true;
+        //            return job;
+        //        }
+        //        return null;
+        //    }
+        //}
+
+
 
         [HarmonyPatch(typeof(JobGiver_GetFood), "TryGiveJob")]
         public class JobGiver_GetFoodPatch
@@ -917,6 +1371,7 @@ namespace ZLevels
                             if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
                             // minimal job interval check per pawn is 200 ticks
                             {
+                                ZLogger.Message(pawn + " - return 1");
                                 return;
                             }
                             try
@@ -927,6 +1382,7 @@ namespace ZLevels
                                     {
                                         ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                         pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
+                                        ZLogger.Message(pawn + " - return 2");
                                         return;
                                     }
                                     else if (pawn.jobs.jobQueue[0].job.targetA.Thing.Map != pawn.Map)
@@ -935,6 +1391,7 @@ namespace ZLevels
                                     }
                                     else
                                     {
+                                        ZLogger.Message(pawn + " - return 3");
                                         return;
                                     }
                                 }
@@ -951,8 +1408,10 @@ namespace ZLevels
                         if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
                         // minimal job interval check per pawn is 200 ticks
                         {
+                            ZLogger.Message(pawn + " - return 4");
                             return;
                         }
+
                         ThinkResult result;
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
@@ -967,57 +1426,62 @@ namespace ZLevels
                             if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
                             // minimal job interval check per pawn is 200 ticks
                             {
+                                ZLogger.Message(pawn + " - return 7");
                                 return;
                             }
-
-                            ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
-                                + " for " + ZTracker.GetMapInfo(oldMap));
 
                             if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
                             // minimal job interval check per pawn is 200 ticks
                             {
+                                ZLogger.Message(pawn + " - return 8");
                                 return;
                             }
-                            if (oldMap != otherMap)
-                            {
-                                var stairs = new List<Thing>();
-                                if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                                {
-                                    Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                    if (lowerMap != null)
-                                    {
-                                        ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
-                                        stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
-                                    }
-                                    else
-                                    {
-                                        ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                                    }
-                                }
-                                else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                                {
-                                    Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                    if (upperMap != null)
-                                    {
-                                        ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
-                                        stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
-                                    }
-                                    else
-                                    {
-                                        ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                                    }
-                                }
-                                if (stairs != null && stairs.Count() > 0)
-                                {
-                                    var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
-                                    var position = selectedStairs.Position;
 
-                                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                                    JobManagerPatches.manualDespawn = true;
-                                    pawn.DeSpawn();
-                                    JobManagerPatches.manualDespawn = false;
-                                    GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
+                            var stairs = new List<Thing>();
+                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+                            {
+                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                                if (lowerMap != null)
+                                {
+                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
                                 }
+                                else
+                                {
+                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
+                                }
+                            }
+                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                            {
+                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                                if (upperMap != null)
+                                {
+                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
+                                }
+                                else
+                                {
+                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                                }
+                            }
+                            if (stairs != null && stairs.Count() > 0)
+                            {
+                                var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
+                                var position = selectedStairs.Position;
+                            
+                                if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                                JobManagerPatches.manualDespawn = true;
+                                pawn.DeSpawn();
+                                JobManagerPatches.manualDespawn = false;
+                                GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
+                            }
+                            else if (pawn.Map != otherMap)
+                            {
+                                if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                                JobManagerPatches.manualDespawn = true;
+                                pawn.DeSpawn();
+                                JobManagerPatches.manualDespawn = false;
+                                GenPlace.TryPlaceThing(pawn, oldPosition, otherMap, ThingPlaceMode.Direct);
                             }
 
 
@@ -1029,6 +1493,8 @@ namespace ZLevels
                             //}
                             //catch { };
                             Map dest = null;
+                            ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map)
+                                + " for " + ZTracker.GetMapInfo(oldMap));
                             result = TryIssueJobPackage(pawn, jobParams, __instance, __instance.emergency, ref dest);
                             if (result.Job != null)
                             {
@@ -1062,11 +1528,17 @@ namespace ZLevels
                             pawn.DeSpawn();
                             JobManagerPatches.manualDespawn = false;
                             GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-                            if (select) Find.Selector.Select(pawn);
                         }
+                        if (pawn.Position != oldPosition)
+                        {
+                            pawn.Position = oldPosition;
+                        }
+
+                        if (select) Find.Selector.Select(pawn);
                     }
                     try
                     {
+                        ZLogger.Message("2 lastTick");
                         ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame;
                     }
                     catch { }
@@ -1466,11 +1938,11 @@ namespace ZLevels
                     {
                         break;
                     }
+
                     if (!PawnCanUseWorkGiver(pawn, workGiver))
                     {
                         continue;
                     }
-
                     try
                     {
 
@@ -1843,24 +2315,46 @@ namespace ZLevels
                 return ThinkResult.NoJob;
             }
 
+            private static bool HaulShouldSkip(Pawn pawn, WorkGiver giver)
+            {
+                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                foreach (var map in ZTracker.GetAllMaps(pawn.Map.Tile))
+                {
+                    if (map.listerHaulables.ThingsPotentiallyNeedingHauling().Count > 0)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             private static bool PawnCanUseWorkGiver(Pawn pawn, WorkGiver giver)
             {
                 if (!giver.def.nonColonistsCanDo && !pawn.IsColonist)
                 {
+                    ZLogger.Message(pawn + " cannot use " + giver + " - reason: !giver.def.nonColonistsCanDo && !pawn.IsColonist");
                     return false;
                 }
                 if (pawn.WorkTagIsDisabled(giver.def.workTags))
                 {
+                    ZLogger.Message(pawn + " cannot use " + giver + " - reason: pawn.WorkTagIsDisabled(giver.def.workTags)");
                     return false;
                 }
-                if (giver.ShouldSkip(pawn))
+                if (giver is WorkGiver_Haul)
                 {
+
+                }
+                else if (giver.ShouldSkip(pawn))
+                {
+                    ZLogger.Message(pawn + " cannot use " + giver + " - reason: giver.ShouldSkip(pawn)");
                     return false;
                 }
                 if (giver.MissingRequiredCapacity(pawn) != null)
                 {
+                    ZLogger.Message(pawn + " cannot use " + giver + " - reason: giver.MissingRequiredCapacity(pawn) != null");
                     return false;
                 }
+                ZLogger.Message(pawn + " can use " + giver);
                 return true;
             }
 

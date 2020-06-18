@@ -108,7 +108,7 @@ namespace ZLevels
                         {
                             if (this.visitedPawns == null) this.visitedPawns = new HashSet<string>();
                             var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-
+            
                             if (!this.visitedPawns.Contains(pawn.ThingID))
                             {
                                 Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
