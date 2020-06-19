@@ -653,7 +653,7 @@ namespace ZLevels
                             }
                             else
                             {
-                                ZLogger.Message(pawn + " failed " + job);
+                                ZLogger.Message(pawn + " in " + this.GetMapInfo(pawn.Map) + " failed " + job);
                             }
                         }
                         else
@@ -669,6 +669,7 @@ namespace ZLevels
                         this.ResetJobs(pawn);
                         //Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
                     }
+
                     try
                     {
                         foreach (var d in this.jobTracker)
@@ -685,6 +686,7 @@ namespace ZLevels
                         }
                     }
                     catch { }
+
                     return true;
                 }
             }
