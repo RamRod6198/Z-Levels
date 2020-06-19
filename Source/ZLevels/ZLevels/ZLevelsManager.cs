@@ -1017,58 +1017,6 @@ namespace ZLevels
                     }
                 }
                 catch { };
-                var text = "You have created a new level! Congratulation! However, due to the fact that the " +
-                    "Z-Levels are in beta stage and have bugs, it is necessary to check if the information below " +
-                    "is correct. Check if the underground levels, normal player map and the upper levels " +
-                    "in which the pawns are located, are indicated correctly or if the list does not have null maps. " +
-                    "If this is not so, then this is a bug and Z-Levels were created incorrectly. " +
-                    "Let the Z-Levels developers know about it and attach your Hugslib log during " +
-                    "when the wrong map was created.\n" +
-                    "This window will be removed from the mod as soon as the Z-levels are stable. " +
-                    "Thank you for understanding.\n------------\n";
-
-                foreach (var map in this.GetAllMaps(mapToTeleport.Tile))
-                {
-                    if (map.mapPawns.AllPawns.Where(x => x.IsColonist).Count() == 0)
-                    {
-                        if (this.GetZIndexFor(map) < 0)
-                        {
-                            text += "Map - " + this.GetMapInfo(map) + " - Underground\n";
-                        }
-                        else if (this.GetZIndexFor(map) > 0)
-                        {
-                            text += "Map - " + this.GetMapInfo(map) + " - Upper level\n";
-                        }
-                        else
-                        {
-                            text += "Map - " + this.GetMapInfo(map) + " - Normal player map\n";
-                        }
-                    }
-                    else if (map != null)
-                    {
-                        foreach (var pawn in map.mapPawns.AllPawns.Where(x => x.IsColonist))
-                        {
-                            if (this.GetZIndexFor(map) < 0)
-                            {
-                                text += pawn + " - " + this.GetMapInfo(map) + " - Underground\n";
-                            }
-                            else if (this.GetZIndexFor(map) > 0)
-                            {
-                                text += pawn + " - " + this.GetMapInfo(map) + " - Upper level\n";
-                            }
-                            else
-                            {
-                                text += pawn + " - " + this.GetMapInfo(map) + " - Normal player map\n";
-                            }
-                        }
-                    }
-                    else
-                    {
-                        text += "Null map - " + this.GetMapInfo(map) + " - Broken map, report the devs about it\n";
-                    }
-                }
-                Find.WindowStack.Add(new Dialog_MessageBox(text, "Close".Translate(),
-                null, null, null, null, false, null, null));
             }
 
             FloodFillerFog.FloodUnfog(pawnToTeleport.Position, mapToTeleport);
