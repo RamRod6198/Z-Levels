@@ -92,7 +92,6 @@ namespace ZLevels
 					drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 10f);
 					drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 10f);
 					var newGraphic = t.Graphic.GetCopy(drawSize);
-					ZLogger.Message(curLevel + " - origin: " + t.Graphic.drawSize + " - scaled: " + newGraphic.drawSize + " - " + (1f - (((float)(curLevel) - (float)baseLevel) / 10f)));
 					newGraphic.Print(this, t);
 				}
 			}
