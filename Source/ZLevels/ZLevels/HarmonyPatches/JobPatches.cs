@@ -948,6 +948,69 @@ namespace ZLevels
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                     ZLogger.Message(pawn + " Original joy result: " + __result);
+                    ZLogger.Message(pawn + " Current job: " + pawn.CurJob);
+
+                    try
+                    {
+                        if (pawn.jobs.jobQueue.Count > 0)
+                        {
+                            ZLogger.Message(pawn + " 1 taking job instead: " + pawn.jobs.jobQueue[0].job);
+                            __result = pawn.jobs.jobQueue[0].job;
+                            pawn.jobs.jobQueue.Dequeue();
+                            try
+                            {
+                                ZTracker.jobTracker[pawn].lastTickJoy = Find.TickManager.TicksGame;
+                            }
+                            catch { }
+                            try
+                            {
+                                ZLogger.Message("ZTracker.jobTracker[pawn].activeJobs.Count > 0");
+                                ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
+                                ZLogger.Message(pawn + " - ZTracker.jobTracker[pawn].activeJobs[0]: " + ZTracker.jobTracker[pawn].activeJobs[0]);
+                                foreach (var job in pawn.jobs.jobQueue)
+                                {
+                                    ZLogger.Message(pawn + " - job in pawn queue: " + job.job);
+                                }
+                                foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
+                                {
+                                    ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
+                                }
+                            }
+                            catch { };
+                            return;
+                        }
+                        //else if (ZTracker.jobTracker[pawn].activeJobs.Count > 0)
+                        //{
+                        //    ZLogger.Message(pawn + " 2 taking job instead: " + ZTracker.jobTracker[pawn].activeJobs[0]);
+                        //    __result = ZTracker.jobTracker[pawn].activeJobs[0];
+                        //    ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                        //    try
+                        //    {
+                        //        ZLogger.Message("ZTracker.jobTracker[pawn].activeJobs.Count > 0");
+                        //        ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
+                        //        ZLogger.Message(pawn + " - ZTracker.jobTracker[pawn].activeJobs[0]: " + ZTracker.jobTracker[pawn].activeJobs[0]);
+                        //        foreach (var job in pawn.jobs.jobQueue)
+                        //        {
+                        //            ZLogger.Message(pawn + " - job in pawn queue: " + job.job);
+                        //        }
+                        //        foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
+                        //        {
+                        //            ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
+                        //        }
+                        //    }
+                        //    catch { };
+                        //    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+                        //    return;
+                        //}
+                        else
+                        {
+                            ZLogger.Message(pawn + " cant start new job");
+                        }
+                    }
+                    catch (Exception ex) 
+                    {
+                        Log.Error("Error: " + ex);
+                    }
                     if (pawn.def.race.Humanlike && (__result == null || __result?.def?.defName == "Meditate"
                         || __result.def.defName == "Skygaze") && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                     {
@@ -955,6 +1018,7 @@ namespace ZLevels
                         {
                             if (Rand.Chance(0.1f))
                             {
+                                ZLogger.Message(pawn + " returns to original joy " + __result);
                                 return;
                             }
                         }
@@ -1013,6 +1077,7 @@ namespace ZLevels
                         if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickJoy < 200)
                         // minimal job interval check per pawn is 200 ticks
                         {
+                            ZLogger.Message(pawn + " exceeded joy tick limit");
                             return;
                         }
                         Job result;
@@ -1111,6 +1176,10 @@ namespace ZLevels
                             ZTracker.jobTracker[pawn].lastTickJoy = Find.TickManager.TicksGame;
                         }
                         catch { }
+                    }
+                    else
+                    {
+                        ZLogger.Message(pawn + " doing original joy " + __result);
                     }
                 }
                 catch (Exception ex)
@@ -1726,33 +1795,23 @@ namespace ZLevels
                 {
                     num = 0;
                 }
-                IntVec3 intVec = IntVec3.Invalid;
                 for (int i = 0; i < count; i++)
                 {
-                    intVec = cellsList[i];
+                    IntVec3 intVec = cellsList[i];
+                    ZLogger.Message("Checking " + intVec + " in " + slotGroup + " in " + slotGroup.parent.Map);
                     float num2 = (float)(a - intVec).LengthHorizontalSquared;
                     if (num2 <= closestDistSquared && IsGoodStoreCell(intVec, map, t, carrier, faction, oldMap))
                     {
                         closestSlot = intVec;
+                        dest = slotGroup.parent.Map;
                         closestDistSquared = num2;
                         foundPriority = slotGroup.Settings.Priority;
+                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        ZLogger.Message("RESULT: " + carrier + " - " + slotGroup.parent + " - " + ZTracker.GetMapInfo(slotGroup.parent.Map) + " accepts " + t + " in " + ZTracker.GetMapInfo(dest), true);
                         if (i >= num)
                         {
                             break;
                         }
-                    }
-                }
-                if (intVec.IsValid)
-                {
-                    dest = slotGroup.parent.Map;
-                    try
-                    {
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                        ZLogger.Message("RESULT: " + carrier + " - " + slotGroup.parent + " - " + ZTracker.GetMapInfo(slotGroup.parent.Map) + " accepts " + t + " in " + ZTracker.GetMapInfo(dest), true);
-                    }
-                    catch (Exception ex)
-                    {
-                        ZLogger.Message("Cant find result: " + ex);
                     }
                 }
             }
@@ -2318,7 +2377,8 @@ namespace ZLevels
                                     job3.count = bestTargetOfLastPriority.Thing.stackCount;
                                 }
                                 ZLogger.Message(pawn + " tasked to haul " + bestTargetOfLastPriority.Thing +
-                                    " to " + foundCell + " to dest " + ZTracker.GetMapInfo(dest), true);
+                                    " to " + foundCell + " to dest " + ZTracker.GetMapInfo(dest) 
+                                    + " result job: " + job3 , true);
                             }
                             else
                             {
