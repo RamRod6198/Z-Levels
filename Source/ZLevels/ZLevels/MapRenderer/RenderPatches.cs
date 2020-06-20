@@ -41,12 +41,12 @@ namespace ZLevels
 						foreach (Thing thing in drawThings)
 						{
 							IntVec3 position = thing.Position;
-							if ((cellRect.Contains(position) || thing.def.drawOffscreen) 
-								&& (!fogGrid[cellIndices.CellToIndex(position)] 
-								|| thing.def.seeThroughFog) && (thing.def.hideAtSnowDepth >= 1f 
-								|| map2.snowGrid.GetDepth(position) <= thing.def.hideAtSnowDepth))
+							if (position.GetTerrain(map) == ZLevelsDefOf.ZL_OutsideTerrain)
 							{
-								if (position.GetTerrain(map) == ZLevelsDefOf.ZL_OutsideTerrain)
+								if ((cellRect.Contains(position) || thing.def.drawOffscreen)
+									&& (!fogGrid[cellIndices.CellToIndex(position)]
+									|| thing.def.seeThroughFog) && (thing.def.hideAtSnowDepth >= 1f
+									|| map2.snowGrid.GetDepth(position) <= thing.def.hideAtSnowDepth))
 								{
 									try
 									{
@@ -86,10 +86,10 @@ namespace ZLevels
 									{
 										Log.Error(string.Concat(new object[]
 										{
-										"Exception drawing ",
-										thing,
-										": ",
-										ex.ToString()
+											"Exception drawing ",
+											thing,
+											": ",
+											ex.ToString()
 										}), false);
 									}
 								}
