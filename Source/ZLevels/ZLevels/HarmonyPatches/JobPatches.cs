@@ -1449,14 +1449,13 @@ namespace ZLevels
         [HarmonyPatch(typeof(JobGiver_Work), "TryIssueJobPackage")]
         public class TryIssueJobPackagePatch
         {
-            [HarmonyPostfix]
-            private static void TryIssueJobPackagePostfix(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
+            [HarmonyPrefix]
+            private static bool TryIssueJobPackagePostfix(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
             {
                 try
                 {
-                    ZLogger.Message(pawn + " original job " + __result.Job);
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    if (__result.Job == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
+                    if (ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                     {
                         try
                         {
@@ -1468,7 +1467,7 @@ namespace ZLevels
                                 ZLogger.Message("pawn.needs.food.CurCategory: " + pawn.needs.food.CurCategory);
                                 ZLogger.Message("pawn.needs.joy.CurCategory: " + pawn.needs.joy.CurCategory);
                                 ZLogger.Message("pawn.needs.rest.CurCategory: " + pawn.needs.rest.CurCategory);
-                                return;
+                                return false;
                             }
                         }
                         catch { };
@@ -1482,7 +1481,7 @@ namespace ZLevels
                             // minimal job interval check per pawn is 200 ticks
                             {
                                 ZLogger.Message(pawn + " - return 1");
-                                return;
+                                return false;
                             }
                             try
                             {
@@ -1495,7 +1494,7 @@ namespace ZLevels
                                             ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                             pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
                                             ZLogger.Message(pawn + " - return 2");
-                                            return;
+                                            return false;
                                         }
                                     }
                                     else if (pawn.jobs.curJob == null)
@@ -1520,8 +1519,7 @@ namespace ZLevels
 
                                         //pawn.jobs.jobQueue.EnqueueFirst(ZTracker.jobTracker[pawn].activeJobs[0]);
                                         //ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-
-                                        return;
+                                        return false;
                                     }
                                     else if (pawn.jobs.curJob != ZTracker.jobTracker[pawn].activeJobs[0])
                                     {
@@ -1553,147 +1551,22 @@ namespace ZLevels
                         // minimal job interval check per pawn is 200 ticks
                         {
                             ZLogger.Message(pawn + " - return 4");
-                            return;
+                            return false;
                         }
-
-                        ThinkResult result;
-                        var oldMap = pawn.Map;
-                        var oldPosition = pawn.Position;
-                        bool select = false;
-
-                        ZLogger.Message("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        ZLogger.Message(pawn + " - old map: " + oldMap);
-
-                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+                        TryIssueJobPackage(pawn, jobParams, __instance, __instance.emergency);
+                        try
                         {
-                            ZLogger.Message(pawn + " - other map: " + otherMap);
-                            if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
-                            // minimal job interval check per pawn is 200 ticks
-                            {
-                                ZLogger.Message(pawn + " - return 7");
-                                return;
-                            }
-
-                            if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
-                            // minimal job interval check per pawn is 200 ticks
-                            {
-                                ZLogger.Message(pawn + " - return 8");
-                                return;
-                            }
-
-                            var stairs = new List<Thing>();
-                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                if (lowerMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                if (upperMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-                            if (stairs != null && stairs.Count() > 0)
-                            {
-                                var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
-                                var position = selectedStairs.Position;
-
-                                if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                                JobManagerPatches.manualDespawn = true;
-                                pawn.DeSpawn();
-                                JobManagerPatches.manualDespawn = false;
-                                GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-                            }
-                            else if (pawn.Map != oldMap && otherMap == oldMap)
-                            {
-                                if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                                JobManagerPatches.manualDespawn = true;
-                                pawn.DeSpawn();
-                                JobManagerPatches.manualDespawn = false;
-                                if (oldPosition.GetTerrain(oldMap) == ZLevelsDefOf.ZL_OutsideTerrain)
-                                {
-                                    var pos = IntVec3.Invalid;
-                                    if (CellFinder.TryFindRandomCellNear(oldPosition, oldMap, 100,
-                                        (IntVec3 c) => c.Walkable(oldMap), out pos))
-                                    {
-                                        GenPlace.TryPlaceThing(pawn, pos, oldMap, ThingPlaceMode.Direct);
-                                    }
-                                }
-                                else
-                                {
-                                    GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-                                }
-                            }
-
-                            Map dest = null;
-                            ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map)
-                                + " for " + ZTracker.GetMapInfo(oldMap));
-                            result = TryIssueJobPackage(pawn, jobParams, __instance, __instance.emergency, ref dest);
-                            if (result.Job != null)
-                            {
-                                ZLogger.Message(pawn + " got job " + result + " - map: "
-                                    + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
-                                if (pawn.Map != oldMap)
-                                {
-                                    JobManagerPatches.manualDespawn = true;
-                                    pawn.DeSpawn();
-                                    JobManagerPatches.manualDespawn = false;
-                                    GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-                                    if (select) Find.Selector.Select(pawn);
-                                }
-
-                                if (dest != null)
-                                {
-                                    ZTracker.BuildJobListFor(pawn, oldMap, dest, result.Job, null);
-                                }
-                                else
-                                {
-                                    ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result.Job, null);
-                                }
-                                break;
-                            }
+                            //ZLogger.Message("2 lastTick");
+                            ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame;
                         }
-
-                        if (pawn.Map != oldMap)
-                        {
-                            JobManagerPatches.manualDespawn = true;
-                            pawn.DeSpawn();
-                            JobManagerPatches.manualDespawn = false;
-                            GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-                        }
-                        if (pawn.Position != oldPosition)
-                        {
-                            pawn.Position = oldPosition;
-                        }
-
-                        if (select) Find.Selector.Select(pawn);
+                        catch { }
                     }
-                    try
-                    {
-                        //ZLogger.Message("2 lastTick");
-                        ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame;
-                    }
-                    catch { }
                 }
                 catch (Exception ex)
                 {
                     Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
                 }
+                return true;
             }
 
             public static bool TryFindBestBetterStoreCellForValidator(Thing t, Pawn carrier, Map mapToSearch,
@@ -2042,8 +1915,17 @@ namespace ZLevels
                 }
                 return null;
             }
-            public static ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams, JobGiver_Work instance, bool emergency, ref Map dest)
+
+            public static void TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams, JobGiver_Work instance, bool emergency)
             {
+                ThinkResult result = new ThinkResult();
+                var oldMap = pawn.Map;
+                var oldPosition = pawn.Position;
+                bool select = false;
+                Map dest = null;
+
+                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+
                 if (emergency && pawn.mindState.priorityWork.IsPrioritized)
                 {
                     List<WorkGiverDef> workGiversByPriority = pawn.mindState.priorityWork.WorkGiver.workType.workGiversByPriority;
@@ -2056,7 +1938,13 @@ namespace ZLevels
                             if (job != null)
                             {
                                 job.playerForced = true;
-                                return new ThinkResult(job, instance, workGiversByPriority[i].tagToGive);
+                                result = new ThinkResult(job, instance, workGiversByPriority[i].tagToGive);
+                                if (result.Job != null)
+                                {
+                                    ZLogger.Message(pawn + " 1 got job " + result + " - map: "
+                                        + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
+                                    ZTracker.BuildJobListFor(pawn, pawn.Map, pawn.Map, result.Job, null);
+                                }
                             }
                         }
                     }
@@ -2073,387 +1961,515 @@ namespace ZLevels
                 bool prioritized;
                 bool allowUnreachable;
                 Danger maxPathDanger;
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                 for (int j = 0; j < list.Count; j++)
                 {
-                    WorkGiver workGiver = list[j];
-                    if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
+                    ZLogger.Message(pawn + " - old map: " + oldMap + " - " + result.Job);
+                    if (result.Job == null)
                     {
-                        break;
-                    }
-
-                    if (!PawnCanUseWorkGiver(pawn, workGiver))
-                    {
-                        continue;
-                    }
-                    try
-                    {
-
-                        Job job2 = workGiver.NonScanJob(pawn);
-                        if (job2 != null)
+                        WorkGiver workGiver = list[j];
+                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                         {
-                            return new ThinkResult(job2, instance, list[j].def.tagToGive);
-                        }
+                            ZLogger.Message(workGiver + " - searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                    + " for " + ZTracker.GetMapInfo(oldMap));
 
-                        scanner = (workGiver as WorkGiver_Scanner);
-                        if (scanner != null)
-                        {
-                            if (scanner.def.scanThings)
+                            var stairs = new List<Thing>();
+                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
                             {
-                                Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) &&
-                                scanner.HasJobOnThing(pawn, t);
-
-                                Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn) &&
-                                    JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn, t) != null;
-
-                                Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn) &&
-                                TryIssueJobPackagePatch.HasJobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null;
-
-                                IntVec3 foundCell;
-                                Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn)
-                                && pawn?.carryTracker?.AvailableStackSpace(t?.def) > 0
-                                && pawn?.carryTracker?.MaxStackSpaceEver(t?.def) > 0
-                                && pawn.CanReserve(t, 1, -1, null, false)
-                                && TryIssueJobPackagePatch.TryFindBestBetterStoreCellForValidator(t,
-                                pawn, t.Map, StoreUtility.CurrentStoragePriorityOf(t), pawn.Faction,
-                                out foundCell, true);
-
-                                IEnumerable<Thing> enumerable;
-
-                                if (scanner is WorkGiver_HaulGeneral)
+                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                                if (lowerMap != null)
                                 {
-                                    ZLogger.Message(pawn + " - pawn.map: " + pawn.Map);
-                                    var allZones = new Dictionary<Zone_Stockpile, Map>();
-                                    var allMaps = ZTracker.GetAllMaps(pawn.Map.Tile);
-                                    foreach (Map map in allMaps)
-                                    {
-                                        foreach (var zone in map.zoneManager.AllZones.Where(x => x is Zone_Stockpile))
-                                        {
-                                            ZLogger.Message("Adding " + zone + " in " + ZTracker.GetMapInfo(zone.Map) + " - " + ZTracker.GetMapInfo(map));
-                                            allZones[(Zone_Stockpile)zone] = map;
-                                        }
-                                    }
-
-                                    List<Zone_Stockpile> copiedZones = new List<Zone_Stockpile>();
-                                    IntVec3 newPosition2 = IntVec3.Invalid;
-                                    foreach (Map map in allMaps)
-                                    {
-                                        foreach (var zone in allZones)
-                                        {
-                                            if (zone.Key.Map != pawn.Map)
-                                            {
-                                                var newZone = new Zone_Stockpile();
-                                                newZone.settings = zone.Key.settings;
-                                                newZone.label = zone.Key.label + " - Copy";
-                                                foreach (IntVec3 intVec in zone.Key.cells)
-                                                {
-                                                    var newPosition = (intVec - zone.Key.Position) + pawn.Position;
-                                                    if (newPosition.GetZone(pawn.Map) == null && newPosition.GetSlotGroup(pawn.Map) == null)
-                                                    {
-                                                        newZone.cells.Add(newPosition);
-                                                    }
-                                                    else if (CellFinder.TryFindRandomCellNear
-                                                        (newPosition, map, 1000, (IntVec3 c) => c.Walkable(map)
-                                                        && c.GetZone(map) == null && c.GetSlotGroup(pawn.Map) == null
-                                                        && GenGrid.InBounds(c, map), out newPosition2))
-                                                    {
-                                                        newZone.cells.Add(newPosition2);
-                                                    }
-                                                }
-                                                newZone.zoneManager = pawn.Map.zoneManager;
-                                                ZLogger.Message("Registering " + newZone + " in " + ZTracker.GetMapInfo(pawn.Map));
-                                                pawn.Map.zoneManager.RegisterZone(newZone);
-                                                //ZLogger.Message("Adding " + newZone + " to " + ZTracker.GetMapInfo(pawn.Map));
-                                                copiedZones.Add(newZone);
-                                            }
-                                        }
-                                    }
-
-                                    foreach (var t in pawn.Map.listerThings.AllThings.Where(x => x.def.EverHaulable))
-                                    {
-                                        pawn.Map.listerHaulables.RecalcAllInCell(t.Position);
-                                        pawn.Map.listerMergeables.RecalcAllInCell(t.Position);
-                                    }
-
-                                    enumerable = pawn.Map.listerHaulables.ThingsPotentiallyNeedingHauling();
-
-                                    foreach (var zone in copiedZones)
-                                    {
-                                        pawn.Map.zoneManager.DeregisterZone(zone);
-                                    }
-                                    //ZLogger.Message("--------------------", true);
-
+                                    //ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
                                 }
                                 else
                                 {
-                                    enumerable = scanner.PotentialWorkThingsGlobal(pawn);
-                                }
-                                Thing thing = null;
-                                if (scanner.Prioritized)
-                                {
-                                    IEnumerable<Thing> enumerable2 = enumerable;
-                                    if (enumerable2 == null)
-                                    {
-                                        enumerable2 = pawn.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
-                                    }
-                                    thing = ((!scanner.AllowUnreachable) ? GenClosest.ClosestThing_Global_Reachable(pawn.Position, pawn.Map, enumerable2, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, (Thing x) => scanner.GetPriority(pawn, x)) : GenClosest.ClosestThing_Global(pawn.Position, enumerable2, 99999f, validator, (Thing x) => scanner.GetPriority(pawn, x)));
-                                }
-                                else if (scanner.AllowUnreachable)
-                                {
-                                    IEnumerable<Thing> enumerable3 = enumerable;
-                                    if (enumerable3 == null)
-                                    {
-                                        enumerable3 = pawn.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
-                                    }
-                                    thing = GenClosest.ClosestThing_Global(pawn.Position, enumerable3, 99999f, validator);
-                                }
-                                else
-                                {
-                                    if (scanner is WorkGiver_HaulGeneral)
-                                    {
-                                        thing = GenClosest.ClosestThingReachable
-                                            (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
-                                            scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)),
-                                            9999f, haulingValidator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
-                                            enumerable != null);
-                                        try
-                                        {
-                                            if (enumerable != null)
-                                            {
-                                                ZLogger.Message("Try get thing from enumerable: " + enumerable.Count(), true);
-                                            }
-                                            if (thing != null)
-                                            {
-                                                ZLogger.Message("Get thing: " + thing + " in " + thing.Map + " for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true);
-                                            }
-                                            else
-                                            {
-                                                ZLogger.Message("Cant get thing for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true);
-                                            }
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            ZLogger.Message(ex.ToString());
-                                        };
-                                    }
-
-                                    else if (scanner is WorkGiver_DoBill)
-                                    {
-                                        try
-                                        {
-                                            //thing = GenClosest.ClosestThingReachable
-                                            //    (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
-                                            //    scanner.PathEndMode, TraverseParms.For(pawn,
-                                            //    scanner.MaxPathDanger(pawn)), 9999f, validator,
-                                            //    enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
-                                            //    enumerable != null);
-                                            thing = GenClosest.ClosestThingReachable
-                                                (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
-                                                scanner.PathEndMode, TraverseParms.For(pawn,
-                                                scanner.MaxPathDanger(pawn)), 9999f, billValidator,
-                                                enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
-                                                enumerable != null);
-                                            //ZLogger.Message("Get thing: " + thing + " in " + pawn.Map);
-                                        }
-                                        catch { };
-
-                                    }
-                                    else if (scanner is WorkGiver_ConstructDeliverResourcesToBlueprints)
-                                    {
-                                        thing = GenClosest.ClosestThingReachable
-                                            (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
-                                            scanner.PathEndMode, TraverseParms.For(pawn,
-                                            scanner.MaxPathDanger(pawn)), 9999f, deliverResourcesValidator,
-                                            enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
-                                            enumerable != null);
-                                    }
-                                    else
-                                    {
-                                        thing = GenClosest.ClosestThingReachable
-                                            (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
-                                            scanner.PathEndMode, TraverseParms.For(pawn,
-                                            scanner.MaxPathDanger(pawn)), 9999f, validator,
-                                            enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
-                                            enumerable != null);
-                                    }
-                                    if (thing != null)
-                                    {
-                                        ZLogger.Message(pawn + " - " + ZTracker.GetMapInfo(pawn.Map) + " - " + scanner + " Selected thing: " + thing);
-                                    }
-                                }
-                                if (thing != null)
-                                {
-                                    bestTargetOfLastPriority = thing;
-                                    scannerWhoProvidedTarget = scanner;
+                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
                                 }
                             }
-                            if (scanner.def.scanCells)
+                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
                             {
-                                pawnPosition = pawn.Position;
-                                closestDistSquared = 99999f;
-                                bestPriority = float.MinValue;
-                                prioritized = scanner.Prioritized;
-                                allowUnreachable = scanner.AllowUnreachable;
-                                maxPathDanger = scanner.MaxPathDanger(pawn);
-                                IEnumerable<IntVec3> enumerable4 = scanner.PotentialWorkCellsGlobal(pawn);
-                                IList<IntVec3> list2;
-                                if ((list2 = (enumerable4 as IList<IntVec3>)) != null)
+                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                                if (upperMap != null)
                                 {
-                                    for (int k = 0; k < list2.Count; k++)
+                                    //ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
+                                }
+                                else
+                                {
+                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                                }
+                            }
+                            if (stairs != null && stairs.Count() > 0)
+                            {
+                                var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
+                                var position = selectedStairs.Position;
+
+                                if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                                JobManagerPatches.manualDespawn = true;
+                                pawn.DeSpawn();
+                                JobManagerPatches.manualDespawn = false;
+                                GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
+                            }
+                            else if (pawn.Map != oldMap && otherMap == oldMap)
+                            {
+                                if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                                JobManagerPatches.manualDespawn = true;
+                                pawn.DeSpawn();
+                                JobManagerPatches.manualDespawn = false;
+                                if (oldPosition.GetTerrain(oldMap) == ZLevelsDefOf.ZL_OutsideTerrain)
+                                {
+                                    var pos = IntVec3.Invalid;
+                                    if (CellFinder.TryFindRandomCellNear(oldPosition, oldMap, 100,
+                                        (IntVec3 c) => c.Walkable(oldMap), out pos))
                                     {
-                                        ProcessCell(list2[k]);
+                                        GenPlace.TryPlaceThing(pawn, pos, oldMap, ThingPlaceMode.Direct);
                                     }
                                 }
                                 else
                                 {
-                                    foreach (IntVec3 item in enumerable4)
-                                    {
-                                        ProcessCell(item);
-                                    }
+                                    GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
                                 }
                             }
-                        }
 
-                        void ProcessCell(IntVec3 c)
-                        {
-                            bool flag = false;
-                            float num2 = (c - pawnPosition).LengthHorizontalSquared;
-                            float num3 = 0f;
-                            if (prioritized)
+                            if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                             {
-                                if (!c.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, c))
+                                break;
+                            }
+
+                            if (!PawnCanUseWorkGiver(pawn, workGiver))
+                            {
+                                continue;
+                            }
+                            try
+                            {
+
+                                Job job2 = workGiver.NonScanJob(pawn);
+                                if (job2 != null)
                                 {
-                                    if (!allowUnreachable && !pawn.CanReach(c, scanner.PathEndMode, maxPathDanger))
+                                    result = new ThinkResult(job2, instance, list[j].def.tagToGive);
+                                    if (result.Job != null)
                                     {
-                                        return;
-                                    }
-                                    num3 = scanner.GetPriority(pawn, c);
-                                    if (num3 > bestPriority || (num3 == bestPriority && num2 < closestDistSquared))
-                                    {
-                                        flag = true;
-                                    }
-                                }
-                            }
-                            else if (num2 < closestDistSquared && !c.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, c))
-                            {
-                                if (!allowUnreachable && !pawn.CanReach(c, scanner.PathEndMode, maxPathDanger))
-                                {
-                                    return;
-                                }
-                                flag = true;
-                            }
-                            if (flag)
-                            {
-                                bestTargetOfLastPriority = new TargetInfo(c, pawn.Map);
-                                scannerWhoProvidedTarget = scanner;
-                                closestDistSquared = num2;
-                                bestPriority = num3;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(string.Concat(pawn, " threw exception in WorkGiver ", workGiver.def.defName, ": ", ex.ToString()));
-                    }
-                    finally
-                    {
-
-                    }
-                    if (bestTargetOfLastPriority.IsValid)
-                    {
-                        Job job3 = null;
-                        if (scannerWhoProvidedTarget is WorkGiver_HaulGeneral)
-                        {
-                            IntVec3 foundCell;
-                            if (TryIssueJobPackagePatch.TryFindBestBetterStoreCellFor(bestTargetOfLastPriority.Thing,
-                                pawn, bestTargetOfLastPriority.Thing.Map, StoreUtility.CurrentStoragePriorityOf
-                                (bestTargetOfLastPriority.Thing), pawn.Faction, out foundCell, ref dest))
-                            {
-                                job3 = JobMaker.MakeJob(JobDefOf.HaulToCell, bestTargetOfLastPriority.Thing, foundCell);
-                                job3.count = Mathf.Min(bestTargetOfLastPriority.Thing.stackCount,
-                                    (int)(pawn.GetStatValue(StatDefOf.CarryingCapacity, true)
-                                    / bestTargetOfLastPriority.Thing.def.VolumePerUnit));
-                                if (job3.count < 0)
-                                {
-                                    job3.count = bestTargetOfLastPriority.Thing.stackCount;
-                                }
-                            }
-                            else
-                            {
-                                ZLogger.Message("Cant haul " + bestTargetOfLastPriority.Thing + " in " + ZTracker.GetMapInfo(bestTargetOfLastPriority.Thing.Map), true);
-                            }
-                        }
-                        else if (scannerWhoProvidedTarget is WorkGiver_DoBill)
-                        {
-                            job3 = null;
-                            if (!bestTargetOfLastPriority.HasThing)
-                            {
-                                job3 = scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell);
-                            }
-                            else
-                            {
-                                var origMap = bestTargetOfLastPriority.Thing.Map;
-                                var origMap2 = pawn.Map;
-                                foreach (var tempMap in ZTracker.GetAllMaps(pawn.Map.Tile))
-                                {
-                                    try
-                                    {
-                                        Traverse.Create(bestTargetOfLastPriority.Thing).Field("mapIndexOrState")
-                                            .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
-                                        Traverse.Create(pawn).Field("mapIndexOrState")
-                                            .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
-
-                                        ZLogger.Message("JobOnThing: " + bestTargetOfLastPriority.Thing + " searching in "
-                                            + bestTargetOfLastPriority.Thing.Map);
-
-                                        job3 = scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
-                                        if (job3 != null)
+                                        ZLogger.Message(pawn + " 2 got job " + result + " - map: "
+                                            + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
+                                        if (pawn.Map != oldMap)
                                         {
-                                            break;
+                                            JobManagerPatches.manualDespawn = true;
+                                            pawn.DeSpawn();
+                                            JobManagerPatches.manualDespawn = false;
+                                            GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+                                            if (select) Find.Selector.Select(pawn);
+                                        }
+
+                                        if (dest != null)
+                                        {
+                                            ZTracker.BuildJobListFor(pawn, oldMap, dest, result.Job, null);
                                         }
                                         else
                                         {
-                                            ZLogger.Message("No job in " + ZTracker.GetMapInfo(tempMap) + " for " + bestTargetOfLastPriority.Thing
-                                                + " - " + bestTargetOfLastPriority.Thing.Map);
+                                            ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result.Job, null);
                                         }
+                                        break;
                                     }
-                                    catch (Exception ex)
-                                    {
-                                        Log.Error("Z-Levels failed to process DoBill workgiver. Report about it to Z-Levels devs and provide Hugslib log. Error: " + ex, true);
-                                    }
-
                                 }
 
-                                Traverse.Create(bestTargetOfLastPriority.Thing).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(origMap));
+                                scanner = (workGiver as WorkGiver_Scanner);
+                                if (scanner != null)
+                                {
+                                    if (scanner.def.scanThings)
+                                    {
+                                        Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) &&
+                                        scanner.HasJobOnThing(pawn, t);
 
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
+                                        Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn) &&
+                                            JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn, t) != null;
+
+                                        Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn) &&
+                                        TryIssueJobPackagePatch.HasJobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null;
+
+                                        IntVec3 foundCell;
+                                        Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn)
+                                        && pawn?.carryTracker?.AvailableStackSpace(t?.def) > 0
+                                        && pawn?.carryTracker?.MaxStackSpaceEver(t?.def) > 0
+                                        && pawn.CanReserve(t, 1, -1, null, false)
+                                        && TryIssueJobPackagePatch.TryFindBestBetterStoreCellForValidator(t,
+                                        pawn, t.Map, StoreUtility.CurrentStoragePriorityOf(t), pawn.Faction,
+                                        out foundCell, true);
+
+                                        IEnumerable<Thing> enumerable;
+
+                                        if (scanner is WorkGiver_HaulGeneral)
+                                        {
+                                            ZLogger.Message(pawn + " - pawn.map: " + pawn.Map);
+                                            var allZones = new Dictionary<Zone_Stockpile, Map>();
+                                            var allMaps = ZTracker.GetAllMaps(pawn.Map.Tile);
+                                            foreach (Map map in allMaps)
+                                            {
+                                                foreach (var zone in map.zoneManager.AllZones.Where(x => x is Zone_Stockpile))
+                                                {
+                                                    ZLogger.Message("Adding " + zone + " in " + ZTracker.GetMapInfo(zone.Map) + " - " + ZTracker.GetMapInfo(map));
+                                                    allZones[(Zone_Stockpile)zone] = map;
+                                                }
+                                            }
+
+                                            List<Zone_Stockpile> copiedZones = new List<Zone_Stockpile>();
+                                            IntVec3 newPosition2 = IntVec3.Invalid;
+                                            foreach (Map map in allMaps)
+                                            {
+                                                foreach (var zone in allZones)
+                                                {
+                                                    if (zone.Key.Map != pawn.Map)
+                                                    {
+                                                        var newZone = new Zone_Stockpile();
+                                                        newZone.settings = zone.Key.settings;
+                                                        newZone.label = zone.Key.label + " - Copy";
+                                                        foreach (IntVec3 intVec in zone.Key.cells)
+                                                        {
+                                                            var newPosition = (intVec - zone.Key.Position) + pawn.Position;
+                                                            if (newPosition.GetZone(pawn.Map) == null && newPosition.GetSlotGroup(pawn.Map) == null)
+                                                            {
+                                                                newZone.cells.Add(newPosition);
+                                                            }
+                                                            else if (CellFinder.TryFindRandomCellNear
+                                                                (newPosition, map, 1000, (IntVec3 c) => c.Walkable(map)
+                                                                && c.GetZone(map) == null && c.GetSlotGroup(pawn.Map) == null
+                                                                && GenGrid.InBounds(c, map), out newPosition2))
+                                                            {
+                                                                newZone.cells.Add(newPosition2);
+                                                            }
+                                                        }
+                                                        newZone.zoneManager = pawn.Map.zoneManager;
+                                                        ZLogger.Message("Registering " + newZone + " in " + ZTracker.GetMapInfo(pawn.Map));
+                                                        pawn.Map.zoneManager.RegisterZone(newZone);
+                                                        //ZLogger.Message("Adding " + newZone + " to " + ZTracker.GetMapInfo(pawn.Map));
+                                                        copiedZones.Add(newZone);
+                                                    }
+                                                }
+                                            }
+
+                                            foreach (var t in pawn.Map.listerThings.AllThings.Where(x => x.def.EverHaulable))
+                                            {
+                                                pawn.Map.listerHaulables.RecalcAllInCell(t.Position);
+                                                pawn.Map.listerMergeables.RecalcAllInCell(t.Position);
+                                            }
+
+                                            enumerable = pawn.Map.listerHaulables.ThingsPotentiallyNeedingHauling();
+
+                                            foreach (var zone in copiedZones)
+                                            {
+                                                pawn.Map.zoneManager.DeregisterZone(zone);
+                                            }
+                                            //ZLogger.Message("--------------------", true);
+
+                                        }
+                                        else
+                                        {
+                                            enumerable = scanner.PotentialWorkThingsGlobal(pawn);
+                                        }
+                                        Thing thing = null;
+                                        if (scanner.Prioritized)
+                                        {
+                                            IEnumerable<Thing> enumerable2 = enumerable;
+                                            if (enumerable2 == null)
+                                            {
+                                                enumerable2 = pawn.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
+                                            }
+                                            thing = ((!scanner.AllowUnreachable) ? GenClosest.ClosestThing_Global_Reachable(pawn.Position, pawn.Map, enumerable2, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, (Thing x) => scanner.GetPriority(pawn, x)) : GenClosest.ClosestThing_Global(pawn.Position, enumerable2, 99999f, validator, (Thing x) => scanner.GetPriority(pawn, x)));
+                                        }
+                                        else if (scanner.AllowUnreachable)
+                                        {
+                                            IEnumerable<Thing> enumerable3 = enumerable;
+                                            if (enumerable3 == null)
+                                            {
+                                                enumerable3 = pawn.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
+                                            }
+                                            thing = GenClosest.ClosestThing_Global(pawn.Position, enumerable3, 99999f, validator);
+                                        }
+                                        else
+                                        {
+                                            if (scanner is WorkGiver_HaulGeneral)
+                                            {
+                                                thing = GenClosest.ClosestThingReachable
+                                                    (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
+                                                    scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)),
+                                                    9999f, haulingValidator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
+                                                    enumerable != null);
+                                                try
+                                                {
+                                                    if (enumerable != null)
+                                                    {
+                                                        ZLogger.Message("Try get thing from enumerable: " + enumerable.Count(), true);
+                                                    }
+                                                    if (thing != null)
+                                                    {
+                                                        ZLogger.Message("Get thing: " + thing + " in " + thing.Map + " for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true);
+                                                    }
+                                                    else
+                                                    {
+                                                        ZLogger.Message("Cant get thing for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true);
+                                                    }
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    ZLogger.Message(ex.ToString());
+                                                };
+                                            }
+
+                                            else if (scanner is WorkGiver_DoBill)
+                                            {
+                                                try
+                                                {
+                                                    //thing = GenClosest.ClosestThingReachable
+                                                    //    (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
+                                                    //    scanner.PathEndMode, TraverseParms.For(pawn,
+                                                    //    scanner.MaxPathDanger(pawn)), 9999f, validator,
+                                                    //    enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
+                                                    //    enumerable != null);
+                                                    thing = GenClosest.ClosestThingReachable
+                                                        (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
+                                                        scanner.PathEndMode, TraverseParms.For(pawn,
+                                                        scanner.MaxPathDanger(pawn)), 9999f, billValidator,
+                                                        enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
+                                                        enumerable != null);
+                                                    //ZLogger.Message("Get thing: " + thing + " in " + pawn.Map);
+                                                }
+                                                catch { };
+
+                                            }
+                                            else if (scanner is WorkGiver_ConstructDeliverResourcesToBlueprints)
+                                            {
+                                                thing = GenClosest.ClosestThingReachable
+                                                    (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
+                                                    scanner.PathEndMode, TraverseParms.For(pawn,
+                                                    scanner.MaxPathDanger(pawn)), 9999f, deliverResourcesValidator,
+                                                    enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
+                                                    enumerable != null);
+                                            }
+                                            else
+                                            {
+                                                thing = GenClosest.ClosestThingReachable
+                                                    (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
+                                                    scanner.PathEndMode, TraverseParms.For(pawn,
+                                                    scanner.MaxPathDanger(pawn)), 9999f, validator,
+                                                    enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
+                                                    enumerable != null);
+                                            }
+                                            if (thing != null)
+                                            {
+                                                ZLogger.Message(pawn + " - " + ZTracker.GetMapInfo(pawn.Map) + " - " + scanner + " Selected thing: " + thing);
+                                            }
+                                        }
+                                        if (thing != null)
+                                        {
+                                            bestTargetOfLastPriority = thing;
+                                            scannerWhoProvidedTarget = scanner;
+                                        }
+                                    }
+                                    if (scanner.def.scanCells)
+                                    {
+                                        pawnPosition = pawn.Position;
+                                        closestDistSquared = 99999f;
+                                        bestPriority = float.MinValue;
+                                        prioritized = scanner.Prioritized;
+                                        allowUnreachable = scanner.AllowUnreachable;
+                                        maxPathDanger = scanner.MaxPathDanger(pawn);
+                                        IEnumerable<IntVec3> enumerable4 = scanner.PotentialWorkCellsGlobal(pawn);
+                                        IList<IntVec3> list2;
+                                        if ((list2 = (enumerable4 as IList<IntVec3>)) != null)
+                                        {
+                                            for (int k = 0; k < list2.Count; k++)
+                                            {
+                                                ProcessCell(list2[k]);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            foreach (IntVec3 item in enumerable4)
+                                            {
+                                                ProcessCell(item);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                void ProcessCell(IntVec3 c)
+                                {
+                                    bool flag = false;
+                                    float num2 = (c - pawnPosition).LengthHorizontalSquared;
+                                    float num3 = 0f;
+                                    if (prioritized)
+                                    {
+                                        if (!c.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, c))
+                                        {
+                                            if (!allowUnreachable && !pawn.CanReach(c, scanner.PathEndMode, maxPathDanger))
+                                            {
+                                                return;
+                                            }
+                                            num3 = scanner.GetPriority(pawn, c);
+                                            if (num3 > bestPriority || (num3 == bestPriority && num2 < closestDistSquared))
+                                            {
+                                                flag = true;
+                                            }
+                                        }
+                                    }
+                                    else if (num2 < closestDistSquared && !c.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, c))
+                                    {
+                                        if (!allowUnreachable && !pawn.CanReach(c, scanner.PathEndMode, maxPathDanger))
+                                        {
+                                            return;
+                                        }
+                                        flag = true;
+                                    }
+                                    if (flag)
+                                    {
+                                        bestTargetOfLastPriority = new TargetInfo(c, pawn.Map);
+                                        scannerWhoProvidedTarget = scanner;
+                                        closestDistSquared = num2;
+                                        bestPriority = num3;
+                                    }
+                                }
                             }
-                        }
-                        else if (scannerWhoProvidedTarget is WorkGiver_ConstructDeliverResourcesToBlueprints scanner2)
-                        {
-                            job3 = (!bestTargetOfLastPriority.HasThing) ?
-                                scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
-                                : JobOnThing(scanner2, pawn, bestTargetOfLastPriority.Thing);
-                        }
-                        else
-                        {
-                            job3 = (!bestTargetOfLastPriority.HasThing) ?
-                                scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
-                                : scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
-                        }
+                            catch (Exception ex)
+                            {
+                                Log.Error(string.Concat(pawn, " threw exception in WorkGiver ", workGiver.def.defName, ": ", ex.ToString()));
+                            }
+                            finally
+                            {
 
-                        if (job3 != null)
-                        {
-                            job3.workGiverDef = scannerWhoProvidedTarget.def;
-                            return new ThinkResult(job3, instance, list[j].def.tagToGive);
+                            }
+                            if (bestTargetOfLastPriority.IsValid)
+                            {
+                                Job job3 = null;
+                                if (scannerWhoProvidedTarget is WorkGiver_HaulGeneral)
+                                {
+                                    IntVec3 foundCell;
+                                    if (TryIssueJobPackagePatch.TryFindBestBetterStoreCellFor(bestTargetOfLastPriority.Thing,
+                                        pawn, bestTargetOfLastPriority.Thing.Map, StoreUtility.CurrentStoragePriorityOf
+                                        (bestTargetOfLastPriority.Thing), pawn.Faction, out foundCell, ref dest))
+                                    {
+                                        job3 = JobMaker.MakeJob(JobDefOf.HaulToCell, bestTargetOfLastPriority.Thing, foundCell);
+                                        job3.count = Mathf.Min(bestTargetOfLastPriority.Thing.stackCount,
+                                            (int)(pawn.GetStatValue(StatDefOf.CarryingCapacity, true)
+                                            / bestTargetOfLastPriority.Thing.def.VolumePerUnit));
+                                        if (job3.count < 0)
+                                        {
+                                            job3.count = bestTargetOfLastPriority.Thing.stackCount;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        ZLogger.Message("Cant haul " + bestTargetOfLastPriority.Thing + " in " + ZTracker.GetMapInfo(bestTargetOfLastPriority.Thing.Map), true);
+                                    }
+                                }
+                                else if (scannerWhoProvidedTarget is WorkGiver_DoBill)
+                                {
+                                    job3 = null;
+                                    if (!bestTargetOfLastPriority.HasThing)
+                                    {
+                                        job3 = scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell);
+                                    }
+                                    else
+                                    {
+                                        var origMap = bestTargetOfLastPriority.Thing.Map;
+                                        var origMap2 = pawn.Map;
+                                        foreach (var tempMap in ZTracker.GetAllMaps(pawn.Map.Tile))
+                                        {
+                                            try
+                                            {
+                                                Traverse.Create(bestTargetOfLastPriority.Thing).Field("mapIndexOrState")
+                                                    .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
+                                                Traverse.Create(pawn).Field("mapIndexOrState")
+                                                    .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
+
+                                                ZLogger.Message("JobOnThing: " + bestTargetOfLastPriority.Thing + " searching in "
+                                                    + bestTargetOfLastPriority.Thing.Map);
+
+                                                job3 = scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
+                                                if (job3 != null)
+                                                {
+                                                    break;
+                                                }
+                                                else
+                                                {
+                                                    ZLogger.Message("No job in " + ZTracker.GetMapInfo(tempMap) + " for " + bestTargetOfLastPriority.Thing
+                                                        + " - " + bestTargetOfLastPriority.Thing.Map);
+                                                }
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Log.Error("Z-Levels failed to process DoBill workgiver. Report about it to Z-Levels devs and provide Hugslib log. Error: " + ex, true);
+                                            }
+
+                                        }
+
+                                        Traverse.Create(bestTargetOfLastPriority.Thing).Field("mapIndexOrState")
+                                            .SetValue((sbyte)Find.Maps.IndexOf(origMap));
+
+                                        Traverse.Create(pawn).Field("mapIndexOrState")
+                                            .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
+                                    }
+                                }
+                                else if (scannerWhoProvidedTarget is WorkGiver_ConstructDeliverResourcesToBlueprints scanner2)
+                                {
+                                    job3 = (!bestTargetOfLastPriority.HasThing) ?
+                                        scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
+                                        : JobOnThing(scanner2, pawn, bestTargetOfLastPriority.Thing);
+                                }
+                                else
+                                {
+                                    job3 = (!bestTargetOfLastPriority.HasThing) ?
+                                        scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
+                                        : scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
+                                }
+
+                                if (job3 != null)
+                                {
+                                    job3.workGiverDef = scannerWhoProvidedTarget.def;
+                                    result = new ThinkResult(job3, instance, list[j].def.tagToGive);
+                                    if (result.Job != null)
+                                    {
+                                        ZLogger.Message(pawn + " 3 got job " + result + " - map: "
+                                            + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
+                                        if (pawn.Map != oldMap)
+                                        {
+                                            JobManagerPatches.manualDespawn = true;
+                                            pawn.DeSpawn();
+                                            JobManagerPatches.manualDespawn = false;
+                                            GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+                                            if (select) Find.Selector.Select(pawn);
+                                        }
+
+                                        if (dest != null)
+                                        {
+                                            ZTracker.BuildJobListFor(pawn, oldMap, dest, result.Job, null);
+                                        }
+                                        else
+                                        {
+                                            ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result.Job, null);
+                                        }
+                                        break;
+                                    }
+                                }
+                                //Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
+                            }
+                            num = workGiver.def.priorityInType;
                         }
-                        //Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
                     }
-                    num = workGiver.def.priorityInType;
                 }
-                return ThinkResult.NoJob;
+
+                if (pawn.Map != oldMap)
+                {
+                    JobManagerPatches.manualDespawn = true;
+                    pawn.DeSpawn();
+                    JobManagerPatches.manualDespawn = false;
+                    GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+                }
+                if (pawn.Position != oldPosition)
+                {
+                    pawn.Position = oldPosition;
+                }
+                
+                if (select) Find.Selector.Select(pawn);
+
             }
 
             private static bool HaulShouldSkip(Pawn pawn, WorkGiver giver)
