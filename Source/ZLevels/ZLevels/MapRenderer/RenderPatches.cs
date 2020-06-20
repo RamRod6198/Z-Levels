@@ -46,49 +46,52 @@ namespace ZLevels
 								|| thing.def.seeThroughFog) && (thing.def.hideAtSnowDepth >= 1f 
 								|| map2.snowGrid.GetDepth(position) <= thing.def.hideAtSnowDepth))
 							{
-								try
+								if (position.GetTerrain(map) == ZLevelsDefOf.ZL_OutsideTerrain)
 								{
-									if (thing.Graphic is Graphic_Mote || thing.Graphic is Graphic_Linked)
+									try
 									{
+										if (thing.Graphic is Graphic_Mote || thing.Graphic is Graphic_Linked)
+										{
 
+										}
+										else if (thing.Graphic is Graphic_LinkedCornerFiller
+											|| thing.Graphic is Graphic_RandomRotated)
+										{
+											thing.Draw();
+										}
+										else if (thing is Pawn pawn)
+										{
+											var newRenderer = new PawnRendererScaled(pawn);
+											pawn.Drawer.renderer.graphics.ResolveAllGraphics();
+											newRenderer.graphics.nakedGraphic = pawn.Drawer.renderer.graphics.nakedGraphic;
+											newRenderer.graphics.headGraphic = pawn.Drawer.renderer.graphics.headGraphic;
+											newRenderer.graphics.hairGraphic = pawn.Drawer.renderer.graphics.hairGraphic;
+											newRenderer.graphics.rottingGraphic = pawn.Drawer.renderer.graphics.rottingGraphic;
+											newRenderer.graphics.dessicatedGraphic = pawn.Drawer.renderer.graphics.dessicatedGraphic;
+											newRenderer.graphics.apparelGraphics = pawn.Drawer.renderer.graphics.apparelGraphics;
+											newRenderer.graphics.packGraphic = pawn.Drawer.renderer.graphics.packGraphic;
+											newRenderer.graphics.flasher = pawn.Drawer.renderer.graphics.flasher;
+											newRenderer.RenderPawnAt(thing.DrawPos, curLevel, baseLevel);
+										}
+										else
+										{
+											Vector2 drawSize = thing.Graphic.drawSize;
+											drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+											drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+											var newGraphic = thing.Graphic.GetCopy(drawSize);
+											newGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
+										}
 									}
-									else if (thing.Graphic is Graphic_LinkedCornerFiller 
-										|| thing.Graphic is Graphic_RandomRotated)
+									catch (Exception ex)
 									{
-										thing.Draw();
-									}
-									else if (thing is Pawn pawn)
-									{
-										var newRenderer = new PawnRendererScaled(pawn);
-										pawn.Drawer.renderer.graphics.ResolveAllGraphics();
-										newRenderer.graphics.nakedGraphic = pawn.Drawer.renderer.graphics.nakedGraphic;
-										newRenderer.graphics.headGraphic = pawn.Drawer.renderer.graphics.headGraphic;
-										newRenderer.graphics.hairGraphic = pawn.Drawer.renderer.graphics.hairGraphic;
-										newRenderer.graphics.rottingGraphic = pawn.Drawer.renderer.graphics.rottingGraphic;
-										newRenderer.graphics.dessicatedGraphic = pawn.Drawer.renderer.graphics.dessicatedGraphic;
-										newRenderer.graphics.apparelGraphics = pawn.Drawer.renderer.graphics.apparelGraphics;
-										newRenderer.graphics.packGraphic = pawn.Drawer.renderer.graphics.packGraphic;
-										newRenderer.graphics.flasher = pawn.Drawer.renderer.graphics.flasher;
-										newRenderer.RenderPawnAt(thing.DrawPos, curLevel, baseLevel);
-									}
-									else
-									{
-										Vector2 drawSize = thing.Graphic.drawSize;
-										drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-										drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-										var newGraphic = thing.Graphic.GetCopy(drawSize);
-										newGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
-									}
-								}
-								catch (Exception ex)
-								{
-									Log.Error(string.Concat(new object[]
-									{
+										Log.Error(string.Concat(new object[]
+										{
 										"Exception drawing ",
 										thing,
 										": ",
 										ex.ToString()
-									}), false);
+										}), false);
+									}
 								}
 							}
 						}

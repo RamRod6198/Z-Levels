@@ -1490,10 +1490,13 @@ namespace ZLevels
                                 {
                                     if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                     {
-                                        ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-                                        pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
-                                        ZLogger.Message(pawn + " - return 2");
-                                        return;
+                                        if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory")
+                                        {
+                                            ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
+                                            pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
+                                            ZLogger.Message(pawn + " - return 2");
+                                            return;
+                                        }
                                     }
                                     else if (pawn.jobs.curJob == null)
                                     {
