@@ -119,11 +119,10 @@ namespace ZLevels
                 if (mapToSwitch != null)
                 {
                     var selectedObjects = Find.Selector.SelectedObjects.ListFullCopy();
-                    var rememberedCamera = Current.Game.CurrentMap.rememberedCameraPos;
-                    var pos = rememberedCamera.rootPos;
+                    var pos = Current.Game.CurrentMap.rememberedCameraPos.rootPos;
                     Current.Game.CurrentMap = mapToSwitch;
                     Find.CameraDriver.JumpToCurrentMapLoc(pos);
-                    Find.CameraDriver.SetRootPosAndSize(pos, rememberedCamera.rootSize);
+
                     //foreach (var select in selectedObjects)
                     //{
                     //    this.Select(select);
@@ -138,11 +137,10 @@ namespace ZLevels
                 if (mapToSwitch != null)
                 {
                     var selectedObjects = Find.Selector.SelectedObjects.ListFullCopy();
-                    var rememberedCamera = Current.Game.CurrentMap.rememberedCameraPos;
-                    var pos = rememberedCamera.rootPos;
+
+                    var pos = Current.Game.CurrentMap.rememberedCameraPos.rootPos;
                     Current.Game.CurrentMap = mapToSwitch;
                     Find.CameraDriver.JumpToCurrentMapLoc(pos);
-                    Find.CameraDriver.SetRootPosAndSize(pos, rememberedCamera.rootSize);
 
                     //foreach (var select in selectedObjects)
                     //{
