@@ -25,7 +25,7 @@
 		<thingClass>ZLevels.Building_StairsUp</thingClass>
 		<graphicData>
 			<texPath>Building/LadderUp</texPath>
-			<graphicClass>Graphic_Single</graphicClass>
+			<graphicClass>Graphic_Multi</graphicClass>
 			<drawSize>(3, 3)</drawSize>
 		</graphicData>
 		<statBases>
@@ -38,11 +38,10 @@
 		<stuffCategories>
 			<li>Metallic</li>
 			<li>Woody</li>
-			<li>Stony</li>
 		</stuffCategories>
 		<leaveResourcesWhenKilled>true</leaveResourcesWhenKilled>
 		<costStuffCount>10</costStuffCount>
-		<rotatable>false</rotatable>
+		<rotatable>true</rotatable>
 		<castEdgeShadows>true</castEdgeShadows>
 		<staticSunShadowHeight>0.20</staticSunShadowHeight>
 		<pathCost>60</pathCost>
@@ -56,7 +55,7 @@
 		<surfaceType>Item</surfaceType>
 		<graphicData>
 			<texPath>Building/Ladder</texPath>
-			<graphicClass>Graphic_Single</graphicClass>
+			<graphicClass>Graphic_Multi</graphicClass>
 			<drawSize>(3, 3)</drawSize>
 		</graphicData>
 		<statBases>
@@ -69,11 +68,10 @@
 		<stuffCategories>
 			<li>Metallic</li>
 			<li>Woody</li>
-			<li>Stony</li>
 		</stuffCategories>
 		<leaveResourcesWhenKilled>true</leaveResourcesWhenKilled>
 		<costStuffCount>10</costStuffCount>
-		<rotatable>false</rotatable>
+		<rotatable>true</rotatable>
 		<castEdgeShadows>false</castEdgeShadows>
 		<fillPercent>0.0</fillPercent>
 		<staticSunShadowHeight>0.0</staticSunShadowHeight>
@@ -88,7 +86,7 @@
 		<surfaceType>Item</surfaceType>
 		<graphicData>
 			<texPath>Building/Ladder</texPath>
-			<graphicClass>Graphic_Single</graphicClass>
+			<graphicClass>Graphic_Multi</graphicClass>
 			<drawSize>(3, 3)</drawSize>
 		</graphicData>
 		<statBases>
