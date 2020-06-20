@@ -90,8 +90,8 @@ namespace ZLevels
 				{
 					Vector2 drawSize = t.Graphic.drawSize;
 
-					drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 10f);
-					drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 10f);
+					drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+					drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 					var newGraphic = t.Graphic.GetCopy(drawSize);
 					newGraphic.Print(this, t);
 				}
@@ -104,3 +104,4 @@ namespace ZLevels
 		protected bool requireAddToMapMesh;
 	}
 }
+

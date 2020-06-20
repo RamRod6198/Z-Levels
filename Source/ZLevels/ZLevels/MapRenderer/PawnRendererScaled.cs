@@ -29,12 +29,14 @@ namespace ZLevels
 			this.graphics = new PawnGraphicSet(pawn);
 		}
 
-		public void RenderPawnAt(Vector3 drawLoc)
+		public void RenderPawnAt(Vector3 drawLoc, int curLevel, int baseLevel)
 		{
-			this.RenderPawnAt(drawLoc, this.CurRotDrawMode, !this.pawn.health.hediffSet.HasHead, this.pawn.IsInvisible());
+			this.RenderPawnAt(drawLoc, this.CurRotDrawMode, !this.pawn.health.hediffSet.HasHead, 
+				this.pawn.IsInvisible(), curLevel, baseLevel);
 		}
 
-		public void RenderPawnAt(Vector3 drawLoc, RotDrawMode bodyDrawType, bool headStump, bool invisible)
+		public void RenderPawnAt(Vector3 drawLoc, RotDrawMode bodyDrawType, bool headStump, bool invisible
+			, int curLevel, int baseLevel)
 		{
 			if (!this.graphics.AllResolved)
 			{
@@ -42,7 +44,7 @@ namespace ZLevels
 			}
 			if (this.pawn.GetPosture() == PawnPosture.Standing)
 			{
-				this.RenderPawnInternal(drawLoc, 0f, true, bodyDrawType, headStump, invisible);
+				this.RenderPawnInternal(drawLoc, 0f, true, bodyDrawType, headStump, invisible, curLevel, baseLevel);
 				if (this.pawn.carryTracker != null)
 				{
 					Thing carriedThing = this.pawn.carryTracker.CarriedThing;
@@ -119,7 +121,8 @@ namespace ZLevels
 						rootLoc.y = AltitudeLayer.LayingPawn.AltitudeFor() + 0.007575758f;
 					}
 				}
-				this.RenderPawnInternal(rootLoc, angle, renderBody, rot, rot, bodyDrawType, false, headStump, invisible);
+				this.RenderPawnInternal(rootLoc, angle, renderBody, rot, rot, bodyDrawType, false, headStump,
+					invisible, curLevel, baseLevel);
 			}
 			if (this.pawn.Spawned && !this.pawn.Dead)
 			{
@@ -128,34 +131,20 @@ namespace ZLevels
 			}
 		}
 
-		public void RenderPortrait()
+		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool renderBody, RotDrawMode draw, bool headStump, bool invisible, int curLevel, int baseLevel)
 		{
-			Vector3 zero = Vector3.zero;
-			float angle;
-			if (this.pawn.Dead || this.pawn.Downed)
-			{
-				angle = 85f;
-				zero.x -= 0.18f;
-				zero.z -= 0.18f;
-			}
-			else
-			{
-				angle = 0f;
-			}
-			this.RenderPawnInternal(zero, angle, true, Rot4.South, Rot4.South, this.CurRotDrawMode, true, !this.pawn.health.hediffSet.HasHead, this.pawn.IsInvisible());
+			this.RenderPawnInternal(rootLoc, angle, renderBody, this.pawn.Rotation, this.pawn.Rotation, draw, false, headStump, invisible, curLevel, baseLevel);
 		}
 
-		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool renderBody, RotDrawMode draw, bool headStump, bool invisible)
-		{
-			this.RenderPawnInternal(rootLoc, angle, renderBody, this.pawn.Rotation, this.pawn.Rotation, draw, false, headStump, invisible);
-		}
-
-		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool renderBody, Rot4 bodyFacing, Rot4 headFacing, RotDrawMode bodyDrawType, bool portrait, bool headStump, bool invisible)
+		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool renderBody, Rot4 bodyFacing, Rot4 headFacing, RotDrawMode bodyDrawType, bool portrait
+			, bool headStump, bool invisible, int curLevel, int baseLevel)
 		{
 			if (!this.graphics.AllResolved)
 			{
 				this.graphics.ResolveAllGraphics();
 			}
+			float scaledSize = 1.5f * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
+
 			Quaternion quaternion = Quaternion.AngleAxis(angle, Vector3.up);
 			Mesh mesh = null;
 			if (renderBody)
@@ -170,11 +159,16 @@ namespace ZLevels
 				{
 					if (this.pawn.RaceProps.Humanlike)
 					{
-						mesh = MeshPool.humanlikeBodySet.MeshAt(bodyFacing);
+						mesh = new GraphicMeshSet(scaledSize).MeshAt(bodyFacing);
 					}
 					else
 					{
-						mesh = this.graphics.nakedGraphic.MeshAt(bodyFacing);
+						Vector2 drawSize = this.graphics.nakedGraphic.drawSize;
+						drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+						drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+
+						var newGraphic = this.graphics.nakedGraphic.GetCopy(drawSize);
+						mesh = newGraphic.MeshAt(bodyFacing);
 					}
 					List<Material> list = this.graphics.MatsBodyBaseAt(bodyFacing, bodyDrawType);
 					for (int i = 0; i < list.Count; i++)
@@ -209,14 +203,14 @@ namespace ZLevels
 				Material material = this.graphics.HeadMatAt(headFacing, bodyDrawType, headStump);
 				if (material != null)
 				{
-					GenDraw.DrawMeshNowOrLater(MeshPool.humanlikeHeadSet.MeshAt(headFacing), a + b, quaternion, material, portrait);
+					GenDraw.DrawMeshNowOrLater(new GraphicMeshSet(scaledSize).MeshAt(headFacing), a + b, quaternion, material, portrait);
 				}
 				Vector3 loc2 = rootLoc + b;
 				loc2.y += 0.0303030312f;
 				bool flag = false;
 				if (!portrait || !Prefs.HatsOnlyOnMap)
 				{
-					Mesh mesh2 = this.graphics.HairMeshSet.MeshAt(headFacing);
+					Mesh mesh2 = new GraphicMeshSet(scaledSize).MeshAt(headFacing);
 					List<ApparelGraphicRecord> apparelGraphics = this.graphics.apparelGraphics;
 					for (int j = 0; j < apparelGraphics.Count; j++)
 					{
@@ -242,7 +236,7 @@ namespace ZLevels
 				}
 				if (!flag && bodyDrawType != RotDrawMode.Dessicated && !headStump)
 				{
-					Mesh mesh3 = this.graphics.HairMeshSet.MeshAt(headFacing);
+					Mesh mesh3 = new GraphicMeshSet(scaledSize).MeshAt(headFacing);
 					Material mat2 = this.graphics.HairMatAt(headFacing);
 					GenDraw.DrawMeshNowOrLater(mesh3, loc2, quaternion, mat2, portrait);
 				}
@@ -498,8 +492,6 @@ namespace ZLevels
 			this.wiggler.WigglerTick();
 		}
 
-
-
 		private Pawn pawn;
 
 		public PawnGraphicSet graphics;
@@ -507,7 +499,6 @@ namespace ZLevels
 		public PawnDownedWiggler wiggler;
 
 		private PawnHeadOverlays statusOverlays;
-
 
 		private PawnWoundDrawer woundOverlays;
 
@@ -542,3 +533,4 @@ namespace ZLevels
 		private const float YOffset_Status = 0.0416666679f;
 	}
 }
+

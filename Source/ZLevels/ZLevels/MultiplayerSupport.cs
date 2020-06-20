@@ -23,7 +23,6 @@ namespace ZLevels
 
 		}
 
-
 		private static void FixRNGPre()
 		{
 			Rand.PushState(Find.TickManager.TicksAbs);

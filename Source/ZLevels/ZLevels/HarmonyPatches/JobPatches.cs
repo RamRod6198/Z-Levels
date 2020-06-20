@@ -22,43 +22,29 @@ namespace ZLevels
 
         //public static Thing Spawn(Thing newThing, IntVec3 loc, Map map, Rot4 rot, bool respawningAfterLoad = false)
         //{
-        //    Log.Message("JobManagerPatches - Spawn - if (map == null) - 1", true);
         //    if (map == null)
         //    {
-        //        Log.Message("JobManagerPatches - Spawn - Log.Error(\"Tried to spawn \" + newThing.ToStringSafe() + \" in a null map.\"); - 2", true);
         //        Log.Error("Tried to spawn " + newThing.ToStringSafe() + " in a null map.");
-        //        Log.Message("JobManagerPatches - Spawn - return null; - 3", true);
         //        return null;
         //    }
-        //    Log.Message("JobManagerPatches - Spawn - if (!loc.InBounds(map)) - 4", true);
         //    if (!loc.InBounds(map))
         //    {
-        //        Log.Message("JobManagerPatches - Spawn - Log.Error(string.Concat(\"Tried to spawn \", newThing.ToStringSafe(), \" out of bounds at \", loc, \".\")); - 5", true);
         //        Log.Error(string.Concat("Tried to spawn ", newThing.ToStringSafe(), " out of bounds at ", loc, "."));
-        //        Log.Message("JobManagerPatches - Spawn - return null; - 6", true);
         //        return null;
         //    }
-        //    Log.Message("JobManagerPatches - Spawn - if (newThing.def.randomizeRotationOnSpawn) - 7", true);
         //    if (newThing.def.randomizeRotationOnSpawn)
         //    {
-        //        Log.Message("JobManagerPatches - Spawn - rot = Rot4.Random; - 8", true);
         //        rot = Rot4.Random;
         //    }
         //    CellRect occupiedRect = GenAdj.OccupiedRect(loc, rot, newThing.def.Size);
-        //    Log.Message("JobManagerPatches - Spawn - if (!occupiedRect.InBounds(map)) - 10", true);
         //    if (!occupiedRect.InBounds(map))
         //    {
-        //        Log.Message("JobManagerPatches - Spawn - Log.Error(string.Concat(\"Tried to spawn \", newThing.ToStringSafe(), \" out of bounds at \", loc, \" (out of bounds because size is \", newThing.def.Size, \").\")); - 11", true);
         //        Log.Error(string.Concat("Tried to spawn ", newThing.ToStringSafe(), " out of bounds at ", loc, " (out of bounds because size is ", newThing.def.Size, ")."));
-        //        Log.Message("JobManagerPatches - Spawn - return null; - 12", true);
         //        return null;
         //    }
-        //    Log.Message("JobManagerPatches - Spawn - if (newThing.Spawned) - 13", true);
         //    if (newThing.Spawned)
         //    {
-        //        Log.Message("JobManagerPatches - Spawn - Log.Error(string.Concat(\"Tried to spawn \", newThing, \" but it's already spawned.\")); - 14", true);
         //        Log.Error(string.Concat("Tried to spawn ", newThing, " but it's already spawned."));
-        //        Log.Message("JobManagerPatches - Spawn - return newThing; - 15", true);
         //        return newThing;
         //    }
         //
@@ -80,38 +66,26 @@ namespace ZLevels
         //    //    }
         //    //}
         //    newThing.Rotation = rot;
-        //    Log.Message("JobManagerPatches - Spawn - newThing.Position = loc; - 24", true);
         //    newThing.Position = loc;
-        //    Log.Message("JobManagerPatches - Spawn - if (newThing.holdingOwner != null) - 25", true);
         //    if (newThing.holdingOwner != null)
         //    {
-        //        Log.Message("JobManagerPatches - Spawn - newThing.holdingOwner.Remove(newThing); - 26", true);
         //        newThing.holdingOwner.Remove(newThing);
         //    }
         //    newThing.SpawnSetup(map, respawningAfterLoad);
-        //    Log.Message("JobManagerPatches - Spawn - if (newThing.Spawned && newThing.stackCount == 0) - 28", true);
         //    if (newThing.Spawned && newThing.stackCount == 0)
         //    {
-        //        Log.Message("JobManagerPatches - Spawn - Log.Error(\"Spawned thing with 0 stackCount: \" + newThing); - 29", true);
         //        Log.Error("Spawned thing with 0 stackCount: " + newThing);
-        //        Log.Message("JobManagerPatches - Spawn - newThing.Destroy(); - 30", true);
         //        newThing.Destroy();
-        //        Log.Message("JobManagerPatches - Spawn - return null; - 31", true);
         //        return null;
         //    }
-        //    Log.Message("JobManagerPatches - Spawn - if (newThing.def.passability == Traversability.Impassable) - 32", true);
         //    if (newThing.def.passability == Traversability.Impassable)
         //    {
-        //        Log.Message("JobManagerPatches - Spawn - foreach (IntVec3 item3 in occupiedRect) - 33", true);
         //        foreach (IntVec3 item3 in occupiedRect)
         //        {
-        //            Log.Message("JobManagerPatches - Spawn - foreach (Thing item4 in item3.GetThingList(map).ToList()) - 34", true);
         //            foreach (Thing item4 in item3.GetThingList(map).ToList())
         //            {
-        //                Log.Message("JobManagerPatches - Spawn - if (item4 != newThing) - 35", true);
         //                if (item4 != newThing)
         //                {
-        //                    Log.Message("JobManagerPatches - Spawn - (item4 as Pawn)?.pather.TryRecoverFromUnwalkablePosition(error: false); - 36", true);
         //                    (item4 as Pawn)?.pather.TryRecoverFromUnwalkablePosition(error: false);
         //                }
         //            }
@@ -704,8 +678,6 @@ namespace ZLevels
         //        return null;
         //    }
         //}
-
-
 
         [HarmonyPatch(typeof(JobGiver_GetFood), "TryGiveJob")]
         public class JobGiver_GetFoodPatch
@@ -1644,22 +1616,27 @@ namespace ZLevels
                                 JobManagerPatches.manualDespawn = false;
                                 GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
                             }
-                            else if (pawn.Map != otherMap)
+                            else if (pawn.Map != oldMap && otherMap == oldMap)
                             {
                                 if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
                                 JobManagerPatches.manualDespawn = true;
                                 pawn.DeSpawn();
                                 JobManagerPatches.manualDespawn = false;
-                                GenPlace.TryPlaceThing(pawn, oldPosition, otherMap, ThingPlaceMode.Direct);
+                                if (oldPosition.GetTerrain(oldMap) == ZLevelsDefOf.ZL_OutsideTerrain)
+                                {
+                                    var pos = IntVec3.Invalid;
+                                    if (CellFinder.TryFindRandomCellNear(oldPosition, oldMap, 100,
+                                        (IntVec3 c) => c.Walkable(oldMap), out pos))
+                                    {
+                                        GenPlace.TryPlaceThing(pawn, pos, oldMap, ThingPlaceMode.Direct);
+                                    }
+                                }
+                                else
+                                {
+                                    GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+                                }
                             }
 
-                            //try
-                            //{
-                            //    ZLogger.Message("102 Find.TickManager.TicksGame: " + Find.TickManager.TicksGame);
-                            //    ZLogger.Message("102 ZTracker.jobTracker[pawn].lastTick: " + ZTracker.jobTracker[pawn].lastTick);
-                            //    ZLogger.Message("102 Result: " + (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick));
-                            //}
-                            //catch { };
                             Map dest = null;
                             ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map)
                                 + " for " + ZTracker.GetMapInfo(oldMap));

@@ -31,7 +31,6 @@ namespace ZLevels
             return DebugViewSettings.drawTerrainWater || !terrain.HasTag("Water");
         }
 
-
         public override void Regenerate()
         {
             var ZTracker = Current.Game.GetComponent<ZLevelsManager>();

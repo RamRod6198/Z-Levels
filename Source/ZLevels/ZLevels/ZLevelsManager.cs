@@ -30,7 +30,6 @@ namespace ZLevels
             this.CheckHotkeys();
         }
 
-
         //public override void GameComponentTick()
         //{
         //    base.GameComponentTick();
@@ -271,9 +270,19 @@ namespace ZLevels
 
         public int GetZIndexFor(Map map)
         {
-            this.ZLevelsFixer(map.Tile);
-            var comp = map.GetComponent<MapComponentZLevel>();
-            return comp.Z_LevelIndex;
+            try
+            {
+                this.ZLevelsFixer(map.Tile);
+                var comp = map.GetComponent<MapComponentZLevel>();
+                return comp.Z_LevelIndex;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("[Z-Levels] GetZIndexFor produced an error. " +
+                    "That should not happen and will break things. " +
+                    "Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                return -99999; 
+            }
         }
 
         public Map GetMapByIndex(int tile, int index)
@@ -801,6 +810,7 @@ namespace ZLevels
             }
 
             FloodFillerFog.FloodUnfog(thingToTeleport.Position, mapToTeleport);
+
             AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
             { thingToTeleport.PositionHeld });
         }
@@ -1328,3 +1338,4 @@ namespace ZLevels
         public List<ZLevelData> ZLevelsTrackerValues = new List<ZLevelData>();
     }
 }
+

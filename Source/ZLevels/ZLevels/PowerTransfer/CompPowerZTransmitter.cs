@@ -18,12 +18,10 @@ namespace ZLevels
             }
         }
 
-
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
             base.PostSpawnSetup(respawningAfterLoad);
         }
-
 
         public new CompProperties_PowerZTransmitter Props
         {
@@ -42,7 +40,6 @@ namespace ZLevels
         {
             base.CompTick();
         }
-
 
         //public override string CompInspectStringExtra()
         //{
@@ -72,3 +69,4 @@ namespace ZLevels
         public Thing transmitter;
     }
 }
+

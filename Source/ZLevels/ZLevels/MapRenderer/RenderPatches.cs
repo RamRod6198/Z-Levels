@@ -19,11 +19,12 @@ namespace ZLevels
 			foreach (var map2 in ZTracker.GetAllMaps(map.Tile)
 					.OrderBy(x => ZTracker.GetZIndexFor(x)))
 			{
-				if (map != map2 && ZTracker.GetZIndexFor(map2) >= 0)
+				int curLevel = ZTracker.GetZIndexFor(map);
+				int baseLevel = ZTracker.GetZIndexFor(map2);
+
+				if (curLevel > baseLevel && baseLevel >= 0)
 				{
 					HashSet<Thing> drawThings = Traverse.Create(map2.dynamicDrawManager).Field("drawThings").GetValue<HashSet<Thing>>();
-					int curLevel = ZTracker.GetZIndexFor(map);
-					int baseLevel = ZTracker.GetZIndexFor(map2);
 
 					if (!DebugViewSettings.drawThingsDynamic)
 					{
@@ -47,7 +48,7 @@ namespace ZLevels
 							{
 								try
 								{
-									if (thing.Graphic is Graphic_Mote)
+									if (thing.Graphic is Graphic_Mote || thing.Graphic is Graphic_Linked)
 									{
 
 									}
@@ -58,15 +59,6 @@ namespace ZLevels
 									}
 									else if (thing is Pawn pawn)
 									{
-										Vector2 drawSize = thing.Graphic.drawSize;
-										////drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 10f);
-										////drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 10f);
-										//
-
-										drawSize.x = 0.3f;
-										drawSize.y = 0.3f;
-										
-
 										var newRenderer = new PawnRendererScaled(pawn);
 										pawn.Drawer.renderer.graphics.ResolveAllGraphics();
 										newRenderer.graphics.nakedGraphic = pawn.Drawer.renderer.graphics.nakedGraphic;
@@ -77,39 +69,13 @@ namespace ZLevels
 										newRenderer.graphics.apparelGraphics = pawn.Drawer.renderer.graphics.apparelGraphics;
 										newRenderer.graphics.packGraphic = pawn.Drawer.renderer.graphics.packGraphic;
 										newRenderer.graphics.flasher = pawn.Drawer.renderer.graphics.flasher;
-										newRenderer.RenderPawnAt(thing.DrawPos);
-
-
-										//if (nakedGraphic != null)
-										//{
-										//	nakedGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
-										//}
-
-										//var hairGraphic = pawn.Drawer.renderer.graphics.hairGraphic.GetCopy(drawSize);
-										//if (hairGraphic != null)
-										//{
-										//	hairGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
-										//}
-										//
-										//var headGraphic = pawn.Drawer.renderer.graphics.headGraphic.GetCopy(drawSize);
-										//if (headGraphic != null)
-										//{
-										//	headGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
-										//}
-										//foreach (var apparel in pawn.Drawer.renderer.graphics.apparelGraphics)
-										//{
-										//	var apparelGraphic = apparel.graphic.GetCopy(drawSize);
-										//	if (apparelGraphic != null)
-										//	{
-										//		apparelGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
-										//	}
-										//}
+										newRenderer.RenderPawnAt(thing.DrawPos, curLevel, baseLevel);
 									}
 									else
 									{
 										Vector2 drawSize = thing.Graphic.drawSize;
-										drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 10f);
-										drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 10f);
+										drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+										drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 										var newGraphic = thing.Graphic.GetCopy(drawSize);
 										newGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
 									}
@@ -137,3 +103,4 @@ namespace ZLevels
 		}
     }
 }
+
