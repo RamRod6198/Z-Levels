@@ -1168,6 +1168,8 @@ namespace ZLevels
             foreach (var intVec in newMap.AllCells)
             {
                 newMap.mapDrawer.MapMeshDirty(intVec, MapMeshFlag.Terrain);
+                newMap.mapDrawer.MapMeshDirty(intVec, MapMeshFlag.Things);
+                newMap.mapDrawer.MapMeshDirty(intVec, MapMeshFlag.FogOfWar);
             }
             return newMap;
         }
