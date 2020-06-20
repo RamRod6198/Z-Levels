@@ -31,6 +31,7 @@ namespace ZLevels
             return DebugViewSettings.drawTerrainWater || !terrain.HasTag("Water");
         }
 
+
         public override void Regenerate()
         {
             var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
@@ -68,6 +69,7 @@ namespace ZLevels
                             subMesh.tris.Add(count + 2);
                             subMesh.tris.Add(count + 3);
                         }
+                        
                         for (int i = 0; i < 8; i++)
                         {
                             IntVec3 c = intVec + GenAdj.AdjacentCellsAroundBottom[i];

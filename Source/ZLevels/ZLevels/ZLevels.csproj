@@ -304,9 +304,10 @@
     <Compile Include="HarmonyPatches\CombatPatches.cs" />
     <Compile Include="HarmonyPatches\ResourceCounterPatch.cs" />
     <Compile Include="HarmonyPatches\SkyfallerPatches.cs" />
-    <Compile Include="MapRenderer\SectionLayer_LowerThings.cs" />
-    <Compile Include="MapRenderer\SectionLayer_LowerTerrain.cs" />
+    <Compile Include="MapRenderer\PawnRendererScaled.cs" />
     <Compile Include="MapRenderer\RenderPatches.cs" />
+    <Compile Include="MapRenderer\SectionLayer_LowerTerrain.cs" />
+    <Compile Include="MapRenderer\SectionLayer_LowerThings.cs" />
     <Compile Include="Map\BiomeWorker_NeverSpawn.cs" />
     <Compile Include="Map\BlueprintUtility.cs" />
     <Compile Include="Buildings\Building_StairsDown.cs" />

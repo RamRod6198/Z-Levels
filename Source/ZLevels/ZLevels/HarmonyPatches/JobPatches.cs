@@ -728,14 +728,14 @@ namespace ZLevels
                             {
                                 if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
                                 {
-                                    if (pawn.needs.food.CurCategory < HungerCategory.Starving 
+                                    if (pawn.needs.food.CurCategory < HungerCategory.Starving
                                         && !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                     {
                                         ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                         pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
                                         return;
                                     }
-                                    else if (pawn.needs.food.CurCategory < HungerCategory.Starving 
+                                    else if (pawn.needs.food.CurCategory < HungerCategory.Starving
                                         && pawn.jobs.curJob == null)
                                     {
                                         ZLogger.Message("1 START JOB "
@@ -744,7 +744,7 @@ namespace ZLevels
                                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                         return;
                                     }
-                                    else if (pawn.needs.food.CurCategory >= HungerCategory.Starving 
+                                    else if (pawn.needs.food.CurCategory >= HungerCategory.Starving
                                         && pawn.jobs.curJob != ZTracker.jobTracker[pawn].activeJobs[0])
                                     {
                                         ZLogger.Message("1 RESETTING JOB TRACKER FOR " + pawn);
@@ -1007,7 +1007,7 @@ namespace ZLevels
                             ZLogger.Message(pawn + " cant start new job");
                         }
                     }
-                    catch (Exception ex) 
+                    catch (Exception ex)
                     {
                         Log.Error("Error: " + ex);
                     }
@@ -1033,14 +1033,14 @@ namespace ZLevels
                             {
                                 if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
                                 {
-                                    if (pawn.needs.joy.CurCategory > JoyCategory.Low 
+                                    if (pawn?.needs?.joy?.CurCategory > JoyCategory.Low
                                         && !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                     {
                                         ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                         pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
                                         return;
                                     }
-                                    else if (pawn.needs.joy.CurCategory > JoyCategory.Low 
+                                    else if (pawn?.needs?.joy?.CurCategory > JoyCategory.Low
                                         && pawn.jobs.curJob == null)
                                     {
                                         ZLogger.Message("2 START JOB "
@@ -1049,7 +1049,7 @@ namespace ZLevels
                                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                         return;
                                     }
-                                    else if (pawn.needs.joy.CurCategory <= JoyCategory.Low && pawn.jobs.curJob != ZTracker.jobTracker[pawn].activeJobs[0])
+                                    else if (pawn?.needs?.joy?.CurCategory <= JoyCategory.Low && pawn.jobs.curJob != ZTracker.jobTracker[pawn].activeJobs[0])
                                     {
                                         ZLogger.Message("2 RESETTING JOB TRACKER FOR " + pawn);
                                         ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
@@ -1090,17 +1090,17 @@ namespace ZLevels
                             if (otherMap != oldMap)
                             {
                                 ZLogger.Message(pawn + " - other map: " + otherMap);
-        
+
                                 if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickJoy < 200)
                                 {
                                     return;
                                 }
-        
+
                                 var stairs = new List<Thing>();
-        
+
                                 ZLogger.Message("Searching joy job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                     + " for " + ZTracker.GetMapInfo(oldMap));
-        
+
                                 if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
                                 {
                                     Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
@@ -1132,18 +1132,18 @@ namespace ZLevels
                                 {
                                     return;
                                 }
-        
+
                                 if (stairs != null && stairs.Count() > 0)
                                 {
                                     var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
                                     var position = selectedStairs.Position;
-        
+
                                     if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
                                     JobManagerPatches.manualDespawn = true;
                                     pawn.DeSpawn();
                                     JobManagerPatches.manualDespawn = false;
                                     GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-        
+
                                     bool CanDoDuringMedicalRest = Traverse.Create(__instance).Field("CanDoDuringMedicalRest").GetValue<bool>();
                                     DefMap<JoyGiverDef, float> joyGiverChances = Traverse.Create(__instance).Field("joyGiverChances").GetValue<DefMap<JoyGiverDef, float>>();
                                     result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, joyGiverChances);
@@ -1222,7 +1222,7 @@ namespace ZLevels
                 JoyGiverDef def;
                 while (num3 < joyGiverChances.Count && allDefsListForReading.TryRandomElementByWeight((JoyGiverDef d) => joyGiverChances[d], out def))
                 {
-        
+
                     Job job = def.Worker.TryGiveJobWhileInBed(pawn);
                     if (job != null)
                     {
@@ -1256,23 +1256,23 @@ namespace ZLevels
                             {
                                 if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
                                 {
-                                    if (pawn.needs.rest.CurCategory < RestCategory.Exhausted && 
+                                    if (pawn.needs.rest.CurCategory < RestCategory.Exhausted &&
                                         !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                     {
                                         ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                         pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
                                         return false;
                                     }
-                                    else if (pawn.needs.rest.CurCategory < RestCategory.Exhausted && 
+                                    else if (pawn.needs.rest.CurCategory < RestCategory.Exhausted &&
                                         pawn.jobs.curJob == null)
                                     {
-                                        ZLogger.Message("3 START JOB " 
+                                        ZLogger.Message("3 START JOB "
                                             + ZTracker.jobTracker[pawn].activeJobs[0] + " FOR " + pawn);
                                         pawn.jobs.StartJob(ZTracker.jobTracker[pawn].activeJobs[0]);
                                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                         return false;
                                     }
-                                    else if (pawn.needs.rest.CurCategory >= RestCategory.Exhausted && 
+                                    else if (pawn.needs.rest.CurCategory >= RestCategory.Exhausted &&
                                         pawn.jobs.curJob != ZTracker.jobTracker[pawn].activeJobs[0])
                                     {
                                         ZLogger.Message("3 RESETTING JOB TRACKER FOR " + pawn);
@@ -1299,7 +1299,7 @@ namespace ZLevels
                         {
                             ZTracker.jobTracker[pawn] = new JobTracker();
                         }
-                        if (pawn.needs.rest.CurCategory < RestCategory.VeryTired 
+                        if (pawn.needs?.rest?.CurCategory < RestCategory.VeryTired
                             && Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
                         // minimal job interval check per pawn is 200 ticks
                         {
@@ -1312,7 +1312,7 @@ namespace ZLevels
 
                         foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                         {
-                            if (pawn.needs.rest.CurCategory < RestCategory.VeryTired 
+                            if (pawn?.needs?.rest?.CurCategory < RestCategory.VeryTired
                                 && Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
                             {
                                 return false;
@@ -1351,7 +1351,7 @@ namespace ZLevels
                                         ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
                                     }
                                 }
-                                if (pawn.needs.rest.CurCategory < RestCategory.VeryTired &&
+                                if (pawn?.needs?.rest?.CurCategory < RestCategory.VeryTired &&
                                     Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
                                 // minimal job interval check per pawn is 200 ticks
                                 {
@@ -1376,7 +1376,7 @@ namespace ZLevels
                             result = JobGiver_GetRestPatch.TryGiveJob(pawn, minCategory, maxLevelPercentage);
                             if (result != null && result.targetA.Thing != null)
                             {
-                                ZLogger.Message(pawn + " got rest job " + result + " - map: " 
+                                ZLogger.Message(pawn + " got rest job " + result + " - map: "
                                     + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
                                 if (pawn.Map != oldMap)
                                 {
@@ -1486,16 +1486,20 @@ namespace ZLevels
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                     if (__result.Job == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                     {
-                        if (pawn.needs.food.CurCategory >= HungerCategory.UrgentlyHungry
-                            || pawn.needs.joy.CurCategory < JoyCategory.Low
-                            || pawn.needs.rest.CurCategory >= RestCategory.VeryTired)
+                        try
                         {
-                            ZLogger.Message(pawn + " refusing to work because low needs");
-                            ZLogger.Message("pawn.needs.food.CurCategory: " + pawn.needs.food.CurCategory);
-                            ZLogger.Message("pawn.needs.joy.CurCategory: " + pawn.needs.joy.CurCategory);
-                            ZLogger.Message("pawn.needs.rest.CurCategory: " + pawn.needs.rest.CurCategory);
-                            return;
+                            if (pawn.needs.food.CurCategory >= HungerCategory.UrgentlyHungry
+                                || pawn.needs.joy.CurCategory < JoyCategory.Low
+                                || pawn.needs.rest.CurCategory >= RestCategory.VeryTired)
+                            {
+                                ZLogger.Message(pawn + " refusing to work because low needs");
+                                ZLogger.Message("pawn.needs.food.CurCategory: " + pawn.needs.food.CurCategory);
+                                ZLogger.Message("pawn.needs.joy.CurCategory: " + pawn.needs.joy.CurCategory);
+                                ZLogger.Message("pawn.needs.rest.CurCategory: " + pawn.needs.rest.CurCategory);
+                                return;
+                            }
                         }
+                        catch { };
                         if (ZTracker.jobTracker == null)
                         {
                             ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
@@ -1521,7 +1525,7 @@ namespace ZLevels
                                     }
                                     else if (pawn.jobs.curJob == null)
                                     {
-                                        //ZLogger.Message("4 START JOB " 
+                                        //ZLogger.Message("4 START JOB "
                                         //    + ZTracker.jobTracker[pawn].activeJobs[0] + " FOR " + pawn);
                                         //
                                         //ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
@@ -1633,7 +1637,7 @@ namespace ZLevels
                             {
                                 var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
                                 var position = selectedStairs.Position;
-                            
+
                                 if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
                                 JobManagerPatches.manualDespawn = true;
                                 pawn.DeSpawn();
@@ -1649,7 +1653,6 @@ namespace ZLevels
                                 GenPlace.TryPlaceThing(pawn, oldPosition, otherMap, ThingPlaceMode.Direct);
                             }
 
-
                             //try
                             //{
                             //    ZLogger.Message("102 Find.TickManager.TicksGame: " + Find.TickManager.TicksGame);
@@ -1658,10 +1661,6 @@ namespace ZLevels
                             //}
                             //catch { };
                             Map dest = null;
-                            ZLogger.Message("Pawn needs data for " + pawn);
-                            ZLogger.Message("pawn.needs.food.CurCategory: " + pawn.needs.food.CurCategory);
-                            ZLogger.Message("pawn.needs.joy.CurCategory: " + pawn.needs.joy.CurCategory);
-                            ZLogger.Message("pawn.needs.rest.CurCategory: " + pawn.needs.rest.CurCategory);
                             ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
                             result = TryIssueJobPackage(pawn, jobParams, __instance, __instance.emergency, ref dest);
@@ -1756,7 +1755,7 @@ namespace ZLevels
                 ZLogger.Message("----------------------------");
                 foreach (var slotGroup in allGroupsListInPriorityOrder.OrderByDescending(x => x.Settings.Priority))
                 {
-                    ZLogger.Message("Checking on : " + t + " - " + ZTracker.GetMapInfo(t.Map) + " for " + carrier + " - " + carrier.Map + " - " + slotGroup.parent 
+                    ZLogger.Message("Checking on : " + t + " - " + ZTracker.GetMapInfo(t.Map) + " for " + carrier + " - " + carrier.Map + " - " + slotGroup.parent
                         + " - priority: " + slotGroup.Settings.Priority + " - " + slotGroup.parent.Map);
                     StoragePriority priority = slotGroup.Settings.Priority;
                     if (priority < storagePriority || priority <= currentPriority)
@@ -1821,8 +1820,8 @@ namespace ZLevels
                         closestDistSquared = num2;
                         foundPriority = slotGroup.Settings.Priority;
                         var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                        ZLogger.Message("RESULT: " + carrier + " - " + slotGroup.parent + " - priority: " 
-                            + slotGroup.Settings.Priority + " - " + ZTracker.GetMapInfo(slotGroup.parent.Map) 
+                        ZLogger.Message("RESULT: " + carrier + " - " + slotGroup.parent + " - priority: "
+                            + slotGroup.Settings.Priority + " - " + ZTracker.GetMapInfo(slotGroup.parent.Map)
                             + " accepts " + t + " in " + ZTracker.GetMapInfo(dest), true);
                         if (i >= num)
                         {

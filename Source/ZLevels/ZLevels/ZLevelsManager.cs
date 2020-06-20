@@ -34,20 +34,19 @@ namespace ZLevels
         //public override void GameComponentTick()
         //{
         //    base.GameComponentTick();
-        //    if (Find.TickManager.TicksGame % 60 == 0)
+        //    if (Find.TickManager.TicksGame % 600 == 0)
         //    {
         //        foreach (var data in this.ZLevelsTracker)
         //        {
-        //            Log.Message("======================");
-        //            foreach (var mapData in data.Value.ZLevels.Values.OrderBy(x => 
-        //            (int)Mathf.Abs(this.GetZIndexFor(x) - 4)))
-        //            {
-        //                Log.Message(data.Key + " - " + mapData + " - " + this.GetMapInfo(mapData));
-        //            }
-        //            Log.Message("-------------------");
         //            foreach (var mapData in data.Value.ZLevels.Values)
         //            {
-        //                Log.Message(data.Key + " - " + mapData + " - " + this.GetMapInfo(mapData));
+        //                foreach (var pawn in mapData.mapPawns.AllPawns)
+        //                {
+        //                    foreach (var mapData2 in data.Value.ZLevels.Values)
+        //                    {
+        //                        mapData2.dynamicDrawManager.RegisterDrawable(pawn);
+        //                    }
+        //                }
         //            }
         //        }
         //    }
@@ -1155,6 +1154,11 @@ namespace ZLevels
                 newMap.terrainGrid.SetTerrain(playerStartSpot, ZLevelsDefOf.ZL_OutsideTerrainTwo);
             }
             catch { }
+
+            foreach (var intVec in newMap.AllCells)
+            {
+                newMap.mapDrawer.MapMeshDirty(intVec, MapMeshFlag.Terrain);
+            }
             return newMap;
         }
 
