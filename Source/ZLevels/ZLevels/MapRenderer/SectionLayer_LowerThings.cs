@@ -27,13 +27,15 @@ namespace ZLevels
 		public override void Regenerate()
 		{
 			var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-			if (ZTracker.GetZIndexFor(base.Map) > 0) 
+			int curLevel = ZTracker.GetZIndexFor(base.Map);
+			if (curLevel > 0) 
 			{
 				base.ClearSubMeshes(MeshParts.All);
 				foreach (var map in ZTracker.GetAllMaps(base.Map.Tile)
-					.OrderBy(x => ZTracker.GetZIndexFor(x)))
+					.OrderByDescending(x => ZTracker.GetZIndexFor(x)))
 				{
-					if (map != base.Map && ZTracker.GetZIndexFor(map) >= 0)
+					int baseLevel = ZTracker.GetZIndexFor(map);
+					if (curLevel > baseLevel && baseLevel >= 0)
 					{
 						foreach (IntVec3 intVec in this.section.CellRect)
 						{
@@ -44,14 +46,19 @@ namespace ZLevels
 								for (int i = 0; i < count; i++)
 								{
 									Thing thing = list[i];
-									if ((thing.def.seeThroughFog || !map.fogGrid.fogGrid[CellIndicesUtility.CellToIndex
-										(thing.Position, map.Size.x)]) && thing.def.drawerType != DrawerType.None
-										&& (thing.def.drawerType != DrawerType.RealtimeOnly || !this.requireAddToMapMesh)
-										&& (thing.def.hideAtSnowDepth >= 1f || map.snowGrid.GetDepth(thing.Position)
+									if //((thing.def.seeThroughFog || 
+									   //	!map.fogGrid.fogGrid[CellIndicesUtility.CellToIndex
+									   //	(thing.Position, map.Size.x)]) && 
+										
+										(thing.def.drawerType != DrawerType.None
+										&& (thing.def.drawerType != DrawerType.RealtimeOnly 
+										|| !this.requireAddToMapMesh)
+										&& (thing.def.hideAtSnowDepth >= 1f 
+										|| map.snowGrid.GetDepth(thing.Position)
 										<= thing.def.hideAtSnowDepth) && thing.Position.x == intVec.x
 										&& thing.Position.z == intVec.z)
 									{
-										this.TakePrintFrom(thing, ZTracker.GetZIndexFor(base.Map), ZTracker.GetZIndexFor(map));
+										this.TakePrintFrom(thing, curLevel, baseLevel);
 									}
 								}
 							}

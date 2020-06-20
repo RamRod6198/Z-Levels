@@ -44,8 +44,9 @@ namespace ZLevels
 							if (position.GetTerrain(map) == ZLevelsDefOf.ZL_OutsideTerrain)
 							{
 								if ((cellRect.Contains(position) || thing.def.drawOffscreen)
-									&& (!fogGrid[cellIndices.CellToIndex(position)]
-									|| thing.def.seeThroughFog) && (thing.def.hideAtSnowDepth >= 1f
+									//&& (!fogGrid[cellIndices.CellToIndex(position)]
+									//|| thing.def.seeThroughFog) 
+									&& (thing.def.hideAtSnowDepth >= 1f
 									|| map2.snowGrid.GetDepth(position) <= thing.def.hideAtSnowDepth))
 								{
 									try
