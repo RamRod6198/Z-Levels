@@ -21,10 +21,8 @@
 		</statBases>
 		<stuffCategories>
 			<li>Metallic</li>
-			<li>Woody</li>
-			<li>Stony</li>
 		</stuffCategories>
-		<costStuffCount>20</costStuffCount>
+		<costStuffCount>60</costStuffCount>
 		<holdsRoof>true</holdsRoof>
 		<canOverlapZones>false</canOverlapZones>
 		<rotatable>false</rotatable>
