@@ -20,6 +20,8 @@ namespace ZLevels
     {
         public static bool manualDespawn = false;
 
+        public static bool searchJobs = false;
+
         //public static Thing Spawn(Thing newThing, IntVec3 loc, Map map, Rot4 rot, bool respawningAfterLoad = false)
         //{
         //    if (map == null)
@@ -1446,15 +1448,49 @@ namespace ZLevels
             }
         }
 
+        [HarmonyPatch(typeof(Pawn_WorkSettings), "WorkGiversInOrderNormal", MethodType.Getter)]
+        public static class Pawn_WorkSettings_Patch
+        {
+            [HarmonyPrefix]
+            public static bool WorkGiversInOrderNormal_Pre(Pawn_WorkSettings __instance, ref List<WorkGiver> __result)
+            {
+                if (JobManagerPatches.searchJobs)
+                {
+                    __result = new List<WorkGiver>();
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Pawn_WorkSettings), "WorkGiversInOrderEmergency", MethodType.Getter)]
+        public static class Pawn_WorkSettings_Emerg_Patch
+        {
+            [HarmonyPrefix]
+            public static bool WorkGiversInOrderEmerg_Pre(Pawn_WorkSettings __instance, ref List<WorkGiver> __result)
+            {
+                if (JobManagerPatches.searchJobs)
+                {
+                    __result = new List<WorkGiver>();
+                    return false;
+                }
+                return true;
+            }
+        }
+
         [HarmonyPatch(typeof(JobGiver_Work), "TryIssueJobPackage")]
         public class TryIssueJobPackagePatch
         {
-            [HarmonyPostfix]
-            private static void TryIssueJobPackagePostfix(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
+            private static void Prefix()
             {
+                JobManagerPatches.searchJobs = true;
+            }
+
+            private static void Postfix(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
+            {
+                JobManagerPatches.searchJobs = false;
                 try
                 {
-                    ZLogger.Message(pawn + " original job " + __result.Job);
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                     if (__result.Job == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                     {
