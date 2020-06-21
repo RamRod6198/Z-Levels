@@ -326,13 +326,19 @@ namespace ZLevels
         //    base.GameComponentTick();
         //    if (Find.TickManager.TicksGame % 200 == 0)
         //    {
-        //        foreach (var t in this.ZLevelsTracker)
+        //        foreach (var s in this.stairsDown)
         //        {
-        //            foreach (var d in this.ZLevelsTracker[t.Key].ZLevels)
+        //            foreach (var t in s.Value)
         //            {
-        //                ZLogger.Message(this.GetMapInfo(d.Value) + " - " + d.Value.weatherManager.curWeather
-        //                    + " - " + d.Value.weatherManager.curWeatherAge + " - " + d.Value.weatherManager.lastWeather);
+        //                Log.Message(s.Key + " - " + t);
+        //            }
         //
+        //        }
+        //        foreach (var s in this.stairsUp)
+        //        {
+        //            foreach (var t in s.Value)
+        //            {
+        //                Log.Message(s.Key + " - " + t);
         //            }
         //        }
         //        ZLogger.Message("========================");
@@ -1339,6 +1345,10 @@ namespace ZLevels
         public List<int> Z_LevelsKeys = new List<int>();
         public Dictionary<int, ZLevelData> ZLevelsTracker = new Dictionary<int, ZLevelData>();
         public List<ZLevelData> ZLevelsTrackerValues = new List<ZLevelData>();
+
+        public Dictionary<Map, List<Thing>> stairsUp = new Dictionary<Map, List<Thing>>();
+        public Dictionary<Map, List<Thing>> stairsDown = new Dictionary<Map, List<Thing>>();
+
     }
 }
 
