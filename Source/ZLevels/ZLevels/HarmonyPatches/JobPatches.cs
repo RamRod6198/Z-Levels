@@ -1948,7 +1948,6 @@ namespace ZLevels
                         //JobManagerPatches.manualDespawn = false;
                         //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
         
-        
                     }
                 }
         
@@ -1968,6 +1967,102 @@ namespace ZLevels
                     }
                 }
                 return null;
+            }
+
+            public static Job JobOnThing(WorkGiver_ConstructDeliverResourcesToFrames scanner, Pawn pawn, Thing t, bool forced = false)
+            {
+                if (t.Faction != pawn.Faction)
+                {
+                    return null;
+                }
+                Frame frame = t as Frame;
+                if (frame == null)
+                {
+                    return null;
+                }
+
+                if (GenConstruct.FirstBlockingThing(frame, pawn) != null)
+                {
+                    return GenConstruct.HandleBlockingThingJob(frame, pawn, forced);
+                }
+                bool checkSkills = scanner.def.workType == WorkTypeDefOf.Construction;
+                if (!GenConstruct.CanConstruct(frame, pawn, checkSkills, forced))
+                {
+                    return null;
+                }
+                var method = Traverse.Create(scanner).Method("ResourceDeliverJobFor", new object[]
+                {
+                    pawn, frame, true
+                });
+
+                Job job2 = method.GetValue<Job>();
+                if (job2 == null)
+                {
+                    var oldMap = pawn.Map;
+                    var oldPosition = pawn.Position;
+
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+
+                    foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+                    {
+                        if (otherMap != oldMap)
+                        {
+                            var stairs = otherMap.listerThings.AllThings.Where(x => x is Building_StairsDown
+                            || x is Building_StairsUp).ToList();
+
+                            if (stairs != null && stairs.Count() > 0)
+                            {
+                                //var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
+                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
+                                var position = selectedStairs.Position;
+
+                                Traverse.Create(pawn).Field("mapIndexOrState")
+                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
+                                Traverse.Create(pawn).Field("positionInt")
+                                    .SetValue(position);
+                                //pawn.Position = position;
+                                //Log.Message("4: " + oldPosition, true);
+
+                                //JobManagerPatches.manualDespawn = true;
+                                //pawn.DeSpawn();
+                                //JobManagerPatches.manualDespawn = false;
+                                //GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
+
+                                job2 = method.GetValue<Job>();
+                                if (job2 != null)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (pawn.Map != oldMap)
+                    {
+                        Traverse.Create(pawn).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                        Traverse.Create(pawn).Field("positionInt")
+                            .SetValue(oldPosition);
+                        //pawn.Position = oldPosition;
+                        //Log.Message("5: " + oldPosition, true);
+
+                        //JobManagerPatches.manualDespawn = true;
+                        //pawn.DeSpawn();
+                        //JobManagerPatches.manualDespawn = false;
+                        //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
+
+                    }
+                }
+
+                if (job2 != null)
+                {
+                    return job2;
+                }
+                else
+                {
+                    return null;
+                }
+
+                //return ResourceDeliverJobFor(pawn, frame);
             }
             public static ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams, JobGiver_Work instance, bool emergency, ref Map dest, Map oldMap, IntVec3 oldPosition)
             {
@@ -2154,7 +2249,9 @@ namespace ZLevels
         
                                     Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn) &&
                                         JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn, t) != null;
-        
+
+                                    Predicate<Thing> deliverResourcesValidator2 = (Thing t) => !t.IsForbidden(pawn) &&
+                                        JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t) != null;
                                     Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn) &&
                                     TryIssueJobPackagePatch.HasJobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null;
         
@@ -2314,6 +2411,16 @@ namespace ZLevels
                                                 (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
                                                 scanner.PathEndMode, TraverseParms.For(pawn,
                                                 scanner.MaxPathDanger(pawn)), 9999f, deliverResourcesValidator,
+                                                enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
+                                                enumerable != null);
+                                        }
+
+                                        else if (scanner is WorkGiver_ConstructDeliverResourcesToFrames)
+                                        {
+                                            thing = GenClosest.ClosestThingReachable
+                                                (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
+                                                scanner.PathEndMode, TraverseParms.For(pawn,
+                                                scanner.MaxPathDanger(pawn)), 9999f, deliverResourcesValidator2,
                                                 enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
                                                 enumerable != null);
                                         }
@@ -2485,6 +2592,12 @@ namespace ZLevels
                                 job3 = (!bestTargetOfLastPriority.HasThing) ?
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : JobOnThing(scanner2, pawn, bestTargetOfLastPriority.Thing);
+                            }
+                            else if (scannerWhoProvidedTarget is WorkGiver_ConstructDeliverResourcesToFrames scanner3)
+                            {
+                                job3 = (!bestTargetOfLastPriority.HasThing) ?
+                                    scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
+                                    : JobOnThing(scanner3, pawn, bestTargetOfLastPriority.Thing);
                             }
                             else
                             {
