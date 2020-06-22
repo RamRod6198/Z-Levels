@@ -354,7 +354,6 @@ namespace ZLevels
             //ZLogger.Message(pawn + " - Dest map: " + dest);
             if (this.GetZIndexFor(thing.Map) > this.GetZIndexFor(dest))
             {
-                ZLogger.Message("2 - Build tree (HaulThingToDest): " + pawn + " - Going down");
                 foreach (var map in this.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values.OrderByDescending(x => this.GetZIndexFor(x)))
                 {
                     if (this.GetZIndexFor(thing.Map) >= this.GetZIndexFor(map) &&
@@ -402,7 +401,6 @@ namespace ZLevels
             }
             else if (this.GetZIndexFor(thing.Map) < this.GetZIndexFor(dest))
             {
-                ZLogger.Message("2 - Build tree (HaulThingToDest): " + pawn + " - Going up");
                 foreach (var map in this.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values.OrderBy(x => this.GetZIndexFor(x)))
                 {
                     if (this.GetZIndexFor(thing.Map) <= this.GetZIndexFor(map) &&
@@ -452,12 +450,10 @@ namespace ZLevels
         public List<Job> GoToMap(Pawn pawn, Map dest, ref IntVec3 lastStairsPosition, ref bool fail)
         {
             List<Job> tempJobs = new List<Job>();
-            ZLogger.Message("Build tree: " + pawn + " - GoToMap from " + pawn.Map + " to " + this.GetMapInfo(dest));
             if (pawn.Map != dest)
             {
                 if (this.GetZIndexFor(pawn.Map) > this.GetZIndexFor(dest))
                 {
-                    ZLogger.Message("1 - Build tree (GoToMap): " + pawn + " - Going down");
                     foreach (var map in this.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values.OrderByDescending(x => this.GetZIndexFor(x)))
                     {
                         if (this.GetZIndexFor(pawn.Map) >= this.GetZIndexFor(map) &&
@@ -494,7 +490,6 @@ namespace ZLevels
                 }
                 else if (this.GetZIndexFor(pawn.Map) < this.GetZIndexFor(dest))
                 {
-                    ZLogger.Message("1 - Build tree (GoToMap): " + pawn + " - Going up");
                     foreach (var map in this.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values.OrderBy(x => this.GetZIndexFor(x)))
                     {
                         if (this.GetZIndexFor(pawn.Map) <= this.GetZIndexFor(map) &&
@@ -538,7 +533,7 @@ namespace ZLevels
             List<Job> tempJobs = new List<Job>();
             bool fail = false;
             IntVec3 lastStairsPosition = pawn.Position;
-            ZLogger.Message("Starting build tree for " + pawn);
+
             //Log.Message("jobToDo.def: " + jobToDo.def);
             if (jobToDo.def == JobDefOf.HaulToCell)
             {
@@ -597,7 +592,7 @@ namespace ZLevels
                 ZLogger.Message("tempJobs.Count: " + tempJobs.Count);
                 //Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
             }
-            ZLogger.Message("Ending build tree for " + pawn);
+
         }
 
         public void ResetJobs(Pawn pawn)

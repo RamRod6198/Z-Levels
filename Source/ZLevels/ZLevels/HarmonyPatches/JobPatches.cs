@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -559,19 +560,18 @@ namespace ZLevels
                                     if (pawn.needs.food.CurCategory < HungerCategory.Starving
                                         && !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                     {
-                                        if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory")
+                                        if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory"
+                                            && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
                                         {
-
                                             ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                             pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
-                                            
                                             //Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-
                                             return false;
                                         }
                                     }
                                     else if (pawn.needs.food.CurCategory < HungerCategory.Starving
-                                        && pawn.jobs.curJob == null)
+                                        && pawn.jobs.curJob == null
+                                        && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
                                     {
                                         ZLogger.Message("1 START JOB "
                                             + ZTracker.jobTracker[pawn].activeJobs[0] + " FOR " + pawn);
@@ -879,7 +879,8 @@ namespace ZLevels
                                 if (pawn?.needs?.joy?.CurCategory > JoyCategory.Low
                                     && !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                 {
-                                    if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory")
+                                    if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory"
+                                        && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
                                     {
                                         ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                         pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
@@ -889,8 +890,8 @@ namespace ZLevels
                                     }
         
                                 }
-                                else if (pawn?.needs?.joy?.CurCategory > JoyCategory.Low
-                                    && pawn.jobs.curJob == null)
+                                else if (pawn?.needs?.joy?.CurCategory > JoyCategory.Low && pawn.jobs.curJob == null
+                                    && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
                                 {
 
                                     //ZLogger.Message("2 START JOB "
@@ -1137,7 +1138,8 @@ namespace ZLevels
                                     if (pawn.needs.rest.CurCategory < RestCategory.Exhausted &&
                                         !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                     {
-                                        if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory")
+                                        if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory"
+                                            && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
                                         {
                                             ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                             pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
@@ -1456,7 +1458,8 @@ namespace ZLevels
                             {
                                 if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                 {
-                                    if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory")
+                                    if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory" 
+                                        && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
                                     {
                                         ZLogger.Message("1 Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                         
@@ -2405,6 +2408,7 @@ namespace ZLevels
                                             catch { };
         
                                         }
+
                                         else if (scanner is WorkGiver_ConstructDeliverResourcesToBlueprints)
                                         {
                                             thing = GenClosest.ClosestThingReachable
