@@ -362,10 +362,12 @@ namespace ZLevels
                     {
                         if (map != dest)
                         {
-                            var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsDown && x.Spawned).ToList();
+                            //var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsDown && x.Spawned).ToList();
+                            var stairs = this.stairsDown[map];
                             if (stairs?.Count() > 0)
                             {
-                                var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                //var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
                                 if (selectedStairs != null)
                                 {
                                     lastStairsPosition = selectedStairs.Position;
@@ -408,10 +410,12 @@ namespace ZLevels
                     {
                         if (map != dest)
                         {
-                            var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsUp && x.Spawned).ToList();
+                            //var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsUp && x.Spawned).ToList();
+                            var stairs = this.stairsUp[map];
                             if (stairs?.Count() > 0)
                             {
-                                var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                //var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
                                 if (selectedStairs != null)
                                 {
                                     lastStairsPosition = selectedStairs.Position;
@@ -461,10 +465,12 @@ namespace ZLevels
                         {
                             if (map != dest)
                             {
-                                var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsDown && x.Spawned).ToList();
+                                //var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsDown && x.Spawned).ToList();
+                                var stairs = this.stairsDown[map];
                                 if (stairs?.Count() > 0)
                                 {
-                                    var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                    //var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                    var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
                                     if (selectedStairs != null)
                                     {
                                         ZLogger.Message("Build tree (GoToMap): " + pawn + " - Finding and using " + selectedStairs
@@ -496,10 +502,12 @@ namespace ZLevels
                         {
                             if (map != dest)
                             {
-                                var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsUp && x.Spawned).ToList();
+                                //var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsUp && x.Spawned).ToList();
+                                var stairs = this.stairsUp[map];
                                 if (stairs?.Count() > 0)
                                 {
-                                    var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                    //var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                    var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
                                     if (selectedStairs != null)
                                     {
                                         ZLogger.Message("Build tree (GoToMap): " + pawn + " - Finding and using " + selectedStairs
@@ -581,7 +589,6 @@ namespace ZLevels
             {
                 this.jobTracker[pawn].activeJobs = tempJobs;
                 this.jobTracker[pawn].mainJob = jobToDo;
-                this.TryTakeFirstJob(pawn);
             }
             else
             {
@@ -625,23 +632,22 @@ namespace ZLevels
             {
                 if (this.jobTracker.ContainsKey(pawn) && this.jobTracker[pawn].activeJobs?.Count() > 0)
                 {
-
-                    try
-                    {
-                        foreach (var d in this.jobTracker)
-                        {
-                            foreach (var t in d.Value.activeJobs)
-                            {
-                                ZLogger.Message("Active jobs 1: " + d.Key + " - " + t);
-                            }
-                            foreach (var t in d.Key.jobs.jobQueue)
-                            {
-                                ZLogger.Message("Active jobQueue 1: " + d.Key + " - " + t.job);
-                            }
-                            ZLogger.Message("========================");
-                        }
-                    }
-                    catch { }
+                    //try
+                    //{
+                    //    foreach (var d in this.jobTracker)
+                    //    {
+                    //        foreach (var t in d.Value.activeJobs)
+                    //        {
+                    //            ZLogger.Message("Active jobs 1: " + d.Key + " - " + t);
+                    //        }
+                    //        foreach (var t in d.Key.jobs.jobQueue)
+                    //        {
+                    //            ZLogger.Message("Active jobQueue 1: " + d.Key + " - " + t.job);
+                    //        }
+                    //        ZLogger.Message("========================");
+                    //    }
+                    //}
+                    //catch { }
 
                     Job job = this.jobTracker[pawn].activeJobs[0];
                     if (job?.def != null)
@@ -685,22 +691,22 @@ namespace ZLevels
                         //Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
                     }
 
-                    try
-                    {
-                        foreach (var d in this.jobTracker)
-                        {
-                            foreach (var t in d.Value.activeJobs)
-                            {
-                                ZLogger.Message("Active jobs 2: " + d.Key + " - " + t);
-                            }
-                            foreach (var t in d.Key.jobs.jobQueue)
-                            {
-                                ZLogger.Message("Active jobQueue 2: " + d.Key + " - " + t.job);
-                            }
-                            ZLogger.Message("========================");
-                        }
-                    }
-                    catch { }
+                    //try
+                    //{
+                    //    foreach (var d in this.jobTracker)
+                    //    {
+                    //        foreach (var t in d.Value.activeJobs)
+                    //        {
+                    //            ZLogger.Message("Active jobs 2: " + d.Key + " - " + t);
+                    //        }
+                    //        foreach (var t in d.Key.jobs.jobQueue)
+                    //        {
+                    //            ZLogger.Message("Active jobQueue 2: " + d.Key + " - " + t.job);
+                    //        }
+                    //        ZLogger.Message("========================");
+                    //    }
+                    //}
+                    //catch { }
 
                     return true;
                 }
