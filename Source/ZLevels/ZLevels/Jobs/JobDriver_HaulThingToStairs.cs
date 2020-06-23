@@ -24,7 +24,11 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    this.savedThing = this.TargetB.Thing;
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    if (ZTracker.jobTracker.ContainsKey(pawn))
+                    {
+                        this.savedThing = this.TargetB.Thing;
+                    }
                 }
             };
             this.FailOnDestroyedOrNull(TargetIndex.B);
@@ -37,6 +41,12 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    if (ZTracker.jobTracker.ContainsKey(pawn))
+                    {
+                        ZLogger.Message("Job count: " + ZTracker.jobTracker[pawn].mainJob.count);
+                    }
+                    
                     this.pawn.jobs.curJob.count = Mathf.Min(TargetB.Thing.stackCount, (int)(pawn.GetStatValue(StatDefOf.CarryingCapacity, true) / TargetB.Thing.def.VolumePerUnit));
                     if (this.pawn.jobs.curJob.count < 0)
                     {
@@ -57,13 +67,6 @@ namespace ZLevels
                         var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                         if (ZTracker.jobTracker.ContainsKey(pawn))
                         {
-                            ZLogger.Message("Analyzing: " + pawn);
-                            ZLogger.Message("Main thing: " + TargetB.Thing);
-                            ZLogger.Message("Saved thing: " + this.savedThing);
-                            ZLogger.Message("Carrying thing: " + pawn.carryTracker?.CarriedThing);
-                            ZLogger.Message("Main job: " + ZTracker.jobTracker[pawn].mainJob);
-                            ZLogger.Message("job.targetA.Thing: " + ZTracker.jobTracker[pawn].mainJob.targetA.Thing);
-                            ZLogger.Message("job.targetB.Thing: " + ZTracker.jobTracker[pawn].mainJob.targetB.Thing);
                             if (ZTracker.jobTracker[pawn].mainJob.targetA.Thing != null
                             && ZTracker.jobTracker[pawn].mainJob.targetA.Thing == this.savedThing
                             && ZTracker.jobTracker[pawn].mainJob.targetA.Thing != TargetB.Thing)
@@ -84,7 +87,6 @@ namespace ZLevels
                                 for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
                                 {
                                     var target = ZTracker.jobTracker[pawn].mainJob.targetQueueA[i];
-                                    ZLogger.Message("job.targetQueueA: " + target.Thing);
                                     if (target.Thing != null && target.Thing == this.savedThing && target.Thing != TargetB.Thing)
                                     {
                                         ZLogger.Message("3 Pawns carried thing not the same: " + target.Thing);
@@ -98,15 +100,6 @@ namespace ZLevels
                                 for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
                                 {
                                     var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
-                                    ZLogger.Message("job.targetQueueB: " + target.Thing);
-
-                                    ZLogger.Message("target.Thing != null: " + (target.Thing != null).ToString());
-                                    ZLogger.Message("target.Thing: " + target.Thing);
-                                    ZLogger.Message("this.savedThing: " + this.savedThing);
-                                    ZLogger.Message("target.Thing == this.savedThing: " + (target.Thing == this.savedThing).ToString());
-                                    ZLogger.Message("target.Thing != TargetB.Thing: " + (target.Thing != TargetB.Thing).ToString());
-
-
                                     if (target.Thing != null && target.Thing == this.savedThing && target.Thing != TargetB.Thing)
                                     {
                                         ZLogger.Message("4 Pawns carried thing not the same: " + target.Thing);
@@ -127,6 +120,48 @@ namespace ZLevels
             yield return carryToCell;
 
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
+
+            yield return new Toil
+            {
+                initAction = delegate ()
+                {
+                    try
+                    {
+                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        if (ZTracker.jobTracker.ContainsKey(pawn))
+                        {
+                            ZLogger.Message("10 Main job: " + ZTracker.jobTracker[pawn].mainJob);
+                            ZLogger.Message("10 job.targetA.Thing: " + ZTracker.jobTracker[pawn].mainJob.targetA.Thing);
+                            ZLogger.Message("10 job.targetB.Thing: " + ZTracker.jobTracker[pawn].mainJob.targetB.Thing);
+
+                            try
+                            {
+                                for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
+                                {
+                                    var target = ZTracker.jobTracker[pawn].mainJob.targetQueueA[i];
+                                    ZLogger.Message("10 job.targetQueueA: " + target.Thing);
+                                    ZLogger.Message("10 job.targetQueueA.Map: " + target.Thing.Map);
+                                }
+                            }
+                            catch { }
+                            try
+                            {
+                                for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                                {
+                                    var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
+                                    ZLogger.Message("10 job.targetQueueB: " + target.Thing);
+                                    ZLogger.Message("10 job.targetQueueB.Map: " + target.Thing.Map);
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("Z-Tracker produced an error in JobDriver_HaulThingToStairs class. Report about it to devs. Error: " + ex);
+                    }
+                }
+            };
 
             Toil useStairs = Toils_General.Wait(60, 0);
             ToilEffects.WithProgressBarToilDelay(useStairs, TargetIndex.A, false, -0.5f);
