@@ -1425,9 +1425,23 @@ namespace ZLevels
         
             private static bool Prefix(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
             {
-                ZLogger.Message(pawn + " start work search");
-                //JobManagerPatches.searchJobs = false;
                 var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                ZLogger.Message(pawn + " start work search 1");
+                try
+                {
+                    foreach (var d in ZTracker.jobTracker[pawn].activeJobs)
+                    {
+                        ZLogger.Message("Active jobs: " + d + " - " + pawn);
+                    }
+                    foreach (var t in pawn.jobs.jobQueue)
+                    {
+                        ZLogger.Message("Active jobQueue: " + pawn + " - " + t.job);
+                    }
+                }
+                catch { }
+                ZLogger.Message(pawn + " start work search 2");
+                ZLogger.Message("=============================");
+                //JobManagerPatches.searchJobs = false;
                 try
                 {
                     try
@@ -1462,7 +1476,6 @@ namespace ZLevels
                                         && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
                                     {
                                         ZLogger.Message("1 Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-                                        
                                         __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
                                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                         
@@ -1555,6 +1568,9 @@ namespace ZLevels
                         }
                         ZLogger.Message(pawn + " got job " + result + " - map: "
                             + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
+
+                        //pawn.ClearReservationsForJob(result.Job);
+
                         if (dest != null)
                         {
                             ZTracker.BuildJobListFor(pawn, oldMap, dest, result.Job, null);
@@ -1847,6 +1863,7 @@ namespace ZLevels
                         .SetValue((sbyte)Find.Maps.IndexOf(origMap));
                     Traverse.Create(pawn).Field("mapIndexOrState")
                         .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
+
                     return null;
                 }
                 if (!RefuelWorkGiverUtility.CanRefuel(pawn, thing, forced))
@@ -2255,6 +2272,7 @@ namespace ZLevels
 
                                     Predicate<Thing> deliverResourcesValidator2 = (Thing t) => !t.IsForbidden(pawn) &&
                                         JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t) != null;
+
                                     Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn) &&
                                     TryIssueJobPackagePatch.HasJobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null;
         

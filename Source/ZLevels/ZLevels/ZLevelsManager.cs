@@ -557,6 +557,13 @@ namespace ZLevels
                 tempJobs.AddRange(this.HaulThingToDest(pawn, jobToDo.targetA.Thing, jobToDo.targetB.Thing.Map, ref lastStairsPosition, ref fail));
                 tempJobs.Add(jobToDo);
             }
+            else if (jobToDo.def == JobDefOf.Refuel)
+            {
+                ZLogger.Message("Job method 1.7: " + jobToDo.targetB.Thing);
+                tempJobs.AddRange(this.GoToMap(pawn, jobToDo.targetB.Thing.Map, ref lastStairsPosition, ref fail));
+                tempJobs.AddRange(this.HaulThingToDest(pawn, jobToDo.targetB.Thing, jobToDo.targetA.Thing.Map, ref lastStairsPosition, ref fail));
+                tempJobs.Add(jobToDo);
+            }
             else if (jobToDo?.targetQueueB?.Count > 0)
             {
                 foreach (var t in jobToDo.targetQueueB)
@@ -629,18 +636,15 @@ namespace ZLevels
                 {
                     //try
                     //{
-                    //    foreach (var d in this.jobTracker)
+                    //    foreach (var d in this.jobTracker[pawn].activeJobs)
                     //    {
-                    //        foreach (var t in d.Value.activeJobs)
-                    //        {
-                    //            ZLogger.Message("Active jobs 1: " + d.Key + " - " + t);
-                    //        }
-                    //        foreach (var t in d.Key.jobs.jobQueue)
-                    //        {
-                    //            ZLogger.Message("Active jobQueue 1: " + d.Key + " - " + t.job);
-                    //        }
-                    //        ZLogger.Message("========================");
+                    //        ZLogger.Message("Active jobs 1: " + d + " - " + pawn);
                     //    }
+                    //    foreach (var t in pawn.jobs.jobQueue)
+                    //    {
+                    //        ZLogger.Message("Active jobQueue 1: " + pawn + " - " + t.job);
+                    //    }
+                    //    ZLogger.Message("========================");
                     //}
                     //catch { }
 
@@ -651,21 +655,16 @@ namespace ZLevels
                         {
                             if (pawn?.carryTracker?.CarriedThing != null)
                             {
-                                ZLogger.Message("this.jobTracker[pawn].mainJob: " + this.jobTracker[pawn].mainJob.targetB.Thing);
-                                ZLogger.Message("pawn?.carryTracker?.CarriedThing: " + pawn?.carryTracker?.CarriedThing);
+                                ZLogger.Message(pawn + " trying to drop " + pawn?.carryTracker?.CarriedThing + " for " + job);
                                 Thing newThing;
-                                pawn.carryTracker.TryDropCarriedThing
-                                (pawn.Position, ThingPlaceMode.Direct, out newThing);
-                                ZLogger.Message("newThing: " + newThing);
-                                ZLogger.Message("this.jobTracker[pawn].mainJob: " +
-                                    this.jobTracker[pawn].mainJob.targetB.Thing);
-                                ZLogger.Message("Same things: "
-                                    + (newThing == this.jobTracker[pawn].mainJob.targetB.Thing).ToString());
+                                pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Direct, out newThing);
+                                ZLogger.Message(pawn + " dropping " + newThing + " for " + job);
                             }
                             if (job.TryMakePreToilReservations(pawn, false))
                             {
                                 ZLogger.Message(pawn + " taking job " + job + " in " + this.GetMapInfo(pawn.Map));
-                                pawn.jobs.jobQueue.EnqueueFirst(this.jobTracker[pawn].mainJob);
+                                pawn.jobs.StartJob(this.jobTracker[pawn].mainJob);
+                                //pawn.jobs.jobQueue.EnqueueFirst(this.jobTracker[pawn].mainJob);
                             }
                             else
                             {
@@ -688,18 +687,15 @@ namespace ZLevels
 
                     //try
                     //{
-                    //    foreach (var d in this.jobTracker)
+                    //    foreach (var d in this.jobTracker[pawn].activeJobs)
                     //    {
-                    //        foreach (var t in d.Value.activeJobs)
-                    //        {
-                    //            ZLogger.Message("Active jobs 2: " + d.Key + " - " + t);
-                    //        }
-                    //        foreach (var t in d.Key.jobs.jobQueue)
-                    //        {
-                    //            ZLogger.Message("Active jobQueue 2: " + d.Key + " - " + t.job);
-                    //        }
-                    //        ZLogger.Message("========================");
+                    //        ZLogger.Message("Active jobs 2: " + d + " - " + pawn);
                     //    }
+                    //    foreach (var t in pawn.jobs.jobQueue)
+                    //    {
+                    //        ZLogger.Message("Active jobQueue 2: " + pawn + " - " + t.job);
+                    //    }
+                    //    ZLogger.Message("========================");
                     //}
                     //catch { }
 
