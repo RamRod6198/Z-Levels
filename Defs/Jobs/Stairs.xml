@@ -13,4 +13,12 @@
 		<reportString>traversing TargetA.</reportString>
 	</JobDef>
 
+	<JobDef>
+		<defName>ZL_HaulToCell</defName>
+		<driverClass>ZLevels.JobDriver_ZHaulToCell</driverClass>
+		<reportString>hauling TargetA.</reportString>
+		<suspendable>false</suspendable>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+
 </Defs>

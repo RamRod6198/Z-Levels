@@ -42,6 +42,8 @@ namespace ZLevels
 		public static JobDef ZL_GoToStairs;
 
 		public static JobDef ZL_HaulThingToStairs;
+
+		public static JobDef ZL_HaulToCell;
 	}
 }
 

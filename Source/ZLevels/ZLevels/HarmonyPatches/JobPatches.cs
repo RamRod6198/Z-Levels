@@ -1134,6 +1134,19 @@ namespace ZLevels
                                             && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
                                         {
                                             ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
+
+                                            try
+                                            {
+                                                for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                                                {
+                                                    var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
+                                                    ZLogger.Message("31 job.targetQueueB: " + target.Thing);
+                                                    ZLogger.Message("31 job.targetQueueB.Map: " + target.Thing.Map);
+                                                    ZLogger.Message("31 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                                                }
+                                            }
+                                            catch { }
+
                                             pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
 
                                             return false;
@@ -1415,6 +1428,19 @@ namespace ZLevels
             private static bool Prefix(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
             {
                 var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+
+                try
+                {
+                    for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                    {
+                        var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
+                        ZLogger.Message("45 job.targetQueueB: " + target.Thing);
+                        ZLogger.Message("45 job.targetQueueB.Map: " + target.Thing.Map);
+                        ZLogger.Message("45 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                    }
+                }
+                catch { }
+
                 ZLogger.Message(pawn + " start work search 1");
                 try
                 {
@@ -1430,7 +1456,6 @@ namespace ZLevels
                 catch { }
                 ZLogger.Message(pawn + " start work search 2");
                 ZLogger.Message("=============================");
-                Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
 
                 //JobManagerPatches.searchJobs = false;
                 try
@@ -1467,7 +1492,22 @@ namespace ZLevels
                                         && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
                                     {
                                         ZLogger.Message("1 Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-                                        __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
+                                        try
+                                        {
+                                            for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                                            {
+                                                var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
+                                                ZLogger.Message("50 job.targetQueueB: " + target.Thing);
+                                                ZLogger.Message("50 job.targetQueueB.Map: " + target.Thing.Map);
+                                                ZLogger.Message("50 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                                            }
+                                        }
+                                        catch { }
+                                        if (pawn?.carryTracker?.CarriedThing != null)
+                                        {
+                                            ZLogger.Message(pawn + " carrying " + pawn?.carryTracker?.CarriedThing);
+                                        }
+                                            __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
                                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                         
                                         //pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);

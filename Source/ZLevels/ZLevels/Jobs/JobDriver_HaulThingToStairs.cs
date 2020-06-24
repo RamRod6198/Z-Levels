@@ -241,6 +241,18 @@ namespace ZLevels
                         ZTracker.jobTracker[pawn].lastTickJoy = Find.TickManager.TicksGame + 201;
                     }
                     catch { };
+
+                    try
+                    {
+                        for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                        {
+                            var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
+                            ZLogger.Message("47 job.targetQueueB: " + target.Thing);
+                            ZLogger.Message("47 job.targetQueueB.Map: " + target.Thing.Map);
+                            ZLogger.Message("47 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                        }
+                    }
+                    catch { }
                 }
             };
         }

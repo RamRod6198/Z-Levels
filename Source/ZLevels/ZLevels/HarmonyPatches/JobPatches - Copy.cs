@@ -60,6 +60,53 @@ namespace ZLevels
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
+            Toil toil = new Toil();
+
+            yield return new Toil
+            {
+                initAction = delegate ()
+                {
+
+                    ZLogger.Message("-1 toil.actor: " + toil.actor);
+                    ZLogger.Message("-1 toil.actor.Position: " + toil.actor.Position);
+                    ZLogger.Message("-1 toil.actor.Map: " + toil.actor.Map);
+                    ZLogger.Message("-1 TargetB.Thing: " + TargetB.Thing);
+                    ZLogger.Message("-1 TargetB.Thing.Position: " + TargetB.Thing?.Position);
+                    ZLogger.Message("-1 TargetB.Thing.Map: " + TargetB.Thing?.Map);
+
+                    ZLogger.Message(toil.actor + " - checking reservations on: " + TargetB.Thing, true);
+                    ZLogger.Message("-1 pawn.Map.physicalInteractionReservationManager.FirstReserverOf(target): " + toil.actor.Map.physicalInteractionReservationManager.FirstReserverOf(TargetB));
+                    ZLogger.Message("-1 TargetB.Thing == null: " + (TargetB.Thing == null).ToString());
+                    ZLogger.Message("-1 !toil.actor.Map.physicalInteractionReservationManager.IsReserved(TargetB.Thing): " + (!toil.actor.Map.physicalInteractionReservationManager.IsReserved(TargetB.Thing)).ToString());
+                    ZLogger.Message("-1 toil.actor.Map.physicalInteractionReservationManager.IsReservedBy(toil.actor, TargetB.Thing)): " + (toil.actor.Map.physicalInteractionReservationManager.IsReservedBy(toil.actor, TargetB.Thing)).ToString());
+                    ZLogger.Message("-1 failcondition" + ((TargetB == null
+                        || !toil.actor.Map.physicalInteractionReservationManager.IsReserved(TargetB)
+                        || toil.actor.Map.physicalInteractionReservationManager.IsReservedBy(toil.actor, TargetB))
+                        ? JobCondition.Ongoing : JobCondition.Incompletable).ToString());
+                    try
+                    {
+                        for (int i = job.targetQueueA.Count - 1; i >= 0; i--)
+                        {
+                            var target = job.targetQueueA[i];
+                            ZLogger.Message("-1 job.targetQueueA: " + target.Thing);
+                            ZLogger.Message("-1 job.targetQueueA: " + target.Thing.Map);
+
+                        }
+                    }
+                    catch { }
+                    try
+                    {
+                        for (int i = job.targetQueueB.Count - 1; i >= 0; i--)
+                        {
+                            var target = job.targetQueueB[i];
+                            ZLogger.Message("-1 job.targetQueueB: " + target.Thing);
+                            ZLogger.Message("-1 job.targetQueueB.Map: " + target.Thing.Map);
+                            ZLogger.Message("-1 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                        }
+                    }
+                    catch { }
+                }
+            };
 
             //AddEndCondition(delegate
             //{
@@ -87,7 +134,6 @@ namespace ZLevels
             //    return false;
             //});
             Toil gotoBillGiver = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
-            Toil toil = new Toil();
 
             toil.initAction = delegate
             {
@@ -134,6 +180,7 @@ namespace ZLevels
                             var target = job.targetQueueA[i];
                             ZLogger.Message("1 job.targetQueueA: " + target.Thing);
                             ZLogger.Message("1 job.targetQueueA: " + target.Thing.Map);
+                            ZLogger.Message("1 job.targetQueueA: " + target.Thing.stackCount);
 
                         }
                     }
@@ -145,6 +192,7 @@ namespace ZLevels
                             var target = job.targetQueueB[i];
                             ZLogger.Message("1 job.targetQueueB: " + target.Thing);
                             ZLogger.Message("1 job.targetQueueB.Map: " + target.Thing.Map);
+                            ZLogger.Message("1 job.targetQueueB.stackCount: " + target.Thing.stackCount);
                         }
                     }
                     catch { }
@@ -196,11 +244,10 @@ namespace ZLevels
                             var target = job.targetQueueB[i];
                             ZLogger.Message("2 job.targetQueueB: " + target.Thing);
                             ZLogger.Message("2 job.targetQueueB.Map: " + target.Thing.Map);
+                            ZLogger.Message("2 job.targetQueueB.stackCount: " + target.Thing.stackCount);
                         }
                     }
                     catch { }
-                    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-
                 }
             };
 
@@ -247,10 +294,10 @@ namespace ZLevels
                             var target = job.targetQueueB[i];
                             ZLogger.Message("3 job.targetQueueB: " + target.Thing);
                             ZLogger.Message("3 job.targetQueueB.Map: " + target.Thing.Map);
+                            ZLogger.Message("3 job.targetQueueB.stackCount: " + target.Thing.stackCount);
                         }
                     }
                     catch { }
-                    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
                 }
             };
             yield return getToHaulTarget;
@@ -330,6 +377,8 @@ namespace ZLevels
                         Log.Message("targetQueue[0].Thing.stackCount: " + (targetQueue[0].Thing.stackCount).ToString(), true);
                         Log.Message("curJob.countQueue[0]: " + (curJob.countQueue[0]).ToString(), true);
                         Log.Message(" - ExtractNextTargetFromQueue - actor.jobs.curDriver.EndJobWith(JobCondition.Incompletable); - 7", true);
+                        Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+
                         actor.jobs.curDriver.EndJobWith(JobCondition.Incompletable);
                     }
                     else

@@ -305,6 +305,7 @@
     <Compile Include="HarmonyPatches\JobPatches - Copy.cs" />
     <Compile Include="HarmonyPatches\ResourceCounterPatch.cs" />
     <Compile Include="HarmonyPatches\SkyfallerPatches.cs" />
+    <Compile Include="Jobs\JobDriver_ZHaulToCell.cs" />
     <Compile Include="MapRenderer\PawnRendererScaled.cs" />
     <Compile Include="MapRenderer\RenderPatches.cs" />
     <Compile Include="MapRenderer\SectionLayer_LowerFogOfWar.cs" />

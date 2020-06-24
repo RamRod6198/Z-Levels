@@ -450,7 +450,7 @@ namespace ZLevels
 
         public Job HaulThingToPlace(Pawn pawn, Thing thing, IntVec3 positionToHaul)
         {
-            Job job = JobMaker.MakeJob(JobDefOf.HaulToCell, thing, positionToHaul);
+            Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, thing, positionToHaul);
             job.count = Mathf.Min(thing.stackCount, (int)(pawn.GetStatValue(StatDefOf.CarryingCapacity, true) 
                 / thing.def.VolumePerUnit));
             if (job.count < 0)
@@ -664,14 +664,10 @@ namespace ZLevels
                     Job job = this.jobTracker[pawn].activeJobs[0];
                     if (job?.def != null)
                     {
-                        if (job == this.jobTracker[pawn].mainJob || job.def == JobDefOf.HaulToCell)
+                        if (job == this.jobTracker[pawn].mainJob || job.def == ZLevelsDefOf.ZL_HaulToCell)
                         {
-                            ZLogger.Message(pawn + " starts job " + job);
-
                             if (pawn?.carryTracker?.CarriedThing != null)
                             {
-
-
                                 try
                                 {
                                     for (int i = this.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
@@ -689,6 +685,7 @@ namespace ZLevels
                                         var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
                                         ZLogger.Message("15 job.targetQueueB: " + target.Thing);
                                         ZLogger.Message("15 job.targetQueueB.Map: " + target.Thing.Map);
+                                        ZLogger.Message("15 job.targetQueueB.stackCount: " + target.Thing.stackCount);
                                     }
                                 }
                                 catch { }
@@ -704,148 +701,151 @@ namespace ZLevels
                                 ZLogger.Message("0 Analyzing: " + pawn);
                                 ZLogger.Message("0 Saved thing: " + savedThing);
                                 ZLogger.Message("0 Main job: " + job);
-                                ZLogger.Message("0 job.targetA.Thing: " + job.targetA.Thing + " - " + job.targetA.Thing.Map);
-                                ZLogger.Message("0 job.targetB.Thing: " + job.targetB.Thing + " - " + job.targetB.Thing.Map);
-                                //try
-                                //{
-                                //    if (job.targetA.Thing == savedThing && savedThing != newThing)
-                                //    {
-                                //        ZLogger.Message(newThing + " 0 job.targetA is not same: " + job.targetA.Thing);
-                                //        job.targetA = new LocalTargetInfo(newThing);
-                                //    }
-                                //
-                                //    if (job.targetB.Thing == savedThing && savedThing != newThing)
-                                //    {
-                                //        ZLogger.Message(newThing + " 0 job.targetB is not same: " + job.targetB.Thing);
-                                //        job.targetB = new LocalTargetInfo(newThing);
-                                //    }
-                                //}
-                                //catch { };
-                                //try
-                                //{
-                                //    for (int i = job.targetQueueA.Count - 1; i >= 0; i--)
-                                //    {
-                                //        var target = job.targetQueueA[i];
-                                //        ZLogger.Message("0 job.targetQueueA: " + target.Thing + " - " + target.Thing.Map);
-                                //        if (target.Thing == savedThing && savedThing != newThing)
-                                //        {
-                                //            ZLogger.Message(newThing + " 0 job.targetQueueA is not same: " + target.Thing);
-                                //            job.targetQueueA[i] = new LocalTargetInfo(newThing);
-                                //        }
-                                //    }
-                                //}
-                                //catch { }
-                                //try
-                                //{
-                                //    for (int i = job.targetQueueB.Count - 1; i >= 0; i--)
-                                //    {
-                                //        var target = job.targetQueueB[i];
-                                //        ZLogger.Message("0 job.targetQueueB: " + target.Thing + " - " + target.Thing.Map);
-                                //        if (target.Thing == savedThing && savedThing != newThing)
-                                //        {
-                                //            ZLogger.Message(newThing + " 0 job.targetQueueB is not same: " + target.Thing);
-                                //            job.targetQueueB[i] = new LocalTargetInfo(newThing);
-                                //        }
-                                //    }
-                                //}
-                                //catch { }
-                                //if (job != this.jobTracker[pawn].mainJob)
-                                //{
-                                //    try
-                                //    {
-                                //        if (this.jobTracker[pawn].mainJob.targetA.Thing == savedThing && savedThing != newThing)
-                                //        {
-                                //            ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetA is not same: " + this.jobTracker[pawn].mainJob.targetA.Thing);
-                                //            this.jobTracker[pawn].mainJob.targetA = new LocalTargetInfo(newThing);
-                                //        }
-                                //
-                                //        if (this.jobTracker[pawn].mainJob.targetB.Thing == savedThing && savedThing != newThing)
-                                //        {
-                                //            ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetB is not same: " + this.jobTracker[pawn].mainJob.targetB.Thing);
-                                //            this.jobTracker[pawn].mainJob.targetB = new LocalTargetInfo(newThing);
-                                //        }
-                                //    }
-                                //    catch { }
-                                //    try
-                                //    {
-                                //        for (int i = this.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
-                                //        {
-                                //            var target = this.jobTracker[pawn].mainJob.targetQueueA[i];
-                                //            ZLogger.Message("0 this.jobTracker[pawn].mainJob.targetQueueA: " + target.Thing + " - " + target.Thing.Map);
-                                //            if (target.Thing == savedThing && savedThing != newThing)
-                                //            {
-                                //                ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetQueueA is not same: " + target.Thing);
-                                //                this.jobTracker[pawn].mainJob.targetQueueA[i] = new LocalTargetInfo(newThing);
-                                //            }
-                                //        }
-                                //    }
-                                //    catch { }
-                                //    try
-                                //    {
-                                //        for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                                //        {
-                                //            var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
-                                //            ZLogger.Message("0 this.jobTracker[pawn].mainJob.targetQueueB: " + target.Thing);
-                                //            if (target.Thing == savedThing && savedThing != newThing)
-                                //            {
-                                //                ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetQueueB is not same: " + target.Thing);
-                                //                this.jobTracker[pawn].mainJob.targetQueueB[i] = new LocalTargetInfo(newThing);
-                                //            }
-                                //        }
-                                //    }
-                                //    catch { }
-                                //}
-                                //
-                                //try
-                                //{
-                                //    for (int i = this.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
-                                //    {
-                                //        var target = this.jobTracker[pawn].mainJob.targetQueueA[i];
-                                //        ZLogger.Message("25 job.targetQueueA: " + target.Thing);
-                                //        ZLogger.Message("25 job.targetQueueA: " + target.Thing.Map);
-                                //    }
-                                //}
-                                //catch { }
-                                //try
-                                //{
-                                //    for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                                //    {
-                                //        var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
-                                //        ZLogger.Message("25 job.targetQueueB: " + target.Thing);
-                                //        ZLogger.Message("25 job.targetQueueB.Map: " + target.Thing.Map);
-                                //    }
-                                //}
-                                //catch { }
+                                ZLogger.Message("0 job.targetA.Thing: " + job.targetA.Thing + " - " + job.targetA.Thing?.Map);
+                                ZLogger.Message("0 job.targetB.Thing: " + job.targetB.Thing + " - " + job.targetB.Thing?.Map);
+                                try
+                                {
+                                    if (job.targetA.Thing == savedThing && savedThing != newThing)
+                                    {
+                                        ZLogger.Message(newThing + " 0 job.targetA is not same: " + job.targetA.Thing);
+                                        job.targetA = new LocalTargetInfo(newThing);
+                                    }
+                                
+                                    if (job.targetB.Thing == savedThing && savedThing != newThing)
+                                    {
+                                        ZLogger.Message(newThing + " 0 job.targetB is not same: " + job.targetB.Thing);
+                                        job.targetB = new LocalTargetInfo(newThing);
+                                    }
+                                }
+                                catch { };
+                                try
+                                {
+                                    for (int i = job.targetQueueA.Count - 1; i >= 0; i--)
+                                    {
+                                        var target = job.targetQueueA[i];
+                                        ZLogger.Message("0 job.targetQueueA: " + target.Thing + " - " + target.Thing.Map);
+                                        if (target.Thing == savedThing && savedThing != newThing)
+                                        {
+                                            ZLogger.Message(newThing + " 0 job.targetQueueA is not same: " + target.Thing);
+                                            job.targetQueueA[i] = new LocalTargetInfo(newThing);
+                                        }
+                                    }
+                                }
+                                catch { }
+                                try
+                                {
+                                    for (int i = job.targetQueueB.Count - 1; i >= 0; i--)
+                                    {
+                                        var target = job.targetQueueB[i];
+                                        ZLogger.Message("0 job.targetQueueB: " + target.Thing + " - " + target.Thing.Map);
+                                        ZLogger.Message("0 job.targetQueueB: " + target.Thing + " - " + target.Thing.stackCount);
+                                        if (target.Thing == savedThing && savedThing != newThing)
+                                        {
+                                            ZLogger.Message(newThing + " 0 job.targetQueueB is not same: " + target.Thing);
+                                            job.targetQueueB[i] = new LocalTargetInfo(newThing);
+                                        }
+                                    }
+                                }
+                                catch { }
+                                if (job != this.jobTracker[pawn].mainJob)
+                                {
+                                    try
+                                    {
+                                        if (this.jobTracker[pawn].mainJob.targetA.Thing == savedThing && savedThing != newThing)
+                                        {
+                                            ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetA is not same: " + this.jobTracker[pawn].mainJob.targetA.Thing);
+                                            this.jobTracker[pawn].mainJob.targetA = new LocalTargetInfo(newThing);
+                                        }
+                                
+                                        if (this.jobTracker[pawn].mainJob.targetB.Thing == savedThing && savedThing != newThing)
+                                        {
+                                            ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetB is not same: " + this.jobTracker[pawn].mainJob.targetB.Thing);
+                                            this.jobTracker[pawn].mainJob.targetB = new LocalTargetInfo(newThing);
+                                        }
+                                    }
+                                    catch { }
+                                    try
+                                    {
+                                        for (int i = this.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
+                                        {
+                                            var target = this.jobTracker[pawn].mainJob.targetQueueA[i];
+                                            ZLogger.Message("0 this.jobTracker[pawn].mainJob.targetQueueA: " + target.Thing + " - " + target.Thing.Map);
+                                            if (target.Thing == savedThing && savedThing != newThing)
+                                            {
+                                                ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetQueueA is not same: " + target.Thing);
+                                                this.jobTracker[pawn].mainJob.targetQueueA[i] = new LocalTargetInfo(newThing);
+                                            }
+                                        }
+                                    }
+                                    catch { }
+                                    try
+                                    {
+                                        for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                                        {
+                                            var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
+                                            ZLogger.Message("0 this.jobTracker[pawn].mainJob.targetQueueB: " + target.Thing);
+                                            if (target.Thing == savedThing && savedThing != newThing)
+                                            {
+                                                ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetQueueB is not same: " + target.Thing);
+                                                this.jobTracker[pawn].mainJob.targetQueueB[i] = new LocalTargetInfo(newThing);
+                                            }
+                                        }
+                                    }
+                                    catch { }
+                                }
+                                
+                                try
+                                {
+                                    for (int i = this.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
+                                    {
+                                        var target = this.jobTracker[pawn].mainJob.targetQueueA[i];
+                                        ZLogger.Message("25 job.targetQueueA: " + target.Thing);
+                                        ZLogger.Message("25 job.targetQueueA: " + target.Thing.Map);
+                                    }
+                                }
+                                catch { }
+                                try
+                                {
+                                    for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                                    {
+                                        var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
+                                        ZLogger.Message("25 job.targetQueueB: " + target.Thing);
+                                        ZLogger.Message("25 job.targetQueueB.Map: " + target.Thing.Map);
+                                        ZLogger.Message("25 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                                    }
+                                }
+                                catch { }
 
                             }
                             if (job.TryMakePreToilReservations(pawn, false))
                             {
                                 ZLogger.Message(pawn + " taking job " + job + " in " + this.GetMapInfo(pawn.Map));
 
-
-                                //try
-                                //{
-                                //    for (int i = this.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
-                                //    {
-                                //        var target = this.jobTracker[pawn].mainJob.targetQueueA[i];
-                                //        ZLogger.Message("30 job.targetQueueA: " + target.Thing);
-                                //        ZLogger.Message("30 job.targetQueueA: " + target.Thing.Map);
-                                //    }
-                                //}
-                                //catch { }
-                                //try
-                                //{
-                                //    for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                                //    {
-                                //        var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
-                                //        ZLogger.Message("30 job.targetQueueB: " + target.Thing);
-                                //        ZLogger.Message("30 job.targetQueueB.Map: " + target.Thing.Map);
-                                //    }
-                                //}
-                                //catch { }
+                                try
+                                {
+                                    for (int i = this.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
+                                    {
+                                        var target = this.jobTracker[pawn].mainJob.targetQueueA[i];
+                                        ZLogger.Message("30 job.targetQueueA: " + target.Thing);
+                                        ZLogger.Message("30 job.targetQueueA: " + target.Thing.Map);
+                                    }
+                                }
+                                catch { }
+                                try
+                                {
+                                    for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                                    {
+                                        var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
+                                        ZLogger.Message("30 job.targetQueueB: " + target.Thing);
+                                        ZLogger.Message("30 job.targetQueueB.Map: " + target.Thing.Map);
+                                        ZLogger.Message("30 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                                    }
+                                }
+                                catch { }
 
 
                                 pawn.jobs.StartJob(job);
+
                                 //pawn.jobs.jobQueue.EnqueueFirst(this.jobTracker[pawn].mainJob);
                             }
                             else
@@ -1228,6 +1228,18 @@ namespace ZLevels
             //        }
             //    }
             //}
+
+            try
+            {
+                for (int i = this.jobTracker[pawnToTeleport].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                {
+                    var target = this.jobTracker[pawnToTeleport].mainJob.targetQueueB[i];
+                    ZLogger.Message("40 job.targetQueueB: " + target.Thing);
+                    ZLogger.Message("40 job.targetQueueB.Map: " + target.Thing.Map);
+                    ZLogger.Message("40 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                }
+            }
+            catch { }
 
         }
 
