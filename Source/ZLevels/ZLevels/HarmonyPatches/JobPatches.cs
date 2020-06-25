@@ -2482,7 +2482,6 @@ namespace ZLevels
 
                         if (job3 != null)
                         {
-                            Log.Message("TEST");
                             job3.workGiverDef = scannerWhoProvidedTarget.def;
                             return new ThinkResult(job3, instance, list[j].def.tagToGive);
                         }
