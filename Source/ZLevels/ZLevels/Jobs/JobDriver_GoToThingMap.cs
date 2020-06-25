@@ -6,7 +6,7 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class JobDriver_GoToStairs : JobDriver
+    public class JobDriver_GoToThingMap : JobDriver
     {
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
@@ -14,6 +14,35 @@ namespace ZLevels
         }
         protected override IEnumerable<Toil> MakeNewToils()
         {
+            Toil setStairs = new Toil
+            {
+                initAction = delegate ()
+                {
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    Pawn pawn = GetActor();
+
+                    Thing selectedStairs = null;
+                    if (ZTracker.GetZIndexFor(pawn.Map) > ZTracker.GetZIndexFor(this.job.targetB.Thing.Map))
+                    {
+                        var stairs = ZTracker.stairsDown[pawn.Map];
+                        if (stairs?.Count() > 0)
+                        {
+                            selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(this.job.targetB.Thing.Position, x.Position));
+                        }
+                    }
+                    else if (ZTracker.GetZIndexFor(pawn.Map) < ZTracker.GetZIndexFor(this.job.targetB.Thing.Map))
+                    {
+                        var stairs = ZTracker.stairsUp[pawn.Map];
+                        if (stairs?.Count() > 0)
+                        {
+                            selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(this.job.targetB.Thing.Position, x.Position));
+                        }
+                    }
+                    this.job.targetA = new LocalTargetInfo(selectedStairs);
+                }
+            };
+            yield return setStairs;
+
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
             Toil useStairs = Toils_General.Wait(60, 0);
             ToilEffects.WithProgressBarToilDelay(useStairs, TargetIndex.A, false, -0.5f);
@@ -83,11 +112,14 @@ namespace ZLevels
                     try
                     {
                         ZLogger.Message("5 lastTick");
-
                         ZTracker.jobTracker[pawn].lastTickFood = Find.TickManager.TicksGame + 201;
                         ZTracker.jobTracker[pawn].lastTickJoy = Find.TickManager.TicksGame + 201;
                     }
                     catch { };
+                    if (pawn.Map != job.targetB.Thing.Map)
+                    {
+                        JumpToToil(setStairs);
+                    }
                 }
             };
         }

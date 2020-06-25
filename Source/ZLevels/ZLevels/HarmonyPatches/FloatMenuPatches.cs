@@ -89,7 +89,7 @@ namespace ZLevels
                     if (floatMenuOption != null)
                     {
                         opts.Remove(floatMenuOption);
-                        opts.Add(AddHumanlikeOrders_Patch.addRescueOption(pawn, pawn2));
+                        opts.Add(AddHumanlikeOrders_Patch.AddRescueOption(pawn, pawn2));
                     }
                     TaggedString toCheck2 = "Capture".Translate(pawn2.LabelCap, pawn2);
                     FloatMenuOption floatMenuOption2 = opts.FirstOrDefault((FloatMenuOption x) => x.Label.Contains
@@ -97,12 +97,12 @@ namespace ZLevels
                     if (floatMenuOption2 != null)
                     {
                         opts.Remove(floatMenuOption2);
-                        opts.Add(AddHumanlikeOrders_Patch.addCaptureOption(pawn, pawn2));
+                        opts.Add(AddHumanlikeOrders_Patch.AddCaptureOption(pawn, pawn2));
                     }
                 }
             }
 
-            public static FloatMenuOption addCaptureOption(Pawn pawn, Pawn victim)
+            public static FloatMenuOption AddCaptureOption(Pawn pawn, Pawn victim)
             {
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Capture".Translate
                     (victim.LabelCap, victim), delegate ()
@@ -205,7 +205,7 @@ namespace ZLevels
                 return floatOption;
             }
 
-            public static FloatMenuOption addRescueOption(Pawn pawn, Pawn victim)
+            public static FloatMenuOption AddRescueOption(Pawn pawn, Pawn victim)
             {
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Rescue".Translate
                     (victim.LabelCap, victim), delegate ()

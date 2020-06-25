@@ -56,3 +56,4 @@ namespace ZLevels
 		private const byte FogBrightness = 35;
 	}
 }
+
