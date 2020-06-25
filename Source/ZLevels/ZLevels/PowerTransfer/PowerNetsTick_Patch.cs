@@ -58,7 +58,6 @@ namespace ZLevels
                 catch (Exception ex)
                 {
                     Log.Error("[Z-Levels] PowerNetsTick_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
-                    //Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
                 }
                 return true;
             }

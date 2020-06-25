@@ -23,7 +23,7 @@ namespace ZLevels
 		{
 			if (ZLogger.DebugEnabled)
 
-				Log.Warning(ZLogger.Prefix + message + "\n" + ((e != null) ? e.ToString() : null), true);
+				Log.Warning(ZLogger.Prefix + message + "\n" + (e?.ToString()), true);
 		}
 
 		public static void Error(string message)
@@ -37,7 +37,7 @@ namespace ZLevels
 		{
 			if (ZLogger.DebugEnabled)
 
-				Log.Error(ZLogger.Prefix + message + "\n" + ((e != null) ? e.ToString() : null), true);
+				Log.Error(ZLogger.Prefix + message + "\n" + (e?.ToString()), true);
 		}
 
 		public static void ErrorOnce(string message, bool test)

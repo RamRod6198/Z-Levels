@@ -80,8 +80,10 @@ namespace ZLevels
                     {
                         //Log.Message(this + " Add1 ", true);
                         powerComps.Add(baseComp);
-                        connectedPowerNets.powerNets = new Dictionary<int, List<CompPowerZTransmitter>>();
-                        connectedPowerNets.powerNets.Add(0, powerComps);
+                        connectedPowerNets.powerNets = new Dictionary<int, List<CompPowerZTransmitter>>
+                        {
+                            { 0, powerComps }
+                        };
                     }
                     else if (connectedPowerNets.powerNets.Count == 0)
                     {
@@ -121,12 +123,14 @@ namespace ZLevels
                                         .Where(x => x is CompPowerZTransmitter).FirstOrDefault();
                                     if (upperPowerComp == null)
                                     {
-                                        upperPowerComp = new CompPowerZTransmitter();
-                                        upperPowerComp.parent = this;
+                                        upperPowerComp = new CompPowerZTransmitter
+                                        {
+                                            parent = this,
+                                            powerOutputInt = 0,
+                                            PowerOn = true,
+                                            transNet = upperComp.transNet
+                                        };
                                         upperPowerComp.Initialize(new CompProperties_PowerZTransmitter());
-                                        upperPowerComp.powerOutputInt = 0;
-                                        upperPowerComp.PowerOn = true;
-                                        upperPowerComp.transNet = upperComp.transNet;
                                         upperComp.PowerNet.powerComps.Add(upperPowerComp);
                                     }
                                     if (upperPowerComp != null && !powerComps.Contains(upperPowerComp))
@@ -152,12 +156,14 @@ namespace ZLevels
                                         .powerComps.Where(x => x is CompPowerZTransmitter).FirstOrDefault();
                                     if (lowerPowerComp == null)
                                     {
-                                        lowerPowerComp = new CompPowerZTransmitter();
-                                        lowerPowerComp.parent = this;
+                                        lowerPowerComp = new CompPowerZTransmitter
+                                        {
+                                            parent = this,
+                                            powerOutputInt = 0,
+                                            transNet = lowerComp.transNet,
+                                            PowerOn = true
+                                        };
                                         lowerPowerComp.Initialize(new CompProperties_PowerZTransmitter());
-                                        lowerPowerComp.powerOutputInt = 0;
-                                        lowerPowerComp.transNet = lowerComp.transNet;
-                                        lowerPowerComp.PowerOn = true;
                                         lowerComp.PowerNet.powerComps.Add(lowerPowerComp);
                                     }
                                     if (lowerPowerComp != null && !powerComps.Contains(lowerPowerComp))
@@ -239,3 +245,4 @@ namespace ZLevels
 
     }
 }
+

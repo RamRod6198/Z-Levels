@@ -166,3 +166,4 @@ namespace ZLevels
         private static readonly Color32 ColorClear = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, 0);
     }
 }
+

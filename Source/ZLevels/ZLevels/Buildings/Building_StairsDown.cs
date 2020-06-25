@@ -17,13 +17,21 @@ namespace ZLevels
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
+            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            if (!ZTracker.stairsDown.ContainsKey(this.Map))
+            {
+                ZTracker.stairsDown[this.Map] = new List<Thing>();
+            }
+            if (!ZTracker.stairsDown[this.Map].Contains(this))
+            {
+                ZTracker.stairsDown[this.Map].Add(this);
+            }
             if (!respawningAfterLoad)
             {
                 if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
                 {
                     this.Map.terrainGrid.SetTerrain(this.Position, ZLevelsDefOf.ZL_OutsideTerrainTwo);
                 }
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                 Map mapBelow = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
                 if (mapBelow != null && mapBelow != this.Map && this.def.defName == "FC_StairsDown")
                 {
@@ -62,6 +70,11 @@ namespace ZLevels
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
+            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            if (ZTracker.stairsDown[this.Map].Contains(this))
+            {
+                ZTracker.stairsDown[this.Map].Remove(this);
+            }
             if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrainTwo)
             {
                 this.Map.terrainGrid.SetTerrain(this.Position, ZLevelsDefOf.ZL_OutsideTerrain);
