@@ -1391,10 +1391,11 @@ namespace ZLevels
             private static bool Prefix(JobGiver_Work __instance, bool ___emergency, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
             {
                 ZLogger.Message(pawn + " emergency " + ___emergency);
+
                 var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                 try
                 {
-                        ZLogger.Message("--------------------------");
+                    ZLogger.Message("--------------------------");
                     for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
                     {
                         var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
