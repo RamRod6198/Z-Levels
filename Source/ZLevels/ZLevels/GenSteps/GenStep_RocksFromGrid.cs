@@ -46,13 +46,17 @@ namespace ZLevels
 			map.regionAndRoomUpdater.Enabled = false;
 			float num = 0.7f;
 			List<RoofThreshold> list = new List<RoofThreshold>();
-			RoofThreshold roofThreshold = new RoofThreshold();
-			roofThreshold.roofDef = RoofDefOf.RoofRockThick;
-			roofThreshold.minGridVal = num * 1.14f;
+			RoofThreshold roofThreshold = new RoofThreshold
+			{
+				roofDef = RoofDefOf.RoofRockThick,
+				minGridVal = num * 1.14f
+			};
 			list.Add(roofThreshold);
-			RoofThreshold roofThreshold2 = new RoofThreshold();
-			roofThreshold2.roofDef = RoofDefOf.RoofRockThin;
-			roofThreshold2.minGridVal = num * 1.04f;
+			RoofThreshold roofThreshold2 = new RoofThreshold
+			{
+				roofDef = RoofDefOf.RoofRockThin,
+				minGridVal = num * 1.04f
+			};
 			list.Add(roofThreshold2);
 			MapGenFloatGrid elevation = MapGenerator.Elevation;
 			MapGenFloatGrid caves = MapGenerator.Caves;
@@ -85,8 +89,10 @@ namespace ZLevels
 					}
 				}
 			}
-			GenStep_ScatterLumpsMineableUnderground genStep_ScatterLumpsMineable = new GenStep_ScatterLumpsMineableUnderground();
-			genStep_ScatterLumpsMineable.maxValue = maxMineableValue;
+			GenStep_ScatterLumpsMineableUnderground genStep_ScatterLumpsMineable = new GenStep_ScatterLumpsMineableUnderground
+			{
+				maxValue = maxMineableValue
+			};
 			float num3 = 16f;
 			genStep_ScatterLumpsMineable.countPer10kCellsRange = new FloatRange(num3, num3);
 			genStep_ScatterLumpsMineable.Generate(map, parms);

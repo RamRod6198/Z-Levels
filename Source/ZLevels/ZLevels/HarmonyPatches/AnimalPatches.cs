@@ -92,8 +92,10 @@ namespace ZLevels
                                 && x.GetStatValue(StatDefOf.Nutrition, true) > 0.1f);
                         if (foods != null && foods.Count() > 0)
                         {
-                            List<PawnKindDef> infestators = new List<PawnKindDef>();
-                            infestators.Add(ZLevelsDefOf.ZL_UndegroundBiome.AllWildAnimals.RandomElement());
+                            List<PawnKindDef> infestators = new List<PawnKindDef>
+                            {
+                                ZLevelsDefOf.ZL_UndegroundBiome.AllWildAnimals.RandomElement()
+                            };
                             var infestationPlace = foods.RandomElement().Position;
                             var infestationData = new InfestationData(infestators, parms.points, infestationPlace);
                             if (comp.ActiveInfestations == null)
