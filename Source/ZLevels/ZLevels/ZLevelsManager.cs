@@ -1035,21 +1035,25 @@ namespace ZLevels
 
         public void FixMainJobIfThereIsProblems(Pawn pawn)
         {
-            if (this.jobTracker.ContainsKey(pawn) && this.jobTracker[pawn].mainJob != null)
+            try
             {
-                if (this.jobTracker[pawn].mainJob.targetQueueB != null 
-                    && this.jobTracker[pawn].mainJob.targetQueueB.Count == this.jobTracker[pawn].mainJob.countQueue.Count)
+                if (this.jobTracker.ContainsKey(pawn) && this.jobTracker[pawn].mainJob != null)
                 {
-                    for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                    if (this.jobTracker[pawn].mainJob.targetQueueB != null
+                        && this.jobTracker[pawn].mainJob.targetQueueB.Count == this.jobTracker[pawn].mainJob.countQueue.Count)
                     {
-                        if (this.jobTracker[pawn].mainJob.targetQueueB[i].Thing.stackCount 
-                            < this.jobTracker[pawn].mainJob.countQueue[i])
+                        for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
                         {
-                            this.jobTracker[pawn].mainJob.countQueue[i] = this.jobTracker[pawn].mainJob.targetQueueB[i].Thing.stackCount;
+                            if (this.jobTracker[pawn].mainJob.targetQueueB[i].Thing.stackCount
+                                < this.jobTracker[pawn].mainJob.countQueue[i])
+                            {
+                                this.jobTracker[pawn].mainJob.countQueue[i] = this.jobTracker[pawn].mainJob.targetQueueB[i].Thing.stackCount;
+                            }
                         }
                     }
                 }
             }
+            catch { };
         }
         public void ResetJobTrackerFor(Pawn pawn)
         {

@@ -1492,7 +1492,6 @@ namespace ZLevels
                                     else
                                     {
                                         ZLogger.Message(pawn + " failed job queue " + ZTracker.jobTracker[pawn].activeJobs[0] + " in " + ZTracker.GetMapInfo(pawn.Map));
-                                        Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
                                     }
                                 }
                                 else if (pawn.jobs.curJob == null)
