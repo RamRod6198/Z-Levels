@@ -348,7 +348,7 @@ namespace ZLevels
         //                        }
         //                        if (strOperand != null && strOperand.Contains("CurrentMap"))
         //                        {
-        //                            Log.Message("Found");
+        //                            Log.Message(pawn + " - Found");
         //                            foundCurrentMapMethod = true;
         //                            break;
         //                        }
@@ -358,7 +358,7 @@ namespace ZLevels
         //        }
         //        if (startIndex > -1 && endIndex > -1)
         //        {
-        //            Log.Message("Remove");
+        //            Log.Message(pawn + " - Remove");
         //            // we cannot remove the first code of our range since some jump actually jumps to
         //            // it, so we replace it with a no-op instead of fixing that jump (easier).
         //            codes[startIndex].opcode = OpCodes.Nop;
@@ -374,7 +374,7 @@ namespace ZLevels
         //{
         //    private static void Postfix()
         //    {
-        //        Log.Message("Run");
+        //        Log.Message(pawn + " - Run");
         //    }
         //}
     }

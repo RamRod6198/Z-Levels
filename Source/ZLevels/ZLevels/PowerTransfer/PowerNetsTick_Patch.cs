@@ -50,7 +50,7 @@ namespace ZLevels
                                 {
                                     comp.powerOutputInt = newValue - compPowers[comp];
                                 }
-                                //Log.Message("powerNet.Value: " + powerNet.Value.Count + " - newValue: " + newValue, true);
+                                //Log.Message(pawn + " - powerNet.Value: " + powerNet.Value.Count + " - newValue: " + newValue, true);
                             }
                         }
                     }

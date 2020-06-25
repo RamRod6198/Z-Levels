@@ -20,7 +20,6 @@ namespace ZLevels
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                     Pawn pawn = GetActor();
-
                     Thing selectedStairs = null;
                     if (ZTracker.GetZIndexFor(pawn.Map) > ZTracker.GetZIndexFor(this.job.targetB.Thing.Map))
                     {
@@ -125,4 +124,3 @@ namespace ZLevels
         }
     }
 }
-

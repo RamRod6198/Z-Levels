@@ -145,7 +145,7 @@ namespace ZLevels
 
                     //foreach (var select in selectedObjects)
                     //{
-                    //    Log.Message("Select");
+                    //    Log.Message(pawn + " - Select");
                     //    this.Select(select);
                     //}
                 }
@@ -353,11 +353,6 @@ namespace ZLevels
         public List<Job> HaulThingToDest(Pawn pawn, Thing thing, Map dest, ref IntVec3 lastStairsPosition, ref bool fail, int count = -1)
         {
             List<Job> tempJobs = new List<Job>();
-            //ZLogger.Message(pawn + " - ???++++++++++++++++++++++++++++++++++++++++???");
-            //ZLogger.Message(pawn + " - Hauling " + thing + "(" + thing.Map + ") from " + pawn.Map + " to " + dest);
-            //ZLogger.Message(pawn + " - Current pawn map: " + pawn.Map);
-            //ZLogger.Message(pawn + " - Thing map: " + thing.Map);
-            //ZLogger.Message(pawn + " - Dest map: " + dest);
             if (this.GetZIndexFor(thing.Map) > this.GetZIndexFor(dest))
             {
                 foreach (var map in this.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values.OrderByDescending(x => this.GetZIndexFor(x)))
@@ -569,7 +564,7 @@ namespace ZLevels
             bool fail = false;
             IntVec3 lastStairsPosition = pawn.Position;
 
-            //Log.Message("jobToDo.def: " + jobToDo.def);
+            //Log.Message(pawn + " - jobToDo.def: " + jobToDo.def);
             if (jobToDo.def == JobDefOf.HaulToCell)
             {
                 ZLogger.Message("Job method 1");
@@ -1636,51 +1631,6 @@ namespace ZLevels
         public override void LoadedGame()
         {
             base.LoadedGame();
-            try
-            {
-                foreach (var test in this.ZLevelsTracker)
-                {
-                    Log.Message("Z-Levels start");
-                    foreach (var d in test.Value.ZLevels)
-                    {
-                        if (d.Key < 0)
-                        {
-                            Log.Message("Registered map: " + this.GetMapInfo(d.Value) + " - Underground");
-                        }
-                        else if (d.Key > 0)
-                        {
-                            Log.Message("Registered map: " + this.GetMapInfo(d.Value) + " - Upper level");
-                        }
-                        else
-                        {
-                            Log.Message("Registered map: " + this.GetMapInfo(d.Value) + " - Normal player map");
-                        }
-                    }
-                }
-            }
-            catch { };
-            try
-            {
-                foreach (var pawn in PawnsFinder.AllMaps)
-                {
-                    if (pawn.Spawned && pawn.Map != null)
-                    {
-                        if (this.GetZIndexFor(pawn.Map) < 0)
-                        {
-                            Log.Message("Registered map: " + this.GetMapInfo(pawn.Map) + " - Underground");
-                        }
-                        else if (this.GetZIndexFor(pawn.Map) > 0)
-                        {
-                            Log.Message("Registered map: " + this.GetMapInfo(pawn.Map) + " - Upper level");
-                        }
-                        else
-                        {
-                            Log.Message("Registered map: " + this.GetMapInfo(pawn.Map) + " - Normal player map");
-                        }
-                    }
-                }
-            }
-            catch { };
         }
 
         public override void ExposeData()

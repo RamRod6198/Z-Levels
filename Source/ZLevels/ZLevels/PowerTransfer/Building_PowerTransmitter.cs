@@ -52,7 +52,6 @@ namespace ZLevels
             {
                 if (net.powerComps[i].PowerOn)
                 {
-                    Log.Message("net.powerComps[i]: " + net.powerComps[i] + " - " + net.powerComps[i].parent, true);
                     num += net.powerComps[i].EnergyOutputPerTick;
                 }
             }
@@ -197,7 +196,7 @@ namespace ZLevels
                     GenExplosion.DoExplosion(randomCell, base.Map, radius, DamageDefOf.Flame, null, -1, -1f, null, null, null, null, null, 0f, 1, false, null, 0f, 1, 0f, false, null, null);
                 }
             }
-            //Log.Message("-----------------", true);
+            //Log.Message(pawn + " - -----------------", true);
         }
         public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
