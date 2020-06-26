@@ -155,7 +155,8 @@ namespace ZLevels
 			{
 				initAction = delegate ()
 				{
-					ZLogger.Message("savedThing: " + this.savedThing);
+					ZLogger.Message("10 savedThing: " + this.savedThing);
+					ZLogger.Message("10 carried Thing: " + pawn.carryTracker?.CarriedThing);
 					ZLogger.Message("200.5 TargetA.Thing: " + TargetA.Thing);
 					ZLogger.Message("200.5 TargetA.Thing.Position: " + TargetA.Thing?.Position);
 					ZLogger.Message("200.5 TargetA.Thing.Map: " + TargetA.Thing?.Map);
@@ -243,10 +244,15 @@ namespace ZLevels
 						&& ZTracker.jobTracker[this.pawn].mainJob.targetQueueB
 						.Where(x => x.Thing == TargetA.Thing).Count() == 0)
 						{
-							var newTarget = new LocalTargetInfo(TargetA.Thing);
-							ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.Add(newTarget);
-							ZTracker.jobTracker[this.pawn].mainJob.countQueue.Add(newTarget.Thing.stackCount);
-							ZLogger.Message("Adding " + newTarget + " to " + ZTracker.jobTracker[this.pawn].mainJob);
+							//var newTarget = new LocalTargetInfo(TargetA.Thing);
+							//ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.Add(newTarget);
+							//ZTracker.jobTracker[this.pawn].mainJob.countQueue.Add(newTarget.Thing.stackCount);
+							//ZLogger.Message("1 Adding " + newTarget + " to " + ZTracker.jobTracker[this.pawn].mainJob);
+							//int ind = ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.FirstIndexOf(x => x.Thing == this.savedThing);
+							//ZLogger.Message("1 Removing " + ZTracker.jobTracker[this.pawn].mainJob.targetQueueB[ind] + " from " + ZTracker.jobTracker[this.pawn].mainJob);
+							//
+							//ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.RemoveAt(ind);
+							//ZTracker.jobTracker[this.pawn].mainJob.countQueue.RemoveAt(ind);
 						}
 					}
 

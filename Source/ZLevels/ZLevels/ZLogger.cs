@@ -46,7 +46,16 @@ namespace ZLevels
 			Log.Error(ZLogger.Prefix + message, true);
 		}
 
-		private static readonly bool DebugEnabled = true;
+		public static void Pause(string reason)
+		{
+			if (ZLogger.DebugEnabled)
+			{
+				Log.Error("Pausing, reason: " + reason, true);
+				Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+			}
+		}
+
+		private static readonly bool DebugEnabled = false;
 
 		private static readonly string Prefix = "[Z-Levels] ";
 	}

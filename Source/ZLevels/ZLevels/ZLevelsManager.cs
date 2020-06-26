@@ -604,7 +604,10 @@ namespace ZLevels
                         var t = jobToDo.targetQueueB[i];
                         tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToThingMap, null, t.Thing));
                         tempJobs.AddRange(this.HaulThingToDest(pawn, t.Thing, dest, ref lastStairsPosition, ref fail, jobToDo.countQueue[i]));
-                        tempJobs.Add(this.HaulThingToPlace(pawn, t.Thing, jobToDo.targetA.Cell, jobToDo.countQueue[i]));
+                        if (pawn.Map != jobToDo.targetA.Thing.Map)
+                        {
+                            tempJobs.Add(this.HaulThingToPlace(pawn, t.Thing, jobToDo.targetA.Cell, jobToDo.countQueue[i]));
+                        }
                     }
                 }
                 else
@@ -613,7 +616,10 @@ namespace ZLevels
                     {
                         tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToThingMap, null, t.Thing));
                         tempJobs.AddRange(this.HaulThingToDest(pawn, t.Thing, dest, ref lastStairsPosition, ref fail));
-                        tempJobs.Add(this.HaulThingToPlace(pawn, t.Thing, jobToDo.targetA.Cell));
+                        if (pawn.Map != jobToDo.targetA.Thing.Map)
+                        {
+                            tempJobs.Add(this.HaulThingToPlace(pawn, t.Thing, jobToDo.targetA.Cell));
+                        }
                     }
                 }
 
@@ -997,7 +1003,7 @@ namespace ZLevels
                                     ZLogger.Message("Active jobs: " + d + " - " + pawn);
                                 }
                                 ZLogger.Message("Main job: " + this.jobTracker[pawn].mainJob + " - " + pawn);
-                                Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+                                ZLogger.Pause("Fail in TryMakePreToilReservations in method TryTakeFirstJob");
                             }
                         }
                         else
@@ -1208,11 +1214,6 @@ namespace ZLevels
         public void TeleportPawn(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, bool spawnStairsBelow = false, bool spawnStairsUpper = false)
         {
             //ZLogger.Message("Trying to teleport to " + mapToTeleport);
-            Log.Message("Pawn curJob: " + pawnToTeleport.jobs.curJob);
-            foreach (var queue in pawnToTeleport.jobs.jobQueue)
-            {
-                Log.Message("Pawn queue: " + queue.job);
-            }
             bool jump = false;
             bool draft = false;
             if (Find.Selector.SelectedObjects.Contains(pawnToTeleport))
@@ -1338,7 +1339,6 @@ namespace ZLevels
                 }
             }
 
-
             try
             {
                 RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
@@ -1421,13 +1421,6 @@ namespace ZLevels
                 }
             }
             catch { }
-
-            Log.Message("Pawn curJob: " + pawnToTeleport.jobs.curJob);
-            foreach (var queue in pawnToTeleport.jobs.jobQueue)
-            {
-                Log.Message("Pawn queue: " + queue.job);
-            }
-
         }
 
         public Map CreateLowerLevel(Map origin, IntVec3 playerStartSpot)

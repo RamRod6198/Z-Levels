@@ -531,7 +531,6 @@ namespace ZLevels
         //    }
         //}
 
-
         [HarmonyPatch(typeof(JobDriver_Ingest))]
         [HarmonyPatch("PrepareToIngestToils_ToolUser")]
         public static class Patch_PrepareToIngestToils_ToolUser_Postfix
@@ -587,7 +586,6 @@ namespace ZLevels
                     }
                     return flag ? true : false;
                 };
-
 
                 foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(actor.Map))
                 {
@@ -645,13 +643,13 @@ namespace ZLevels
                     {
                         list.InsertRange(list.Count - 2, JobDriver_GoToThingMap.Toils_GoToThingMap(__instance.GetActor()
                             , null, thing, __instance));
-                        Log.Message("Adding: " + thing + " in " + actor);
+                        ZLogger.Message("Adding: " + thing + " in " + actor);
                     }
                     else
                     {
                         list.InsertRange(list.Count - 1, JobDriver_GoToThingMap.Toils_GoToThingMap(__instance.GetActor()
                             , null, thing, __instance));
-                        Log.Message("Adding 2: " + thing + " in " + actor);
+                        ZLogger.Message("Adding 2: " + thing + " in " + actor);
                     }
                 }
                 __result = list;
@@ -1465,52 +1463,37 @@ namespace ZLevels
 
             private static Job TryGiveJob(Pawn pawn, RestCategory minCategory, float maxLevelPercentage = 1f)
             {
-                Log.Message(" - TryGiveJob - Need_Rest rest = pawn.needs.rest; - 1", true);
                 Need_Rest rest = pawn.needs.rest;
-                Log.Message(" - TryGiveJob - if (rest == null || rest.CurCategory < minCategory || rest.CurLevelPercentage > maxLevelPercentage) - 2", true);
                 if (rest == null || rest.CurCategory < minCategory || rest.CurLevelPercentage > maxLevelPercentage)
                 {
-                    Log.Message(" - TryGiveJob - return null; - 3", true);
                     return null;
                 }
-                Log.Message(" - TryGiveJob - if (RestUtility.DisturbancePreventsLyingDown(pawn)) - 4", true);
                 if (RestUtility.DisturbancePreventsLyingDown(pawn))
                 {
-                    Log.Message(" - TryGiveJob - return null; - 5", true);
                     return null;
                 }
                 Lord lord = pawn.GetLord();
-                Log.Message(" - TryGiveJob - Building_Bed building_Bed; - 7", true);
                 Building_Bed building_Bed;
-                Log.Message(" - TryGiveJob - var ZTracker = Current.Game.GetComponent<ZLevelsManager>(); - 8", true);
                 var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                Log.Message(" - TryGiveJob - if ((lord != null && lord.CurLordToil != null && !lord.CurLordToil.AllowRestingInBed) || pawn.IsWildMan()) - 9", true);
                 if ((lord != null && lord.CurLordToil != null && !lord.CurLordToil.AllowRestingInBed) || pawn.IsWildMan())
                 {
-                    Log.Message(" - TryGiveJob - building_Bed = null; - 10", true);
                     building_Bed = null;
                 }
                 else
                 {
-                    Log.Message(" - TryGiveJob - if (pawn.ownership.OwnedBed != null && ZTracker.GetAllMaps(pawn.Map.Tile) - 11", true);
                     if (pawn.ownership?.OwnedBed != null && ZTracker.GetAllMaps(pawn.Map.Tile)
                         .Contains(pawn.ownership?.OwnedBed?.Map))
                     {
-                        Log.Message(" - TryGiveJob - building_Bed = pawn.ownership.OwnedBed; - 12", true);
                         building_Bed = pawn.ownership.OwnedBed;
                     }
                     else
                     {
-                        Log.Message(" - TryGiveJob - building_Bed = RestUtility.FindBedFor(pawn); - 13", true);
                         building_Bed = RestUtility.FindBedFor(pawn);
                     }
                 }
-                Log.Message(" - TryGiveJob - if (building_Bed != null) - 14", true);
                 if (building_Bed != null)
                 {
-                    Log.Message(" - TryGiveJob - ZLogger.Message(\"Found \" + building_Bed + \" for \" + pawn + \" in \" + ZTracker.GetMapInfo(building_Bed.Map)); - 15", true);
                     ZLogger.Message("Found " + building_Bed + " for " + pawn + " in " + ZTracker.GetMapInfo(building_Bed.Map));
-                    Log.Message(" - TryGiveJob - return JobMaker.MakeJob(JobDefOf.LayDown, building_Bed); - 16", true);
                     return JobMaker.MakeJob(JobDefOf.LayDown, building_Bed);
                 }
                 return JobMaker.MakeJob(JobDefOf.LayDown, FindGroundSleepSpotFor(pawn));
@@ -1545,7 +1528,6 @@ namespace ZLevels
                     for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
                     {
                         var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
-            
                         ZLogger.Message("45 job.targetQueueB: " + target.Thing);
                         ZLogger.Message("45 job.targetQueueB.Map: " + target.Thing.Map);
                         ZLogger.Message("45 job.targetQueueB.stackCount: " + target.Thing.stackCount);
@@ -1624,11 +1606,25 @@ namespace ZLevels
                                         {
                                             ZLogger.Message(pawn + " carrying " + pawn?.carryTracker?.CarriedThing);
                                         }
-
+                        
                                         //if (ZTracker.jobTracker[pawn].activeJobs[0] == ZTracker.jobTracker[pawn].mainJob)
                                         //{
                                         //    ZTracker.FixMainJobIfThereIsProblems(pawn);
                                         //}
+                        
+                                        ZLogger.Message("--------------------------");
+                                        try
+                                        {
+                                            for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                                            {
+                                                var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
+                                                ZLogger.Message("51 job.targetQueueB: " + target.Thing);
+                                                ZLogger.Message("51 job.targetQueueB.Map: " + target.Thing.Map);
+                                                ZLogger.Message("51 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                                                ZLogger.Message("51 job.targetQueueB.countQueue: " + ZTracker.jobTracker[pawn].mainJob.countQueue[i]);
+                                            }
+                                        }
+                                        catch { };
                                         __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
                                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                         
@@ -1648,7 +1644,7 @@ namespace ZLevels
                                     //
                                     //ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
                                     //ZLogger.Message(pawn + " - ZTracker.jobTracker[pawn].activeJobs[0]: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-            
+                        
                                     //foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
                                     //{
                                     //    ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
@@ -1772,7 +1768,6 @@ namespace ZLevels
                 }
                 return true;
             }
-
 
             public static bool TryFindBestBetterStoreCellForValidator(Thing t, Pawn carrier, Map mapToSearch,
                 StoragePriority currentPriority, Faction faction, out IntVec3 foundCell, bool needAccurateResult = true)
