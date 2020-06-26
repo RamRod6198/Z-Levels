@@ -72,7 +72,7 @@ namespace ZLevels
         //        ZLogger.Message("Switching to " + j, true);
         //    }
         //}
-
+        //
         //
         //[HarmonyPatch(typeof(JobGiver_Work), "GiverTryGiveJobPrioritized")]
         //internal static class Patch_JobGiver_Work
@@ -791,6 +791,8 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(position);
+                                ZLogger.Message("19 SetPosition for " + pawn + " to " + position);
+
                             }
                             else if (pawn.Map != oldMap && otherMap == oldMap)
                             {
@@ -798,8 +800,10 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(oldPosition);
+                                ZLogger.Message("4 SetPosition for " + pawn + " to " + oldPosition);
+
                             }
-            
+
                             result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap, maxLevelPercentage, minCategory);
             
                             if (result != null)
@@ -811,12 +815,13 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(oldPosition);
-            
+                                ZLogger.Message("3 SetPosition for " + pawn + " to " + oldPosition);
+
                                 //JobManagerPatches.manualDespawn = true;
                                 //pawn.DeSpawn();
                                 //JobManagerPatches.manualDespawn = false;
                                 //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-            
+
                                 ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result, null);
                                 __result = ZTracker.jobTracker[pawn].activeJobs[0];
                                 ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -830,7 +835,9 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
-            
+                            ZLogger.Message("19 SetPosition for " + pawn + " to " + oldPosition);
+
+
                             //JobManagerPatches.manualDespawn = true;
                             //    pawn.DeSpawn();
                             //    JobManagerPatches.manualDespawn = false;
@@ -1112,6 +1119,8 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(position);
+                            ZLogger.Message("5 SetPosition for " + pawn + " to " + position);
+
                         }
                         else if (pawn.Map != oldMap && otherMap == oldMap)
                         {
@@ -1119,6 +1128,8 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
+                            ZLogger.Message("6 SetPosition for " + pawn + " to " + oldPosition);
+
                         }
                         result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, joyGiverChances, __instance);
                         if (result != null)
@@ -1145,13 +1156,15 @@ namespace ZLevels
                             .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
-        
+                        ZLogger.Message("7 SetPosition for " + pawn + " to " + oldPosition);
+
+
                         //JobManagerPatches.manualDespawn = true;
                         //pawn.DeSpawn();
                         //JobManagerPatches.manualDespawn = false;
                         //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
                     }
-        
+
                     if (jobList.Count > 0)
                     {
                         //var job = jobList.MaxBy(j => j.Key.def.joyGainRate);
@@ -1393,7 +1406,9 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(position);
-        
+                                ZLogger.Message("8 SetPosition for " + pawn + " to " + position);
+
+
                                 //JobManagerPatches.manualDespawn = true;
                                 //pawn.DeSpawn();
                                 //JobManagerPatches.manualDespawn = false;
@@ -1405,8 +1420,10 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(oldPosition);
+                                ZLogger.Message("2 SetPosition for " + pawn + " to " + oldPosition);
+
                             }
-        
+
                             result = JobGiver_GetRestPatch.TryGiveJob(pawn, minCategory, maxLevelPercentage);
                             if (result != null && result.targetA.Thing != null)
                             {
@@ -1418,7 +1435,7 @@ namespace ZLevels
                                         .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                                     Traverse.Create(pawn).Field("positionInt")
                                         .SetValue(oldPosition);
-        
+                                    ZLogger.Message("1 SetPosition for " + pawn + " to " + oldPosition);
                                     //JobManagerPatches.manualDespawn = true;
                                     //pawn.DeSpawn();
                                     //JobManagerPatches.manualDespawn = false;
@@ -1437,7 +1454,9 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
-        
+                            ZLogger.Message("9 SetPosition for " + pawn + " to " + oldPosition);
+
+
                             //JobManagerPatches.manualDespawn = true;
                             //pawn.DeSpawn();
                             //JobManagerPatches.manualDespawn = false;
@@ -1705,9 +1724,11 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
+                            ZLogger.Message("10 SetPosition for " + pawn + " to " + oldPosition);
+
                             //pawn.Position = oldPosition;
                             //Log.Message(pawn + " - 1: " + oldPosition, true);
-            
+
                         }
                         ZLogger.Message(pawn + " got job " + result + " - map: "
                             + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
@@ -1742,10 +1763,12 @@ namespace ZLevels
                             .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
-            
+                        ZLogger.Message("11 SetPosition for " + pawn + " to " + oldPosition);
+
+
                         //pawn.Position = oldPosition;
                         //Log.Message(pawn + " - 2: " + oldPosition, true);
-            
+
                         //JobManagerPatches.manualDespawn = true;
                         //pawn.DeSpawn();
                         //JobManagerPatches.manualDespawn = false;
@@ -1755,10 +1778,12 @@ namespace ZLevels
                     {
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
+                        ZLogger.Message("12 SetPosition for " + pawn + " to " + oldPosition);
+
                         //pawn.Position = oldPosition;
                         //Log.Message(pawn + " - 3: " + oldPosition, true);
                     }
-            
+
                     if (select) Find.Selector.Select(pawn);
                     return false;
                 }
@@ -2084,14 +2109,16 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(position);
+                                ZLogger.Message("13 SetPosition for " + pawn + " to " + position);
+
                                 //pawn.Position = position;
                                 //Log.Message(pawn + " - 4: " + oldPosition, true);
-        
+
                                 //JobManagerPatches.manualDespawn = true;
                                 //pawn.DeSpawn();
                                 //JobManagerPatches.manualDespawn = false;
                                 //GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-        
+
                                 job2 = method.GetValue<Job>();
                                 if (job2 != null)
                                 {
@@ -2106,14 +2133,16 @@ namespace ZLevels
                             .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
+                        ZLogger.Message("14 SetPosition for " + pawn + " to " + oldPosition);
+
                         //pawn.Position = oldPosition;
                         //Log.Message(pawn + " - 5: " + oldPosition, true);
-        
+
                         //JobManagerPatches.manualDespawn = true;
                         //pawn.DeSpawn();
                         //JobManagerPatches.manualDespawn = false;
                         //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-        
+
                     }
                 }
         
@@ -2212,6 +2241,8 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(position);
+                                ZLogger.Message("15 SetPosition for " + pawn + " to " + position);
+
                                 //pawn.Position = position;
                                 //Log.Message(pawn + " - 4: " + oldPosition, true);
 
@@ -2234,6 +2265,8 @@ namespace ZLevels
                             .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
+                        ZLogger.Message("16 SetPosition for " + pawn + " to " + oldPosition);
+
                         //pawn.Position = oldPosition;
                         //Log.Message(pawn + " - 5: " + oldPosition, true);
 
@@ -2346,14 +2379,16 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(position);
+                            ZLogger.Message("17 SetPosition for " + pawn + " to " + position);
+
                             //pawn.Position = position;
                             //Log.Message(pawn + " - 6: " + oldPosition, true);
-        
+
                             //JobManagerPatches.manualDespawn = true;
                             //pawn.DeSpawn();
                             //JobManagerPatches.manualDespawn = false;
                             //GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-        
+
                         }
                         else if (pawn.Map != oldMap && otherMap == oldMap)
                         {
@@ -2366,7 +2401,9 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
-        
+                            ZLogger.Message("18 SetPosition for " + pawn + " to " + oldPosition);
+
+
                             //if (oldPosition.GetTerrain(oldMap) == ZLevelsDefOf.ZL_OutsideTerrain)
                             //{
                             //    IntVec3 position = IntVec3.Invalid;

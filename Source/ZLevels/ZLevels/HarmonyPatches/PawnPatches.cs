@@ -71,29 +71,29 @@ namespace ZLevels
             }
         }
 
-        [HarmonyPatch(typeof(Pawn_PathFollower), "CostToMoveIntoCell", new Type[]
-        {
-            typeof(Pawn),
-            typeof(IntVec3)
-        })]
-        public static class CostToMoveIntoCell_Patch
-        {
-            public static void Prefix(Pawn_PathFollower __instance, Pawn pawn, IntVec3 c, ref int __result)
-            {
-                try
-                {
-                    if (c.GetTerrain(pawn.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
-                    {
-                        pawn.pather.StopDead();
-                        __result = 100000;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("[Z-Levels] CostToMoveIntoCell_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
-                }
-            }
-        }
+        //[HarmonyPatch(typeof(Pawn_PathFollower), "CostToMoveIntoCell", new Type[]
+        //{
+        //    typeof(Pawn),
+        //    typeof(IntVec3)
+        //})]
+        //public static class CostToMoveIntoCell_Patch
+        //{
+        //    public static void Prefix(Pawn_PathFollower __instance, Pawn pawn, IntVec3 c, ref int __result)
+        //    {
+        //        try
+        //        {
+        //            if (c.GetTerrain(pawn.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
+        //            {
+        //                pawn.pather.StopDead();
+        //                __result = 100000;
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Log.Error("[Z-Levels] CostToMoveIntoCell_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+        //        }
+        //    }
+        //}
 
         [HarmonyPatch(typeof(Pawn_JobTracker))]
         [HarmonyPatch(nameof(Pawn_JobTracker.StopAll))]
@@ -120,7 +120,7 @@ namespace ZLevels
                 return true;
             }
         }
-
+        
         [HarmonyPatch(typeof(Pawn_PathFollower))]
         [HarmonyPatch(nameof(Pawn_PathFollower.StopDead))]
         static class Pawn_PathFollower_Patch

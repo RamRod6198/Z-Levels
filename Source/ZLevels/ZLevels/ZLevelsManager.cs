@@ -604,7 +604,7 @@ namespace ZLevels
                         var t = jobToDo.targetQueueB[i];
                         tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToThingMap, null, t.Thing));
                         tempJobs.AddRange(this.HaulThingToDest(pawn, t.Thing, dest, ref lastStairsPosition, ref fail, jobToDo.countQueue[i]));
-                        if (pawn.Map != jobToDo.targetA.Thing.Map)
+                        if (pawn.Map != jobToDo.targetA.Thing.Map || pawn.Map != t.Thing.Map)
                         {
                             tempJobs.Add(this.HaulThingToPlace(pawn, t.Thing, jobToDo.targetA.Cell, jobToDo.countQueue[i]));
                         }
@@ -616,7 +616,7 @@ namespace ZLevels
                     {
                         tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToThingMap, null, t.Thing));
                         tempJobs.AddRange(this.HaulThingToDest(pawn, t.Thing, dest, ref lastStairsPosition, ref fail));
-                        if (pawn.Map != jobToDo.targetA.Thing.Map)
+                        if (pawn.Map != jobToDo.targetA.Thing.Map || pawn.Map != t.Thing.Map)
                         {
                             tempJobs.Add(this.HaulThingToPlace(pawn, t.Thing, jobToDo.targetA.Cell));
                         }
@@ -1339,29 +1339,35 @@ namespace ZLevels
                 }
             }
 
-            try
-            {
-                RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
-                pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);
-                pawnToTeleport.Map?.listerThings.Remove(pawnToTeleport);
-                pawnToTeleport.Map?.thingGrid.Deregister(pawnToTeleport);
-                pawnToTeleport.Map?.coverGrid.DeRegister(pawnToTeleport);
-                pawnToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(pawnToTeleport);
-                pawnToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(pawnToTeleport);
-                pawnToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(pawnToTeleport);
-                StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
-                pawnToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(pawnToTeleport);
-                pawnToTeleport.Map?.mapPawns.DeRegisterPawn(pawnToTeleport);
-                Traverse.Create(pawnToTeleport).Field("mapIndexOrState").SetValue((sbyte)-1);
-                GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
-            }
-            catch (Exception ex)
-            {
-                JobManagerPatches.manualDespawn = true;
-                pawnToTeleport.DeSpawn();
-                JobManagerPatches.manualDespawn = false;
-                Log.Error("Error in teleportation: " + ex);
-            }
+            JobManagerPatches.manualDespawn = true;
+            pawnToTeleport.DeSpawn();
+            JobManagerPatches.manualDespawn = false;
+            GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
+
+            //try
+            //{
+            //    RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
+            //    pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);
+            //    pawnToTeleport.Map?.listerThings.Remove(pawnToTeleport);
+            //    pawnToTeleport.Map?.thingGrid.Deregister(pawnToTeleport);
+            //    pawnToTeleport.Map?.coverGrid.DeRegister(pawnToTeleport);
+            //    pawnToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(pawnToTeleport);
+            //    pawnToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(pawnToTeleport);
+            //    pawnToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(pawnToTeleport);
+            //    StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
+            //    pawnToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(pawnToTeleport);
+            //    pawnToTeleport.Map?.mapPawns.DeRegisterPawn(pawnToTeleport);
+            //    Traverse.Create(pawnToTeleport).Field("mapIndexOrState").SetValue((sbyte)-1);
+            //    GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
+            //}
+            //catch (Exception ex)
+            //{
+            //    JobManagerPatches.manualDespawn = true;
+            //    pawnToTeleport.DeSpawn();
+            //    JobManagerPatches.manualDespawn = false;
+            //    GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
+            //    Log.Error("Error in teleportation: " + ex);
+            //}
 
             try
             {
