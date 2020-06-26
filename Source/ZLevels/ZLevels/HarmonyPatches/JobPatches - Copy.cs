@@ -48,26 +48,39 @@ namespace ZLevels
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - TryMakePreToilReservations - if (!pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed)) - 8", true);
             if (!pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed))
             {
                 Log.Message("JobDriver_DoBillZLevels : JobDriver - TryMakePreToilReservations - return false; - 9", true);
                 return false;
             }
             pawn.ReserveAsManyAsPossible(job.GetTargetQueue(TargetIndex.B), job);
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - TryMakePreToilReservations - return true; - 11", true);
             return true;
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - Toil toil = new Toil(); - 12", true);
             Toil toil = new Toil();
 
             yield return new Toil
             {
                 initAction = delegate ()
                 {
+                    try
+                    {
+                        ZLogger.Message("--------------------------");
+                        for (int i = job.targetQueueB.Count - 1; i >= 0; i--)
+                        {
+                            Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - var target = job.targetQueueB[i]; - 29", true);
+                            var target = job.targetQueueB[i];
+
+                            ZLogger.Message("-1 job.targetQueueB: " + target.Thing);
+                            ZLogger.Message("-1 job.targetQueueB.Map: " + target.Thing.Map);
+                            ZLogger.Message("-1 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                            ZLogger.Message("-1 job.targetQueueB.countQueue: " + job.countQueue[i]);
+
+                        }
+                    }
+                    catch { }
 
                     ZLogger.Message("-1 toil.actor: " + toil.actor);
                     ZLogger.Message("-1 toil.actor.Position: " + toil.actor.Position);
@@ -97,22 +110,7 @@ namespace ZLevels
                         }
                     }
                     catch { }
-                    try
-                    {
-                        ZLogger.Message("--------------------------");
-                        for (int i = job.targetQueueB.Count - 1; i >= 0; i--)
-                        {
-                            Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - var target = job.targetQueueB[i]; - 29", true);
-                            var target = job.targetQueueB[i];
 
-                            ZLogger.Message("-1 job.targetQueueB: " + target.Thing);
-                            ZLogger.Message("-1 job.targetQueueB.Map: " + target.Thing.Map);
-                            ZLogger.Message("-1 job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                            ZLogger.Message("-1 job.targetQueueB.countQueue: " + job.countQueue[i]);
-
-                        }
-                    }
-                    catch { }
                 }
             };
 
@@ -140,7 +138,6 @@ namespace ZLevels
                 }
                 return false;
             });
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - Toil gotoBillGiver = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell); - 48", true);
             Toil gotoBillGiver = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
 
             toil.initAction = delegate
@@ -214,7 +211,6 @@ namespace ZLevels
             };
 
             yield return Toils_Jump.JumpIf(gotoBillGiver, () => job.GetTargetQueue(TargetIndex.B).NullOrEmpty());
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - Toil extract = ExtractNextTargetFromQueue(TargetIndex.B); - 78", true);
             Toil extract = ExtractNextTargetFromQueue(TargetIndex.B);
 
             yield return new Toil
@@ -270,7 +266,6 @@ namespace ZLevels
             };
 
             yield return extract;
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - Toil getToHaulTarget = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch); - 101", true);
             Toil getToHaulTarget = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch);
 
             yield return new Toil
@@ -331,7 +326,6 @@ namespace ZLevels
             yield return JumpToCollectNextIntoHandsForBill(getToHaulTarget, TargetIndex.B);
             yield return new Toil { initAction = delegate () { Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell).FailOnDestroyedOrNull(TargetIndex.B); - 126", true); } };
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell).FailOnDestroyedOrNull(TargetIndex.B);
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - Toil findPlaceTarget2 = Toils_JobTransforms.SetTargetToIngredientPlaceCell(TargetIndex.A, TargetIndex.B, TargetIndex.C); - 127", true);
             Toil findPlaceTarget2 = Toils_JobTransforms.SetTargetToIngredientPlaceCell(TargetIndex.A, TargetIndex.B, TargetIndex.C);
             yield return new Toil { initAction = delegate () { Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - yield return findPlaceTarget2; - 128", true); } };
             yield return findPlaceTarget2;
@@ -347,18 +341,15 @@ namespace ZLevels
             yield return DoRecipeWork().FailOnDespawnedNullOrForbiddenPlacedThings().FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
             yield return new Toil { initAction = delegate () { Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - yield return FinishRecipeAndStartStoringProduct(); - 134", true); } };
             yield return FinishRecipeAndStartStoringProduct();
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - if (!job.RecipeDef.products.NullOrEmpty() || !job.RecipeDef.specialProducts.NullOrEmpty()) - 135", true);
             if (!job.RecipeDef.products.NullOrEmpty() || !job.RecipeDef.specialProducts.NullOrEmpty())
             {
                 yield return new Toil { initAction = delegate () { Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - yield return Toils_Reserve.Reserve(TargetIndex.B); - 136", true); } };
                 yield return Toils_Reserve.Reserve(TargetIndex.B);
-                Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - findPlaceTarget2 = Toils_Haul.CarryHauledThingToCell(TargetIndex.B); - 137", true);
                 findPlaceTarget2 = Toils_Haul.CarryHauledThingToCell(TargetIndex.B);
                 yield return new Toil { initAction = delegate () { Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - yield return findPlaceTarget2; - 138", true); } };
                 yield return findPlaceTarget2;
                 yield return new Toil { initAction = delegate () { Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.B, findPlaceTarget2, storageMode: true, tryStoreInSameStorageIfSpotCantHoldWholeStack: true); - 139", true); } };
                 yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.B, findPlaceTarget2, storageMode: true, tryStoreInSameStorageIfSpotCantHoldWholeStack: true);
-                Log.Message("JobDriver_DoBillZLevels : JobDriver - MakeNewToils - Toil recount = new Toil(); - 140", true);
                 Toil recount = new Toil();
                 recount.initAction = delegate
                 {
@@ -378,7 +369,6 @@ namespace ZLevels
 
         public static Toil ExtractNextTargetFromQueue(TargetIndex ind, bool failIfCountFromQueueTooBig = true)
         {
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - ExtractNextTargetFromQueue - Toil toil = new Toil(); - 146", true);
             Toil toil = new Toil();
             toil.initAction = delegate
             {
@@ -437,13 +427,11 @@ namespace ZLevels
                     }
                 }
             };
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - ExtractNextTargetFromQueue - return toil; - 172", true);
             return toil;
         }
 
         public static Toil DoRecipeWork()
         {
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - DoRecipeWork - Toil toil = new Toil(); - 173", true);
             Toil toil = new Toil();
             toil.initAction = delegate
             {
@@ -553,11 +541,8 @@ namespace ZLevels
                     }
                 }
             };
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - DoRecipeWork - toil.defaultCompleteMode = ToilCompleteMode.Never; - 216", true);
             toil.defaultCompleteMode = ToilCompleteMode.Never;
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - DoRecipeWork - toil.WithEffect(() => toil.actor.CurJob.bill.recipe.effectWorking, TargetIndex.A); - 217", true);
             toil.WithEffect(() => toil.actor.CurJob.bill.recipe.effectWorking, TargetIndex.A);
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - DoRecipeWork - toil.PlaySustainerOrSound(() => toil.actor.CurJob.bill.recipe.soundWorking); - 218", true);
             toil.PlaySustainerOrSound(() => toil.actor.CurJob.bill.recipe.soundWorking);
             toil.WithProgressBar(TargetIndex.A, delegate
             {
@@ -590,15 +575,12 @@ namespace ZLevels
                 return toil.actor.CurJob.bill.suspended;
                 Log.Message("JobDriver_DoBillZLevels : JobDriver - DoRecipeWork - }); - 230", true);
             });
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - DoRecipeWork - toil.activeSkill = (() => toil.actor.CurJob.bill.recipe.workSkill); - 231", true);
             toil.activeSkill = (() => toil.actor.CurJob.bill.recipe.workSkill);
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - DoRecipeWork - return toil; - 232", true);
             return toil;
         }
 
         public static Toil FinishRecipeAndStartStoringProduct()
         {
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - FinishRecipeAndStartStoringProduct - Toil toil = new Toil(); - 233", true);
             Toil toil = new Toil();
             toil.initAction = delegate
             {
@@ -716,7 +698,6 @@ namespace ZLevels
                     }
                 }
             };
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - FinishRecipeAndStartStoringProduct - return toil; - 275", true);
             return toil;
         }
 
@@ -816,7 +797,6 @@ namespace ZLevels
 
         private static Toil JumpToCollectNextIntoHandsForBill(Toil gotoGetTargetToil, TargetIndex ind)
         {
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - JumpToCollectNextIntoHandsForBill - Toil toil = new Toil(); - 308", true);
             Toil toil = new Toil();
             toil.initAction = delegate
             {
@@ -886,7 +866,6 @@ namespace ZLevels
                     }
                 }
             };
-            Log.Message("JobDriver_DoBillZLevels : JobDriver - JumpToCollectNextIntoHandsForBill - return toil; - 336", true);
             return toil;
         }
     }

@@ -15,6 +15,7 @@ namespace ZLevels
 
 		private const TargetIndex StoreCellInd = TargetIndex.B;
 
+		private Thing savedThing = null;
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -128,6 +129,7 @@ namespace ZLevels
 					ZLogger.Message("200.3 TargetA.Thing.Position: " + TargetA.Thing?.Position);
 					ZLogger.Message("200.3 TargetA.Thing.Map: " + TargetA.Thing?.Map);
 					ZLogger.Message("200.3 TargetA.Thing.stackCount: " + TargetA.Thing?.stackCount);
+					this.savedThing = TargetA.Thing;
 					var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
 
 					for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
@@ -153,6 +155,7 @@ namespace ZLevels
 			{
 				initAction = delegate ()
 				{
+					ZLogger.Message("savedThing: " + this.savedThing);
 					ZLogger.Message("200.5 TargetA.Thing: " + TargetA.Thing);
 					ZLogger.Message("200.5 TargetA.Thing.Position: " + TargetA.Thing?.Position);
 					ZLogger.Message("200.5 TargetA.Thing.Map: " + TargetA.Thing?.Map);

@@ -23,7 +23,7 @@ namespace ZLevels
         static class Log_Error_Patch
         {
             [HarmonyPrefix]
-            public static bool Prefix(string text, bool ignoreStopLoggingLimit = false)
+            public static bool Prefix(string text, ref bool ignoreStopLoggingLimit)
             {
                 // somehow the game periodically gives this error message when pawns haul between maps
                 // and I really don’t know where the source is and how to fix it. If you know how, then tell me
@@ -38,6 +38,12 @@ namespace ZLevels
                     //ZLogger.Message("The error: " + text);
                     return false;
                 }
+                try
+                {
+                    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+                }
+                catch { };
+                ignoreStopLoggingLimit = true;
                 return true;
             }
         }

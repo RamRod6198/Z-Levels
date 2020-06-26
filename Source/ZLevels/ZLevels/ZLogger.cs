@@ -46,7 +46,7 @@ namespace ZLevels
 			Log.Error(ZLogger.Prefix + message, true);
 		}
 
-		private static readonly bool DebugEnabled = false;
+		private static readonly bool DebugEnabled = true;
 
 		private static readonly string Prefix = "[Z-Levels] ";
 	}

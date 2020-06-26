@@ -958,21 +958,21 @@ namespace ZLevels
                                 }
                                 catch { }
                             }
-                            if (job == this.jobTracker[pawn].mainJob)
-                            {
-                                this.FixMainJobIfThereIsProblems(pawn);
-                            }
+
+                            //if (job == this.jobTracker[pawn].mainJob)
+                            //{
+                            //    this.FixMainJobIfThereIsProblems(pawn);
+                            //}
+
                             if (job.TryMakePreToilReservations(pawn, false))
                             {
                                 ZLogger.Message(pawn + " taking job " + job + " in " + this.GetMapInfo(pawn.Map));
-
                                 try
                                 {
-                                        ZLogger.Message("--------------------------");
+                                    ZLogger.Message("--------------------------");
                                     for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
                                     {
                                         var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
-
                                         ZLogger.Message("30 job.targetQueueB: " + target.Thing);
                                         ZLogger.Message("30 job.targetQueueB.Map: " + target.Thing.Map);
                                         ZLogger.Message("30 job.targetQueueB.stackCount: " + target.Thing.stackCount);
@@ -989,6 +989,15 @@ namespace ZLevels
                             else
                             {
                                 ZLogger.Message(pawn + " in " + this.GetMapInfo(pawn.Map) + " failed " + job);
+                                ZLogger.Message("job.targetA.Thing.Map: " + job.targetA.Thing?.Map);
+                                ZLogger.Message("job.targetB.Thing.Map: " + job.targetB.Thing?.Map);
+                                ZLogger.Message("Active jobs: " + this.jobTracker[pawn].activeJobs.Count);
+                                foreach (var d in this.jobTracker[pawn].activeJobs)
+                                {
+                                    ZLogger.Message("Active jobs: " + d + " - " + pawn);
+                                }
+                                ZLogger.Message("Main job: " + this.jobTracker[pawn].mainJob + " - " + pawn);
+                                Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
                             }
                         }
                         else
@@ -1028,28 +1037,28 @@ namespace ZLevels
             return false;
         }
 
-        public void FixMainJobIfThereIsProblems(Pawn pawn)
-        {
-            try
-            {
-                if (this.jobTracker.ContainsKey(pawn) && this.jobTracker[pawn].mainJob != null)
-                {
-                    if (this.jobTracker[pawn].mainJob.targetQueueB != null
-                        && this.jobTracker[pawn].mainJob.targetQueueB.Count == this.jobTracker[pawn].mainJob.countQueue.Count)
-                    {
-                        for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                        {
-                            if (this.jobTracker[pawn].mainJob.targetQueueB[i].Thing.stackCount
-                                < this.jobTracker[pawn].mainJob.countQueue[i])
-                            {
-                                this.jobTracker[pawn].mainJob.countQueue[i] = this.jobTracker[pawn].mainJob.targetQueueB[i].Thing.stackCount;
-                            }
-                        }
-                    }
-                }
-            }
-            catch { };
-        }
+        //public void FixMainJobIfThereIsProblems(Pawn pawn)
+        //{
+        //    try
+        //    {
+        //        if (this.jobTracker.ContainsKey(pawn) && this.jobTracker[pawn].mainJob != null)
+        //        {
+        //            if (this.jobTracker[pawn].mainJob.targetQueueB != null
+        //                && this.jobTracker[pawn].mainJob.targetQueueB.Count == this.jobTracker[pawn].mainJob.countQueue.Count)
+        //            {
+        //                for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+        //                {
+        //                    if (this.jobTracker[pawn].mainJob.targetQueueB[i].Thing.stackCount
+        //                        < this.jobTracker[pawn].mainJob.countQueue[i])
+        //                    {
+        //                        this.jobTracker[pawn].mainJob.countQueue[i] = this.jobTracker[pawn].mainJob.targetQueueB[i].Thing.stackCount;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch { };
+        //}
         public void ResetJobTrackerFor(Pawn pawn)
         {
             if (this.jobTracker.ContainsKey(pawn))
@@ -1195,9 +1204,15 @@ namespace ZLevels
         //    }
         //}
 
+        
         public void TeleportPawn(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, bool spawnStairsBelow = false, bool spawnStairsUpper = false)
         {
             //ZLogger.Message("Trying to teleport to " + mapToTeleport);
+            Log.Message("Pawn curJob: " + pawnToTeleport.jobs.curJob);
+            foreach (var queue in pawnToTeleport.jobs.jobQueue)
+            {
+                Log.Message("Pawn queue: " + queue.job);
+            }
             bool jump = false;
             bool draft = false;
             if (Find.Selector.SelectedObjects.Contains(pawnToTeleport))
@@ -1223,12 +1238,7 @@ namespace ZLevels
                 }
             }
             var mapComp = mapToTeleport.GetComponent<MapComponentZLevel>();
-
-            //if (mapComp.path != null && mapComp.path.Length > 0)
-            //{
-            //    mapComp.DoForcedGeneration(true);
-            //}
-
+            
             if (spawnStairsUpper)
             {
                 if (this.GetZIndexFor(pawnToTeleport.Map) < this.GetZIndexFor(mapToTeleport))
@@ -1308,13 +1318,13 @@ namespace ZLevels
                     }
                 }
             }
-
+            
             try
             {
                 this.SaveArea(pawnToTeleport);
             }
             catch { }
-
+            
             foreach (var animal in pawnToTeleport.relations.DirectRelations
                 .Where(x => x.def == PawnRelationDefOf.Bond && x.otherPawn.Spawned
                 && pawnToTeleport.Position.InHorDistOf(x.otherPawn.Position, 15)))
@@ -1328,22 +1338,43 @@ namespace ZLevels
                 }
             }
 
-            JobManagerPatches.manualDespawn = true;
-            pawnToTeleport.DeSpawn();
-            JobManagerPatches.manualDespawn = false;
-            GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
+
+            try
+            {
+                RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
+                pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);
+                pawnToTeleport.Map?.listerThings.Remove(pawnToTeleport);
+                pawnToTeleport.Map?.thingGrid.Deregister(pawnToTeleport);
+                pawnToTeleport.Map?.coverGrid.DeRegister(pawnToTeleport);
+                pawnToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(pawnToTeleport);
+                pawnToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(pawnToTeleport);
+                pawnToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(pawnToTeleport);
+                StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
+                pawnToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(pawnToTeleport);
+                pawnToTeleport.Map?.mapPawns.DeRegisterPawn(pawnToTeleport);
+                Traverse.Create(pawnToTeleport).Field("mapIndexOrState").SetValue((sbyte)-1);
+                GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
+            }
+            catch (Exception ex)
+            {
+                JobManagerPatches.manualDespawn = true;
+                pawnToTeleport.DeSpawn();
+                JobManagerPatches.manualDespawn = false;
+                Log.Error("Error in teleportation: " + ex);
+            }
 
             try
             {
                 this.TryTakeFirstJob(pawnToTeleport);
             }
             catch { };
+            
             try
             {
                 this.LoadArea(pawnToTeleport);
             }
             catch { }
-
+            
             ZLogger.Message("Pawn: " + pawnToTeleport + " teleported to " + this.GetMapInfo(mapToTeleport));
             if (jump)
             {
@@ -1371,30 +1402,18 @@ namespace ZLevels
                 }
                 catch { };
             }
-
+            
             FloodFillerFog.FloodUnfog(pawnToTeleport.Position, mapToTeleport);
             AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
             { pawnToTeleport.PositionHeld });
-
-            //foreach (var map2 in Find.Maps)
-            //{
-            //    var comp2 = map2.GetComponent<MapComponentZLevel>();
-            //    if (this.ZLevelsTracker[map2.Tile] != null)
-            //    {
-            //        foreach (var d in this.ZLevelsTracker[map2.Tile].ZLevels)
-            //        {
-            //            Log.Message(map2 + ": " + d.Key + " - " + this.GetMapInfo(d.Value));
-            //        }
-            //    }
-            //}
-
+        
             try
             {
                 ZLogger.Message("--------------------------");
                 for (int i = this.jobTracker[pawnToTeleport].mainJob.targetQueueB.Count - 1; i >= 0; i--)
                 {
                     var target = this.jobTracker[pawnToTeleport].mainJob.targetQueueB[i];
-
+            
                     ZLogger.Message("TeleportPawn job.targetQueueB: " + target.Thing);
                     ZLogger.Message("TeleportPawn job.targetQueueB.Map: " + target.Thing.Map);
                     ZLogger.Message("TeleportPawn job.targetQueueB.stackCount: " + target.Thing.stackCount);
@@ -1402,6 +1421,12 @@ namespace ZLevels
                 }
             }
             catch { }
+
+            Log.Message("Pawn curJob: " + pawnToTeleport.jobs.curJob);
+            foreach (var queue in pawnToTeleport.jobs.jobQueue)
+            {
+                Log.Message("Pawn queue: " + queue.job);
+            }
 
         }
 
