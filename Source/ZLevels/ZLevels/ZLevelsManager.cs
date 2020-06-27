@@ -353,108 +353,116 @@ namespace ZLevels
         public List<Job> HaulThingToDest(Pawn pawn, Thing thing, Map dest, ref IntVec3 lastStairsPosition, ref bool fail, int count = -1)
         {
             List<Job> tempJobs = new List<Job>();
-            if (this.GetZIndexFor(thing.Map) > this.GetZIndexFor(dest))
+            try
             {
-                foreach (var map in this.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values.OrderByDescending(x => this.GetZIndexFor(x)))
+                if (this.GetZIndexFor(thing.Map) > this.GetZIndexFor(dest))
                 {
-                    if (this.GetZIndexFor(thing.Map) >= this.GetZIndexFor(map) &&
-                        this.GetZIndexFor(map) >= this.GetZIndexFor(dest))
+                    foreach (var map in this.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values.OrderByDescending(x => this.GetZIndexFor(x)))
                     {
-                        if (map != dest)
+                        if (this.GetZIndexFor(thing.Map) >= this.GetZIndexFor(map) &&
+                            this.GetZIndexFor(map) >= this.GetZIndexFor(dest))
                         {
-                            //var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsDown && x.Spawned).ToList();
-                            var stairs = this.stairsDown[map];
-                            if (stairs?.Count() > 0)
+                            if (map != dest)
                             {
-                                //var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
-                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                if (selectedStairs != null)
+                                //var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsDown && x.Spawned).ToList();
+                                var stairs = this.stairsDown[map];
+                                if (stairs?.Count() > 0)
                                 {
-                                    lastStairsPosition = selectedStairs.Position;
-                                    Job gotoStairs = null;
-                                    if (thing.Map == map)
+                                    //var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                    var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
+                                    if (selectedStairs != null)
                                     {
-                                        ZLogger.Message("Build tree (HaulThingToDest): " + pawn + " - Hauling " + thing + " to "
-                                            + selectedStairs + " in " + this.GetMapInfo(map));
-                                        gotoStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToStairs, 
-                                            selectedStairs, thing);
-                                        if (count != -1)
+                                        lastStairsPosition = selectedStairs.Position;
+                                        Job gotoStairs = null;
+                                        if (thing.Map == map)
                                         {
-                                            gotoStairs.count = count;
+                                            ZLogger.Message("Build tree (HaulThingToDest): " + pawn + " - Hauling " + thing + " to "
+                                                + selectedStairs + " in " + this.GetMapInfo(map));
+                                            gotoStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToStairs,
+                                                selectedStairs, thing);
+                                            if (count != -1)
+                                            {
+                                                gotoStairs.count = count;
+                                            }
                                         }
+                                        else
+                                        {
+                                            ZLogger.Message("Build tree (HaulThingToDest): " + pawn + " - Finding and using " + selectedStairs
+                                                + " in " + this.GetMapInfo(map));
+                                            gotoStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, selectedStairs);
+                                        }
+                                        tempJobs.Add(gotoStairs);
                                     }
                                     else
                                     {
-                                        ZLogger.Message("Build tree (HaulThingToDest): " + pawn + " - Finding and using " + selectedStairs
-                                            + " in " + this.GetMapInfo(map));
-                                        gotoStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, selectedStairs);
+                                        fail = true;
                                     }
-                                    tempJobs.Add(gotoStairs);
                                 }
                                 else
                                 {
                                     fail = true;
                                 }
                             }
-                            else
-                            {
-                                fail = true;
-                            }
                         }
                     }
                 }
-            }
-            else if (this.GetZIndexFor(thing.Map) < this.GetZIndexFor(dest))
-            {
-                foreach (var map in this.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values.OrderBy(x => this.GetZIndexFor(x)))
+                else if (this.GetZIndexFor(thing.Map) < this.GetZIndexFor(dest))
                 {
-                    if (this.GetZIndexFor(thing.Map) <= this.GetZIndexFor(map) &&
-                        this.GetZIndexFor(map) <= this.GetZIndexFor(dest))
+                    foreach (var map in this.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values.OrderBy(x => this.GetZIndexFor(x)))
                     {
-                        if (map != dest)
+                        if (this.GetZIndexFor(thing.Map) <= this.GetZIndexFor(map) &&
+                            this.GetZIndexFor(map) <= this.GetZIndexFor(dest))
                         {
-                            //var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsUp && x.Spawned).ToList();
-                            var stairs = this.stairsUp[map];
-                            if (stairs?.Count() > 0)
+                            if (map != dest)
                             {
-                                //var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
-                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                if (selectedStairs != null)
+                                //var stairs = map.listerThings.AllThings.Where(x => x is Building_StairsUp && x.Spawned).ToList();
+                                var stairs = this.stairsUp[map];
+                                if (stairs?.Count() > 0)
                                 {
-                                    lastStairsPosition = selectedStairs.Position;
-                                    Job gotoStairs = null;
-                                    if (thing.Map == map)
+                                    //var selectedStairs = GenClosest.ClosestThing_Global(lastStairsPosition, stairs, 99999f);
+                                    var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
+                                    if (selectedStairs != null)
                                     {
-                                        ZLogger.Message("Build tree (HaulThingToDest): " + pawn + " - Hauling " + thing + " to "
-                                            + selectedStairs + " in " + this.GetMapInfo(map));
-                                        gotoStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToStairs, 
-                                            selectedStairs, thing);
-                                        if (count != -1)
+                                        lastStairsPosition = selectedStairs.Position;
+                                        Job gotoStairs = null;
+                                        if (thing.Map == map)
                                         {
-                                            gotoStairs.count = count;
+                                            ZLogger.Message("Build tree (HaulThingToDest): " + pawn + " - Hauling " + thing + " to "
+                                                + selectedStairs + " in " + this.GetMapInfo(map));
+                                            gotoStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToStairs,
+                                                selectedStairs, thing);
+                                            if (count != -1)
+                                            {
+                                                gotoStairs.count = count;
+                                            }
                                         }
+                                        else
+                                        {
+                                            ZLogger.Message("Build tree (HaulThingToDest): " + pawn + " - Finding and using " + selectedStairs
+                                                + " in " + this.GetMapInfo(map));
+                                            gotoStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, selectedStairs);
+                                        }
+                                        tempJobs.Add(gotoStairs);
                                     }
                                     else
                                     {
-                                        ZLogger.Message("Build tree (HaulThingToDest): " + pawn + " - Finding and using " + selectedStairs
-                                            + " in " + this.GetMapInfo(map));
-                                        gotoStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, selectedStairs);
+                                        fail = true;
                                     }
-                                    tempJobs.Add(gotoStairs);
                                 }
                                 else
                                 {
                                     fail = true;
                                 }
                             }
-                            else
-                            {
-                                fail = true;
-                            }
                         }
                     }
                 }
             }
+            catch (Exception ex) 
+            {
+                Log.Error("Z-Levels: Job builder in HaulThingToDest produced an error. This error will lead to glitches to the game." +
+                    " Report this to the Z-Levels devs and attach the save game with an error if you can.");
+            };
             return tempJobs;
         }
 
