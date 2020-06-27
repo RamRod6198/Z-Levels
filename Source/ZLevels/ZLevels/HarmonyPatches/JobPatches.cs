@@ -2289,6 +2289,234 @@ namespace ZLevels
 
                 //return ResourceDeliverJobFor(pawn, frame);
             }
+
+            public static bool PawnCanAutomaticallyHaulFast(Pawn p, Thing t, bool forced)
+            {
+                UnfinishedThing unfinishedThing = t as UnfinishedThing;
+                Building building;
+                if (unfinishedThing != null && unfinishedThing.BoundBill != null 
+                    && ((building = (unfinishedThing.BoundBill.billStack.billGiver as Building)) == null 
+                    || (building.Spawned && building.OccupiedRect().ExpandedBy(1).Contains(unfinishedThing.Position))))
+                {
+                    return false;
+                }
+                if (!p.CanReserve(t, 1, -1, null, forced))
+                {
+                    return false;
+                }
+                if (!p.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+                {
+                    return false;
+                }
+                if (t.def.IsNutritionGivingIngestible && t.def.ingestible.HumanEdible && !t.IsSociallyProper(p, forPrisoner: false, animalsCare: true))
+                {
+                    JobFailReason.Is("ReservedForPrisoners".Translate());
+                    return false;
+                }
+                if (t.IsBurning())
+                {
+                    JobFailReason.Is("BurningLower".Translate());
+                    return false;
+                }
+                return true;
+            }
+
+            public static Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+            {
+                if (!PawnCanAutomaticallyHaulFast(pawn, t, forced))
+                {
+                    return null;
+                }
+                return HaulToStorageJob(pawn, t);
+            }
+
+            public static bool TryFindBestBetterNonSlotGroupStorageFor(Thing t, Pawn carrier, Map map, StoragePriority currentPriority, Faction faction, out IHaulDestination haulDestination, bool acceptSamePriority = false)
+            {
+                List<IHaulDestination> allHaulDestinationsListInPriorityOrder = map.haulDestinationManager.AllHaulDestinationsListInPriorityOrder;
+                IntVec3 intVec = t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld;
+                float num = float.MaxValue;
+                StoragePriority storagePriority = StoragePriority.Unstored;
+                haulDestination = null;
+                for (int i = 0; i < allHaulDestinationsListInPriorityOrder.Count; i++)
+                {
+                    if (allHaulDestinationsListInPriorityOrder[i] is ISlotGroupParent)
+                    {
+                        continue;
+                    }
+                    StoragePriority priority = allHaulDestinationsListInPriorityOrder[i].GetStoreSettings().Priority;
+                    if ((int)priority < (int)storagePriority || (acceptSamePriority && (int)priority < (int)currentPriority) || (!acceptSamePriority && (int)priority <= (int)currentPriority))
+                    {
+                        break;
+                    }
+                    float num2 = intVec.DistanceToSquared(allHaulDestinationsListInPriorityOrder[i].Position);
+                    if (num2 > num || !allHaulDestinationsListInPriorityOrder[i].Accepts(t))
+                    {
+                        continue;
+                    }
+                    Thing thing = allHaulDestinationsListInPriorityOrder[i] as Thing;
+                    if (thing != null && thing.Faction != faction)
+                    {
+                        continue;
+                    }
+                    if (thing != null)
+                    {
+                        if (carrier != null)
+                        {
+                            if (thing.IsForbidden(carrier))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (faction != null && thing.IsForbidden(faction))
+                        {
+                            continue;
+                        }
+                    }
+                    if (thing != null)
+                    {
+                        if (carrier != null)
+                        {
+                            if (!carrier.CanReserveNew(thing))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (faction != null && map.reservationManager.IsReservedByAnyoneOf(thing, faction))
+                        {
+                            continue;
+                        }
+                    }
+                    if (carrier != null)
+                    {
+                        if (thing != null)
+                        {
+                            if (!carrier.Map.reachability.CanReach(intVec, thing, PathEndMode.ClosestTouch, TraverseParms.For(carrier)))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (!carrier.Map.reachability.CanReach(intVec, allHaulDestinationsListInPriorityOrder[i].Position, PathEndMode.ClosestTouch, TraverseParms.For(carrier)))
+                        {
+                            continue;
+                        }
+                    }
+                    num = num2;
+                    storagePriority = priority;
+                    haulDestination = allHaulDestinationsListInPriorityOrder[i];
+                }
+                return haulDestination != null;
+            }
+
+            public static bool TryFindBestBetterStorageFor(Thing t, Pawn carrier, Map map, StoragePriority currentPriority, Faction faction, out IntVec3 foundCell, out IHaulDestination haulDestination, bool needAccurateResult = true)
+            {
+                IntVec3 foundCell2 = IntVec3.Invalid;
+                Map dest = null;
+                StoragePriority storagePriority = StoragePriority.Unstored;
+                if (TryFindBestBetterStoreCellFor(t, carrier, map, currentPriority, faction, out foundCell2, ref dest, needAccurateResult))
+                {
+                    storagePriority = foundCell2.GetSlotGroup(map).Settings.Priority;
+                }
+                if (!TryFindBestBetterNonSlotGroupStorageFor(t, carrier, map, currentPriority, faction, out IHaulDestination haulDestination2))
+                {
+                    haulDestination2 = null;
+                }
+                if (storagePriority == StoragePriority.Unstored && haulDestination2 == null)
+                {
+                    foundCell = IntVec3.Invalid;
+                    haulDestination = null;
+                    return false;
+                }
+                if (haulDestination2 != null && (storagePriority == StoragePriority.Unstored || (int)haulDestination2.GetStoreSettings().Priority > (int)storagePriority))
+                {
+                    foundCell = IntVec3.Invalid;
+                    haulDestination = haulDestination2;
+                    return true;
+                }
+                foundCell = foundCell2;
+                haulDestination = foundCell2.GetSlotGroup(map).parent;
+                return true;
+            }
+
+            public static Job HaulToStorageJob(Pawn p, Thing t)
+            {
+                StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(t);
+                if (!TryFindBestBetterStorageFor(t, p, p.Map, currentPriority, p.Faction, out IntVec3 foundCell, out IHaulDestination haulDestination))
+                {
+                    JobFailReason.Is("NoEmptyPlaceLower".Translate());
+                    return null;
+                }
+                if (haulDestination is ISlotGroupParent)
+                {
+                    return HaulToCellStorageJob(p, t, foundCell, fitInStoreCell: false);
+                }
+                Thing thing = haulDestination as Thing;
+                if (thing != null && thing.TryGetInnerInteractableThingOwner() != null)
+                {
+                    return HaulToContainerJob(p, t, thing);
+                }
+                Log.Error("Don't know how to handle HaulToStorageJob for storage " + haulDestination.ToStringSafe() + ". thing=" + t.ToStringSafe());
+                return null;
+            }
+
+            public static Job HaulToCellStorageJob(Pawn p, Thing t, IntVec3 storeCell, bool fitInStoreCell)
+            {
+                Job job = JobMaker.MakeJob(JobDefOf.HaulToCell, t, storeCell);
+                SlotGroup slotGroup = p.Map.haulDestinationManager.SlotGroupAt(storeCell);
+                if (slotGroup != null)
+                {
+                    Thing thing = p.Map.thingGrid.ThingAt(storeCell, t.def);
+                    if (thing != null)
+                    {
+                        job.count = t.def.stackLimit;
+                        if (fitInStoreCell)
+                        {
+                            job.count -= thing.stackCount;
+                        }
+                    }
+                    else
+                    {
+                        job.count = 99999;
+                    }
+                    int num = 0;
+                    float statValue = p.GetStatValue(StatDefOf.CarryingCapacity);
+                    List<IntVec3> cellsList = slotGroup.CellsList;
+                    for (int i = 0; i < cellsList.Count; i++)
+                    {
+                        if (StoreUtility.IsGoodStoreCell(cellsList[i], p.Map, t, p, p.Faction))
+                        {
+                            Thing thing2 = p.Map.thingGrid.ThingAt(cellsList[i], t.def);
+                            num = ((thing2 == null || thing2 == t) ? (num + t.def.stackLimit) : (num + Mathf.Max(t.def.stackLimit - thing2.stackCount, 0)));
+                            if (num >= job.count || (float)num >= statValue)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    job.count = Mathf.Min(job.count, num);
+                }
+                else
+                {
+                    job.count = 99999;
+                }
+                job.haulOpportunisticDuplicates = true;
+                job.haulMode = HaulMode.ToCellStorage;
+                return job;
+            }
+
+            public static Job HaulToContainerJob(Pawn p, Thing t, Thing container)
+            {
+                ThingOwner thingOwner = container.TryGetInnerInteractableThingOwner();
+                if (thingOwner == null)
+                {
+                    Log.Error(container.ToStringSafe() + " gave null ThingOwner.");
+                    return null;
+                }
+                Job job = JobMaker.MakeJob(JobDefOf.HaulToContainer, t, container);
+                job.count = Mathf.Min(t.stackCount, thingOwner.GetCountCanAccept(t));
+                job.haulMode = HaulMode.ToContainer;
+                return job;
+            }
+
             public static ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams, JobGiver_Work instance, bool emergency, ref Map dest, Map oldMap, IntVec3 oldPosition)
             {
                 if (emergency && pawn.mindState.priorityWork.IsPrioritized)
