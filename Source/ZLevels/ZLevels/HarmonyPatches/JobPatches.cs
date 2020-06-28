@@ -1876,7 +1876,7 @@ namespace ZLevels
                     IntVec3 intVec = cellsList[i];
                     //ZLogger.Message("Checking " + intVec + " in " + slotGroup + " in " + slotGroup.parent.Map);
                     float num2 = (float)(a - intVec).LengthHorizontalSquared;
-                    if (num2 <= closestDistSquared && IsGoodStoreCell(intVec, map, t, carrier, faction, oldMap))
+                    if (num2 <= closestDistSquared && IsGoodStoreCell(intVec, slotGroup.parent.Map, t, carrier, faction, oldMap))
                     {
                         closestSlot = intVec;
                         dest = slotGroup.parent.Map;
@@ -1900,7 +1900,7 @@ namespace ZLevels
                 {
                     return false;
                 }
-                if (!NoStorageBlockersIn(c, oldMap, t))
+                if (!NoStorageBlockersIn(c, map, t))
                 {
                     return false;
                 }
