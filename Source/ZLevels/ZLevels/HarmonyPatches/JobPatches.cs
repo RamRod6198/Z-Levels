@@ -1600,6 +1600,10 @@ namespace ZLevels
                         {
                             if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
                             {
+                                foreach (var activeJob in ZTracker.jobTracker[pawn]?.activeJobs)
+                                {
+                                    ZLogger.Message(pawn + " - active job: " + activeJob);
+                                }
                                 if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                 {
                                     if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory"
@@ -1689,6 +1693,10 @@ namespace ZLevels
                                     ZTracker.ResetJobTrackerFor(pawn);
                                 }
                             }
+                            else
+                            {
+                                ZLogger.Message(pawn + " has no active jobs");
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -1699,7 +1707,6 @@ namespace ZLevels
                     {
                         ZTracker.jobTracker[pawn] = new JobTracker();
                     }
-
                     ThinkResult result;
                     var oldMap = pawn.Map;
                     var oldPosition = pawn.Position;
@@ -2896,6 +2903,7 @@ namespace ZLevels
                                                 enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
                                                 enumerable != null);
                                         }
+
                                         if (thing != null)
                                         {
                                             ZLogger.Message(pawn + " - " + ZTracker.GetMapInfo(pawn.Map) + " - " + scanner + " Selected thing: " + thing);
@@ -2987,24 +2995,8 @@ namespace ZLevels
                                 job3 = (!bestTargetOfLastPriority.HasThing) ?
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : JobOnThing(pawn, bestTargetOfLastPriority.Thing, ref dest);
-                                //IntVec3 foundCell;
-                                //if (TryIssueJobPackagePatch.TryFindBestBetterStoreCellFor(bestTargetOfLastPriority.Thing,
-                                //    pawn, bestTargetOfLastPriority.Thing.Map, StoreUtility.CurrentStoragePriorityOf
-                                //    (bestTargetOfLastPriority.Thing), pawn.Faction, out foundCell, ref dest))
-                                //{
-                                //    job3 = JobMaker.MakeJob(JobDefOf.HaulToCell, bestTargetOfLastPriority.Thing, foundCell);
-                                //    job3.count = Mathf.Min(bestTargetOfLastPriority.Thing.stackCount,
-                                //        (int)(pawn.GetStatValue(StatDefOf.CarryingCapacity, true)
-                                //        / bestTargetOfLastPriority.Thing.def.VolumePerUnit));
-                                //    if (job3.count < 0)
-                                //    {
-                                //        job3.count = bestTargetOfLastPriority.Thing.stackCount;
-                                //    }
-                                //}
-                                //else
-                                //{
-                                //    ZLogger.Message("Cant haul " + bestTargetOfLastPriority.Thing + " in " + ZTracker.GetMapInfo(bestTargetOfLastPriority.Thing.Map), true);
-                                //}
+                                ZLogger.Message("1 - " + scannerWhoProvidedTarget + " - " + job3);
+
                             }
                             else if (scannerWhoProvidedTarget is WorkGiver_DoBill)
                             {
@@ -3012,6 +3004,7 @@ namespace ZLevels
                                 if (!bestTargetOfLastPriority.HasThing)
                                 {
                                     job3 = scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell);
+                                    ZLogger.Message("2 - " + scannerWhoProvidedTarget + " - " + job3);
                                 }
                                 else
                                 {
@@ -3030,6 +3023,8 @@ namespace ZLevels
                                                 + bestTargetOfLastPriority.Thing.Map);
 
                                             job3 = scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
+                                            ZLogger.Message("3 - " + scannerWhoProvidedTarget + " - " + job3);
+
                                             if (job3 != null)
                                             {
                                                 break;
@@ -3058,18 +3053,24 @@ namespace ZLevels
                                 job3 = (!bestTargetOfLastPriority.HasThing) ?
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : JobOnThing(scanner2, pawn, bestTargetOfLastPriority.Thing);
+                                ZLogger.Message("4 - " + scannerWhoProvidedTarget + " - " + job3);
+
                             }
                             else if (scannerWhoProvidedTarget is WorkGiver_ConstructDeliverResourcesToFrames scanner3)
                             {
                                 job3 = (!bestTargetOfLastPriority.HasThing) ?
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : JobOnThing(scanner3, pawn, bestTargetOfLastPriority.Thing);
+                                ZLogger.Message("5 - " + scannerWhoProvidedTarget + " - " + job3);
+
                             }
                             else
                             {
                                 job3 = (!bestTargetOfLastPriority.HasThing) ?
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
+                                ZLogger.Message("6 - " + scannerWhoProvidedTarget + " - " + job3);
+
                             }
 
                             if (job3 != null)
