@@ -2724,54 +2724,54 @@ namespace ZLevels
 
                                     if (scanner is WorkGiver_HaulGeneral || scanner is WorkGiver_HaulCorpses)
                                     {
-                                        //ZLogger.Message(pawn + " - pawn.map: " + pawn.Map);
-                                        //var allZones = new Dictionary<Zone_Stockpile, Map>();
-                                        //var allMaps = ZTracker.GetAllMaps(pawn.Map.Tile);
-                                        //foreach (Map map in allMaps)
-                                        //{
-                                        //    foreach (var zone in map.zoneManager.AllZones.Where(x => x is Zone_Stockpile))
-                                        //    {
-                                        //        //ZLogger.Message("Adding " + zone + " in " + ZTracker.GetMapInfo(zone.Map) + " - " + ZTracker.GetMapInfo(map));
-                                        //        allZones[(Zone_Stockpile)zone] = map;
-                                        //    }
-                                        //}
-                                        //
-                                        //List<Zone_Stockpile> copiedZones = new List<Zone_Stockpile>();
-                                        //IntVec3 newPosition2 = IntVec3.Invalid;
-                                        //foreach (Map map in allMaps)
-                                        //{
-                                        //    foreach (var zone in allZones)
-                                        //    {
-                                        //        if (zone.Key.Map != pawn.Map)
-                                        //        {
-                                        //            var newZone = new Zone_Stockpile
-                                        //            {
-                                        //                settings = zone.Key.settings,
-                                        //                label = zone.Key.label + " - Copy"
-                                        //            };
-                                        //            foreach (IntVec3 intVec in zone.Key.cells)
-                                        //            {
-                                        //                var newPosition = (intVec - zone.Key.Position) + pawn.Position;
-                                        //                if (newPosition.GetZone(pawn.Map) == null && newPosition.GetSlotGroup(pawn.Map) == null)
-                                        //                {
-                                        //                    newZone.cells.Add(newPosition);
-                                        //                }
-                                        //                else if (CellFinder.TryFindRandomCellNear
-                                        //                    (newPosition, map, 1000, (IntVec3 c) => c.Walkable(map)
-                                        //                    && c.GetZone(map) == null && c.GetSlotGroup(pawn.Map) == null
-                                        //                    && GenGrid.InBounds(c, map), out newPosition2))
-                                        //                {
-                                        //                    newZone.cells.Add(newPosition2);
-                                        //                }
-                                        //            }
-                                        //            newZone.zoneManager = pawn.Map.zoneManager;
-                                        //            //ZLogger.Message("Registering " + newZone + " in " + ZTracker.GetMapInfo(pawn.Map));
-                                        //            pawn.Map.zoneManager.RegisterZone(newZone);
-                                        //            //ZLogger.Message("Adding " + newZone + " to " + ZTracker.GetMapInfo(pawn.Map));
-                                        //            copiedZones.Add(newZone);
-                                        //        }
-                                        //    }
-                                        //}
+                                        ZLogger.Message(pawn + " - pawn.map: " + pawn.Map);
+                                        var allZones = new Dictionary<Zone_Stockpile, Map>();
+                                        var allMaps = ZTracker.GetAllMaps(pawn.Map.Tile);
+                                        foreach (Map map in allMaps)
+                                        {
+                                            foreach (var zone in map.zoneManager.AllZones.Where(x => x is Zone_Stockpile))
+                                            {
+                                                //ZLogger.Message("Adding " + zone + " in " + ZTracker.GetMapInfo(zone.Map) + " - " + ZTracker.GetMapInfo(map));
+                                                allZones[(Zone_Stockpile)zone] = map;
+                                            }
+                                        }
+                                        
+                                        List<Zone_Stockpile> copiedZones = new List<Zone_Stockpile>();
+                                        IntVec3 newPosition2 = IntVec3.Invalid;
+                                        foreach (Map map in allMaps)
+                                        {
+                                            foreach (var zone in allZones)
+                                            {
+                                                if (zone.Key.Map != pawn.Map)
+                                                {
+                                                    var newZone = new Zone_Stockpile
+                                                    {
+                                                        settings = zone.Key.settings,
+                                                        label = zone.Key.label + " - Copy"
+                                                    };
+                                                    foreach (IntVec3 intVec in zone.Key.cells)
+                                                    {
+                                                        var newPosition = (intVec - zone.Key.Position) + pawn.Position;
+                                                        if (newPosition.GetZone(pawn.Map) == null && newPosition.GetSlotGroup(pawn.Map) == null)
+                                                        {
+                                                            newZone.cells.Add(newPosition);
+                                                        }
+                                                        else if (CellFinder.TryFindRandomCellNear
+                                                            (newPosition, map, 1000, (IntVec3 c) => c.Walkable(map)
+                                                            && c.GetZone(map) == null && c.GetSlotGroup(pawn.Map) == null
+                                                            && GenGrid.InBounds(c, map), out newPosition2))
+                                                        {
+                                                            newZone.cells.Add(newPosition2);
+                                                        }
+                                                    }
+                                                    newZone.zoneManager = pawn.Map.zoneManager;
+                                                    //ZLogger.Message("Registering " + newZone + " in " + ZTracker.GetMapInfo(pawn.Map));
+                                                    pawn.Map.zoneManager.RegisterZone(newZone);
+                                                    //ZLogger.Message("Adding " + newZone + " to " + ZTracker.GetMapInfo(pawn.Map));
+                                                    copiedZones.Add(newZone);
+                                                }
+                                            }
+                                        }
 
                                         foreach (var t in pawn.Map.listerThings.AllThings.Where(x => x.def.EverHaulable))
                                         {
@@ -2781,11 +2781,11 @@ namespace ZLevels
 
                                         enumerable = pawn.Map.listerHaulables.ThingsPotentiallyNeedingHauling();
 
-                                        //foreach (var zone in copiedZones)
-                                        //{
-                                        //    pawn.Map.zoneManager.DeregisterZone(zone);
-                                        //}
-                                        //ZLogger.Message("--------------------", true);
+                                        foreach (var zone in copiedZones)
+                                        {
+                                            pawn.Map.zoneManager.DeregisterZone(zone);
+                                        }
+                                        ZLogger.Message("--------------------", true);
 
                                     }
                                     else
