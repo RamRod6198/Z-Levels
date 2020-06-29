@@ -1349,35 +1349,48 @@ namespace ZLevels
                 }
             }
 
-            JobManagerPatches.manualDespawn = true;
-            pawnToTeleport.DeSpawn();
-            JobManagerPatches.manualDespawn = false;
-            GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
+            //JobManagerPatches.manualDespawn = true;
+            //pawnToTeleport.DeSpawn();
+            //JobManagerPatches.manualDespawn = false;
+            //GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
 
-            //try
-            //{
-            //    RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
-            //    pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);
-            //    pawnToTeleport.Map?.listerThings.Remove(pawnToTeleport);
-            //    pawnToTeleport.Map?.thingGrid.Deregister(pawnToTeleport);
-            //    pawnToTeleport.Map?.coverGrid.DeRegister(pawnToTeleport);
-            //    pawnToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(pawnToTeleport);
-            //    pawnToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(pawnToTeleport);
-            //    pawnToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(pawnToTeleport);
-            //    StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
-            //    pawnToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(pawnToTeleport);
-            //    pawnToTeleport.Map?.mapPawns.DeRegisterPawn(pawnToTeleport);
-            //    Traverse.Create(pawnToTeleport).Field("mapIndexOrState").SetValue((sbyte)-1);
-            //    GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
-            //}
-            //catch (Exception ex)
-            //{
-            //    JobManagerPatches.manualDespawn = true;
-            //    pawnToTeleport.DeSpawn();
-            //    JobManagerPatches.manualDespawn = false;
-            //    GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
-            //    Log.Error("Error in teleportation: " + ex);
-            //}
+            try
+            {
+                RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
+                pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);
+                pawnToTeleport.Map?.listerThings.Remove(pawnToTeleport);
+                pawnToTeleport.Map?.thingGrid.Deregister(pawnToTeleport);
+                pawnToTeleport.Map?.coverGrid.DeRegister(pawnToTeleport);
+                pawnToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(pawnToTeleport);
+                pawnToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(pawnToTeleport);
+                pawnToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(pawnToTeleport);
+                StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
+                pawnToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(pawnToTeleport);
+                pawnToTeleport.Map?.mapPawns.DeRegisterPawn(pawnToTeleport);
+
+                Traverse.Create(pawnToTeleport).Field("mapIndexOrState")
+                    .SetValue((sbyte)Find.Maps.IndexOf(mapToTeleport));
+
+                RegionListersUpdater.RegisterInRegions(pawnToTeleport, mapToTeleport);
+                mapToTeleport.spawnedThings.TryAdd(pawnToTeleport);
+                mapToTeleport.listerThings.Add(pawnToTeleport);
+                mapToTeleport.thingGrid.Register(pawnToTeleport);
+                mapToTeleport.coverGrid.Register(pawnToTeleport);
+                mapToTeleport.tooltipGiverList.Notify_ThingSpawned(pawnToTeleport);
+                mapToTeleport.attackTargetsCache.Notify_ThingSpawned(pawnToTeleport);
+                StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
+                mapToTeleport.dynamicDrawManager.RegisterDrawable(pawnToTeleport);
+                mapToTeleport.mapPawns.RegisterPawn(pawnToTeleport);
+
+            }
+            catch (Exception ex)
+            {
+                JobManagerPatches.manualDespawn = true;
+                pawnToTeleport.DeSpawn();
+                JobManagerPatches.manualDespawn = false;
+                GenPlace.TryPlaceThing(pawnToTeleport, cellToTeleport, mapToTeleport, ThingPlaceMode.Near);
+                Log.Error("Error in teleportation: " + ex);
+            }
 
             try
             {

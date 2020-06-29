@@ -52,12 +52,11 @@ namespace ZLevels
                 }
             };
             yield return setStairs;
-
             yield return Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.OnCell);
             Toil useStairs = Toils_General.Wait(60, 0);
             ToilEffects.WithProgressBarToilDelay(useStairs, TargetIndex.C, false, -0.5f);
             ToilFailConditions.FailOnDespawnedNullOrForbidden<Toil>(useStairs, TargetIndex.C);
-            ToilFailConditions.FailOnCannotTouch<Toil>(useStairs, TargetIndex.C, PathEndMode.OnCell);
+            //ToilFailConditions.FailOnCannotTouch<Toil>(useStairs, TargetIndex.C, PathEndMode.OnCell);
             yield return useStairs;
 
             yield return new Toil
@@ -128,4 +127,3 @@ namespace ZLevels
         }
     }
 }
-
