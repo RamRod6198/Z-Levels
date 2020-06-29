@@ -1973,42 +1973,31 @@ namespace ZLevels
                     Traverse.Create(scanner).Field("chosenIngThings").GetValue<List<ThingCount>>();
                 for (int i = 0; i < giver.BillStack.Count; i++)
                 {
-                    Log.Message(" - StartOrResumeBillJob - Bill bill = giver.BillStack[i]; - 2", true);
                     Bill bill = giver.BillStack[i];
-                    Log.Message(" - StartOrResumeBillJob - if ((bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType - 3", true);
                     if ((bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType
                         != scanner.def.workType) || (Find.TickManager.TicksGame < bill.lastIngredientSearchFailTicks
                         + Traverse.Create(scanner).Field("ReCheckFailedBillTicksRange").GetValue<IntRange>().RandomInRange
                         && FloatMenuMakerMap.makingFor != pawn))
                     {
-                        Log.Message(" - StartOrResumeBillJob - continue; - 4", true);
                         continue;
                     }
                     bill.lastIngredientSearchFailTicks = 0;
-                    Log.Message(" - StartOrResumeBillJob - if (!bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn)) - 6", true);
                     if (!bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn))
                     {
-                        Log.Message(" - StartOrResumeBillJob - continue; - 7", true);
                         continue;
                     }
                     SkillRequirement skillRequirement = bill.recipe.FirstSkillRequirementPawnDoesntSatisfy(pawn);
-                    Log.Message(" - StartOrResumeBillJob - if (skillRequirement != null) - 9", true);
                     if (skillRequirement != null)
                     {
-                        Log.Message(" - StartOrResumeBillJob - JobFailReason.Is(\"UnderRequiredSkill\".Translate(skillRequirement.minLevel), bill.Label); - 10", true);
                         JobFailReason.Is("UnderRequiredSkill".Translate(skillRequirement.minLevel), bill.Label);
-                        Log.Message(" - StartOrResumeBillJob - continue; - 11", true);
                         continue;
                     }
                     Bill_ProductionWithUft bill_ProductionWithUft = bill as Bill_ProductionWithUft;
 
-                    Log.Message(" - StartOrResumeBillJob - if (bill_ProductionWithUft != null) - 13", true);
                     if (bill_ProductionWithUft != null)
                     {
-                        Log.Message(" - StartOrResumeBillJob - if (bill_ProductionWithUft.BoundUft != null) - 14", true);
                         if (bill_ProductionWithUft.BoundUft != null)
                         {
-                            Log.Message(" - StartOrResumeBillJob - if (bill_ProductionWithUft.BoundWorker == pawn && pawn.CanReserveAndReach(bill_ProductionWithUft.BoundUft, PathEndMode.Touch, Danger.Deadly) && !bill_ProductionWithUft.BoundUft.IsForbidden(pawn)) - 15", true);
                             if (bill_ProductionWithUft.BoundWorker == pawn && pawn.CanReserveAndReach(bill_ProductionWithUft.BoundUft, PathEndMode.Touch, Danger.Deadly) && !bill_ProductionWithUft.BoundUft.IsForbidden(pawn))
                             {
                                 return Traverse.Create(scanner).Method("FinishUftJob", new object[]
@@ -2027,7 +2016,6 @@ namespace ZLevels
 
                         //UnfinishedThing unfinishedThing = ClosestUnfinishedThingForBill(pawn, bill_ProductionWithUft);
 
-                        Log.Message(" - StartOrResumeBillJob - if (unfinishedThing != null) - 21", true);
                         if (unfinishedThing != null)
                         {
                             return Traverse.Create(scanner).Method("FinishUftJob", new object[]
@@ -2038,32 +2026,55 @@ namespace ZLevels
                         }
                     }
 
-                    bool flag = Traverse.Create(scanner).Method("TryFindBestBillIngredients", new object[]
+                    bool flag = false;
+                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var origMap = giver.Map;
+                    var origMap2 = pawn.Map;
+                    ZLogger.Message(giver + " - billGiver.Map: " + ZTracker.GetMapInfo(giver.Map));
+                    foreach (var map in ZTracker.GetAllMapsInClosestOrder(giver.Map))
+                    {
+                        try
+                        {
+                            Traverse.Create(giver).Field("mapIndexOrState")
+                                .SetValue((sbyte)Find.Maps.IndexOf(map));
+                            Traverse.Create(pawn).Field("mapIndexOrState")
+                                .SetValue((sbyte)Find.Maps.IndexOf(map));
+
+                            ZLogger.Message("pawn.Map: " + ZTracker.GetMapInfo(pawn.Map));
+                            ZLogger.Message("billGiver.Map: " + ZTracker.GetMapInfo(giver.Map));
+                            flag = Traverse.Create(scanner).Method("TryFindBestBillIngredients", new object[]
                                     {
-                                           bill, pawn, (Thing)giver, chosenIngThings
+                                        bill, pawn, (Thing)giver, chosenIngThings
                                     }).GetValue<bool>();
-                    Log.Message(" - StartOrResumeBillJob - if (!flag) - 25", true);
+                            if (flag) break;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("Z-Levels failed to process HasJobOnThing of DoBill workgiver. Report about it to devs and provide Hugslib log. Error: " + ex);
+                        }
+                    }
+
+                    Traverse.Create(giver).Field("mapIndexOrState")
+                        .SetValue((sbyte)Find.Maps.IndexOf(origMap));
+                    Traverse.Create(pawn).Field("mapIndexOrState")
+                        .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
+
                     if (!flag)
                     {
-                        Log.Message(" - StartOrResumeBillJob - if (FloatMenuMakerMap.makingFor != pawn) - 26", true);
                         if (FloatMenuMakerMap.makingFor != pawn)
                         {
                             bill.lastIngredientSearchFailTicks = Find.TickManager.TicksGame;
                         }
                         else
                         {
-                            Log.Message(" - StartOrResumeBillJob - JobFailReason.Is(\"MissingMaterials\".Translate(), bill.Label); - 28", true);
                             JobFailReason.Is("MissingMaterials".Translate(), bill.Label);
                         }
                         chosenIngThings.Clear();
-                        Log.Message(" - StartOrResumeBillJob - continue; - 30", true);
                         continue;
                     }
                     Job haulOffJob = null;
-                    Log.Message("chosenIngThings: " + chosenIngThings.Count);
                     foreach (var t in chosenIngThings)
                     {
-                        Log.Message("choosedn: " + t);
                     }
                     Job result = TryStartNewDoBillJob(pawn, bill, giver, chosenIngThings, out haulOffJob);
                     chosenIngThings.Clear();
@@ -2071,7 +2082,6 @@ namespace ZLevels
                     return result;
                 }
                 chosenIngThings.Clear();
-                Log.Message(" - StartOrResumeBillJob - return null; - 36", true);
                 return null;
             }
 
@@ -2109,50 +2119,8 @@ namespace ZLevels
                 if (compRefuelable == null || compRefuelable.HasFuel)
                 {
                     billGiver.BillStack.RemoveIncompletableBills();
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    var origMap = thing.Map;
-                    var origMap2 = pawn.Map;
-                    ZLogger.Message(billGiver + " - billGiver.Map: " + ZTracker.GetMapInfo(billGiver.Map));
-                    foreach (var map in ZTracker.GetAllMapsInClosestOrder(billGiver.Map))
-                    //foreach (var map in ZTracker.GetAllMaps(pawn.Map.Tile))
-                    {
-                        try
-                        {
-                            Traverse.Create(thing).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(map));
-                            Traverse.Create(pawn).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(map));
-
-                            ZLogger.Message("pawn.Map: " + ZTracker.GetMapInfo(pawn.Map));
-                            ZLogger.Message("billGiver.Map: " + ZTracker.GetMapInfo(billGiver.Map));
-                            Job job = StartOrResumeBillJob(scanner, pawn, billGiver);
-
-                            //Job job = Traverse.Create(scanner).Method("StartOrResumeBillJob", new object[]
-                            //{
-                            //    pawn, billGiver
-                            //}).GetValue<Job>();
-
-
-                            ZLogger.Message(ZTracker.GetMapInfo(map) + " - DoBill JobOnThing value: " + job);
-                            if (job != null)
-                            {
-                                Traverse.Create(thing).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(origMap));
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
-                                return job;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error("Z-Levels failed to process HasJobOnThing of DoBill workgiver. Report about it to devs and provide Hugslib log. Error: " + ex);
-                        }
-                    }
-                    Traverse.Create(thing).Field("mapIndexOrState")
-                        .SetValue((sbyte)Find.Maps.IndexOf(origMap));
-                    Traverse.Create(pawn).Field("mapIndexOrState")
-                        .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
-                    return null;
+                    Job job = StartOrResumeBillJob(scanner, pawn, billGiver);
+                    return job;
                 }
                 if (!RefuelWorkGiverUtility.CanRefuel(pawn, thing, forced))
                 {
@@ -2864,7 +2832,7 @@ namespace ZLevels
                                                 allZones[(Zone_Stockpile)zone] = map;
                                             }
                                         }
-                                        
+
                                         List<Zone_Stockpile> copiedZones = new List<Zone_Stockpile>();
                                         IntVec3 newPosition2 = IntVec3.Invalid;
                                         foreach (Map map in allMaps)
