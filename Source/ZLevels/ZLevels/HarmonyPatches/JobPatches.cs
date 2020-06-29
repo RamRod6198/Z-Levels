@@ -1967,7 +1967,135 @@ namespace ZLevels
                 return true;
             }
 
-            public static Job HasJobOnThing(WorkGiver_DoBill scanner, Pawn pawn, Thing thing, bool forced = false)
+            private static Job StartOrResumeBillJob(WorkGiver_DoBill scanner, Pawn pawn, IBillGiver giver)
+            {
+                List<ThingCount> chosenIngThings =
+                    Traverse.Create(scanner).Field("chosenIngThings").GetValue<List<ThingCount>>();
+                for (int i = 0; i < giver.BillStack.Count; i++)
+                {
+                    Log.Message(" - StartOrResumeBillJob - Bill bill = giver.BillStack[i]; - 2", true);
+                    Bill bill = giver.BillStack[i];
+                    Log.Message(" - StartOrResumeBillJob - if ((bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType - 3", true);
+                    if ((bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType
+                        != scanner.def.workType) || (Find.TickManager.TicksGame < bill.lastIngredientSearchFailTicks
+                        + Traverse.Create(scanner).Field("ReCheckFailedBillTicksRange").GetValue<IntRange>().RandomInRange
+                        && FloatMenuMakerMap.makingFor != pawn))
+                    {
+                        Log.Message(" - StartOrResumeBillJob - continue; - 4", true);
+                        continue;
+                    }
+                    bill.lastIngredientSearchFailTicks = 0;
+                    Log.Message(" - StartOrResumeBillJob - if (!bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn)) - 6", true);
+                    if (!bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn))
+                    {
+                        Log.Message(" - StartOrResumeBillJob - continue; - 7", true);
+                        continue;
+                    }
+                    SkillRequirement skillRequirement = bill.recipe.FirstSkillRequirementPawnDoesntSatisfy(pawn);
+                    Log.Message(" - StartOrResumeBillJob - if (skillRequirement != null) - 9", true);
+                    if (skillRequirement != null)
+                    {
+                        Log.Message(" - StartOrResumeBillJob - JobFailReason.Is(\"UnderRequiredSkill\".Translate(skillRequirement.minLevel), bill.Label); - 10", true);
+                        JobFailReason.Is("UnderRequiredSkill".Translate(skillRequirement.minLevel), bill.Label);
+                        Log.Message(" - StartOrResumeBillJob - continue; - 11", true);
+                        continue;
+                    }
+                    Bill_ProductionWithUft bill_ProductionWithUft = bill as Bill_ProductionWithUft;
+
+                    Log.Message(" - StartOrResumeBillJob - if (bill_ProductionWithUft != null) - 13", true);
+                    if (bill_ProductionWithUft != null)
+                    {
+                        Log.Message(" - StartOrResumeBillJob - if (bill_ProductionWithUft.BoundUft != null) - 14", true);
+                        if (bill_ProductionWithUft.BoundUft != null)
+                        {
+                            Log.Message(" - StartOrResumeBillJob - if (bill_ProductionWithUft.BoundWorker == pawn && pawn.CanReserveAndReach(bill_ProductionWithUft.BoundUft, PathEndMode.Touch, Danger.Deadly) && !bill_ProductionWithUft.BoundUft.IsForbidden(pawn)) - 15", true);
+                            if (bill_ProductionWithUft.BoundWorker == pawn && pawn.CanReserveAndReach(bill_ProductionWithUft.BoundUft, PathEndMode.Touch, Danger.Deadly) && !bill_ProductionWithUft.BoundUft.IsForbidden(pawn))
+                            {
+                                return Traverse.Create(scanner).Method("FinishUftJob", new object[]
+                                {
+                                    pawn, bill_ProductionWithUft.BoundUft, bill_ProductionWithUft
+                                }).GetValue<Job>();
+
+                                //return FinishUftJob(pawn, bill_ProductionWithUft.BoundUft, bill_ProductionWithUft);
+                            }
+                            continue;
+                        }
+                        UnfinishedThing unfinishedThing = Traverse.Create(scanner).Method("ClosestUnfinishedThingForBill", new object[]
+                            {
+                                    pawn, bill_ProductionWithUft
+                            }).GetValue<UnfinishedThing>();
+
+                        //UnfinishedThing unfinishedThing = ClosestUnfinishedThingForBill(pawn, bill_ProductionWithUft);
+
+                        Log.Message(" - StartOrResumeBillJob - if (unfinishedThing != null) - 21", true);
+                        if (unfinishedThing != null)
+                        {
+                            return Traverse.Create(scanner).Method("FinishUftJob", new object[]
+                            {
+                                    pawn, unfinishedThing, bill_ProductionWithUft
+                            }).GetValue<Job>();
+                            //return FinishUftJob(pawn, unfinishedThing, bill_ProductionWithUft);
+                        }
+                    }
+
+                    bool flag = Traverse.Create(scanner).Method("TryFindBestBillIngredients", new object[]
+                                    {
+                                           bill, pawn, (Thing)giver, chosenIngThings
+                                    }).GetValue<bool>();
+                    Log.Message(" - StartOrResumeBillJob - if (!flag) - 25", true);
+                    if (!flag)
+                    {
+                        Log.Message(" - StartOrResumeBillJob - if (FloatMenuMakerMap.makingFor != pawn) - 26", true);
+                        if (FloatMenuMakerMap.makingFor != pawn)
+                        {
+                            bill.lastIngredientSearchFailTicks = Find.TickManager.TicksGame;
+                        }
+                        else
+                        {
+                            Log.Message(" - StartOrResumeBillJob - JobFailReason.Is(\"MissingMaterials\".Translate(), bill.Label); - 28", true);
+                            JobFailReason.Is("MissingMaterials".Translate(), bill.Label);
+                        }
+                        chosenIngThings.Clear();
+                        Log.Message(" - StartOrResumeBillJob - continue; - 30", true);
+                        continue;
+                    }
+                    Job haulOffJob = null;
+                    Log.Message("chosenIngThings: " + chosenIngThings.Count);
+                    foreach (var t in chosenIngThings)
+                    {
+                        Log.Message("choosedn: " + t);
+                    }
+                    Job result = TryStartNewDoBillJob(pawn, bill, giver, chosenIngThings, out haulOffJob);
+                    chosenIngThings.Clear();
+                    ZLogger.Message("StartOrResumeBillJob result: " + result);
+                    return result;
+                }
+                chosenIngThings.Clear();
+                Log.Message(" - StartOrResumeBillJob - return null; - 36", true);
+                return null;
+            }
+
+            public static Job TryStartNewDoBillJob(Pawn pawn, Bill bill, IBillGiver giver, List<ThingCount> chosenIngThings, out Job haulOffJob, bool dontCreateJobIfHaulOffRequired = true)
+            {
+                haulOffJob = WorkGiverUtility.HaulStuffOffBillGiverJob(pawn, giver, null);
+                if (haulOffJob != null && dontCreateJobIfHaulOffRequired)
+                {
+                    return haulOffJob;
+                }
+                Job job = JobMaker.MakeJob(JobDefOf.DoBill, (Thing)giver);
+                job.targetQueueB = new List<LocalTargetInfo>(chosenIngThings.Count);
+                job.countQueue = new List<int>(chosenIngThings.Count);
+                for (int i = 0; i < chosenIngThings.Count; i++)
+                {
+                    job.targetQueueB.Add(chosenIngThings[i].Thing);
+                    job.countQueue.Add(chosenIngThings[i].Count);
+                }
+                job.haulMode = HaulMode.ToCellNonStorage;
+                job.bill = bill;
+                return job;
+            }
+
+            public static Job JobOnThing(WorkGiver_DoBill scanner, Pawn pawn, Thing thing, bool forced = false)
             {
                 IBillGiver billGiver = thing as IBillGiver;
                 if (billGiver == null || !scanner.ThingIsUsableBillGiver(thing)
@@ -1984,29 +2112,34 @@ namespace ZLevels
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                     var origMap = thing.Map;
                     var origMap2 = pawn.Map;
-
-                    foreach (var map in ZTracker.GetAllMaps(pawn.Map.Tile))
+                    ZLogger.Message(billGiver + " - billGiver.Map: " + ZTracker.GetMapInfo(billGiver.Map));
+                    foreach (var map in ZTracker.GetAllMapsInClosestOrder(billGiver.Map))
+                    //foreach (var map in ZTracker.GetAllMaps(pawn.Map.Tile))
                     {
                         try
                         {
                             Traverse.Create(thing).Field("mapIndexOrState")
                                 .SetValue((sbyte)Find.Maps.IndexOf(map));
-
                             Traverse.Create(pawn).Field("mapIndexOrState")
                                 .SetValue((sbyte)Find.Maps.IndexOf(map));
 
-                            Job job = Traverse.Create(scanner).Method("StartOrResumeBillJob", new object[]
-                            {
-                                pawn, billGiver
-                            }).GetValue<Job>();
+                            ZLogger.Message("pawn.Map: " + ZTracker.GetMapInfo(pawn.Map));
+                            ZLogger.Message("billGiver.Map: " + ZTracker.GetMapInfo(billGiver.Map));
+                            Job job = StartOrResumeBillJob(scanner, pawn, billGiver);
+
+                            //Job job = Traverse.Create(scanner).Method("StartOrResumeBillJob", new object[]
+                            //{
+                            //    pawn, billGiver
+                            //}).GetValue<Job>();
+
+
+                            ZLogger.Message(ZTracker.GetMapInfo(map) + " - DoBill JobOnThing value: " + job);
                             if (job != null)
                             {
                                 Traverse.Create(thing).Field("mapIndexOrState")
                                     .SetValue((sbyte)Find.Maps.IndexOf(origMap));
-
                                 Traverse.Create(pawn).Field("mapIndexOrState")
                                     .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
-
                                 return job;
                             }
                         }
@@ -2019,7 +2152,6 @@ namespace ZLevels
                         .SetValue((sbyte)Find.Maps.IndexOf(origMap));
                     Traverse.Create(pawn).Field("mapIndexOrState")
                         .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
-
                     return null;
                 }
                 if (!RefuelWorkGiverUtility.CanRefuel(pawn, thing, forced))
@@ -2711,21 +2843,11 @@ namespace ZLevels
                                         JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t) != null;
 
                                     Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn)
-                                    && TryIssueJobPackagePatch.HasJobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null
+                                    && TryIssueJobPackagePatch.JobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null
                                     && NoOneHasJobOn(t, pawn);
-
-                                    IntVec3 foundCell;
 
                                     Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn)
                                     && HasJobOnThing(pawn, t, false) != null;
-
-                                    //Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn)
-                                    //&& pawn?.carryTracker?.AvailableStackSpace(t?.def) > 0
-                                    //&& pawn?.carryTracker?.MaxStackSpaceEver(t?.def) > 0
-                                    //&& pawn.CanReserve(t, 1, -1, null, false)
-                                    //&& TryIssueJobPackagePatch.TryFindBestBetterStoreCellForValidator(t,
-                                    //pawn, t.Map, StoreUtility.CurrentStoragePriorityOf(t), pawn.Faction,
-                                    //out foundCell, true);
 
                                     IEnumerable<Thing> enumerable;
 
@@ -2857,12 +2979,6 @@ namespace ZLevels
                                         {
                                             try
                                             {
-                                                //thing = GenClosest.ClosestThingReachable
-                                                //    (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
-                                                //    scanner.PathEndMode, TraverseParms.For(pawn,
-                                                //    scanner.MaxPathDanger(pawn)), 9999f, validator,
-                                                //    enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
-                                                //    enumerable != null);
                                                 thing = GenClosest.ClosestThingReachable
                                                     (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
                                                     scanner.PathEndMode, TraverseParms.For(pawn,
@@ -2996,81 +3112,34 @@ namespace ZLevels
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : JobOnThing(pawn, bestTargetOfLastPriority.Thing, ref dest);
                                 ZLogger.Message("1 - " + scannerWhoProvidedTarget + " - " + job3);
-
                             }
-                            else if (scannerWhoProvidedTarget is WorkGiver_DoBill)
+                            else if (scannerWhoProvidedTarget is WorkGiver_DoBill scanner1)
                             {
-                                job3 = null;
-                                if (!bestTargetOfLastPriority.HasThing)
-                                {
-                                    job3 = scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell);
-                                    ZLogger.Message("2 - " + scannerWhoProvidedTarget + " - " + job3);
-                                }
-                                else
-                                {
-                                    var origMap = bestTargetOfLastPriority.Thing.Map;
-                                    var origMap2 = pawn.Map;
-                                    foreach (var tempMap in ZTracker.GetAllMaps(pawn.Map.Tile))
-                                    {
-                                        try
-                                        {
-                                            Traverse.Create(bestTargetOfLastPriority.Thing).Field("mapIndexOrState")
-                                                .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
-                                            Traverse.Create(pawn).Field("mapIndexOrState")
-                                                .SetValue((sbyte)Find.Maps.IndexOf(tempMap));
-
-                                            ZLogger.Message("JobOnThing: " + bestTargetOfLastPriority.Thing + " searching in "
-                                                + bestTargetOfLastPriority.Thing.Map);
-
-                                            job3 = scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
-                                            ZLogger.Message("3 - " + scannerWhoProvidedTarget + " - " + job3);
-
-                                            if (job3 != null)
-                                            {
-                                                break;
-                                            }
-                                            else
-                                            {
-                                                ZLogger.Message("No job in " + ZTracker.GetMapInfo(tempMap) + " for " + bestTargetOfLastPriority.Thing
-                                                    + " - " + bestTargetOfLastPriority.Thing.Map);
-                                            }
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            Log.Error("Z-Levels failed to process DoBill workgiver. Report about it to Z-Levels devs and provide Hugslib log. Error: " + ex, true);
-                                        }
-                                    }
-
-                                    Traverse.Create(bestTargetOfLastPriority.Thing).Field("mapIndexOrState")
-                                        .SetValue((sbyte)Find.Maps.IndexOf(origMap));
-
-                                    Traverse.Create(pawn).Field("mapIndexOrState")
-                                        .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
-                                }
+                                job3 = (!bestTargetOfLastPriority.HasThing) ?
+                                    scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
+                                    : JobOnThing(scanner1, pawn, bestTargetOfLastPriority.Thing);
+                                ZLogger.Message("2 - " + scannerWhoProvidedTarget + " - " + job3);
                             }
                             else if (scannerWhoProvidedTarget is WorkGiver_ConstructDeliverResourcesToBlueprints scanner2)
                             {
                                 job3 = (!bestTargetOfLastPriority.HasThing) ?
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : JobOnThing(scanner2, pawn, bestTargetOfLastPriority.Thing);
-                                ZLogger.Message("4 - " + scannerWhoProvidedTarget + " - " + job3);
-
+                                ZLogger.Message("3 - " + scannerWhoProvidedTarget + " - " + job3);
                             }
                             else if (scannerWhoProvidedTarget is WorkGiver_ConstructDeliverResourcesToFrames scanner3)
                             {
                                 job3 = (!bestTargetOfLastPriority.HasThing) ?
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : JobOnThing(scanner3, pawn, bestTargetOfLastPriority.Thing);
-                                ZLogger.Message("5 - " + scannerWhoProvidedTarget + " - " + job3);
-
+                                ZLogger.Message("4 - " + scannerWhoProvidedTarget + " - " + job3);
                             }
                             else
                             {
                                 job3 = (!bestTargetOfLastPriority.HasThing) ?
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
-                                ZLogger.Message("6 - " + scannerWhoProvidedTarget + " - " + job3);
-
+                                ZLogger.Message("5 - " + scannerWhoProvidedTarget + " - " + job3);
                             }
 
                             if (job3 != null)
@@ -3080,6 +3149,14 @@ namespace ZLevels
                                 {
                                     dest = otherMap;
                                 }
+                                ZLogger.Message("Main job stats: ");
+                                ZLogger.Message("Job: " + job3);
+                                ZLogger.Message("Job.targetA: " + job3.targetA);
+                                ZLogger.Message("Job.targetB: " + job3.targetB);
+                                ZLogger.Message("Job.targetC: " + job3.targetC);
+                                ZLogger.Message("Job.targetQueueA: " + job3.targetQueueA);
+                                ZLogger.Message("Job.targetQueueB: " + job3.targetQueueB);
+                                ZLogger.Message("Job.countQueue: " + job3.countQueue);
                                 return new ThinkResult(job3, instance, list[j].def.tagToGive);
                             }
                             //Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
