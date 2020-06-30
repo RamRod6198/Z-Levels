@@ -584,10 +584,10 @@ namespace ZLevels
                                                     job2.workGiverDef = workGiver_Scanner2.def;
                                                     action2 = delegate
                                                     {
-                                                        //if (pawn.jobs.TryTakeOrderedJobPrioritizedWork(localJob, localScanner, clickCell) && workGiver.forceMote != null)
-                                                        //{
-                                                        //    MoteMaker.MakeStaticMote(clickCell, pawn.Map, workGiver.forceMote);
-                                                        //}
+                                                        if (pawn.jobs.TryTakeOrderedJobPrioritizedWork(localJob, localScanner, clickCell) && workGiver.forceMote != null)
+                                                        {
+                                                            MoteMaker.MakeStaticMote(clickCell, pawn.Map, workGiver.forceMote);
+                                                        }
                                                     };
                                                 }
                                             }

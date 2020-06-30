@@ -1530,35 +1530,36 @@ namespace ZLevels
                 return CellFinder.RandomClosewalkCellNearNotForbidden(pawn.Position, map, 4, pawn);
             }
         }
-        [HarmonyPatch(typeof(Pawn_JobTracker), "EndCurrentJob")]
-        public class EndCurrentJobPatch
-        {
-            private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
-            {
-                if (___pawn.RaceProps.Humanlike)
-                {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn) 
-                        && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
-                    {
-                        startNewJob = false;
-                    }
-                    ZLogger.Message(___pawn + " ends " + __instance.curJob + " - " + startNewJob);
-                }
-            }
-            private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
-            {
-                if (___pawn.RaceProps.Humanlike)
-                {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
-                        && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
-                    {
-                        ZTracker.TryTakeFirstJob(___pawn);
-                    }
-                }
-            }
-        }
+
+        //[HarmonyPatch(typeof(Pawn_JobTracker), "EndCurrentJob")]
+        //public class EndCurrentJobPatch
+        //{
+        //    private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
+        //    {
+        //        if (___pawn.RaceProps.Humanlike)
+        //        {
+        //            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+        //            if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn) 
+        //                && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
+        //            {
+        //                startNewJob = false;
+        //            }
+        //            ZLogger.Message(___pawn + " ends " + __instance.curJob + " - " + startNewJob);
+        //        }
+        //    }
+        //    private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
+        //    {
+        //        if (___pawn.RaceProps.Humanlike)
+        //        {
+        //            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+        //            if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
+        //                && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
+        //            {
+        //                ZTracker.TryTakeFirstJob(___pawn);
+        //            }
+        //        }
+        //    }
+        //}
 
 
         [HarmonyPatch(typeof(JobGiver_Work), "TryIssueJobPackage")]
