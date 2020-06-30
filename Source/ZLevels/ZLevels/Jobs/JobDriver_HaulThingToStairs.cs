@@ -34,16 +34,14 @@ namespace ZLevels
             this.FailOnDestroyedOrNull(TargetIndex.B);
             this.FailOnBurningImmobile(TargetIndex.B);
             this.FailOnForbidden(TargetIndex.B);
+            Toil reserveTargetA = Toils_Reserve.Reserve(TargetIndex.B, 1, -1, null);
+            yield return reserveTargetA;
+            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch);
             yield return new Toil
             {
                 initAction = delegate ()
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    if (ZTracker.jobTracker[pawn].mainJob.count != -1)
-                    {
-                        this.pawn.jobs.curJob.count = ZTracker.jobTracker[pawn].mainJob.count;
-                    }
-                    else if (this.pawn.jobs.curJob.count == -1)
+                    if (this.pawn.jobs.curJob.count == -1)
                     {
                         this.pawn.jobs.curJob.count = Mathf.Min(TargetB.Thing.stackCount, (int)(pawn.GetStatValue(StatDefOf.CarryingCapacity, true) / TargetB.Thing.def.VolumePerUnit));
                         if (this.pawn.jobs.curJob.count < 0)
@@ -54,31 +52,17 @@ namespace ZLevels
                     ZLogger.Message(this.pawn + " haul count: " + this.pawn.jobs.curJob.count);
                 }
             };
-
-            Toil reserveItem = Toils_Reserve.Reserve(TargetIndex.B);
-            yield return reserveItem;
-            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-            yield return Toils_Haul.StartCarryThing(TargetIndex.B, putRemainderInQueue: false, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.B);
-            yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveItem, TargetIndex.B, TargetIndex.None, takeFromValidStorage: true);
+            yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, true, false);
+            yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveTargetA, TargetIndex.B, TargetIndex.A,
+                false, null);
+            Toil carryToCell = Toils_Haul.CarryHauledThingToCell(TargetIndex.A);
+            yield return carryToCell;
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
-
-
-
-            //Toil reserveTargetA = Toils_Reserve.Reserve(TargetIndex.B, 1, -1, null);
-            //yield return reserveTargetA;
-            //yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch);
-            //yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, true, false);
-            //yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveTargetA, TargetIndex.B, TargetIndex.A,
-            //    false, null);
-            //Toil carryToCell = Toils_Haul.CarryHauledThingToCell(TargetIndex.A);
-            //yield return carryToCell;
-            //yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
 
             Toil useStairs = Toils_General.Wait(60, 0);
             ToilEffects.WithProgressBarToilDelay(useStairs, TargetIndex.A, false, -0.5f);
             ToilFailConditions.FailOnDespawnedNullOrForbidden<Toil>(useStairs, TargetIndex.A);
             ToilFailConditions.FailOnCannotTouch<Toil>(useStairs, TargetIndex.A, PathEndMode.OnCell);
-
             //yield return new Toil
             //{
             //    initAction = delegate () {
