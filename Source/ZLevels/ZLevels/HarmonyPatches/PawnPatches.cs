@@ -95,83 +95,83 @@ namespace ZLevels
         //    }
         //}
 
-        [HarmonyPatch(typeof(Pawn_JobTracker))]
-        [HarmonyPatch(nameof(Pawn_JobTracker.StopAll))]
-        static class Pawn_JobTracker_Patch
-        {
-            [HarmonyPrefix]
-            public static bool Prefix()
-            {
-                try
-                {
-                    if (JobManagerPatches.manualDespawn == true)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("[Z-Levels] Pawn_JobTracker_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
-                }
-                return true;
-            }
-        }
-        
-        [HarmonyPatch(typeof(Pawn_PathFollower))]
-        [HarmonyPatch(nameof(Pawn_PathFollower.StopDead))]
-        static class Pawn_PathFollower_Patch
-        {
-            [HarmonyPrefix]
-            public static bool Prefix()
-            {
-                try
-                {
-                    if (JobManagerPatches.manualDespawn == true)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("[Z-Levels] Pawn_JobTracker_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
-                }
-                return true;
-            }
-        }
-
-        [HarmonyPatch(typeof(Pawn))]
-        [HarmonyPatch(nameof(Pawn.ClearAllReservations))]
-        static class Pawn_ClearAllReservations_Patch
-        {
-            [HarmonyPrefix]
-            public static bool Prefix()
-            {
-                try
-                {
-                    if (JobManagerPatches.manualDespawn == true)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("[Z-Levels] Pawn_ClearAllReservations_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
-                }
-                return true;
-            }
-        }
+        //[HarmonyPatch(typeof(Pawn_JobTracker))]
+        //[HarmonyPatch(nameof(Pawn_JobTracker.StopAll))]
+        //static class Pawn_JobTracker_Patch
+        //{
+        //    [HarmonyPrefix]
+        //    public static bool Prefix()
+        //    {
+        //        try
+        //        {
+        //            if (JobManagerPatches.manualDespawn == true)
+        //            {
+        //                return false;
+        //            }
+        //            else
+        //            {
+        //                return true;
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Log.Error("[Z-Levels] Pawn_JobTracker_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+        //        }
+        //        return true;
+        //    }
+        //}
+        //
+        //[HarmonyPatch(typeof(Pawn_PathFollower))]
+        //[HarmonyPatch(nameof(Pawn_PathFollower.StopDead))]
+        //static class Pawn_PathFollower_Patch
+        //{
+        //    [HarmonyPrefix]
+        //    public static bool Prefix()
+        //    {
+        //        try
+        //        {
+        //            if (JobManagerPatches.manualDespawn == true)
+        //            {
+        //                return false;
+        //            }
+        //            else
+        //            {
+        //                return true;
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Log.Error("[Z-Levels] Pawn_JobTracker_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+        //        }
+        //        return true;
+        //    }
+        //}
+        //
+        //[HarmonyPatch(typeof(Pawn))]
+        //[HarmonyPatch(nameof(Pawn.ClearAllReservations))]
+        //static class Pawn_ClearAllReservations_Patch
+        //{
+        //    [HarmonyPrefix]
+        //    public static bool Prefix()
+        //    {
+        //        try
+        //        {
+        //            if (JobManagerPatches.manualDespawn == true)
+        //            {
+        //                return false;
+        //            }
+        //            else
+        //            {
+        //                return true;
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Log.Error("[Z-Levels] Pawn_ClearAllReservations_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+        //        }
+        //        return true;
+        //    }
+        //}
     }
 }
 

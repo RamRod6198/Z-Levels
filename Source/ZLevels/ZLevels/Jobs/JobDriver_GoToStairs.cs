@@ -80,14 +80,6 @@ namespace ZLevels
                             stairsDown.shouldSpawnStairsBelow = false;
                         }
                     }
-                    try
-                    {
-                        ZLogger.Message("5 lastTick");
-
-                        ZTracker.jobTracker[pawn].lastTickFood = Find.TickManager.TicksGame + 201;
-                        ZTracker.jobTracker[pawn].lastTickJoy = Find.TickManager.TicksGame + 201;
-                    }
-                    catch { };
                 }
             };
         }
