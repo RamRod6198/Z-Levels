@@ -1013,7 +1013,7 @@ namespace ZLevels
                                     {
                                         ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                                     }
-                                    ZTracker.ResetJobTrackerFor(pawn);
+                                    ZTracker.ResetJobs(pawn);
 
                                 }
                             }
@@ -1259,7 +1259,7 @@ namespace ZLevels
                                         {
                                             ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                                         }
-                                        ZTracker.ResetJobTrackerFor(pawn);
+                                        ZTracker.ResetJobs(pawn);
 
                                     }
                                 }
@@ -1606,7 +1606,7 @@ namespace ZLevels
                                     {
                                         ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                                     }
-                                    ZTracker.ResetJobTrackerFor(pawn);
+                                    ZTracker.ResetJobs(pawn);
                                 }
                             }
                             else
