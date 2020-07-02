@@ -1457,7 +1457,7 @@ namespace ZLevels
                 if (___pawn.RaceProps.Humanlike)
                 {
                     var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                    if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
+                    if (___pawn.CurJob == null && ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
                         && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
                     {
                         ZLogger.Message(___pawn + " taking first job 1");
@@ -1471,7 +1471,7 @@ namespace ZLevels
                             ZLogger.Message("POSTFIX 2: " + job);
                         }
                         ZLogger.Message("POSTFIX 3: " + ZTracker.jobTracker[___pawn].activeJobs[0]);
-
+            
                         ZTracker.TryTakeFirstJob(___pawn);
                     }
                 }
@@ -2550,7 +2550,7 @@ namespace ZLevels
 
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(position);
-                        ZLogger.Message("30 SetPosition for " + pawn + " to " + position);
+                        //ZLogger.Message("30 SetPosition for " + pawn + " to " + position);
                     }
                     else if (pawn.Map != oldMap && otherMap == oldMap)
                     {
@@ -2561,7 +2561,7 @@ namespace ZLevels
 
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
-                        ZLogger.Message("31 SetPosition for " + pawn + " to " + oldPosition);
+                        //ZLogger.Message("31 SetPosition for " + pawn + " to " + oldPosition);
                     }
                     if (scanner.HasJobOnThing(pawn, t))
                     {
@@ -2570,9 +2570,6 @@ namespace ZLevels
                     if (job != null)
                     {
                         job.count = job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompRefuelable>().GetFuelCountToFullyRefuel();
-                        Log.Message("Refuel job: " + job);
-                        Log.Message("job.count: " + job.count);
-                        Log.Message("job.countQueue: " + job.countQueue);
                     }
                     if (job != null) break;
                 }
@@ -2623,7 +2620,7 @@ namespace ZLevels
                 for (int j = 0; j < list.Count; j++)
                 {
                     WorkGiver workGiver = list[j];
-                    ZLogger.Message(pawn + " - " + workGiver);
+                    //ZLogger.Message(pawn + " - " + workGiver);
                     foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                     {
                         //ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
@@ -2673,7 +2670,7 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(position);
-                            ZLogger.Message("17 SetPosition for " + pawn + " to " + position);
+                            //ZLogger.Message("17 SetPosition for " + pawn + " to " + position);
                         }
                         else if (pawn.Map != oldMap && otherMap == oldMap)
                         {
@@ -2681,7 +2678,7 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
-                            ZLogger.Message("18 SetPosition for " + pawn + " to " + oldPosition);
+                            //ZLogger.Message("18 SetPosition for " + pawn + " to " + oldPosition);
                         }
                         if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                         {
@@ -2729,7 +2726,6 @@ namespace ZLevels
 
                                     if (scanner is WorkGiver_HaulGeneral || scanner is WorkGiver_HaulCorpses)
                                     {
-                                        ZLogger.Message(pawn + " - pawn.map: " + pawn.Map);
                                         var allZones = new Dictionary<Zone_Stockpile, Map>();
                                         var allMaps = ZTracker.GetAllMaps(pawn.Map.Tile);
                                         foreach (Map map in allMaps)
@@ -2790,8 +2786,6 @@ namespace ZLevels
                                         {
                                             pawn.Map.zoneManager.DeregisterZone(zone);
                                         }
-                                        ZLogger.Message("--------------------", true);
-
                                     }
                                     else
                                     {
@@ -3043,35 +3037,14 @@ namespace ZLevels
                                 {
                                     dest = otherMap;
                                 }
-                                ZLogger.Message("Main job stats: ");
-                                ZLogger.Message("Job: " + job3);
-                                ZLogger.Message("Job.targetA: " + job3.targetA);
-                                ZLogger.Message("Job.targetB: " + job3.targetB);
-                                ZLogger.Message("Job.targetC: " + job3.targetC);
-                                ZLogger.Message("Job.targetQueueA: " + job3.targetQueueA);
-                                ZLogger.Message("Job.targetQueueB: " + job3.targetQueueB);
-                                ZLogger.Message("Job.countQueue: " + job3.countQueue);
                                 return new ThinkResult(job3, instance, list[j].def.tagToGive);
                             }
-                            //Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
+                            Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
                         }
                         num = workGiver.def.priorityInType;
                     }
                 }
                 return ThinkResult.NoJob;
-            }
-
-            private static bool HaulShouldSkip(Pawn pawn, WorkGiver giver)
-            {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                foreach (var map in ZTracker.GetAllMaps(pawn.Map.Tile))
-                {
-                    if (map.listerHaulables.ThingsPotentiallyNeedingHauling().Count > 0)
-                    {
-                        return false;
-                    }
-                }
-                return true;
             }
 
             private static bool PawnCanUseWorkGiver(Pawn pawn, WorkGiver giver)

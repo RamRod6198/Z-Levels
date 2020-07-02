@@ -304,7 +304,10 @@
     <Compile Include="HarmonyPatches\CombatPatches.cs" />
     <Compile Include="HarmonyPatches\ResourceCounterPatch.cs" />
     <Compile Include="HarmonyPatches\SkyfallerPatches.cs" />
+    <Compile Include="Jobs\JobDriver_HaulThingToDest.cs" />
+    <Compile Include="Jobs\JobDriver_GoToMap.cs" />
     <Compile Include="Jobs\JobDriver_GoToThingMap.cs" />
+    <Compile Include="Jobs\Toils_ZLevels.cs" />
     <Compile Include="Jobs\JobDriver_ZHaulToCell.cs" />
     <Compile Include="MapRenderer\PawnRendererScaled.cs" />
     <Compile Include="MapRenderer\RenderPatches.cs" />

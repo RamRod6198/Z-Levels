@@ -21,6 +21,10 @@ namespace ZLevels
 			Scribe_References.Look<Job>(ref this.mainJob, "mainJob");
 		}
 
+		public Map dest;
+
+		//public Thing selectedStairs;
+
 		public Job mainJob;
 
 		public List<Job> activeJobs;
