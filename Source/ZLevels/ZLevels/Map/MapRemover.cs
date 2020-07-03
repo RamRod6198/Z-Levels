@@ -50,7 +50,7 @@ namespace ZLevels
 										ZLogger.Message("Removing map: " + map);
 									}
 									var parent = map.Parent as MapParent_ZLevel;
-									var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+									var ZTracker = ZUtils.ZTracker;
 									parent.Abandon();
 									ZTracker.ZLevelsTracker[map.Tile].ZLevels.Remove(comp.Z_LevelIndex);
 
@@ -86,7 +86,7 @@ namespace ZLevels
 									}
 
 									var parent = map.Parent as MapParent_ZLevel;
-									var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+									var ZTracker = ZUtils.ZTracker;
 									parent.Abandon();
 									ZTracker.ZLevelsTracker[map.Tile].ZLevels.Remove(comp.Z_LevelIndex);
 

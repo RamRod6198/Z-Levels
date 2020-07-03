@@ -1415,11 +1415,6 @@ namespace ZLevels
             catch { };
         }
 
-        public override void StartedNewGame()
-        {
-            base.StartedNewGame();
-        }
-
         public void ReCheckStairs()
         {
             try
@@ -1490,10 +1485,17 @@ namespace ZLevels
                 ZLogger.Error("Error in ReCheckStairs: " + ex);
             }
         }
+
+        public override void StartedNewGame()
+        {
+            base.StartedNewGame();
+            ZUtils.ResetZTracker();
+        }
         public override void LoadedGame()
         {
             base.LoadedGame();
             this.ReCheckStairs();
+            ZUtils.ResetZTracker();
         }
 
         public override void ExposeData()

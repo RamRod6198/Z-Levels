@@ -15,8 +15,7 @@ namespace ZLevels
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].dest, this))
+            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZUtils.ZTracker.jobTracker[pawn].dest, this))
             {
                 yield return toil;
             }

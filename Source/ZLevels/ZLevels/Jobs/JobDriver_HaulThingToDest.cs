@@ -22,7 +22,7 @@ namespace ZLevels
         }
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            var ZTracker = ZUtils.ZTracker;
             if (pawn.Map == this.job.targetA.Thing.Map && pawn.Map == ZTracker.jobTracker[pawn].dest)
             {
                 ZLogger.Message("pawn map and thing map and dest map are same, yield breaking in JobDriver_HaulThingToDest");

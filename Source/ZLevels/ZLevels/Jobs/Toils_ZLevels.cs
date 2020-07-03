@@ -34,7 +34,7 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     ZLogger.Message("Pawn: " + pawn);
                     ZLogger.Message("Pawn.map: " + pawn.Map);
                     ZLogger.Message("Dest Map: " + dest);
@@ -72,7 +72,7 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (pawn.CurJob.targetC.Thing is Building_StairsUp stairsUp)
                     {
                         Map map = ZTracker.GetUpperLevel(pawn.Map.Tile, pawn.Map);

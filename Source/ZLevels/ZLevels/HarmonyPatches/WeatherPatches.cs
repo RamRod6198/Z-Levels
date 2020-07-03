@@ -27,7 +27,7 @@ namespace ZLevels
                 try
                 {
                     Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(map.Tile))
                     {
                         ZLogger.Message("Weather decider: " + __result + " - " + ZTracker.GetMapInfo(map));
@@ -74,7 +74,7 @@ namespace ZLevels
                 try
                 {
                     Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(map.Tile))
                     {
                         ZLogger.Message("2 Weather decider: " + newWeather + " - " + ZTracker.GetMapInfo(map));
@@ -124,7 +124,7 @@ namespace ZLevels
                 try
                 {
                     Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(map.Tile) && ZTracker.GetZIndexFor(map) < 0)
                     {
                         int curWeatherDuration = Traverse.Create(__instance).Field("curWeatherDuration").GetValue<int>();
@@ -154,7 +154,7 @@ namespace ZLevels
                 try
                 {
                     Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(map.Tile) && ZTracker.GetZIndexFor(map) > 0)
                     {
                         return false;

@@ -29,10 +29,9 @@ namespace ZLevels
                 {
                     try
                     {
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                         if (parent.finishedGeneration == true)
                         {
-                            var ind = ZTracker.GetZIndexFor(__instance);
+                            var ind = ZUtils.ZTracker.GetZIndexFor(__instance);
                             if (ind < 0)
                             {
                                 __result = ZLevelsDefOf.ZL_UndegroundBiome;

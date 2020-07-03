@@ -539,7 +539,7 @@ namespace ZLevels
                 Pawn actor = __instance.pawn;
                 Thing thing = null;
                 IntVec3 intVec = IntVec3.Invalid;
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 var oldMap = actor.Map;
                 bool select = false;
                 if (Find.Selector.SelectedObjects.Contains(actor)) select = true;
@@ -663,7 +663,7 @@ namespace ZLevels
                 {
                     try
                     {
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        var ZTracker = ZUtils.ZTracker;
                         if (ZTracker.jobTracker == null)
                         {
                             ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
@@ -900,7 +900,7 @@ namespace ZLevels
             {
                 try
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     try
                     {
                         //    if (pawn.jobs.jobQueue.Count > 0)
@@ -1189,7 +1189,7 @@ namespace ZLevels
             {
                 try
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (pawn.Faction == Faction.OfPlayer)
                     {
                         ZLogger.Message(pawn + " search for rest job");
@@ -1392,7 +1392,7 @@ namespace ZLevels
                 }
                 Lord lord = pawn.GetLord();
                 Building_Bed building_Bed;
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 if ((lord != null && lord.CurLordToil != null && !lord.CurLordToil.AllowRestingInBed) || pawn.IsWildMan())
                 {
                     building_Bed = null;
@@ -1450,7 +1450,7 @@ namespace ZLevels
                             return false;
                         }
                         //Map temp = null;
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        var ZTracker = ZUtils.ZTracker;
                         foreach (var map in ZTracker.GetAllMapsInClosestOrder(t.Map))
                         {
                             if (StoreUtility.TryFindBestBetterStorageFor(t, null, map, 
@@ -1503,7 +1503,7 @@ namespace ZLevels
             {
                 if (__instance.pawn.RaceProps.Humanlike)
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(__instance.pawn)
                         && ZTracker.jobTracker[__instance.pawn].activeJobs?.Count > 0 && blockTryDrop)
                     {
@@ -1521,7 +1521,7 @@ namespace ZLevels
             {
                 if (___pawn.RaceProps.Humanlike)
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
                         && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
                     {
@@ -1545,7 +1545,7 @@ namespace ZLevels
             {
                 if (___pawn.RaceProps.Humanlike)
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (___pawn.CurJob == null && ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
                         && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
                     {
@@ -1583,7 +1583,7 @@ namespace ZLevels
             {
                 ZLogger.Message(pawn + " emergency " + ___emergency);
             
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 ZTracker.ReCheckStairs();
                 ZLogger.Message(pawn + " start work search 1");
                 try
@@ -1808,7 +1808,7 @@ namespace ZLevels
             public static bool TryFindBestBetterStoreCellFor(Thing t, Pawn carrier, Map mapToSearch, StoragePriority currentPriority, Faction faction, out IntVec3 foundCell, ref Map dest, bool needAccurateResult = true)
             {
                 bool result = true;
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 List<SlotGroup> allGroupsListInPriorityOrder = new List<SlotGroup>();
                 foreach (var map in ZTracker.GetAllMaps(t.Map.Tile))
                 {
@@ -2028,7 +2028,7 @@ namespace ZLevels
                     }
 
                     bool flag = false;
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     var origMap = giver.Map;
                     var origMap2 = pawn.Map;
                     ZLogger.Message(giver + " - billGiver.Map: " + ZTracker.GetMapInfo(giver.Map));
@@ -2176,7 +2176,7 @@ namespace ZLevels
                     var oldMap = pawn.Map;
                     var oldPosition = pawn.Position;
 
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
 
                     foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
                     {
@@ -2270,7 +2270,7 @@ namespace ZLevels
 
             public static bool NoOneHasJobOn(Thing t, Pawn pawn)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 try
                 {
                     foreach (var jobPawn in ZTracker.jobTracker.Keys)
@@ -2326,7 +2326,7 @@ namespace ZLevels
                     var oldMap = pawn.Map;
                     var oldPosition = pawn.Position;
 
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
 
                     foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
                     {
@@ -2464,7 +2464,7 @@ namespace ZLevels
 
             public static bool TryFindBestBetterNonSlotGroupStorageFor(Thing t, Pawn carrier, Map map, StoragePriority currentPriority, Faction faction, out IHaulDestination haulDestination, ref Map dest, bool acceptSamePriority = false)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 List<IHaulDestination> allHaulDestinationsListInPriorityOrder = map.haulDestinationManager.AllHaulDestinationsListInPriorityOrder;
                 List<IHaulDestination> allHaulDestinations = new List<IHaulDestination>();
                 foreach (var map2 in ZTracker.GetAllMaps(map.Tile))
@@ -2609,7 +2609,7 @@ namespace ZLevels
 
             public static Job JobOnThing(WorkGiver_Refuel scanner, Pawn pawn, Thing t, bool forced = false)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 Job job = null;
                 var JobStandard = Traverse.Create(scanner).Field("JobStandard").GetValue<JobDef>();
                 var JobAtomic = Traverse.Create(scanner).Field("JobAtomic").GetValue<JobDef>();
@@ -2733,7 +2733,7 @@ namespace ZLevels
                 bool prioritized;
                 bool allowUnreachable;
                 Danger maxPathDanger;
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 var entryPoints = new Dictionary<Map, IntVec3>();
                 for (int j = 0; j < list.Count; j++)
                 {

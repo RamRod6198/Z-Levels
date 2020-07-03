@@ -79,7 +79,7 @@ namespace ZLevels
                 Pawn pawn2 = GridsUtility.GetThingList(IntVec3.FromVector3(clickPos), pawn.Map)
                     .FirstOrDefault((Thing x) => x is Pawn) as Pawn;
                 var mapComp = pawn.Map.GetComponent<MapComponentZLevel>();
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
 
                 if (pawn2 != null && ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Count > 1)
                 {
@@ -107,7 +107,7 @@ namespace ZLevels
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Capture".Translate
                     (victim.LabelCap, victim), delegate ()
                     {
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        var ZTracker = ZUtils.ZTracker;
                         var oldMap = pawn.Map;
                         var oldPosition1 = pawn.Position;
                         var oldPosition2 = victim.Position;
@@ -225,7 +225,7 @@ namespace ZLevels
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Rescue".Translate
                     (victim.LabelCap, victim), delegate ()
                     {
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        var ZTracker = ZUtils.ZTracker;
                         var oldMap = pawn.Map;
                         var oldPosition1 = pawn.Position;
                         var oldPosition2 = victim.Position;
@@ -358,7 +358,7 @@ namespace ZLevels
         {
             public static void Postfix(IntVec3 clickCell, Pawn pawn, ref List<FloatMenuOption> opts, bool drafted, FloatMenuOption[] ___equivalenceGroupTempStorage)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 if (pawn.thinker.TryGetMainTreeThinkNode<JobGiver_Work>() != null)
                 {
                     foreach (Thing item in pawn.Map.thingGrid.ThingsAt(clickCell))

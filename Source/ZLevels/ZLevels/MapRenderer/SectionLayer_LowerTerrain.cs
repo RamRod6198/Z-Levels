@@ -34,7 +34,7 @@ namespace ZLevels
 
         public override void Regenerate()
         {
-            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            var ZTracker = ZUtils.ZTracker;
             int curLevel = ZTracker.GetZIndexFor(base.Map);
             base.ClearSubMeshes(MeshParts.All);
             foreach (var map in ZTracker.GetAllMaps(base.Map.Tile)

@@ -15,7 +15,7 @@ namespace ZLevels
 		public static void DynamicDrawManagerPostfix(DynamicDrawManager __instance)
 		{
 			Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-			var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+			var ZTracker = ZUtils.ZTracker;
 			foreach (var map2 in ZTracker.GetAllMaps(map.Tile)
 					.OrderBy(x => ZTracker.GetZIndexFor(x)))
 			{

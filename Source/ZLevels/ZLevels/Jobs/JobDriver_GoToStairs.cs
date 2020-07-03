@@ -25,7 +25,7 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     Pawn pawn = GetActor();
                     if (TargetA.Thing is Building_StairsUp stairsUp)
                     {

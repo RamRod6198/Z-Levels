@@ -343,6 +343,7 @@
     <Compile Include="Map\MapComponentZLevel.cs" />
     <Compile Include="Map\MapParent_ZLevel.cs" />
     <Compile Include="Map\MapRemover.cs" />
+    <Compile Include="ZUtils.cs" />
     <Compile Include="PowerTransfer\CompPowerZTransmitter.cs" />
     <Compile Include="PowerTransfer\CompProperties_PowerZTransmitter.cs" />
     <Compile Include="PowerTransfer\Building_PowerTransmitter.cs" />

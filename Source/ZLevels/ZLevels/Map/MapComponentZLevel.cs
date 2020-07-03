@@ -67,7 +67,7 @@ namespace ZLevels
                 }
             }
 
-            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            var ZTracker = ZUtils.ZTracker;
             if (ZTracker.ZLevelsTracker == null)
             {
                 ZTracker.ZLevelsTracker = new Dictionary<int, ZLevelData>();
