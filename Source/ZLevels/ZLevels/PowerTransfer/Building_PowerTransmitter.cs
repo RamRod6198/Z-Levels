@@ -131,7 +131,7 @@ namespace ZLevels
                         {
                             foreach (var t in pos.GetThingList(upperMap))
                             {
-                                Log.Message("Power candidate: " + t);
+                                //Log.Message("Power candidate: " + t);
                                 if (t.TryGetComp<CompPowerTransmitter>() != null)
                                 {
                                     upperTransmitter = t;

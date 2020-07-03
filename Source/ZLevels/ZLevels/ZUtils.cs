@@ -80,10 +80,16 @@ namespace ZLevels
                 }
                 else if (otherMap == oldMap)
                 {
-                    Traverse.Create(pawn).Field("mapIndexOrState")
-                        .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                    Traverse.Create(pawn).Field("positionInt")
-                        .SetValue(oldPosition);
+                    if (pawn.Map != oldMap)
+                    {
+                        Traverse.Create(pawn).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                    }
+                    if (pawn.Position != oldPosition)
+                    {
+                        Traverse.Create(pawn).Field("positionInt")
+                            .SetValue(oldPosition);
+                    }
                     ZLogger.Message("4 SetPosition for " + pawn + " to " + oldPosition);
                     ZLogger.Message("return " + otherMap);
                     yield return otherMap;
