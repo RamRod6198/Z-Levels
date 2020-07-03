@@ -304,8 +304,10 @@
     <Compile Include="HarmonyPatches\CombatPatches.cs" />
     <Compile Include="HarmonyPatches\ResourceCounterPatch.cs" />
     <Compile Include="HarmonyPatches\SkyfallerPatches.cs" />
-    <Compile Include="Jobs\JobDriver_GoToThingMap.cs" />
-    <Compile Include="Jobs\JobDriver_ZHaulToCell.cs" />
+    <Compile Include="Jobs\JobDriver_HaulThingToDest.cs" />
+    <Compile Include="Jobs\JobDriver_GoToMap.cs" />
+    <Compile Include="Jobs\Toils_ZLevels.cs" />
+    <Compile Include="Jobs\JobDriver_HaulThingToDestAndToCell.cs" />
     <Compile Include="MapRenderer\PawnRendererScaled.cs" />
     <Compile Include="MapRenderer\RenderPatches.cs" />
     <Compile Include="MapRenderer\SectionLayer_LowerFogOfWar.cs" />
@@ -337,11 +339,11 @@
     <Compile Include="HarmonyPatches\AnimalPatches.cs" />
     <Compile Include="Map\InfestationData.cs" />
     <Compile Include="Jobs\JobDriver_GoToStairs.cs" />
-    <Compile Include="Jobs\JobDriver_HaulThingToStairs.cs" />
     <Compile Include="JobTracker.cs" />
     <Compile Include="Map\MapComponentZLevel.cs" />
     <Compile Include="Map\MapParent_ZLevel.cs" />
     <Compile Include="Map\MapRemover.cs" />
+    <Compile Include="ZUtils.cs" />
     <Compile Include="PowerTransfer\CompPowerZTransmitter.cs" />
     <Compile Include="PowerTransfer\CompProperties_PowerZTransmitter.cs" />
     <Compile Include="PowerTransfer\Building_PowerTransmitter.cs" />

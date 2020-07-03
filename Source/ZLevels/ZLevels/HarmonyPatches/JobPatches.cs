@@ -18,10 +18,8 @@ using Verse.AI.Group;
 namespace ZLevels
 {
     [StaticConstructorOnStartup]
-    public static class JobManagerPatches
+    public static class JobPatches
     {
-        public static bool manualDespawn = false;
-
         //static JobManagerPatches()
         //{
         //    MethodInfo method = typeof(JobManagerPatches).GetMethod("LogScanner");
@@ -541,7 +539,7 @@ namespace ZLevels
                 Pawn actor = __instance.pawn;
                 Thing thing = null;
                 IntVec3 intVec = IntVec3.Invalid;
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 var oldMap = actor.Map;
                 bool select = false;
                 if (Find.Selector.SelectedObjects.Contains(actor)) select = true;
@@ -639,14 +637,14 @@ namespace ZLevels
                 {
                     if (!IngestibleSource.def.IsDrug)
                     {
-                        list.InsertRange(list.Count - 2, JobDriver_GoToThingMap.Toils_GoToThingMap(__instance.GetActor()
-                            , null, thing, __instance));
+                        list.InsertRange(list.Count - 2, Toils_ZLevels.GoToMap(__instance.GetActor()
+                            , thing.Map, __instance));
                         ZLogger.Message("Adding: " + thing + " in " + actor);
                     }
                     else
                     {
-                        list.InsertRange(list.Count - 1, JobDriver_GoToThingMap.Toils_GoToThingMap(__instance.GetActor()
-                            , null, thing, __instance));
+                        list.InsertRange(list.Count - 1, Toils_ZLevels.GoToMap(__instance.GetActor()
+                            , thing.Map, __instance));
                         ZLogger.Message("Adding 2: " + thing + " in " + actor);
                     }
                 }
@@ -665,7 +663,7 @@ namespace ZLevels
                 {
                     try
                     {
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        var ZTracker = ZUtils.ZTracker;
                         if (ZTracker.jobTracker == null)
                         {
                             ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
@@ -753,7 +751,6 @@ namespace ZLevels
                                 {
                                     ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
                                     stairs = ZTracker.stairsUp[lowerMap];
-                                    //stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
                                 }
                                 else
                                 {
@@ -767,7 +764,6 @@ namespace ZLevels
                                 {
                                     ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
                                     stairs = ZTracker.stairsDown[upperMap];
-                                    //stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
                                 }
                                 else
                                 {
@@ -779,11 +775,6 @@ namespace ZLevels
                             {
                                 var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
                                 var position = selectedStairs.Position;
-
-                                //JobManagerPatches.manualDespawn = true;
-                                //pawn.DeSpawn();
-                                //JobManagerPatches.manualDespawn = false;
-                                //GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
 
                                 Traverse.Create(pawn).Field("mapIndexOrState")
                                     .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
@@ -799,7 +790,6 @@ namespace ZLevels
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(oldPosition);
                                 ZLogger.Message("4 SetPosition for " + pawn + " to " + oldPosition);
-
                             }
 
                             result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap, maxLevelPercentage, minCategory);
@@ -815,12 +805,7 @@ namespace ZLevels
                                     .SetValue(oldPosition);
                                 ZLogger.Message("3 SetPosition for " + pawn + " to " + oldPosition);
 
-                                //JobManagerPatches.manualDespawn = true;
-                                //pawn.DeSpawn();
-                                //JobManagerPatches.manualDespawn = false;
-                                //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-
-                                ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result, null);
+                                ZTracker.BuildJobListFor(pawn, otherMap, result);
                                 __result = ZTracker.jobTracker[pawn].activeJobs[0];
                                 ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                 break;
@@ -834,18 +819,7 @@ namespace ZLevels
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
                             ZLogger.Message("19 SetPosition for " + pawn + " to " + oldPosition);
-
-
-                            //JobManagerPatches.manualDespawn = true;
-                            //    pawn.DeSpawn();
-                            //    JobManagerPatches.manualDespawn = false;
-                            //    GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
                         }
-                        try
-                        {
-                            ZTracker.jobTracker[pawn].lastTickFood = Find.TickManager.TicksGame;
-                        }
-                        catch { }
                         if (select) Find.Selector.Select(pawn);
                         return false;
                     }
@@ -926,7 +900,7 @@ namespace ZLevels
             {
                 try
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     try
                     {
                         //    if (pawn.jobs.jobQueue.Count > 0)
@@ -1038,7 +1012,7 @@ namespace ZLevels
                                     {
                                         ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                                     }
-                                    ZTracker.ResetJobTrackerFor(pawn);
+                                    ZTracker.ResetJobs(pawn);
 
                                 }
                             }
@@ -1052,12 +1026,6 @@ namespace ZLevels
                     {
                         ZTracker.jobTracker[pawn] = new JobTracker();
                     }
-                    //if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickJoy < 200)
-                    //// minimal job interval check per pawn is 200 ticks
-                    //{
-                    //    ZLogger.Message(pawn + " exceeded joy tick limit");
-                    //    return;
-                    //}
 
                     Job result = null;
                     var oldMap = pawn.Map;
@@ -1085,7 +1053,6 @@ namespace ZLevels
                             {
                                 //ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
                                 stairs = ZTracker.stairsUp[lowerMap];
-                                //stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
                             }
                             else
                             {
@@ -1099,7 +1066,6 @@ namespace ZLevels
                             {
                                 //ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
                                 stairs = ZTracker.stairsDown[upperMap];
-                                //stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
                             }
                             else
                             {
@@ -1110,15 +1076,12 @@ namespace ZLevels
                         if (stairs != null && stairs.Count() > 0)
                         {
                             var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                            //var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
                             var position = selectedStairs.Position;
-
                             Traverse.Create(pawn).Field("mapIndexOrState")
                                 .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(position);
                             ZLogger.Message("5 SetPosition for " + pawn + " to " + position);
-
                         }
                         else if (pawn.Map != oldMap && otherMap == oldMap)
                         {
@@ -1135,16 +1098,6 @@ namespace ZLevels
                             ZLogger.Message(pawn + " got joy job " + result + " - map: "
                                 + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
                             jobList[result] = otherMap;
-
-                            //JobManagerPatches.manualDespawn = true;
-                            //pawn.DeSpawn();
-                            //JobManagerPatches.manualDespawn = false;
-                            //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-
-                            //ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result, null);
-                            //__result = ZTracker.jobTracker[pawn].activeJobs[0];
-                            //ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-                            //break;
                         }
                     }
 
@@ -1155,19 +1108,13 @@ namespace ZLevels
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
                         ZLogger.Message("7 SetPosition for " + pawn + " to " + oldPosition);
-
-
-                        //JobManagerPatches.manualDespawn = true;
-                        //pawn.DeSpawn();
-                        //JobManagerPatches.manualDespawn = false;
-                        //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
                     }
 
                     if (jobList.Count > 0)
                     {
                         //var job = jobList.MaxBy(j => j.Key.def.joyGainRate);
                         var job = jobList.RandomElement();
-                        ZTracker.BuildJobListFor(pawn, oldMap, job.Value, job.Key, null);
+                        ZTracker.BuildJobListFor(pawn, job.Value, job.Key);
                         __result = ZTracker.jobTracker[pawn].activeJobs[0];
                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                     }
@@ -1175,11 +1122,6 @@ namespace ZLevels
                     {
                         ZLogger.Message(pawn + " cant find joy job");
                     }
-                    try
-                    {
-                        ZTracker.jobTracker[pawn].lastTickJoy = Find.TickManager.TicksGame;
-                    }
-                    catch { }
 
                     if (select) Find.Selector.Select(pawn);
 
@@ -1239,7 +1181,6 @@ namespace ZLevels
             }
         }
 
-
         [HarmonyPatch(typeof(JobGiver_GetRest), "TryGiveJob")]
         public class JobGiver_GetRestPatch
         {
@@ -1248,7 +1189,7 @@ namespace ZLevels
             {
                 try
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (pawn.Faction == Faction.OfPlayer)
                     {
                         ZLogger.Message(pawn + " search for rest job");
@@ -1314,7 +1255,7 @@ namespace ZLevels
                                         {
                                             ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                                         }
-                                        ZTracker.ResetJobTrackerFor(pawn);
+                                        ZTracker.ResetJobs(pawn);
 
                                     }
                                 }
@@ -1329,13 +1270,6 @@ namespace ZLevels
                             ZTracker.jobTracker[pawn] = new JobTracker();
                         }
 
-                        //if (pawn.needs?.rest?.CurCategory < RestCategory.VeryTired
-                        //    && Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
-                        //// minimal job interval check per pawn is 200 ticks
-                        //{
-                        //    return false;
-                        //}
-
                         Job result = null;
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
@@ -1347,12 +1281,6 @@ namespace ZLevels
 
                         foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                         {
-                            //if (pawn?.needs?.rest?.CurCategory < RestCategory.VeryTired
-                            //    && Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
-                            //{
-                            //    return false;
-                            //}
-
                             ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
 
@@ -1365,7 +1293,6 @@ namespace ZLevels
                                 {
                                     ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
                                     stairs = ZTracker.stairsUp[lowerMap];
-                                    //stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
                                 }
                                 else
                                 {
@@ -1379,7 +1306,6 @@ namespace ZLevels
                                 {
                                     ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
                                     stairs = ZTracker.stairsDown[upperMap];
-                                    //stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
                                 }
                                 else
                                 {
@@ -1387,17 +1313,9 @@ namespace ZLevels
                                 }
                             }
 
-                            //if (pawn?.needs?.rest?.CurCategory < RestCategory.VeryTired &&
-                            //    Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTickRest < 200)
-                            //// minimal job interval check per pawn is 200 ticks
-                            //{
-                            //    return false;
-                            //}
-
                             if (stairs != null && stairs.Count() > 0)
                             {
                                 var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                //var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
                                 var position = selectedStairs.Position;
 
                                 Traverse.Create(pawn).Field("mapIndexOrState")
@@ -1405,12 +1323,6 @@ namespace ZLevels
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(position);
                                 ZLogger.Message("8 SetPosition for " + pawn + " to " + position);
-
-
-                                //JobManagerPatches.manualDespawn = true;
-                                //pawn.DeSpawn();
-                                //JobManagerPatches.manualDespawn = false;
-                                //GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
                             }
                             else if (pawn.Map != oldMap && otherMap == oldMap)
                             {
@@ -1419,7 +1331,6 @@ namespace ZLevels
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(oldPosition);
                                 ZLogger.Message("2 SetPosition for " + pawn + " to " + oldPosition);
-
                             }
 
                             result = JobGiver_GetRestPatch.TryGiveJob(pawn, minCategory, maxLevelPercentage);
@@ -1434,12 +1345,8 @@ namespace ZLevels
                                     Traverse.Create(pawn).Field("positionInt")
                                         .SetValue(oldPosition);
                                     ZLogger.Message("1 SetPosition for " + pawn + " to " + oldPosition);
-                                    //JobManagerPatches.manualDespawn = true;
-                                    //pawn.DeSpawn();
-                                    //JobManagerPatches.manualDespawn = false;
-                                    //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
                                 }
-                                ZTracker.BuildJobListFor(pawn, oldMap, result.targetA.Thing.Map, result, null);
+                                ZTracker.BuildJobListFor(pawn, result.targetA.Thing.Map, result);
                                 __result = ZTracker.jobTracker[pawn].activeJobs[0];
                                 ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                 break;
@@ -1453,12 +1360,6 @@ namespace ZLevels
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
                             ZLogger.Message("9 SetPosition for " + pawn + " to " + oldPosition);
-
-
-                            //JobManagerPatches.manualDespawn = true;
-                            //pawn.DeSpawn();
-                            //JobManagerPatches.manualDespawn = false;
-                            //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
                         }
                         if (result.targetA.Thing == null)
                         {
@@ -1491,7 +1392,7 @@ namespace ZLevels
                 }
                 Lord lord = pawn.GetLord();
                 Building_Bed building_Bed;
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 if ((lord != null && lord.CurLordToil != null && !lord.CurLordToil.AllowRestingInBed) || pawn.IsWildMan())
                 {
                     building_Bed = null;
@@ -1531,28 +1432,158 @@ namespace ZLevels
             }
         }
 
+        [HarmonyPatch(typeof(StoreUtility), "IsInValidBestStorage")]
+        public static class IsInValidBestStoragePatch
+        {
+            //public static bool CheckOtherMaps = false;
+            private static bool Prefix(Thing t, bool __result)
+            {
+                //Log.Message("Checking: " + t, true);
+                //if (CheckOtherMaps)
+                //{
+                    try
+                    {
+                        IHaulDestination haulDestination = StoreUtility.CurrentHaulDestinationOf(t);
+                        if (haulDestination == null || !haulDestination.Accepts(t))
+                        {
+                            __result = false;
+                            return false;
+                        }
+                        //Map temp = null;
+                        var ZTracker = ZUtils.ZTracker;
+                        foreach (var map in ZTracker.GetAllMapsInClosestOrder(t.Map))
+                        {
+                            if (StoreUtility.TryFindBestBetterStorageFor(t, null, map, 
+                                haulDestination.GetStoreSettings().Priority, Faction.OfPlayer, 
+                                out IntVec3 _, out IHaulDestination _, needAccurateResult: false))
+                            {
+                                __result = false;
+                                return false;
+                            }
+                        }
+                        //if (TryIssueJobPackagePatch.TryFindBestBetterStorageFor(t, null, t.Map,
+                        //    haulDestination.GetStoreSettings().Priority, Faction.OfPlayer,
+                        //    out IntVec3 _, out IHaulDestination _, ref temp, needAccurateResult: false))
+                        //{
+                        //    __result = false;
+                        //    return false;
+                        //}
+                        __result = true;
+                        //CheckOtherMaps = false;
+                        return false;
+                    }
+                    catch
+                    {
+                        return true;
+                    }
+                    return true;
+        
+                //}
+            }
+        }
+
+        [HarmonyPatch(typeof(Pawn_CarryTracker), "TryDropCarriedThing")]
+        [HarmonyPatch(new Type[]
+        {
+            typeof(IntVec3),
+            typeof(ThingPlaceMode),
+            typeof(Thing),
+            typeof(Action<Thing, int>)
+        }, new ArgumentType[]
+        {
+             ArgumentType.Normal,
+             ArgumentType.Normal,
+             ArgumentType.Out,
+             ArgumentType.Normal
+        })]
+        public static class TryDropCarriedThingPatch
+        {
+            public static bool blockTryDrop = false;
+            private static bool Prefix(Pawn_CarryTracker __instance, IntVec3 dropLoc, ThingPlaceMode mode, Thing resultingThing, Action<Thing, int> placedAction = null)
+            {
+                if (__instance.pawn.RaceProps.Humanlike)
+                {
+                    var ZTracker = ZUtils.ZTracker;
+                    if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(__instance.pawn)
+                        && ZTracker.jobTracker[__instance.pawn].activeJobs?.Count > 0 && blockTryDrop)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Pawn_JobTracker), "EndCurrentJob")]
+        public class EndCurrentJobPatch
+        {
+            private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
+            {
+                if (___pawn.RaceProps.Humanlike)
+                {
+                    var ZTracker = ZUtils.ZTracker;
+                    if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
+                        && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
+                    {
+                        startNewJob = false;
+                        TryDropCarriedThingPatch.blockTryDrop = true;
+                    }
+                    try
+                    {
+                        //ZLogger.Message("3 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
+                        ZLogger.Message(___pawn + " ends " + __instance.curJob + " - " + startNewJob);
+                    }
+                    catch
+                    {
+
+                    }
+
+                }
+            }
+
+            private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
+            {
+                if (___pawn.RaceProps.Humanlike)
+                {
+                    var ZTracker = ZUtils.ZTracker;
+                    if (___pawn.CurJob == null && ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
+                        && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
+                    {
+                        TryDropCarriedThingPatch.blockTryDrop = false;
+                        try
+                        {
+                            ZLogger.Message(___pawn + " taking first job 1");
+                            ZLogger.Message("POSTFIX 0: " + ___pawn.CurJob);
+                            foreach (var job in ___pawn.jobs.jobQueue)
+                            {
+                                ZLogger.Message("POSTFIX 1: " + job.job);
+                            }
+                            foreach (var job in ZTracker.jobTracker[___pawn].activeJobs)
+                            {
+                                ZLogger.Message("POSTFIX 2: " + job);
+                            }
+                            ZLogger.Message("POSTFIX 3: " + ZTracker.jobTracker[___pawn].activeJobs[0]);
+                            ZLogger.Message("4 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
+                            ZTracker.TryTakeFirstJob(___pawn);
+                        }
+                        catch
+                        {
+
+                        }
+
+                    }
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(JobGiver_Work), "TryIssueJobPackage")]
         public class TryIssueJobPackagePatch
         {
             private static bool Prefix(JobGiver_Work __instance, bool ___emergency, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
             {
-                ZLogger.Message(pawn + " emergency " + ___emergency);
-
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                try
-                {
-                    ZLogger.Message("--------------------------");
-                    for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                    {
-                        var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
-                        ZLogger.Message("45 job.targetQueueB: " + target.Thing);
-                        ZLogger.Message("45 job.targetQueueB.Map: " + target.Thing.Map);
-                        ZLogger.Message("45 job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                        ZLogger.Message("45 job.targetQueueB.countQueue: " + ZTracker.jobTracker[pawn].mainJob.countQueue[i]);
-                    }
-                }
-                catch { }
-
+                ZLogger.Message(pawn + " emergency " + ___emergency);        
+                var ZTracker = ZUtils.ZTracker;
+                ZTracker.ReCheckStairs();
                 ZLogger.Message(pawn + " start work search 1");
                 try
                 {
@@ -1568,32 +1599,13 @@ namespace ZLevels
                 catch { }
                 ZLogger.Message(pawn + " start work search 2");
                 ZLogger.Message("=============================");
-
-                //JobManagerPatches.searchJobs = false;
                 try
                 {
-
+            
                     if (ZTracker.jobTracker == null)
                     {
                         ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
                     }
-                    //try
-                    //{
-                    //    if (ZTracker.jobTracker.ContainsKey(pawn) && ZTracker.jobTracker[pawn]?.activeJobs?.Count() == 0
-                    //        && (pawn.needs.food.CurCategory >= HungerCategory.UrgentlyHungry
-                    //        || pawn.needs.joy.CurCategory < JoyCategory.Low
-                    //        || pawn.needs.rest.CurCategory >= RestCategory.VeryTired))
-                    //    {
-                    //        ZLogger.Message(pawn + " refusing to work because low needs");
-                    //        ZLogger.Message("pawn.needs.food.CurCategory: " + pawn.needs.food.CurCategory);
-                    //        ZLogger.Message("pawn.needs.joy.CurCategory: " + pawn.needs.joy.CurCategory);
-                    //        ZLogger.Message("pawn.needs.rest.CurCategory: " + pawn.needs.rest.CurCategory);
-                    //        __result = ThinkResult.NoJob;
-                    //        return false;
-                    //    }
-                    //}
-                    //catch { };
-
                     if (ZTracker.jobTracker.ContainsKey(pawn))
                     {
                         try
@@ -1627,12 +1639,12 @@ namespace ZLevels
                                         {
                                             ZLogger.Message(pawn + " carrying " + pawn?.carryTracker?.CarriedThing);
                                         }
-
+            
                                         //if (ZTracker.jobTracker[pawn].activeJobs[0] == ZTracker.jobTracker[pawn].mainJob)
                                         //{
                                         //    ZTracker.FixMainJobIfThereIsProblems(pawn);
                                         //}
-
+            
                                         ZLogger.Message("--------------------------");
                                         try
                                         {
@@ -1648,9 +1660,9 @@ namespace ZLevels
                                         catch { };
                                         __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
                                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-
+            
                                         //pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
-
+            
                                         return false;
                                     }
                                     else
@@ -1665,16 +1677,16 @@ namespace ZLevels
                                     //
                                     //ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
                                     //ZLogger.Message(pawn + " - ZTracker.jobTracker[pawn].activeJobs[0]: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-
+            
                                     //foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
                                     //{
                                     //    ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                                     //}
-
+            
                                     //pawn.jobs.jobQueue.EnqueueFirst(ZTracker.jobTracker[pawn].activeJobs[0]);
                                     //ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                     ZLogger.Message(pawn + " - return 3");
-
+            
                                     return false;
                                 }
                                 else if (pawn.jobs.curJob != ZTracker.jobTracker[pawn].activeJobs[0])
@@ -1690,7 +1702,7 @@ namespace ZLevels
                                     {
                                         ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                                     }
-                                    ZTracker.ResetJobTrackerFor(pawn);
+                                    ZTracker.ResetJobs(pawn);
                                 }
                             }
                             else
@@ -1712,55 +1724,39 @@ namespace ZLevels
                     var oldPosition = pawn.Position;
                     bool select = false;
                     if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-
+            
                     Map dest = null;
                     result = TryIssueJobPackage(pawn, jobParams, __instance, ___emergency, ref dest, oldMap, oldPosition);
                     if (result.Job != null)
                     {
-
                         if (pawn.Map != oldMap)
                         {
-                            //JobManagerPatches.manualDespawn = true;
-                            //pawn.DeSpawn();
-                            //JobManagerPatches.manualDespawn = false;
-                            //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-
                             Traverse.Create(pawn).Field("mapIndexOrState")
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
                             ZLogger.Message("10 SetPosition for " + pawn + " to " + oldPosition);
-
-                            //pawn.Position = oldPosition;
-
                         }
                         ZLogger.Message(pawn + " got job " + result + " - map: "
                             + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
-
-                        //pawn.ClearReservationsForJob(result.Job);
-
                         if (dest != null)
                         {
-                            ZTracker.BuildJobListFor(pawn, oldMap, dest, result.Job, null);
+                            ZTracker.BuildJobListFor(pawn, dest, result.Job);
                         }
                         else
                         {
-                            ZTracker.BuildJobListFor(pawn, oldMap, oldMap, result.Job, null);
-                        }
-                        foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
-                        {
-                            ZLogger.Message("Active job: " + job);
+                            ZTracker.BuildJobListFor(pawn, oldMap, result.Job);
                         }
                         __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-
+            
                     }
                     else
                     {
                         __result = ThinkResult.NoJob;
                         ZLogger.Message(pawn + " failed to find job");
                     }
-
+            
                     if (pawn.Map != oldMap)
                     {
                         Traverse.Create(pawn).Field("mapIndexOrState")
@@ -1768,24 +1764,14 @@ namespace ZLevels
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
                         ZLogger.Message("11 SetPosition for " + pawn + " to " + oldPosition);
-
-
-                        //pawn.Position = oldPosition;
-
-                        //JobManagerPatches.manualDespawn = true;
-                        //pawn.DeSpawn();
-                        //JobManagerPatches.manualDespawn = false;
-                        //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
                     }
                     if (pawn.Position != oldPosition)
                     {
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
                         ZLogger.Message("12 SetPosition for " + pawn + " to " + oldPosition);
-
-                        //pawn.Position = oldPosition;
                     }
-
+            
                     if (select) Find.Selector.Select(pawn);
                     return false;
                 }
@@ -1806,9 +1792,9 @@ namespace ZLevels
             public static bool TryFindBestBetterStoreCellFor(Thing t, Pawn carrier, Map mapToSearch, StoragePriority currentPriority, Faction faction, out IntVec3 foundCell, ref Map dest, bool needAccurateResult = true)
             {
                 bool result = true;
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 List<SlotGroup> allGroupsListInPriorityOrder = new List<SlotGroup>();
-                foreach (var map in ZTracker.GetAllMaps(carrier.Map.Tile))
+                foreach (var map in ZTracker.GetAllMaps(t.Map.Tile))
                 {
                     allGroupsListInPriorityOrder.AddRange(map.haulDestinationManager.AllGroupsListInPriorityOrder);
                 }
@@ -1825,17 +1811,17 @@ namespace ZLevels
 
                 foreach (var slotGroup in allGroupsListInPriorityOrder.OrderByDescending(x => x.Settings.Priority))
                 {
-                    ZLogger.Message("Checking on : " + t + " - " + ZTracker.GetMapInfo(t.Map) + " for " + carrier + " - " + carrier.Map + " - " + slotGroup.parent
-                        + " - priority: " + slotGroup.Settings.Priority + " - " + slotGroup.parent.Map);
+                    //ZLogger.Message("Checking on : " + t + " - " + ZTracker.GetMapInfo(t.Map) + " for " + carrier + " - " + carrier?.Map + " - " + slotGroup.parent
+                    //    + " - priority: " + slotGroup.Settings.Priority + " - " + slotGroup.parent.Map);
                     StoragePriority priority = slotGroup.Settings.Priority;
                     if (priority < storagePriority || priority <= currentPriority)
                     {
-                        ZLogger.Message("Break on - " + slotGroup.parent + " - priority: " + slotGroup.Settings.Priority + " - " + slotGroup.parent.Map);
+                        //ZLogger.Message("Break on - " + slotGroup.parent + " - priority: " + slotGroup.Settings.Priority + " - " + slotGroup.parent.Map);
                         break;
                     }
                     TryIssueJobPackagePatch.TryFindBestBetterStoreCellForWorker
                     (t, carrier, mapToSearch, faction, slotGroup, needAccurateResult,
-                    ref invalid, ref num, ref storagePriority, slotGroup.parent.Map, ref dest);
+                    ref invalid, ref num, ref storagePriority, ref dest);
                 }
                 if (!invalid.IsValid)
                 {
@@ -1843,11 +1829,10 @@ namespace ZLevels
                     result = false;
                 }
                 foundCell = invalid;
-
                 return result;
             }
 
-            private static void TryFindBestBetterStoreCellForWorker(Thing t, Pawn carrier, Map map, Faction faction, SlotGroup slotGroup, bool needAccurateResult, ref IntVec3 closestSlot, ref float closestDistSquared, ref StoragePriority foundPriority, Map oldMap, ref Map dest)
+            private static void TryFindBestBetterStoreCellForWorker(Thing t, Pawn carrier, Map map, Faction faction, SlotGroup slotGroup, bool needAccurateResult, ref IntVec3 closestSlot, ref float closestDistSquared, ref StoragePriority foundPriority, ref Map dest)
             {
                 if (slotGroup == null)
                 {
@@ -1860,11 +1845,11 @@ namespace ZLevels
 
                 if (slotGroup.HeldThings.Contains(t))
                 {
-                    ZLogger.Message(t + " already in stockpile " + slotGroup.parent);
+                    //ZLogger.Message(t + " already in stockpile " + slotGroup.parent);
                     return;
                 }
-                ZLogger.Message(slotGroup.parent + " - priority: " + slotGroup.Settings.Priority
-                    + " - " + slotGroup.parent.Map + " accepts " + t + " - " + t.Map, true);
+                //ZLogger.Message(slotGroup.parent + " - priority: " + slotGroup.Settings.Priority
+                //    + " - " + slotGroup.parent.Map + " accepts " + t + " - " + t.Map, true);
 
                 IntVec3 a = t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld;
                 List<IntVec3> cellsList = slotGroup.CellsList;
@@ -1883,16 +1868,16 @@ namespace ZLevels
                     IntVec3 intVec = cellsList[i];
                     //ZLogger.Message("Checking " + intVec + " in " + slotGroup + " in " + slotGroup.parent.Map);
                     float num2 = (float)(a - intVec).LengthHorizontalSquared;
-                    if (num2 <= closestDistSquared && IsGoodStoreCell(intVec, slotGroup.parent.Map, t, carrier, faction, oldMap))
+                    if (num2 <= closestDistSquared && IsGoodStoreCell(intVec, slotGroup.parent.Map, t, carrier, faction))
                     {
                         closestSlot = intVec;
                         dest = slotGroup.parent.Map;
                         closestDistSquared = num2;
                         foundPriority = slotGroup.Settings.Priority;
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                        ZLogger.Message("RESULT: " + carrier + " - " + slotGroup.parent + " - priority: "
-                            + slotGroup.Settings.Priority + " - " + ZTracker.GetMapInfo(slotGroup.parent.Map)
-                            + " accepts " + t + " in " + ZTracker.GetMapInfo(dest), true);
+                        //var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        //ZLogger.Message("RESULT: " + carrier + " - " + slotGroup.parent + " - priority: "
+                        //    + slotGroup.Settings.Priority + " - " + ZTracker.GetMapInfo(slotGroup.parent.Map)
+                        //    + " accepts " + t + " in " + ZTracker.GetMapInfo(dest), true);
                         if (i >= num)
                         {
                             break;
@@ -1901,7 +1886,7 @@ namespace ZLevels
                 }
             }
 
-            public static bool IsGoodStoreCell(IntVec3 c, Map map, Thing t, Pawn carrier, Faction faction, Map oldMap)
+            public static bool IsGoodStoreCell(IntVec3 c, Map map, Thing t, Pawn carrier, Faction faction)
             {
                 if (carrier != null && c.IsForbidden(carrier))
                 {
@@ -2027,7 +2012,7 @@ namespace ZLevels
                     }
 
                     bool flag = false;
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     var origMap = giver.Map;
                     var origMap2 = pawn.Map;
                     ZLogger.Message(giver + " - billGiver.Map: " + ZTracker.GetMapInfo(giver.Map));
@@ -2175,7 +2160,7 @@ namespace ZLevels
                     var oldMap = pawn.Map;
                     var oldPosition = pawn.Position;
 
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
 
                     foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
                     {
@@ -2184,9 +2169,35 @@ namespace ZLevels
                             var stairs = otherMap.listerThings.AllThings.Where(x => x is Building_StairsDown
                             || x is Building_StairsUp).ToList();
 
+                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+                            {
+                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                                if (lowerMap != null)
+                                {
+                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = ZTracker.stairsUp[lowerMap];
+                                }
+                                else
+                                {
+                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
+                                }
+                            }
+                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                            {
+                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                                if (upperMap != null)
+                                {
+                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = ZTracker.stairsDown[upperMap];
+                                }
+                                else
+                                {
+                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                                }
+                            }
+
                             if (stairs != null && stairs.Count() > 0)
                             {
-                                //var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
                                 var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
                                 var position = selectedStairs.Position;
 
@@ -2194,20 +2205,22 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(position);
-                                ZLogger.Message("13 SetPosition for " + pawn + " to " + position);
+                                ZLogger.Message("19 SetPosition for " + pawn + " to " + position);
 
-                                //pawn.Position = position;
+                            }
+                            else if (pawn.Map != oldMap && otherMap == oldMap)
+                            {
+                                Traverse.Create(pawn).Field("mapIndexOrState")
+                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                                Traverse.Create(pawn).Field("positionInt")
+                                    .SetValue(oldPosition);
+                                ZLogger.Message("4 SetPosition for " + pawn + " to " + oldPosition);
+                            }
 
-                                //JobManagerPatches.manualDespawn = true;
-                                //pawn.DeSpawn();
-                                //JobManagerPatches.manualDespawn = false;
-                                //GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-
-                                job2 = method.GetValue<Job>();
-                                if (job2 != null)
-                                {
-                                    break;
-                                }
+                            job2 = method.GetValue<Job>();
+                            if (job2 != null)
+                            {
+                                break;
                             }
                         }
                     }
@@ -2218,14 +2231,6 @@ namespace ZLevels
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
                         ZLogger.Message("14 SetPosition for " + pawn + " to " + oldPosition);
-
-                        //pawn.Position = oldPosition;
-
-                        //JobManagerPatches.manualDespawn = true;
-                        //pawn.DeSpawn();
-                        //JobManagerPatches.manualDespawn = false;
-                        //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-
                     }
                 }
 
@@ -2249,7 +2254,7 @@ namespace ZLevels
 
             public static bool NoOneHasJobOn(Thing t, Pawn pawn)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 try
                 {
                     foreach (var jobPawn in ZTracker.jobTracker.Keys)
@@ -2305,7 +2310,7 @@ namespace ZLevels
                     var oldMap = pawn.Map;
                     var oldPosition = pawn.Position;
 
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
 
                     foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
                     {
@@ -2316,7 +2321,6 @@ namespace ZLevels
 
                             if (stairs != null && stairs.Count() > 0)
                             {
-                                //var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
                                 var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
                                 var position = selectedStairs.Position;
 
@@ -2325,13 +2329,6 @@ namespace ZLevels
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(position);
                                 ZLogger.Message("15 SetPosition for " + pawn + " to " + position);
-
-                                //pawn.Position = position;
-
-                                //JobManagerPatches.manualDespawn = true;
-                                //pawn.DeSpawn();
-                                //JobManagerPatches.manualDespawn = false;
-                                //GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
 
                                 job2 = method.GetValue<Job>();
                                 if (job2 != null)
@@ -2348,27 +2345,9 @@ namespace ZLevels
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
                         ZLogger.Message("16 SetPosition for " + pawn + " to " + oldPosition);
-
-                        //pawn.Position = oldPosition;
-
-                        //JobManagerPatches.manualDespawn = true;
-                        //pawn.DeSpawn();
-                        //JobManagerPatches.manualDespawn = false;
-                        //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-
                     }
                 }
-
-                if (job2 != null)
-                {
-                    return job2;
-                }
-                else
-                {
-                    return null;
-                }
-
-                //return ResourceDeliverJobFor(pawn, frame);
+                return job2;
             }
 
             public static bool PawnCanAutomaticallyHaulFast(Pawn p, Thing t, bool forced)
@@ -2469,7 +2448,7 @@ namespace ZLevels
 
             public static bool TryFindBestBetterNonSlotGroupStorageFor(Thing t, Pawn carrier, Map map, StoragePriority currentPriority, Faction faction, out IHaulDestination haulDestination, ref Map dest, bool acceptSamePriority = false)
             {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 List<IHaulDestination> allHaulDestinationsListInPriorityOrder = map.haulDestinationManager.AllHaulDestinationsListInPriorityOrder;
                 List<IHaulDestination> allHaulDestinations = new List<IHaulDestination>();
                 foreach (var map2 in ZTracker.GetAllMaps(map.Tile))
@@ -2482,28 +2461,21 @@ namespace ZLevels
                 haulDestination = null;
                 foreach (var container in allHaulDestinations.OrderByDescending(x => x.GetStoreSettings().Priority))
                 {
-                    ZLogger.Message(container + " - 1");
                     if (container is ISlotGroupParent)
                     {
                         continue;
                     }
-                    ZLogger.Message(container + " - 2");
-
                     StoragePriority priority = container.GetStoreSettings().Priority;
                     if ((int)priority < (int)storagePriority || (acceptSamePriority && (int)priority < (int)currentPriority) || (!acceptSamePriority && (int)priority <= (int)currentPriority))
                     {
                         break;
                     }
-
-                    ZLogger.Message(container + " - 3");
-
                     float num2 = intVec.DistanceToSquared(container.Position);
-                    ZLogger.Message(container + " accepts " + t + " - " + (container.Accepts(t)).ToString());
-                    ZLogger.Message("num2 > num: " + (num2 > num).ToString());
                     if (num2 > num || !container.Accepts(t))
                     {
                         continue;
                     }
+                    //ZLogger.Message(container + " accepts " + t + " - " + (container.Accepts(t)).ToString());
                     Thing thing = container as Thing;
                     if (thing != null && thing.Faction != faction)
                     {
@@ -2561,7 +2533,6 @@ namespace ZLevels
 
             public static Job HaulToCellStorageJob(Pawn p, Thing t, IntVec3 storeCell, bool fitInStoreCell)
             {
-                Map oldMap = null;
                 Job job = JobMaker.MakeJob(JobDefOf.HaulToCell, t, storeCell);
                 SlotGroup slotGroup = p.Map.haulDestinationManager.SlotGroupAt(storeCell);
                 if (slotGroup != null)
@@ -2584,7 +2555,7 @@ namespace ZLevels
                     List<IntVec3> cellsList = slotGroup.CellsList;
                     for (int i = 0; i < cellsList.Count; i++)
                     {
-                        if (IsGoodStoreCell(cellsList[i], p.Map, t, p, p.Faction, oldMap))
+                        if (IsGoodStoreCell(cellsList[i], p.Map, t, p, p.Faction))
                         {
                             Thing thing2 = p.Map.thingGrid.ThingAt(cellsList[i], t.def);
                             num = ((thing2 == null || thing2 == t) ? (num + t.def.stackLimit) :
@@ -2617,6 +2588,98 @@ namespace ZLevels
                 Job job = JobMaker.MakeJob(JobDefOf.HaulToContainer, t, container);
                 job.count = Mathf.Min(t.stackCount, thingOwner.GetCountCanAccept(t));
                 job.haulMode = HaulMode.ToContainer;
+                return job;
+            }
+            public static Job JobOnThing(WorkGiver_Refuel scanner, Pawn pawn, Thing t, bool forced = false)
+            {
+                var ZTracker = ZUtils.ZTracker;
+                Job job = null;
+                var JobStandard = Traverse.Create(scanner).Field("JobStandard").GetValue<JobDef>();
+                var JobAtomic = Traverse.Create(scanner).Field("JobAtomic").GetValue<JobDef>();
+                Map oldMap = pawn.Map;
+                IntVec3 oldPosition = pawn.Position;
+                Map oldMap2 = t.Map;
+                var entryPoints = new Dictionary<Map, IntVec3>();
+                foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(t.Map))
+                {
+                    var stairs = new List<Thing>();
+                    if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+                    {
+                        Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                        if (lowerMap != null)
+                        {
+                            //ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(lowerMap));
+                            stairs = ZTracker.stairsUp[lowerMap];
+                        }
+                        else
+                        {
+                            ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
+                        }
+                    }
+                    else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                    {
+                        Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                        if (upperMap != null)
+                        {
+                            //ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(upperMap));
+                            stairs = ZTracker.stairsDown[upperMap];
+                        }
+                        else
+                        {
+                            ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                        }
+                    }
+                    if (stairs != null && stairs.Count() > 0)
+                    {
+                        IntVec3 position = IntVec3.Invalid;
+                        if (!entryPoints.ContainsKey(otherMap))
+                        {
+
+                            var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
+                            position = selectedStairs.Position;
+                            entryPoints[otherMap] = position;
+                        }
+                        else
+                        {
+                            position = entryPoints[otherMap];
+                        }
+
+                        Traverse.Create(pawn).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
+                        Traverse.Create(t).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
+
+                        Traverse.Create(pawn).Field("positionInt")
+                            .SetValue(position);
+                        //ZLogger.Message("30 SetPosition for " + pawn + " to " + position);
+                    }
+                    else if (pawn.Map != oldMap && otherMap == oldMap)
+                    {
+                        Traverse.Create(pawn).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                        Traverse.Create(t).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+
+                        Traverse.Create(pawn).Field("positionInt")
+                            .SetValue(oldPosition);
+                        //ZLogger.Message("31 SetPosition for " + pawn + " to " + oldPosition);
+                    }
+                    if (scanner.HasJobOnThing(pawn, t))
+                    {
+                        job = RefuelWorkGiverUtility.RefuelJob(pawn, t, forced, JobStandard, JobAtomic);
+                    }
+                    if (job != null)
+                    {
+                        job.count = job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompRefuelable>().GetFuelCountToFullyRefuel();
+                    }
+                    if (job != null) break;
+                }
+                Traverse.Create(pawn).Field("mapIndexOrState")
+                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                Traverse.Create(t).Field("mapIndexOrState")
+                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap2));
+                Traverse.Create(pawn).Field("positionInt")
+                    .SetValue(oldPosition);
                 return job;
             }
 
@@ -2653,16 +2716,18 @@ namespace ZLevels
                 bool prioritized;
                 bool allowUnreachable;
                 Danger maxPathDanger;
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
                 var entryPoints = new Dictionary<Map, IntVec3>();
                 for (int j = 0; j < list.Count; j++)
                 {
                     WorkGiver workGiver = list[j];
+
                     foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                     {
                         //ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                         //        + " for " + ZTracker.GetMapInfo(oldMap));
                         var stairs = new List<Thing>();
+                        //ZLogger.Message("Iterate over " + ZTracker.GetMapInfo(otherMap));
                         if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
                         {
                             Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
@@ -2670,7 +2735,11 @@ namespace ZLevels
                             {
                                 //ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(lowerMap));
                                 stairs = ZTracker.stairsUp[lowerMap];
-                                //lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
+                                foreach (var s in ZTracker.stairsUp[lowerMap])
+                                {
+                                    //ZLogger.Message("Adding upper stairs: " + s + " from "
+                                    //     + ZTracker.GetMapInfo(lowerMap));
+                                }
                             }
                             else
                             {
@@ -2684,7 +2753,11 @@ namespace ZLevels
                             {
                                 //ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(upperMap));
                                 stairs = ZTracker.stairsDown[upperMap];
-                                //upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
+                                foreach (var s in ZTracker.stairsDown[upperMap])
+                                {
+                                    //ZLogger.Message("Adding lower stairs: " + s + " from "
+                                    //   + ZTracker.GetMapInfo(upperMap));
+                                }
                             }
                             else
                             {
@@ -2705,20 +2778,10 @@ namespace ZLevels
                             {
                                 position = entryPoints[otherMap];
                             }
-
                             Traverse.Create(pawn).Field("mapIndexOrState")
                                 .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(position);
-                            ZLogger.Message("17 SetPosition for " + pawn + " to " + position);
-
-                            //pawn.Position = position;
-
-                            //JobManagerPatches.manualDespawn = true;
-                            //pawn.DeSpawn();
-                            //JobManagerPatches.manualDespawn = false;
-                            //GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-
                         }
                         else if (pawn.Map != oldMap && otherMap == oldMap)
                         {
@@ -2731,52 +2794,6 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
-                            ZLogger.Message("18 SetPosition for " + pawn + " to " + oldPosition);
-
-
-                            //if (oldPosition.GetTerrain(oldMap) == ZLevelsDefOf.ZL_OutsideTerrain)
-                            //{
-                            //    IntVec3 position = IntVec3.Invalid;
-                            //    if (!entryPoints.ContainsKey(oldMap))
-                            //    {
-                            //        //var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
-                            //        var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                            //        position = selectedStairs.Position;
-                            //        entryPoints[oldMap] = position;
-                            //        if (CellFinder.TryFindRandomCellNear(oldPosition, oldMap, 100,
-                            //            (IntVec3 c) => c.Walkable(oldMap), out position))
-                            //        {
-                            //            Traverse.Create(pawn).Field("mapIndexOrState")
-                            //                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                            //            Traverse.Create(pawn).Field("positionInt")
-                            //                .SetValue(position);
-                            //            //pawn.Position = position;
-                            //
-                            //            //GenPlace.TryPlaceThing(pawn, position, oldMap, ThingPlaceMode.Direct);
-                            //        }
-                            //    }
-                            //    else
-                            //    {
-                            //        position = entryPoints[oldMap];
-                            //        Traverse.Create(pawn).Field("mapIndexOrState")
-                            //            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                            //        Traverse.Create(pawn).Field("positionInt")
-                            //            .SetValue(position);
-                            //        //pawn.Position = position;
-                            //
-                            //        //GenPlace.TryPlaceThing(pawn, position, oldMap, ThingPlaceMode.Direct);
-                            //    }
-                            //}
-                            //else
-                            //{
-                            //    Traverse.Create(pawn).Field("mapIndexOrState")
-                            //        .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                            //    Traverse.Create(pawn).Field("positionInt")
-                            //        .SetValue(oldPosition);
-                            //    //pawn.Position = oldPosition;
-                            //
-                            //    //GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-                            //}
                         }
                         if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                         {
@@ -2821,69 +2838,26 @@ namespace ZLevels
 
                                     if (scanner is WorkGiver_HaulGeneral || scanner is WorkGiver_HaulCorpses)
                                     {
-                                        ZLogger.Message(pawn + " - pawn.map: " + pawn.Map);
-                                        var allZones = new Dictionary<Zone_Stockpile, Map>();
-                                        var allMaps = ZTracker.GetAllMaps(pawn.Map.Tile);
-                                        foreach (Map map in allMaps)
-                                        {
-                                            foreach (var zone in map.zoneManager.AllZones.Where(x => x is Zone_Stockpile))
-                                            {
-                                                //ZLogger.Message("Adding " + zone + " in " + ZTracker.GetMapInfo(zone.Map) + " - " + ZTracker.GetMapInfo(map));
-                                                allZones[(Zone_Stockpile)zone] = map;
-                                            }
-                                        }
-
-                                        List<Zone_Stockpile> copiedZones = new List<Zone_Stockpile>();
-                                        IntVec3 newPosition2 = IntVec3.Invalid;
-                                        foreach (Map map in allMaps)
-                                        {
-                                            foreach (var zone in allZones)
-                                            {
-                                                if (zone.Key.Map != pawn.Map)
-                                                {
-                                                    var newZone = new Zone_Stockpile
-                                                    {
-                                                        settings = zone.Key.settings,
-                                                        label = zone.Key.label + " - Copy"
-                                                    };
-                                                    foreach (IntVec3 intVec in zone.Key.cells)
-                                                    {
-                                                        var newPosition = (intVec - zone.Key.Position) + pawn.Position;
-                                                        if (newPosition.GetZone(pawn.Map) == null && newPosition.GetSlotGroup(pawn.Map) == null)
-                                                        {
-                                                            newZone.cells.Add(newPosition);
-                                                        }
-                                                        else if (CellFinder.TryFindRandomCellNear
-                                                            (newPosition, map, 1000, (IntVec3 c) => c.Walkable(map)
-                                                            && c.GetZone(map) == null && c.GetSlotGroup(pawn.Map) == null
-                                                            && GenGrid.InBounds(c, map), out newPosition2))
-                                                        {
-                                                            newZone.cells.Add(newPosition2);
-                                                        }
-                                                    }
-                                                    newZone.zoneManager = pawn.Map.zoneManager;
-                                                    //ZLogger.Message("Registering " + newZone + " in " + ZTracker.GetMapInfo(pawn.Map));
-                                                    pawn.Map.zoneManager.RegisterZone(newZone);
-                                                    //ZLogger.Message("Adding " + newZone + " to " + ZTracker.GetMapInfo(pawn.Map));
-                                                    copiedZones.Add(newZone);
-                                                }
-                                            }
-                                        }
-
-                                        foreach (var t in pawn.Map.listerThings.AllThings.Where(x => x.def.EverHaulable))
-                                        {
-                                            pawn.Map.listerHaulables.RecalcAllInCell(t.Position);
-                                            pawn.Map.listerMergeables.RecalcAllInCell(t.Position);
-                                        }
+                                        //Log.Message("HAULABLES 1: " + pawn.Map
+                                        //    .listerHaulables.ThingsPotentiallyNeedingHauling().Count);
+                                        //foreach (var t in pawn.Map.listerThings.AllThings.Where(x => x.def.EverHaulable))
+                                        //{
+                                        //    if (!pawn.Map.listerHaulables
+                                        //        .ThingsPotentiallyNeedingHauling().Contains(t))
+                                        //    {
+                                        //        Log.Message("Notify_Spawned: " + t);
+                                        //        IsInValidBestStoragePatch.CheckOtherMaps = true;
+                                        //        pawn.Map.listerHaulables.Notify_Spawned(t);
+                                        //        IsInValidBestStoragePatch.CheckOtherMaps = true;
+                                        //        pawn.Map.listerMergeables.Notify_Spawned(t);
+                                        //        IsInValidBestStoragePatch.CheckOtherMaps = false;
+                                        //    }
+                                        //}
+                                        //IsInValidBestStoragePatch.CheckOtherMaps = false;
+                                        //Log.Message("HAULABLES 2: " + pawn.Map
+                                        //    .listerHaulables.ThingsPotentiallyNeedingHauling().Count);
 
                                         enumerable = pawn.Map.listerHaulables.ThingsPotentiallyNeedingHauling();
-
-                                        foreach (var zone in copiedZones)
-                                        {
-                                            pawn.Map.zoneManager.DeregisterZone(zone);
-                                        }
-                                        ZLogger.Message("--------------------", true);
-
                                     }
                                     else
                                     {
@@ -3117,35 +3091,14 @@ namespace ZLevels
                                 {
                                     dest = otherMap;
                                 }
-                                ZLogger.Message("Main job stats: ");
-                                ZLogger.Message("Job: " + job3);
-                                ZLogger.Message("Job.targetA: " + job3.targetA);
-                                ZLogger.Message("Job.targetB: " + job3.targetB);
-                                ZLogger.Message("Job.targetC: " + job3.targetC);
-                                ZLogger.Message("Job.targetQueueA: " + job3.targetQueueA);
-                                ZLogger.Message("Job.targetQueueB: " + job3.targetQueueB);
-                                ZLogger.Message("Job.countQueue: " + job3.countQueue);
                                 return new ThinkResult(job3, instance, list[j].def.tagToGive);
                             }
-                            //Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
+                            Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
                         }
                         num = workGiver.def.priorityInType;
                     }
                 }
                 return ThinkResult.NoJob;
-            }
-
-            private static bool HaulShouldSkip(Pawn pawn, WorkGiver giver)
-            {
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                foreach (var map in ZTracker.GetAllMaps(pawn.Map.Tile))
-                {
-                    if (map.listerHaulables.ThingsPotentiallyNeedingHauling().Count > 0)
-                    {
-                        return false;
-                    }
-                }
-                return true;
             }
 
             private static bool PawnCanUseWorkGiver(Pawn pawn, WorkGiver giver)

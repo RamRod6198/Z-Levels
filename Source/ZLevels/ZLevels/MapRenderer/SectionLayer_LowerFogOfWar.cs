@@ -22,7 +22,7 @@ namespace ZLevels
 
 		public override void Regenerate()
 		{
-			var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+			var ZTracker = ZUtils.ZTracker;
 			int curLevel = ZTracker.GetZIndexFor(base.Map);
 			bool[] fogGrid = base.Map.fogGrid.fogGrid;
 			if (curLevel > 0)

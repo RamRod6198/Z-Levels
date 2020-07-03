@@ -25,7 +25,7 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     Pawn pawn = GetActor();
                     if (TargetA.Thing is Building_StairsUp stairsUp)
                     {
@@ -80,14 +80,6 @@ namespace ZLevels
                             stairsDown.shouldSpawnStairsBelow = false;
                         }
                     }
-                    try
-                    {
-                        ZLogger.Message("5 lastTick");
-
-                        ZTracker.jobTracker[pawn].lastTickFood = Find.TickManager.TicksGame + 201;
-                        ZTracker.jobTracker[pawn].lastTickJoy = Find.TickManager.TicksGame + 201;
-                    }
-                    catch { };
                 }
             };
         }

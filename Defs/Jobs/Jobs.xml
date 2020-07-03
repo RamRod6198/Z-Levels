@@ -6,22 +6,22 @@
 		<driverClass>ZLevels.JobDriver_GoToStairs</driverClass>
 		<reportString>traversing TargetA.</reportString>
 	</JobDef>
-	
+
 	<JobDef>
-		<defName>ZL_GoToThingMap</defName>
-		<driverClass>ZLevels.JobDriver_GoToThingMap</driverClass>
+		<defName>ZL_GoToMap</defName>
+		<driverClass>ZLevels.JobDriver_GoToMap</driverClass>
 		<reportString>traversing TargetA.</reportString>
 	</JobDef>
 
 	<JobDef>
-		<defName>ZL_HaulThingToStairs</defName>
-		<driverClass>ZLevels.JobDriver_HaulThingToStairs</driverClass>
+		<defName>ZL_HaulThingToDest</defName>
+		<driverClass>ZLevels.JobDriver_HaulThingToDest</driverClass>
 		<reportString>traversing TargetA.</reportString>
 	</JobDef>
 
 	<JobDef>
 		<defName>ZL_HaulToCell</defName>
-		<driverClass>ZLevels.JobDriver_ZHaulToCell</driverClass>
+		<driverClass>ZLevels.JobDriver_HaulThingToDestAndToCell</driverClass>
 		<reportString>hauling TargetA.</reportString>
 		<suspendable>false</suspendable>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>

@@ -43,7 +43,7 @@ namespace ZLevels
             {
                 try
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.GetZIndexFor(___map) > 0)
                     {
                         int num = ___map.cellIndices.CellToIndex(c);
@@ -108,7 +108,7 @@ namespace ZLevels
                 {
                     if (__instance.Position.GetTerrain(__instance.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
                     {
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        var ZTracker = ZUtils.ZTracker;
                         Map lowerMap = ZTracker.GetLowerLevel(__instance.Map.Tile, __instance.Map);
                         bool firstTime = false;
                         if (lowerMap == null)
@@ -147,7 +147,7 @@ namespace ZLevels
                     if (def != null && !def.isNatural)
                     {
                         Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        var ZTracker = ZUtils.ZTracker;
                         var upperMap = ZTracker.GetUpperLevel(map.Tile, map);
                         if (upperMap != null && upperMap.terrainGrid.TerrainAt(c) == ZLevelsDefOf.ZL_OutsideTerrain)
                         {
@@ -159,7 +159,7 @@ namespace ZLevels
                         Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
                         if (c.GetRoof(map) == RoofDefOf.RoofConstructed)
                         {
-                            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                            var ZTracker = ZUtils.ZTracker;
                             Map upperMap = ZTracker.GetUpperLevel(map.Tile, map);
                             if (upperMap != null)
                             {
@@ -194,7 +194,7 @@ namespace ZLevels
                 {
                     if (newTerr != null && newTerr.Removable)
                     {
-                        var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                        var ZTracker = ZUtils.ZTracker;
                         Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
                         var lowerMap = ZTracker.GetLowerLevel(map.Tile, map);
                         if (lowerMap != null && lowerMap.roofGrid.RoofAt(c) != RoofDefOf.RoofConstructed)

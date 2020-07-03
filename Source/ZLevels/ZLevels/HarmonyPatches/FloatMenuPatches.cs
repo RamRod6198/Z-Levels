@@ -79,7 +79,7 @@ namespace ZLevels
                 Pawn pawn2 = GridsUtility.GetThingList(IntVec3.FromVector3(clickPos), pawn.Map)
                     .FirstOrDefault((Thing x) => x is Pawn) as Pawn;
                 var mapComp = pawn.Map.GetComponent<MapComponentZLevel>();
-                var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                var ZTracker = ZUtils.ZTracker;
 
                 if (pawn2 != null && ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Count > 1)
                 {
@@ -107,86 +107,99 @@ namespace ZLevels
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Capture".Translate
                     (victim.LabelCap, victim), delegate ()
                     {
-                        Building_Bed building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, false);
-                        if (building_Bed == null)
+                        var ZTracker = ZUtils.ZTracker;
+                        var oldMap = pawn.Map;
+                        var oldPosition1 = pawn.Position;
+                        var oldPosition2 = victim.Position;
+                        bool select = false;
+                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+
+                        Building building_Bed = null;
+                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                         {
-                            building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, true);
-                        }
-                        if (building_Bed == null)
-                        {
-                            var mapComp = pawn.Map.GetComponent<MapComponentZLevel>();
-                            var oldMap = pawn.Map;
-                            var oldPosition1 = pawn.Position;
-                            var oldPosition2 = victim.Position;
-                            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                            foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(pawn.Map))
+                            ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                + " for " + ZTracker.GetMapInfo(oldMap));
+                        
+                            var stairs = new List<Thing>();
+                        
+                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
                             {
-                                if (oldMap != otherMap)
+                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                                if (lowerMap != null)
                                 {
-                                    var mapComp2 = otherMap.GetComponent<MapComponentZLevel>();
-                                    var stairs = new List<Thing>();
-                                    if (mapComp2.Z_LevelIndex >= 0)
-                                    {
-
-                                        Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                        if (lowerMap != null)
-                                        {
-                                            stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                        if (upperMap != null)
-                                        {
-                                            stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
-                                        }
-                                    }
-                                    if (stairs != null && stairs.Count() > 0)
-                                    {
-                                        var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
-                                        var position = selectedStairs.Position;
-                                        bool select = false;
-                                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                                        JobManagerPatches.manualDespawn = true;
-                                        pawn.DeSpawn();
-                                        JobManagerPatches.manualDespawn = false;
-                                        GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-
-                                        JobManagerPatches.manualDespawn = true;
-                                        victim.DeSpawn();
-                                        JobManagerPatches.manualDespawn = false;
-                                        GenPlace.TryPlaceThing(victim, position, otherMap, ThingPlaceMode.Direct);
-                                        building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, false);
-                                        if (building_Bed == null)
-                                        {
-                                            building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, true);
-                                        }
-
-                                        JobManagerPatches.manualDespawn = true;
-                                        pawn.DeSpawn();
-                                        JobManagerPatches.manualDespawn = false;
-                                        GenPlace.TryPlaceThing(pawn, oldPosition1, oldMap, ThingPlaceMode.Direct);
-                                        if (select) Find.Selector.Select(pawn);
-
-                                        JobManagerPatches.manualDespawn = true;
-                                        victim.DeSpawn();
-                                        JobManagerPatches.manualDespawn = false;
-                                        GenPlace.TryPlaceThing(victim, oldPosition2, oldMap, ThingPlaceMode.Direct);
-
-                                        if (building_Bed != null)
-                                        {
-                                            ZLogger.Message("Found bed: " + building_Bed);
-                                            Job captureJob = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
-                                            captureJob.count = 1;
-                                            ZTracker.BuildJobListFor(pawn, oldMap, oldMap, captureJob, null);
-                                            PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
-                                            return;
-                                        }
-                                    }
+                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = ZTracker.stairsUp[lowerMap];
+                                }
+                                else
+                                {
+                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
                                 }
                             }
+                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                            {
+                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                                if (upperMap != null)
+                                {
+                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = ZTracker.stairsDown[upperMap];
+                                }
+                                else
+                                {
+                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                                }
+                            }
+                        
+                            if (stairs != null && stairs.Count() > 0)
+                            {
+                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
+                                var position = selectedStairs.Position;
+                        
+                                Traverse.Create(pawn).Field("mapIndexOrState")
+                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
+                                Traverse.Create(pawn).Field("positionInt")
+                                    .SetValue(position);
+                        
+                                Traverse.Create(victim).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
+                                Traverse.Create(victim).Field("positionInt")
+                                    .SetValue(position);
+                                ZLogger.Message("8 SetPosition for " + pawn + " to " + position);
+                            }
+                            else if (pawn.Map != oldMap && otherMap == oldMap)
+                            {
+                                Traverse.Create(pawn).Field("mapIndexOrState")
+                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                                Traverse.Create(pawn).Field("positionInt")
+                                    .SetValue(oldPosition1);
+                        
+                                Traverse.Create(victim).Field("mapIndexOrState")
+                                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                                Traverse.Create(victim).Field("positionInt")
+                                    .SetValue(oldPosition2);
+                                ZLogger.Message("40 SetPosition for " + pawn + " to " + oldPosition1);
+                            }
+                        
+                        
+                            building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, false);
+                            if (building_Bed == null)
+                            {
+                                building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, true);
+                            }
+                                if (building_Bed != null) break;
                         }
+
+                        Traverse.Create(pawn).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                        Traverse.Create(pawn).Field("positionInt")
+                            .SetValue(oldPosition1);
+
+                        Traverse.Create(victim).Field("mapIndexOrState")
+                        .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                        Traverse.Create(victim).Field("positionInt")
+                            .SetValue(oldPosition2);
+
+                        if (select) Find.Selector.Select(pawn);
+
                         if (building_Bed == null)
                         {
                             Messages.Message("CannotCapture".Translate() + ": " + "NoPrisonerBed".Translate(), victim, MessageTypeDefOf.RejectInput, false);
@@ -194,7 +207,9 @@ namespace ZLevels
                         }
                         Job job = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
                         job.count = 1;
-                        pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+                        ZTracker.BuildJobListFor(pawn, pawn.Map, job);
+                        ZLogger.Message(pawn + " taking first job 3");
+                        pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
                         PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Capturing, KnowledgeAmount.Total);
                         if (victim.Faction != null && victim.Faction != Faction.OfPlayer && !victim.Faction.def.hidden && !victim.Faction.HostileTo(Faction.OfPlayer) && !victim.IsPrisonerOfColony)
                         {
@@ -210,100 +225,110 @@ namespace ZLevels
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Rescue".Translate
                     (victim.LabelCap, victim), delegate ()
                     {
-                        Building_Bed building_Bed = RestUtility.FindBedFor(victim, pawn, false, false, false);
-                        if (building_Bed == null)
+                        var ZTracker = ZUtils.ZTracker;
+                        var oldMap = pawn.Map;
+                        var oldPosition1 = pawn.Position;
+                        var oldPosition2 = victim.Position;
+                        bool select = false;
+                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+
+                        Building building_Bed = null;
+                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                         {
-                            building_Bed = RestUtility.FindBedFor(victim, pawn, false, false, true);
-                        }
-                        if (building_Bed == null)
-                        {
-                            var mapComp = pawn.Map.GetComponent<MapComponentZLevel>();
-                            var oldMap = pawn.Map;
-                            var oldPosition1 = pawn.Position;
-                            var oldPosition2 = victim.Position;
-                            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                            foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(pawn.Map))
+                            ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                + " for " + ZTracker.GetMapInfo(oldMap));
+
+                            var stairs = new List<Thing>();
+
+                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
                             {
-                                if (oldMap != otherMap)
+                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                                if (lowerMap != null)
                                 {
-                                    var mapComp2 = otherMap.GetComponent<MapComponentZLevel>();
-                                    var stairs = new List<Thing>();
-                                    if (mapComp2.Z_LevelIndex >= 0)
-                                    {
-                                        Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                        if (lowerMap != null)
-                                        {
-                                            stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                        if (upperMap != null)
-                                        {
-                                            stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
-                                        }
-                                    }
-                                    if (stairs != null && stairs.Count() > 0)
-                                    {
-                                        var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
-                                        var position = selectedStairs.Position;
-                                        bool select = false;
-                                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                                        JobManagerPatches.manualDespawn = true;
-                                        pawn.DeSpawn();
-                                        JobManagerPatches.manualDespawn = false;
-                                        GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-
-                                        JobManagerPatches.manualDespawn = true;
-                                        victim.DeSpawn();
-                                        JobManagerPatches.manualDespawn = false;
-                                        GenPlace.TryPlaceThing(victim, position, otherMap, ThingPlaceMode.Direct);
-                                        building_Bed = RestUtility.FindBedFor(victim, pawn, false, false, false);
-                                        if (building_Bed == null)
-                                        {
-                                            building_Bed = RestUtility.FindBedFor(victim, pawn, false, false, true);
-                                        }
-
-                                        JobManagerPatches.manualDespawn = true;
-                                        pawn.DeSpawn();
-                                        JobManagerPatches.manualDespawn = false;
-                                        GenPlace.TryPlaceThing(pawn, oldPosition1, oldMap, ThingPlaceMode.Direct);
-                                        if (select) Find.Selector.Select(pawn);
-
-                                        JobManagerPatches.manualDespawn = true;
-                                        victim.DeSpawn();
-                                        JobManagerPatches.manualDespawn = false;
-                                        GenPlace.TryPlaceThing(victim, oldPosition2, oldMap, ThingPlaceMode.Direct);
-
-                                        if (building_Bed != null)
-                                        {
-                                            ZLogger.Message("Found bed: " + building_Bed);
-                                            Job rescureJob = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
-                                            rescureJob.count = 1;
-                                            ZTracker.BuildJobListFor(pawn, oldMap, oldMap, rescureJob, null);
-                                            PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
-                                            return;
-                                        }
-                                    }
+                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = ZTracker.stairsUp[lowerMap];
+                                }
+                                else
+                                {
+                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
                                 }
                             }
-                            string t5;
-                            if (victim.RaceProps.Animal)
+                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
                             {
-                                t5 = "NoAnimalBed".Translate();
+                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                                if (upperMap != null)
+                                {
+                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
+                                    stairs = ZTracker.stairsDown[upperMap];
+                                }
+                                else
+                                {
+                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                                }
                             }
-                            else
+
+                            if (stairs != null && stairs.Count() > 0)
                             {
-                                t5 = "NoNonPrisonerBed".Translate();
+                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
+                                var position = selectedStairs.Position;
+
+                                Traverse.Create(pawn).Field("mapIndexOrState")
+                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
+                                Traverse.Create(pawn).Field("positionInt")
+                                    .SetValue(position);
+
+                                Traverse.Create(victim).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
+                                Traverse.Create(victim).Field("positionInt")
+                                    .SetValue(position);
+                                ZLogger.Message("8 SetPosition for " + pawn + " to " + position);
                             }
-                            Messages.Message("CannotRescue".Translate() + ": " + t5, victim, MessageTypeDefOf.RejectInput, false);
-                            return;
+                            else if (pawn.Map != oldMap && otherMap == oldMap)
+                            {
+                                Traverse.Create(pawn).Field("mapIndexOrState")
+                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                                Traverse.Create(pawn).Field("positionInt")
+                                    .SetValue(oldPosition1);
+
+                                Traverse.Create(victim).Field("mapIndexOrState")
+                                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                                Traverse.Create(victim).Field("positionInt")
+                                    .SetValue(oldPosition2);
+                                ZLogger.Message("40 SetPosition for " + pawn + " to " + oldPosition1);
+                            }
+
+                            building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false, checkSocialProperness: false);
+                            if (building_Bed == null)
+                            {
+                                building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false, checkSocialProperness: false, ignoreOtherReservations: true);
+                            }
+                            if (building_Bed != null) break;
                         }
-                        Job job = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
-                        job.count = 1;
-                        pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-                        PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
+                        if (select) Find.Selector.Select(pawn);
+                        Traverse.Create(pawn).Field("mapIndexOrState")
+                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                        Traverse.Create(pawn).Field("positionInt")
+                            .SetValue(oldPosition1);
+
+                        Traverse.Create(victim).Field("mapIndexOrState")
+                        .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                        Traverse.Create(victim).Field("positionInt")
+                            .SetValue(oldPosition2);
+
+                        if (building_Bed == null)
+                        {
+                            string t3 = (!victim.RaceProps.Animal) ? ((string)"NoNonPrisonerBed".Translate()) : ((string)"NoAnimalBed".Translate());
+                            Messages.Message("CannotRescue".Translate() + ": " + t3, victim, MessageTypeDefOf.RejectInput, historical: false);
+                        }
+                        else
+                        {
+                            Job job = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
+                            job.count = 1;
+                            ZTracker.BuildJobListFor(pawn, pawn.Map, job);
+                            ZLogger.Message(pawn + " taking first job 2");
+                            pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
+                            PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
+                        }
                     }, MenuOptionPriority.RescueOrCapture, null, victim, 0f, null, null), pawn, victim, "ReservedBy");
                 return floatOption;
             }
@@ -377,6 +402,376 @@ namespace ZLevels
         //        Log.Message(pawn + " - Run");
         //    }
         //}
+
+        [HarmonyPatch(typeof(Pawn_JobTracker))]
+        [HarmonyPatch("StartJob")]
+        internal static class MakeDriver_Patch
+        {
+            public static bool Prefix(Pawn ___pawn, Job newJob, JobCondition lastJobEndCondition = JobCondition.None, ThinkNode jobGiver = null, bool resumeCurJobAfterwards = false, bool cancelBusyStances = true, ThinkTreeDef thinkTree = null, JobTag? tag = null, bool fromQueue = false, bool canReturnCurJobToPool = false)
+            {
+                try
+                {
+                    newJob.MakeDriver(___pawn);
+                }
+                catch
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(FloatMenuMakerMap))]
+        [HarmonyPatch("AddJobGiverWorkOrders")]
+        internal static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
+        {
+            public static void Postfix(IntVec3 clickCell, Pawn pawn, ref List<FloatMenuOption> opts, bool drafted, FloatMenuOption[] ___equivalenceGroupTempStorage)
+            {
+                var ZTracker = ZUtils.ZTracker;
+                if (pawn.thinker.TryGetMainTreeThinkNode<JobGiver_Work>() != null)
+                {
+                    foreach (Thing item in pawn.Map.thingGrid.ThingsAt(clickCell))
+                    {
+                        bool flag = false;
+                        foreach (WorkTypeDef item2 in DefDatabase<WorkTypeDef>.AllDefsListForReading)
+                        {
+                            for (int i = 0; i < item2.workGiversByPriority.Count; i++)
+                            {
+                                WorkGiverDef workGiver2 = item2.workGiversByPriority[i];
+                                if (!drafted || workGiver2.canBeDoneWhileDrafted)
+                                {
+                                    WorkGiver_Scanner workGiver_Scanner = workGiver2.Worker as WorkGiver_Scanner;
+                                    if (workGiver_Scanner != null && workGiver_Scanner.def.directOrderable && !workGiver_Scanner.ShouldSkip(pawn, forced: true))
+                                    {
+                                        JobFailReason.Clear();
+                                        if (workGiver_Scanner.PotentialWorkThingRequest.Accepts(item) || (workGiver_Scanner.PotentialWorkThingsGlobal(pawn) != null && workGiver_Scanner.PotentialWorkThingsGlobal(pawn).Contains(item)))
+                                        {
+                                            string text = null;
+                                            Action action = null;
+                                            PawnCapacityDef pawnCapacityDef = workGiver_Scanner.MissingRequiredCapacity(pawn);
+                                            if (pawnCapacityDef != null)
+                                            {
+                                                text = "CannotMissingHealthActivities".Translate(pawnCapacityDef.label);
+                                            }
+                                            else
+                                            {
+                                                Map oldMap = pawn.Map;
+                                                Job job = null;
+                                                foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+                                                {
+                                                    if (workGiver_Scanner is WorkGiver_Refuel scanner1)
+                                                    {
+                                                        job = JobPatches.TryIssueJobPackagePatch.
+                                                            JobOnThing(scanner1, pawn, item, true);
+                                                    }
+                                                    else
+                                                    {
+                                                        job = workGiver_Scanner.HasJobOnThing(pawn, item, forced: true) ?
+                                                            workGiver_Scanner.JobOnThing(pawn, item, forced: true) : null;
+                                                    }
+
+                                                    if (job != null) break;
+                                                }
+                                                if (job == null)
+                                                {
+                                                    if (JobFailReason.HaveReason)
+                                                    {
+                                                        text = (JobFailReason.CustomJobString.NullOrEmpty() ? ((string)"CannotGenericWork".Translate(workGiver_Scanner.def.verb, item.LabelShort, item)) : ((string)"CannotGenericWorkCustom".Translate(JobFailReason.CustomJobString)));
+                                                        text = text + ": " + JobFailReason.Reason.CapitalizeFirst();
+                                                    }
+                                                    else
+                                                    {
+                                                        if (!item.IsForbidden(pawn))
+                                                        {
+                                                            continue;
+                                                        }
+                                                        text = (item.Position.InAllowedArea(pawn) ? ((string)"CannotPrioritizeForbidden".Translate(item.Label, item)) : ((string)("CannotPrioritizeForbiddenOutsideAllowedArea".Translate() + ": " + pawn.playerSettings.EffectiveAreaRestriction.Label)));
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    WorkTypeDef workType = workGiver_Scanner.def.workType;
+                                                    if (pawn.WorkTagIsDisabled(workGiver_Scanner.def.workTags))
+                                                    {
+                                                        text = "CannotPrioritizeWorkGiverDisabled".Translate(workGiver_Scanner.def.label);
+                                                    }
+                                                    else if (pawn.jobs.curJob != null && pawn.jobs.curJob.JobIsSameAs(job))
+                                                    {
+                                                        text = "CannotGenericAlreadyAm".Translate(workGiver_Scanner.PostProcessedGerund(job), item.LabelShort, item);
+                                                    }
+                                                    else if (pawn.workSettings.GetPriority(workType) == 0)
+                                                    {
+                                                        text = (pawn.WorkTypeIsDisabled(workType) ? ((string)"CannotPrioritizeWorkTypeDisabled".Translate(workType.gerundLabel)) : ((!"CannotPrioritizeNotAssignedToWorkType".CanTranslate()) ? ((string)"CannotPrioritizeWorkTypeDisabled".Translate(workType.pawnLabel)) : ((string)"CannotPrioritizeNotAssignedToWorkType".Translate(workType.gerundLabel))));
+                                                    }
+                                                    else if (job.def == JobDefOf.Research && item is Building_ResearchBench)
+                                                    {
+                                                        text = "CannotPrioritizeResearch".Translate();
+                                                    }
+                                                    else if (item.IsForbidden(pawn))
+                                                    {
+                                                        text = (item.Position.InAllowedArea(pawn) ? ((string)"CannotPrioritizeForbidden".Translate(item.Label, item)) : ((string)("CannotPrioritizeForbiddenOutsideAllowedArea".Translate() + ": " + pawn.playerSettings.EffectiveAreaRestriction.Label)));
+                                                    }
+                                                    else if (!pawn.CanReach(item, workGiver_Scanner.PathEndMode, Danger.Deadly))
+                                                    {
+                                                        text = (item.Label + ": " + "NoPath".Translate()).CapitalizeFirst();
+                                                    }
+                                                    else
+                                                    {
+                                                        text = "PrioritizeGeneric".Translate(workGiver_Scanner.PostProcessedGerund(job), item.Label);
+                                                        Job localJob2 = job;
+                                                        WorkGiver_Scanner localScanner2 = workGiver_Scanner;
+                                                        job.workGiverDef = workGiver_Scanner.def;
+                                                        action = delegate
+                                                        {
+                                                            ZTracker.BuildJobListFor(pawn, oldMap, job);
+                                                            ZLogger.Message(pawn + " taking job " + ZTracker.jobTracker[pawn].activeJobs[0]);
+                                                            if (pawn.jobs.TryTakeOrderedJob(ZTracker.jobTracker[pawn].activeJobs[0]) 
+                                                            && workGiver2.forceMote != null)
+                                                            {
+                                                                ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                                                                MoteMaker.MakeStaticMote(clickCell, pawn.Map, workGiver2.forceMote);
+                                                            }
+                                                        };
+                                                    }
+                                                }
+                                            }
+                                            if (DebugViewSettings.showFloatMenuWorkGivers)
+                                            {
+                                                text += $" (from {workGiver2.defName})";
+                                            }
+                                            FloatMenuOption menuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, action), pawn, item);
+                                            if (drafted && workGiver2.autoTakeablePriorityDrafted != -1)
+                                            {
+                                                menuOption.autoTakeable = true;
+                                                menuOption.autoTakeablePriority = workGiver2.autoTakeablePriorityDrafted;
+                                            }
+                                            ZLogger.Message("workGiver_Scanner: " + workGiver_Scanner 
+                                                + " - menuOption.Label: " + menuOption.Label);
+                                            if (!opts.Any((FloatMenuOption op) => op.Label == menuOption.Label))
+                                            {
+                                                if (workGiver2.equivalenceGroup != null)
+                                                {
+                                                    if (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] == null || (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index].Disabled && !menuOption.Disabled))
+                                                    {
+                                                        ___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] = menuOption;
+                                                        flag = true;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    opts.Add(menuOption);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (flag)
+                        {
+                            for (int j = 0; j < ___equivalenceGroupTempStorage.Length; j++)
+                            {
+                                if (___equivalenceGroupTempStorage[j] != null)
+                                {
+                                    opts.Add(___equivalenceGroupTempStorage[j]);
+                                    ___equivalenceGroupTempStorage[j] = null;
+                                }
+                            }
+                        }
+                    }
+                    foreach (WorkTypeDef item3 in DefDatabase<WorkTypeDef>.AllDefsListForReading)
+                    {
+                        for (int k = 0; k < item3.workGiversByPriority.Count; k++)
+                        {
+                            WorkGiverDef workGiver = item3.workGiversByPriority[k];
+                            if (!drafted || workGiver.canBeDoneWhileDrafted)
+                            {
+                                WorkGiver_Scanner workGiver_Scanner2 = workGiver.Worker as WorkGiver_Scanner;
+                                if (workGiver_Scanner2 != null && workGiver_Scanner2.def.directOrderable && !workGiver_Scanner2.ShouldSkip(pawn, forced: true))
+                                {
+                                    JobFailReason.Clear();
+                                    if (workGiver_Scanner2.PotentialWorkCellsGlobal(pawn).Contains(clickCell))
+                                    {
+                                        Action action2 = null;
+                                        string label = null;
+                                        PawnCapacityDef pawnCapacityDef2 = workGiver_Scanner2.MissingRequiredCapacity(pawn);
+                                        if (pawnCapacityDef2 != null)
+                                        {
+                                            label = "CannotMissingHealthActivities".Translate(pawnCapacityDef2.label);
+                                        }
+                                        else
+                                        {
+                                            Job job2 = workGiver_Scanner2.HasJobOnCell(pawn, clickCell, forced: true) ? workGiver_Scanner2.JobOnCell(pawn, clickCell, forced: true) : null;
+                                            if (job2 == null)
+                                            {
+                                                if (JobFailReason.HaveReason)
+                                                {
+                                                    if (!JobFailReason.CustomJobString.NullOrEmpty())
+                                                    {
+                                                        label = "CannotGenericWorkCustom".Translate(JobFailReason.CustomJobString);
+                                                    }
+                                                    else
+                                                    {
+                                                        label = "CannotGenericWork".Translate(workGiver_Scanner2.def.verb, "AreaLower".Translate());
+                                                    }
+                                                    label = label + ": " + JobFailReason.Reason.CapitalizeFirst();
+                                                }
+                                                else
+                                                {
+                                                    if (!clickCell.IsForbidden(pawn))
+                                                    {
+                                                        continue;
+                                                    }
+                                                    if (!clickCell.InAllowedArea(pawn))
+                                                    {
+                                                        label = "CannotPrioritizeForbiddenOutsideAllowedArea".Translate() + ": " + pawn.playerSettings.EffectiveAreaRestriction.Label;
+                                                    }
+                                                    else
+                                                    {
+                                                        label = "CannotPrioritizeCellForbidden".Translate();
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                WorkTypeDef workType2 = workGiver_Scanner2.def.workType;
+                                                if (pawn.jobs.curJob != null && pawn.jobs.curJob.JobIsSameAs(job2))
+                                                {
+                                                    label = "CannotGenericAlreadyAmCustom".Translate(workGiver_Scanner2.PostProcessedGerund(job2));
+                                                }
+                                                else if (pawn.workSettings.GetPriority(workType2) == 0)
+                                                {
+                                                    if (pawn.WorkTypeIsDisabled(workType2))
+                                                    {
+                                                        label = "CannotPrioritizeWorkTypeDisabled".Translate(workType2.gerundLabel);
+                                                    }
+                                                    else if ("CannotPrioritizeNotAssignedToWorkType".CanTranslate())
+                                                    {
+                                                        label = "CannotPrioritizeNotAssignedToWorkType".Translate(workType2.gerundLabel);
+                                                    }
+                                                    else
+                                                    {
+                                                        label = "CannotPrioritizeWorkTypeDisabled".Translate(workType2.pawnLabel);
+                                                    }
+                                                }
+                                                else if (clickCell.IsForbidden(pawn))
+                                                {
+                                                    if (!clickCell.InAllowedArea(pawn))
+                                                    {
+                                                        label = "CannotPrioritizeForbiddenOutsideAllowedArea".Translate() + ": " + pawn.playerSettings.EffectiveAreaRestriction.Label;
+                                                    }
+                                                    else
+                                                    {
+                                                        label = "CannotPrioritizeCellForbidden".Translate();
+                                                    }
+                                                }
+                                                else if (!pawn.CanReach(clickCell, PathEndMode.Touch, Danger.Deadly))
+                                                {
+                                                    label = "AreaLower".Translate().CapitalizeFirst() + ": " + "NoPath".Translate();
+                                                }
+                                                else
+                                                {
+                                                    label = "PrioritizeGeneric".Translate(workGiver_Scanner2.PostProcessedGerund(job2), "AreaLower".Translate());
+                                                    Job localJob = job2;
+                                                    WorkGiver_Scanner localScanner = workGiver_Scanner2;
+                                                    job2.workGiverDef = workGiver_Scanner2.def;
+                                                    action2 = delegate
+                                                    {
+                                                        if (pawn.jobs.TryTakeOrderedJobPrioritizedWork(localJob, localScanner, clickCell) && workGiver.forceMote != null)
+                                                        {
+                                                            MoteMaker.MakeStaticMote(clickCell, pawn.Map, workGiver.forceMote);
+                                                        }
+                                                    };
+                                                }
+                                            }
+                                        }
+                                        if (!opts.Any((FloatMenuOption op) => op.Label == label.TrimEnd()))
+                                        {
+                                            FloatMenuOption floatMenuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(label, action2), pawn, clickCell);
+                                            if (drafted && workGiver.autoTakeablePriorityDrafted != -1)
+                                            {
+                                                floatMenuOption.autoTakeable = true;
+                                                floatMenuOption.autoTakeablePriority = workGiver.autoTakeablePriorityDrafted;
+                                            }
+                                            opts.Add(floatMenuOption);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //[HarmonyPatch(typeof(FloatMenuMakerMap))]
+            //[HarmonyPatch("TryMakeFloatMenu")]
+            //public class TryMakeFloatMenu_Transpiler
+            //{
+            //    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            //    {
+            //        var foundCurrentMapMethod = false;
+            //        int startIndex = -1, endIndex = -1;
+            //
+            //        var codes = new List<CodeInstruction>(instructions);
+            //        for (int i = 0; i < codes.Count; i++)
+            //        {
+            //
+            //            if (codes[i].opcode == OpCodes.Ret)
+            //            {
+            //                if (foundCurrentMapMethod)
+            //                {
+            //                    Log.Error("END " + i);
+            //            
+            //                    endIndex = i; // include current 'ret'
+            //                    break;
+            //                }
+            //                else
+            //                {
+            //                    Log.Error("START " + (i + 1));
+            //            
+            //                    startIndex = i + 1; // exclude current 'ret'
+            //            
+            //                    for (int j = startIndex; j < codes.Count; j++)
+            //                    {
+            //                        if (codes[j].opcode == OpCodes.Ret)
+            //                            break;
+            //                        var strOperand = codes[j].ToString();
+            //                        if (strOperand != null)
+            //                        {
+            //                            Log.Message(strOperand);
+            //                        }
+            //                        if (strOperand != null && strOperand.Contains("CurrentMap"))
+            //                        {
+            //                            Log.Message(pawn + " - Found");
+            //                            foundCurrentMapMethod = true;
+            //                            break;
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //        }
+            //        if (startIndex > -1 && endIndex > -1)
+            //        {
+            //            Log.Message(pawn + " - Remove");
+            //            // we cannot remove the first code of our range since some jump actually jumps to
+            //            // it, so we replace it with a no-op instead of fixing that jump (easier).
+            //            codes[startIndex].opcode = OpCodes.Nop;
+            //            codes.RemoveRange(startIndex + 1, endIndex - startIndex - 1);
+            //        }
+            //
+            //        return codes.AsEnumerable();
+            //    }
+            //}
+            //
+            //[HarmonyPatch(typeof(FloatMenuMakerMap), "ChoicesAtFor")]
+            //internal static class Patch_ChoicesAtFor
+            //{
+            //    private static void Postfix()
+            //    {
+            //        Log.Message(pawn + " - Run");
+            //    }
+            //}
+        }
     }
 }
 

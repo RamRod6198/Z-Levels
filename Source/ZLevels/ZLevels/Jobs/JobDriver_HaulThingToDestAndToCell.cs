@@ -7,7 +7,7 @@ using Verse.AI;
 
 namespace ZLevels
 {
-	public class JobDriver_ZHaulToCell : JobDriver
+	public class JobDriver_HaulThingToDestAndToCell : JobDriver
 	{
 		private bool forbiddenInitially;
 
@@ -53,11 +53,9 @@ namespace ZLevels
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			if (pawn.Reserve(job.GetTarget(TargetIndex.B), job, 1, -1, null, errorOnFailed))
-			{
-				return pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed);
-			}
-			return false;
+			pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed);
+			pawn.Reserve(job.GetTarget(TargetIndex.B), job, 1, -1, null, errorOnFailed);
+			return true;
 		}
 
 		public override void Notify_Starting()
@@ -81,27 +79,17 @@ namespace ZLevels
 			{
 				this.FailOnForbidden(TargetIndex.A);
 			}
-			yield return new Toil
+
+			var ZTracker = ZUtils.ZTracker;
+			if (pawn.Map == this.job.targetA.Thing.Map && pawn.Map == ZTracker.jobTracker[pawn].dest)
 			{
-				initAction = delegate ()
-				{
-					ZLogger.Message("200 TargetA.Thing: " + TargetA.Thing);
-					ZLogger.Message("200 TargetA.Thing.Position: " + TargetA.Thing?.Position);
-					ZLogger.Message("200 TargetA.Thing.Map: " + TargetA.Thing?.Map);
-					ZLogger.Message("200 TargetA.Thing.stackCount: " + TargetA.Thing?.stackCount);
-					var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-
-					for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-					{
-						var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
-
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB: " + target.Thing);
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB.Map: " + target.Thing.Map);
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB.stackCount: " + target.Thing.stackCount);
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB.countQueue: " + ZTracker.jobTracker[pawn].mainJob.countQueue[i]);
-					}
-				}
-			};
+				ZLogger.Message("pawn map and thing map and dest map are same, yield breaking in JobDriver_HaulThingToDest");
+				yield break;
+			}
+			foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), TargetA.Thing.Map, this))
+			{
+				yield return toil;
+			}
 
 			Toil reserveTargetA = Toils_Reserve.Reserve(TargetIndex.A);
 			yield return reserveTargetA;
@@ -120,27 +108,13 @@ namespace ZLevels
 				}
 				return false;
 			});
+			
 			yield return toilGoto;
 			yield return new Toil
 			{
 				initAction = delegate ()
 				{
-					ZLogger.Message("200.3 TargetA.Thing: " + TargetA.Thing);
-					ZLogger.Message("200.3 TargetA.Thing.Position: " + TargetA.Thing?.Position);
-					ZLogger.Message("200.3 TargetA.Thing.Map: " + TargetA.Thing?.Map);
-					ZLogger.Message("200.3 TargetA.Thing.stackCount: " + TargetA.Thing?.stackCount);
 					this.savedThing = TargetA.Thing;
-					var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-
-					for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-					{
-						var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
-
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB: " + target.Thing);
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB.Map: " + target.Thing.Map);
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB.stackCount: " + target.Thing.stackCount);
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB.countQueue: " + ZTracker.jobTracker[pawn].mainJob.countQueue[i]);
-					}
 				}
 			};
 
@@ -149,6 +123,11 @@ namespace ZLevels
 			{
 				yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveTargetA, TargetIndex.A, TargetIndex.B);
 			}
+			foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].dest, this))
+			{
+				yield return toil;
+			}
+
 			Toil carryToCell = Toils_Haul.CarryHauledThingToCell(TargetIndex.B);
 			yield return carryToCell;
 			yield return new Toil
@@ -161,8 +140,6 @@ namespace ZLevels
 					ZLogger.Message("200.5 TargetA.Thing.Position: " + TargetA.Thing?.Position);
 					ZLogger.Message("200.5 TargetA.Thing.Map: " + TargetA.Thing?.Map);
 					ZLogger.Message("200.5 TargetA.Thing.stackCount: " + TargetA.Thing?.stackCount);
-					var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-
 					for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
 					{
 						var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
@@ -175,15 +152,6 @@ namespace ZLevels
 				}
 			};
 
-			yield return new Toil
-			{
-				initAction = delegate ()
-				{
-					ZLogger.Message("Pawn: " + pawn);
-					ZLogger.Message("pawn.Map: " + pawn.Map);
-					ZLogger.Message("TargetB: " + TargetB);
-				}
-			};
 			yield return new Toil
 			{
 				initAction = delegate ()
@@ -198,7 +166,6 @@ namespace ZLevels
 						{
 							job.targetB = new LocalTargetInfo(center);
 						}
-
 						else if (CellFinder.TryFindRandomCellNear(TargetB.Cell, pawn.Map, 3,
 						    (IntVec3 c) => c.GetFirstItem(pawn.Map)?.def != TargetA.Thing.def, out newPosition))
 						{
@@ -208,23 +175,12 @@ namespace ZLevels
 				}
 			};
 
-			yield return new Toil
-			{
-				initAction = delegate ()
-				{
-					ZLogger.Message("2 Pawn: " + pawn);
-					ZLogger.Message("2 pawn.Map: " + pawn.Map);
-					ZLogger.Message("2 TargetB: " + TargetB);
-				}
-			};
-
 			yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.B, carryToCell, false);
 
 			yield return new Toil
 			{
 				initAction = delegate ()
 				{
-					var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
 					ZLogger.Message("201 TargetA.Thing: " + TargetA.Thing);
 					ZLogger.Message("201 TargetA.Thing.Position: " + TargetA.Thing?.Position);
 					ZLogger.Message("201 TargetA.Thing.Map: " + TargetA.Thing?.Map);
@@ -254,20 +210,6 @@ namespace ZLevels
 							//ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.RemoveAt(ind);
 							//ZTracker.jobTracker[this.pawn].mainJob.countQueue.RemoveAt(ind);
 						}
-					}
-
-					ZLogger.Message("202 TargetA.Thing: " + TargetA.Thing);
-					ZLogger.Message("202 TargetA.Thing.Position: " + TargetA.Thing?.Position);
-					ZLogger.Message("202 TargetA.Thing.Map: " + TargetA.Thing?.Map);
-					ZLogger.Message("202 TargetA.Thing.stackCount: " + TargetA.Thing?.stackCount);
-					for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-					{
-						var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
-
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB: " + target.Thing);
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB.Map: " + target.Thing.Map);
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB.stackCount: " + target.Thing.stackCount);
-						ZLogger.Message("JobDriver_ZHaulToCell job.targetQueueB.countQueue: " + ZTracker.jobTracker[pawn].mainJob.countQueue[i]);
 					}
 				}
 			};

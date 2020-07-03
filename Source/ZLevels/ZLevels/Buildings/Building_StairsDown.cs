@@ -17,7 +17,7 @@ namespace ZLevels
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
-            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            var ZTracker = ZUtils.ZTracker;
             if (!ZTracker.stairsDown.ContainsKey(this.Map))
             {
                 ZTracker.stairsDown[this.Map] = new List<Thing>();
@@ -26,6 +26,7 @@ namespace ZLevels
             {
                 ZTracker.stairsDown[this.Map].Add(this);
             }
+            ZLogger.Message("Spawning " + this);
             if (!respawningAfterLoad)
             {
                 if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
@@ -66,11 +67,12 @@ namespace ZLevels
                     }
                 }
             }
+            ZTracker.totalStairsDown.Add(this);
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            var ZTracker = ZUtils.ZTracker;
             if (ZTracker.stairsDown[this.Map].Contains(this))
             {
                 ZTracker.stairsDown[this.Map].Remove(this);
@@ -119,8 +121,8 @@ namespace ZLevels
                             && GenSight.LineOfSight(this.Position, pawn.Position, this.Map))
                         {
                             if (this.visitedPawns == null) this.visitedPawns = new HashSet<string>();
-                            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-            
+                            var ZTracker = ZUtils.ZTracker;
+
                             if (!this.visitedPawns.Contains(pawn.ThingID))
                             {
                                 Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);

@@ -29,7 +29,7 @@ namespace ZLevels
                     Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
                     bool result = false;
                     var comp = map.GetComponent<MapComponentZLevel>();
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     if (map.Parent is MapParent_ZLevel && comp != null
                         && ZTracker.GetUpperLevel(map.Tile, map) != null &&
                         !ZTracker.GetUpperLevel(map.Tile, map).GetComponent<MapComponentZLevel>()

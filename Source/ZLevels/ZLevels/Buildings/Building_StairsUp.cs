@@ -17,7 +17,7 @@ namespace ZLevels
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
-            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            var ZTracker = ZUtils.ZTracker;
             if (!ZTracker.stairsUp.ContainsKey(this.Map))
             {
                 ZTracker.stairsUp[this.Map] = new List<Thing>();
@@ -26,6 +26,8 @@ namespace ZLevels
             {
                 ZTracker.stairsUp[this.Map].Add(this);
             }
+            ZLogger.Message("Spawning " + this);
+
             if (!respawningAfterLoad)
             {
                 if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
@@ -52,11 +54,12 @@ namespace ZLevels
                     }
                 }
             }
+            ZTracker.totalStairsUp.Add(this);
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            var ZTracker = ZUtils.ZTracker;
             if (ZTracker.stairsUp[this.Map].Contains(this))
             {
                 ZTracker.stairsUp[this.Map].Remove(this);
@@ -80,8 +83,8 @@ namespace ZLevels
                             pawn.HostileTo(this.Faction) && !pawn.mindState.MeleeThreatStillThreat
                             && GenSight.LineOfSight(this.Position, pawn.Position, this.Map))
                         {
-                            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-                            
+                            var ZTracker = ZUtils.ZTracker;
+
                             if (this.visitedPawns == null) this.visitedPawns = new HashSet<string>();
                             if (!this.visitedPawns.Contains(pawn.ThingID))
                             {

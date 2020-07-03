@@ -30,7 +30,7 @@ namespace ZLevels
 
                 if (pos.Roofed(map))
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     var upperMap = ZTracker.ZLevelsTracker[map.Tile]
                         .ZLevels.Values.Where(x => !pos.Roofed(x)
                         && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
@@ -61,7 +61,7 @@ namespace ZLevels
 
                 if (pos.Roofed(map))
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     var upperMap = ZTracker.ZLevelsTracker[map.Tile]
                         .ZLevels.Values.Where(x => !pos.Roofed(x)
                         && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
@@ -92,7 +92,7 @@ namespace ZLevels
 
                 if (pos.Roofed(map))
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     var upperMap = ZTracker.ZLevelsTracker[map.Tile]
                         .ZLevels.Values.Where(x => !pos.Roofed(x) 
                         && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
@@ -122,7 +122,7 @@ namespace ZLevels
                 ZLogger.Message("Spawning " + __result);
                 if (pos.Roofed(map))
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     var upperMap = ZTracker.ZLevelsTracker[map.Tile]
                         .ZLevels.Values.Where(x => !pos.Roofed(x)
                         && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)

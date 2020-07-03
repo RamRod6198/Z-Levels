@@ -10,8 +10,10 @@ using Verse;
 namespace ZLevels
 {
 	[HarmonyPatch(typeof(ColonistBar), "CheckRecacheEntries")]
-	public class ColonistBarPatch
+	public static class ColonistBarPatch
 	{
+		public static Texture2D AbandonButtonTex = ContentFinder<Texture2D>.Get("UI/Buttons/Abandon", true);
+
 		[HarmonyPostfix]
 		public static void Listener(ColonistBar __instance, ref List<ColonistBar.Entry> 
 			___cachedEntries, ref ColonistBarDrawLocsFinder ___drawLocsFinder, ref List<Vector2> 
@@ -27,7 +29,6 @@ namespace ZLevels
 						//	+ __instance.Size.x + " - " + __instance.Size.y);
 						Rect rect = new Rect(___cachedDrawLocs[i].x + (__instance.Size.x / 2f),
 							___cachedDrawLocs[i].y + (__instance.Size.y / 2f), __instance.Size.x / 2, __instance.Size.y / 2);
-						Texture2D AbandonButtonTex = ContentFinder<Texture2D>.Get("UI/Buttons/Abandon", true);
 						Matrix4x4 matrix = GUI.matrix;
 						Color color2 = GUI.color;
 						GUI.DrawTexture(rect, AbandonButtonTex);
@@ -49,7 +50,7 @@ namespace ZLevels
 										ZLogger.Message("Removing map: " + map);
 									}
 									var parent = map.Parent as MapParent_ZLevel;
-									var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+									var ZTracker = ZUtils.ZTracker;
 									parent.Abandon();
 									ZTracker.ZLevelsTracker[map.Tile].ZLevels.Remove(comp.Z_LevelIndex);
 
@@ -85,7 +86,7 @@ namespace ZLevels
 									}
 
 									var parent = map.Parent as MapParent_ZLevel;
-									var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+									var ZTracker = ZUtils.ZTracker;
 									parent.Abandon();
 									ZTracker.ZLevelsTracker[map.Tile].ZLevels.Remove(comp.Z_LevelIndex);
 

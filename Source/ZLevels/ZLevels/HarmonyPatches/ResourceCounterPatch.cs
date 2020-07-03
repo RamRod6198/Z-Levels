@@ -28,7 +28,7 @@ namespace ZLevels
             {
                 try
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
                     if (ZTracker.ZLevelsTracker.ContainsKey(map.Tile))
                     {
@@ -110,7 +110,7 @@ namespace ZLevels
                 ThingDef thingDef = entDef as ThingDef;
                 if (thingDef2.IsStuff && thingDef2.stuffProps.CanMake(thingDef))
                 {
-                    var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+                    var ZTracker = ZUtils.ZTracker;
                     foreach (var map in ZTracker.GetAllMaps(instance.Map.Tile))
                     {
                         if (map.listerThings.ThingsOfDef(thingDef2).Count > 0)
