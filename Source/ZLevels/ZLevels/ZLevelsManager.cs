@@ -509,6 +509,20 @@ namespace ZLevels
                     job = this.jobTracker[pawn].activeJobs[0];
                     if (job?.def != null)
                     {
+                        try
+                        {
+                            ZLogger.Message(pawn + " taking first job 1");
+                            foreach (var j in this.jobTracker[pawn].activeJobs)
+                            {
+                                ZLogger.Message("2 POSTFIX 2: " + j);
+                            }
+                            ZLogger.Message("2 POSTFIX 3: " + this.jobTracker[pawn].activeJobs[0]);
+                        }
+                        catch
+                        {
+
+                        }
+
                         ZLogger.Message(pawn + " CarriedThing " + pawn?.carryTracker?.CarriedThing);
                         if (pawn?.carryTracker?.CarriedThing != null)
                         {

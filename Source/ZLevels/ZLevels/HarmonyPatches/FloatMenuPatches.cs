@@ -457,12 +457,33 @@ namespace ZLevels
                                             {
                                                 Map oldMap = pawn.Map;
                                                 Job job = null;
+                                                Map dest = null;
                                                 foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                                                 {
                                                     if (workGiver_Scanner is WorkGiver_Refuel scanner1)
                                                     {
                                                         job = JobPatches.TryIssueJobPackagePatch.
                                                             JobOnThing(scanner1, pawn, item, true);
+                                                    }
+                                                    else if (workGiver_Scanner is WorkGiver_HaulGeneral || workGiver_Scanner is WorkGiver_HaulCorpses)
+                                                    {
+                                                        job = JobPatches.TryIssueJobPackagePatch.
+                                                            JobOnThing(pawn, item, ref dest);
+                                                    }
+                                                    else if (workGiver_Scanner is WorkGiver_DoBill scanner2)
+                                                    {
+                                                        job = JobPatches.TryIssueJobPackagePatch.
+                                                            JobOnThing(scanner2, pawn, item);
+                                                    }
+                                                    else if (workGiver_Scanner is WorkGiver_ConstructDeliverResourcesToBlueprints scanner3)
+                                                    {
+                                                        job = JobPatches.TryIssueJobPackagePatch.
+                                                            JobOnThing(scanner3, pawn, item);
+                                                    }
+                                                    else if (workGiver_Scanner is WorkGiver_ConstructDeliverResourcesToFrames scanner4)
+                                                    {
+                                                        job = JobPatches.TryIssueJobPackagePatch.
+                                                            JobOnThing(scanner4, pawn, item);
                                                     }
                                                     else
                                                     {
@@ -523,7 +544,14 @@ namespace ZLevels
                                                         job.workGiverDef = workGiver_Scanner.def;
                                                         action = delegate
                                                         {
-                                                            ZTracker.BuildJobListFor(pawn, oldMap, job);
+                                                            if (dest != null)
+                                                            {
+                                                                ZTracker.BuildJobListFor(pawn, dest, job);
+                                                            }
+                                                            else
+                                                            {
+                                                                ZTracker.BuildJobListFor(pawn, oldMap, job);
+                                                            }
                                                             ZLogger.Message(pawn + " taking job " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                                             if (pawn.jobs.TryTakeOrderedJob(ZTracker.jobTracker[pawn].activeJobs[0]) 
                                                             && workGiver2.forceMote != null)
