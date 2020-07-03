@@ -737,63 +737,11 @@ namespace ZLevels
                         float maxLevelPercentage = Traverse.Create(__instance).Field("maxLevelPercentage").GetValue<float>();
                         HungerCategory minCategory = Traverse.Create(__instance).Field("minCategory").GetValue<HungerCategory>();
 
-                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+                        foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                         {
-                            var stairs = new List<Thing>();
-
                             ZLogger.Message("Searching food job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
-
-                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                if (lowerMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = ZTracker.stairsUp[lowerMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                if (upperMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = ZTracker.stairsDown[upperMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-
-                            if (stairs != null && stairs.Count() > 0)
-                            {
-                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                var position = selectedStairs.Position;
-
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(position);
-                                ZLogger.Message("19 SetPosition for " + pawn + " to " + position);
-
-                            }
-                            else if (pawn.Map != oldMap && otherMap == oldMap)
-                            {
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(oldPosition);
-                                ZLogger.Message("4 SetPosition for " + pawn + " to " + oldPosition);
-                            }
-
                             result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap, maxLevelPercentage, minCategory);
-
                             if (result != null)
                             {
                                 ZLogger.Message(pawn + " got food job " + result + " - map: "
@@ -803,8 +751,8 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(oldPosition);
-                                ZLogger.Message("3 SetPosition for " + pawn + " to " + oldPosition);
 
+                                ZLogger.Message("3 SetPosition for " + pawn + " to " + oldPosition);
                                 ZTracker.BuildJobListFor(pawn, otherMap, result);
                                 __result = ZTracker.jobTracker[pawn].activeJobs[0];
                                 ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -1037,61 +985,12 @@ namespace ZLevels
                     bool CanDoDuringMedicalRest = Traverse.Create(__instance).Field("CanDoDuringMedicalRest").GetValue<bool>();
                     DefMap<JoyGiverDef, float> joyGiverChances = Traverse.Create(__instance).Field("joyGiverChances").GetValue<DefMap<JoyGiverDef, float>>();
 
-                    foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
                         ZLogger.Message(pawn + " - other map: " + otherMap);
-
-                        var stairs = new List<Thing>();
-
                         ZLogger.Message("Searching joy job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                             + " for " + ZTracker.GetMapInfo(oldMap));
 
-                        if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                        {
-                            Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                            if (lowerMap != null)
-                            {
-                                //ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
-                                stairs = ZTracker.stairsUp[lowerMap];
-                            }
-                            else
-                            {
-                                ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                            }
-                        }
-                        else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                        {
-                            Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                            if (upperMap != null)
-                            {
-                                //ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
-                                stairs = ZTracker.stairsDown[upperMap];
-                            }
-                            else
-                            {
-                                ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                            }
-                        }
-
-                        if (stairs != null && stairs.Count() > 0)
-                        {
-                            var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                            var position = selectedStairs.Position;
-                            Traverse.Create(pawn).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                            Traverse.Create(pawn).Field("positionInt")
-                                .SetValue(position);
-                            ZLogger.Message("5 SetPosition for " + pawn + " to " + position);
-                        }
-                        else if (pawn.Map != oldMap && otherMap == oldMap)
-                        {
-                            Traverse.Create(pawn).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                            Traverse.Create(pawn).Field("positionInt")
-                                .SetValue(oldPosition);
-                            ZLogger.Message("6 SetPosition for " + pawn + " to " + oldPosition);
-
-                        }
                         result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, joyGiverChances, __instance);
                         if (result != null)
                         {
@@ -1279,60 +1178,10 @@ namespace ZLevels
                         RestCategory minCategory = Traverse.Create(__instance).Field("minCategory").GetValue<RestCategory>();
                         float maxLevelPercentage = Traverse.Create(__instance).Field("maxLevelPercentage").GetValue<float>();
 
-                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+                        foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                         {
                             ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
-
-                            var stairs = new List<Thing>();
-
-                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                if (lowerMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = ZTracker.stairsUp[lowerMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                if (upperMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = ZTracker.stairsDown[upperMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-
-                            if (stairs != null && stairs.Count() > 0)
-                            {
-                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                var position = selectedStairs.Position;
-
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(position);
-                                ZLogger.Message("8 SetPosition for " + pawn + " to " + position);
-                            }
-                            else if (pawn.Map != oldMap && otherMap == oldMap)
-                            {
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(oldPosition);
-                                ZLogger.Message("2 SetPosition for " + pawn + " to " + oldPosition);
-                            }
-
                             result = JobGiver_GetRestPatch.TryGiveJob(pawn, minCategory, maxLevelPercentage);
                             if (result != null && result.targetA.Thing != null)
                             {
@@ -2182,61 +2031,10 @@ namespace ZLevels
 
                     var ZTracker = ZUtils.ZTracker;
 
-                    foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
                         if (otherMap != oldMap)
                         {
-                            var stairs = otherMap.listerThings.AllThings.Where(x => x is Building_StairsDown
-                            || x is Building_StairsUp).ToList();
-
-                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                if (lowerMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = ZTracker.stairsUp[lowerMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                if (upperMap != null)
-                                {
-                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
-                                    stairs = ZTracker.stairsDown[upperMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-
-                            if (stairs != null && stairs.Count() > 0)
-                            {
-                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                var position = selectedStairs.Position;
-
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(position);
-                                ZLogger.Message("19 SetPosition for " + pawn + " to " + position);
-
-                            }
-                            else if (pawn.Map != oldMap && otherMap == oldMap)
-                            {
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(oldPosition);
-                                ZLogger.Message("4 SetPosition for " + pawn + " to " + oldPosition);
-                            }
-
                             job2 = method.GetValue<Job>();
                             if (job2 != null)
                             {
@@ -2332,29 +2130,14 @@ namespace ZLevels
 
                     var ZTracker = ZUtils.ZTracker;
 
-                    foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
+                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
                         if (otherMap != oldMap)
                         {
-                            var stairs = otherMap.listerThings.AllThings.Where(x => x is Building_StairsDown
-                            || x is Building_StairsUp).ToList();
-
-                            if (stairs != null && stairs.Count() > 0)
+                            job2 = method.GetValue<Job>();
+                            if (job2 != null)
                             {
-                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                var position = selectedStairs.Position;
-
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(position);
-                                ZLogger.Message("15 SetPosition for " + pawn + " to " + position);
-
-                                job2 = method.GetValue<Job>();
-                                if (job2 != null)
-                                {
-                                    break;
-                                }
+                                break;
                             }
                         }
                     }
@@ -2655,7 +2438,6 @@ namespace ZLevels
                         IntVec3 position = IntVec3.Invalid;
                         if (!entryPoints.ContainsKey(otherMap))
                         {
-
                             var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
                             position = selectedStairs.Position;
                             entryPoints[otherMap] = position;
@@ -2743,75 +2525,8 @@ namespace ZLevels
                 {
                     WorkGiver workGiver = list[j];
                     //ZLogger.Message(pawn + " - " + workGiver);
-                    foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
-                        //ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
-                        //        + " for " + ZTracker.GetMapInfo(oldMap));
-                        var stairs = new List<Thing>();
-                        //ZLogger.Message("Iterate over " + ZTracker.GetMapInfo(otherMap));
-                        if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                        {
-                            Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                            if (lowerMap != null)
-                            {
-                                //ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(lowerMap));
-                                stairs = ZTracker.stairsUp[lowerMap];
-                                foreach (var s in ZTracker.stairsUp[lowerMap])
-                                {
-                                    //ZLogger.Message("Adding upper stairs: " + s + " from "
-                                    //     + ZTracker.GetMapInfo(lowerMap));
-                                }
-                            }
-                            else
-                            {
-                                ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                            }
-                        }
-                        else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                        {
-                            Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                            if (upperMap != null)
-                            {
-                                //ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(upperMap));
-                                stairs = ZTracker.stairsDown[upperMap];
-                                foreach (var s in ZTracker.stairsDown[upperMap])
-                                {
-                                    //ZLogger.Message("Adding lower stairs: " + s + " from "
-                                    //   + ZTracker.GetMapInfo(upperMap));
-                                }
-                            }
-                            //else
-                            //{
-                            //    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                            //}
-                        }
-                        if (stairs != null && stairs.Count() > 0)
-                        {
-                            IntVec3 position = IntVec3.Invalid;
-                            if (!entryPoints.ContainsKey(otherMap))
-                            {
-                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                position = selectedStairs.Position;
-                                entryPoints[otherMap] = position;
-                            }
-                            else
-                            {
-                                position = entryPoints[otherMap];
-                            }
-                            Traverse.Create(pawn).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                            Traverse.Create(pawn).Field("positionInt")
-                                .SetValue(position);
-                            //ZLogger.Message("17 SetPosition for " + pawn + " to " + position);
-                        }
-                        else if (pawn.Map != oldMap && otherMap == oldMap)
-                        {
-                            Traverse.Create(pawn).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                            Traverse.Create(pawn).Field("positionInt")
-                                .SetValue(oldPosition);
-                            //ZLogger.Message("18 SetPosition for " + pawn + " to " + oldPosition);
-                        }
                         if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                         {
                             break;
