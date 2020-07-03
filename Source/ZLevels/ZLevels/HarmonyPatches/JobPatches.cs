@@ -1581,7 +1581,8 @@ namespace ZLevels
         {
             private static bool Prefix(JobGiver_Work __instance, bool ___emergency, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
             {
-                ZLogger.Message(pawn + " emergency " + ___emergency);        
+                ZLogger.Message(pawn + " emergency " + ___emergency);
+            
                 var ZTracker = ZUtils.ZTracker;
                 ZTracker.ReCheckStairs();
                 ZLogger.Message(pawn + " start work search 1");
@@ -1658,6 +1659,7 @@ namespace ZLevels
                                             }
                                         }
                                         catch { };
+            
                                         __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
                                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
             
@@ -1747,6 +1749,20 @@ namespace ZLevels
                         {
                             ZTracker.BuildJobListFor(pawn, oldMap, result.Job);
                         }
+            
+                        try
+                        {
+                            foreach (var d in ZTracker.jobTracker[pawn].activeJobs)
+                            {
+                                ZLogger.Message("FINAL: Active jobs: " + d + " - " + pawn);
+                            }
+                            foreach (var t in pawn.jobs.jobQueue)
+                            {
+                                ZLogger.Message("FINAL: Active jobQueue: " + pawn + " - " + t.job);
+                            }
+                        }
+                        catch { }
+            
                         __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
                         ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
             
@@ -2590,6 +2606,7 @@ namespace ZLevels
                 job.haulMode = HaulMode.ToContainer;
                 return job;
             }
+
             public static Job JobOnThing(WorkGiver_Refuel scanner, Pawn pawn, Thing t, bool forced = false)
             {
                 var ZTracker = ZUtils.ZTracker;
@@ -2721,7 +2738,7 @@ namespace ZLevels
                 for (int j = 0; j < list.Count; j++)
                 {
                     WorkGiver workGiver = list[j];
-
+                    //ZLogger.Message(pawn + " - " + workGiver);
                     foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                     {
                         //ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
@@ -2759,17 +2776,16 @@ namespace ZLevels
                                     //   + ZTracker.GetMapInfo(upperMap));
                                 }
                             }
-                            else
-                            {
-                                ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                            }
+                            //else
+                            //{
+                            //    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                            //}
                         }
                         if (stairs != null && stairs.Count() > 0)
                         {
                             IntVec3 position = IntVec3.Invalid;
                             if (!entryPoints.ContainsKey(otherMap))
                             {
-                                //var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
                                 var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
                                 position = selectedStairs.Position;
                                 entryPoints[otherMap] = position;
@@ -2782,18 +2798,15 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(position);
+                            //ZLogger.Message("17 SetPosition for " + pawn + " to " + position);
                         }
                         else if (pawn.Map != oldMap && otherMap == oldMap)
                         {
-
-                            //JobManagerPatches.manualDespawn = true;
-                            //pawn.DeSpawn();
-                            //JobManagerPatches.manualDespawn = false;
-
                             Traverse.Create(pawn).Field("mapIndexOrState")
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
+                            //ZLogger.Message("18 SetPosition for " + pawn + " to " + oldPosition);
                         }
                         if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                         {
@@ -2826,6 +2839,9 @@ namespace ZLevels
 
                                     Predicate<Thing> deliverResourcesValidator2 = (Thing t) => !t.IsForbidden(pawn) &&
                                         JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t) != null;
+
+                                    Predicate<Thing> refuelValidator = (Thing t) => !t.IsForbidden(pawn) &&
+                                        JobOnThing((WorkGiver_Refuel)scanner, pawn, t) != null;
 
                                     Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn)
                                     && TryIssueJobPackagePatch.JobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null
@@ -2952,6 +2968,17 @@ namespace ZLevels
                                                 enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
                                                 enumerable != null);
                                         }
+
+                                        else if (scanner is WorkGiver_Refuel)
+                                        {
+                                            thing = GenClosest.ClosestThingReachable
+                                                (pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest,
+                                                scanner.PathEndMode, TraverseParms.For(pawn,
+                                                scanner.MaxPathDanger(pawn)), 9999f, refuelValidator,
+                                                enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch,
+                                                enumerable != null);
+                                        }
+
                                         else
                                         {
                                             thing = GenClosest.ClosestThingReachable
@@ -3076,12 +3103,19 @@ namespace ZLevels
                                     : JobOnThing(scanner3, pawn, bestTargetOfLastPriority.Thing);
                                 ZLogger.Message("4 - " + scannerWhoProvidedTarget + " - " + job3);
                             }
+                            else if (scannerWhoProvidedTarget is WorkGiver_Refuel scanner4)
+                            {
+                                job3 = (!bestTargetOfLastPriority.HasThing) ?
+                                    scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
+                                    : JobOnThing(scanner4, pawn, bestTargetOfLastPriority.Thing);
+                                ZLogger.Message("5 - " + scannerWhoProvidedTarget + " - " + job3);
+                            }
                             else
                             {
                                 job3 = (!bestTargetOfLastPriority.HasThing) ?
                                     scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                     : scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
-                                ZLogger.Message("5 - " + scannerWhoProvidedTarget + " - " + job3);
+                                ZLogger.Message("6 - " + scannerWhoProvidedTarget + " - " + job3);
                             }
 
                             if (job3 != null)

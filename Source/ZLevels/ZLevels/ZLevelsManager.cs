@@ -829,6 +829,7 @@ namespace ZLevels
                 //    {
                 //        ZLogger.Message("Active jobQueue 2: " + pawn + " - " + t.job);
                 //    }
+                //    ZLogger.Message("========================");
                 //}
                 //catch { }
                 ZLogger.Message(pawn + " - END TryTakeFirstJob");
@@ -1135,11 +1136,11 @@ namespace ZLevels
 
             ZLogger.Message("2 CARRIED TRHING: " + pawnToTeleport.carryTracker?.CarriedThing);
 
-            try
-            {
-                this.TryTakeFirstJob(pawnToTeleport);
-            }
-            catch { };
+            //try
+            //{
+            //    this.TryTakeFirstJob(pawnToTeleport);
+            //}
+            //catch { };
 
             try
             {
