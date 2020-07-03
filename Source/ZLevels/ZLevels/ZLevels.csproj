@@ -306,9 +306,8 @@
     <Compile Include="HarmonyPatches\SkyfallerPatches.cs" />
     <Compile Include="Jobs\JobDriver_HaulThingToDest.cs" />
     <Compile Include="Jobs\JobDriver_GoToMap.cs" />
-    <Compile Include="Jobs\JobDriver_GoToThingMap.cs" />
     <Compile Include="Jobs\Toils_ZLevels.cs" />
-    <Compile Include="Jobs\JobDriver_ZHaulToCell.cs" />
+    <Compile Include="Jobs\JobDriver_HaulThingToDestAndToCell.cs" />
     <Compile Include="MapRenderer\PawnRendererScaled.cs" />
     <Compile Include="MapRenderer\RenderPatches.cs" />
     <Compile Include="MapRenderer\SectionLayer_LowerFogOfWar.cs" />
@@ -340,7 +339,6 @@
     <Compile Include="HarmonyPatches\AnimalPatches.cs" />
     <Compile Include="Map\InfestationData.cs" />
     <Compile Include="Jobs\JobDriver_GoToStairs.cs" />
-    <Compile Include="Jobs\JobDriver_HaulThingToStairs.cs" />
     <Compile Include="JobTracker.cs" />
     <Compile Include="Map\MapComponentZLevel.cs" />
     <Compile Include="Map\MapParent_ZLevel.cs" />

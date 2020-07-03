@@ -207,7 +207,7 @@ namespace ZLevels
                         }
                         Job job = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
                         job.count = 1;
-                        ZTracker.BuildJobListFor(pawn, pawn.Map, pawn.Map, job, victim);
+                        ZTracker.BuildJobListFor(pawn, pawn.Map, job);
                         ZLogger.Message(pawn + " taking first job 3");
                         pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
                         PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Capturing, KnowledgeAmount.Total);
@@ -324,7 +324,7 @@ namespace ZLevels
                         {
                             Job job = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
                             job.count = 1;
-                            ZTracker.BuildJobListFor(pawn, pawn.Map, pawn.Map, job, victim);
+                            ZTracker.BuildJobListFor(pawn, pawn.Map, job);
                             ZLogger.Message(pawn + " taking first job 2");
                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
                             PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
@@ -333,7 +333,6 @@ namespace ZLevels
                 return floatOption;
             }
         }
-
 
         [HarmonyPatch(typeof(Pawn_JobTracker))]
         [HarmonyPatch("StartJob")]
@@ -455,7 +454,7 @@ namespace ZLevels
                                                         job.workGiverDef = workGiver_Scanner.def;
                                                         action = delegate
                                                         {
-                                                            ZTracker.BuildJobListFor(pawn, oldMap, oldMap, job, null);
+                                                            ZTracker.BuildJobListFor(pawn, oldMap, job);
                                                             ZLogger.Message(pawn + " taking job " + ZTracker.jobTracker[pawn].activeJobs[0]);
                                                             if (pawn.jobs.TryTakeOrderedJob(ZTracker.jobTracker[pawn].activeJobs[0]) 
                                                             && workGiver2.forceMote != null)
@@ -477,7 +476,7 @@ namespace ZLevels
                                                 menuOption.autoTakeable = true;
                                                 menuOption.autoTakeablePriority = workGiver2.autoTakeablePriorityDrafted;
                                             }
-                                            Log.Message("workGiver_Scanner: " + workGiver_Scanner 
+                                            ZLogger.Message("workGiver_Scanner: " + workGiver_Scanner 
                                                 + " - menuOption.Label: " + menuOption.Label);
                                             if (!opts.Any((FloatMenuOption op) => op.Label == menuOption.Label))
                                             {
@@ -634,7 +633,6 @@ namespace ZLevels
                     }
                 }
             }
-
 
             //[HarmonyPatch(typeof(FloatMenuMakerMap))]
             //[HarmonyPatch("TryMakeFloatMenu")]

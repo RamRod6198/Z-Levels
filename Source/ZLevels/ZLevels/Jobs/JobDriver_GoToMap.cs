@@ -10,24 +10,17 @@ namespace ZLevels
     {
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            Log.Message("JobDriver_GoToMap : JobDriver - TryMakePreToilReservations - return true; - 1", true);
             return true;
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            Log.Message("JobDriver_GoToMap : JobDriver - MakeNewToils - throw new System.NotImplementedException(); - 2", true);
-            throw new System.NotImplementedException();
+            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
+            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].dest, this))
+            {
+                yield return toil;
+            }
         }
-
-        //protected override IEnumerable<Toil> MakeNewToils()
-        //{
-        //    
-        //    foreach (var toil in Toils_ZLevels.GoToDest(GetActor(), this))
-        //    {
-        //        yield return toil;
-        //    }
-        //}
     }
 }
 

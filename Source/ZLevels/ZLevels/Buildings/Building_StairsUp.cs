@@ -26,6 +26,8 @@ namespace ZLevels
             {
                 ZTracker.stairsUp[this.Map].Add(this);
             }
+            ZLogger.Message("Spawning " + this);
+
             if (!respawningAfterLoad)
             {
                 if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
@@ -52,6 +54,7 @@ namespace ZLevels
                     }
                 }
             }
+            ZTracker.totalStairsUp.Add(this);
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)

@@ -32,11 +32,12 @@ namespace ZLevels
                         var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                         if (parent.finishedGeneration == true)
                         {
-                            if (ZTracker.GetZIndexFor(__instance) < 0)
+                            var ind = ZTracker.GetZIndexFor(__instance);
+                            if (ind < 0)
                             {
                                 __result = ZLevelsDefOf.ZL_UndegroundBiome;
                             }
-                            else if (ZTracker.GetZIndexFor(__instance) > 0)
+                            else if (ind > 0)
                             {
                                 __result = ZLevelsDefOf.ZL_UpperBiome;
                             }

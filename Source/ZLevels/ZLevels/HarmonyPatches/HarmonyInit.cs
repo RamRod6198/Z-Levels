@@ -48,6 +48,53 @@ namespace ZLevels
                 return true;
             }
         }
+
+        //[HarmonyPatch(typeof(PawnRenderer), "DrawEquipment")]
+        //public static class AvP_PawnRenderer_DrawEquipment_Cloak_Patch
+        //{
+        //    public static bool Prefix(PawnRenderer __instance)
+        //    {
+        //        return false;
+        //    }
+        //}
+
+        [HarmonyPatch(typeof(ColonistBarColonistDrawer), "DrawIcons")]
+        public static class DrawIcons_Patch
+        {
+            public static bool Prefix(Rect rect, Pawn colonist)
+            {
+                try
+                {
+                    if (colonist.CurJob != null && colonist.jobs.curDriver.asleep)
+                    {
+
+                    }
+                }
+                catch
+                {
+                    colonist.jobs.EndCurrentJob(JobCondition.Errored);
+                }
+
+                //Log.Message("colonist.CurJob != null && colonist.jobs.curDriver.asleep: "
+                //    + (colonist.CurJob != null && colonist.jobs.curDriver != null).ToString());
+                //
+                //Log.Message("colonist.CurJob != null && colonist.jobs.curDriver.asleep: " 
+                //    + (colonist.CurJob != null && colonist.jobs.curDriver.asleep).ToString());
+                //
+                //
+                //Log.Message("colonist.InAggroMentalState: " + colonist.InAggroMentalState);
+                //Log.Message("colonist.InMentalState: " + colonist.InMentalState);
+                //Log.Message("colonist.InBed() &&  && colonist.CurrentBed().Medical: " 
+                //    + (colonist.InBed() && colonist.CurrentBed().Medical).ToString());
+                //
+                //
+                //Log.Message("colonist.mindState.IsIdle: " + colonist.mindState.IsIdle);
+                //Log.Message("colonist.IsBurning(): " + colonist.IsBurning());
+                //Log.Message("colonist.Inspired: " + colonist.Inspired);
+
+                return true;
+            }
+        }
     }
 }
 
