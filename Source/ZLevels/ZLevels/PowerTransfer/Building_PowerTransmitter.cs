@@ -63,7 +63,7 @@ namespace ZLevels
             var baseComp = this.GetComp<CompPowerZTransmitter>();
             if (baseComp.PowerNet != null)
             {
-                if (baseComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).Count() > 1 
+                if (baseComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).Count() > 1
                     && this.lowerPowerComp == null && this.upperPowerComp == null)
                 {
                     baseComp.PowerNet.powerComps.Remove(baseComp);
@@ -108,12 +108,30 @@ namespace ZLevels
                     var upperMap = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
                     var lowerMap = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
 
+                    //Log.Message("this.upperTransmitter: " + this.upperTransmitter);
+                    //Log.Message("this.upperTransmitter.Spawned: " + this.upperTransmitter?.Spawned);
+                    //Log.Message("this.upperPowerComp: " + this.upperPowerComp);
+                    //Log.Message("this.lowerTransmitter: " + this.lowerTransmitter);
+                    //Log.Message("this.lowerTransmitter.Spawned: " + this.lowerTransmitter?.Spawned);
+                    //Log.Message("this.lowerPowerComp: " + this.lowerPowerComp);
+
+                    if (this.upperPowerComp != null && (upperTransmitter == null || !upperTransmitter.Spawned))
+                    {
+                        this.upperPowerComp = null;
+                        upperTransmitter = null;
+                    }
+                    if (this.lowerPowerComp != null && (lowerTransmitter == null || !lowerTransmitter.Spawned))
+                    {
+                        this.lowerPowerComp = null;
+                        lowerTransmitter = null;
+                    }
                     if (upperMap != null && this.upperPowerComp == null && Find.TickManager.TicksGame % 200 == 0)
                     {
                         foreach (var pos in GenRadial.RadialCellsAround(this.Position, 3f, true))
                         {
                             foreach (var t in pos.GetThingList(upperMap))
                             {
+                                Log.Message("Power candidate: " + t);
                                 if (t.TryGetComp<CompPowerTransmitter>() != null)
                                 {
                                     upperTransmitter = t;
@@ -126,7 +144,7 @@ namespace ZLevels
                                         {
                                             parent = this,
                                             powerOutputInt = 0,
-                                            PowerOn = true,
+                                            //PowerOn = true,
                                             transNet = upperComp.transNet
                                         };
                                         upperPowerComp.Initialize(new CompProperties_PowerZTransmitter());
@@ -160,7 +178,7 @@ namespace ZLevels
                                             parent = this,
                                             powerOutputInt = 0,
                                             transNet = lowerComp.transNet,
-                                            PowerOn = true
+                                            //PowerOn = true
                                         };
                                         lowerPowerComp.Initialize(new CompProperties_PowerZTransmitter());
                                         lowerComp.PowerNet.powerComps.Add(lowerPowerComp);
@@ -244,4 +262,3 @@ namespace ZLevels
 
     }
 }
-

@@ -70,6 +70,10 @@ namespace ZLevels
             ZTracker.totalStairsDown.Add(this);
         }
 
+        public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+        {
+            base.PostApplyDamage(dinfo, totalDamageDealt);
+        }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
             var ZTracker = ZUtils.ZTracker;
