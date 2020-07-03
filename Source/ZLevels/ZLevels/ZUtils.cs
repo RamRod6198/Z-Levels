@@ -38,7 +38,7 @@ namespace ZLevels
             foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
             {
                 var stairs = new List<Thing>();
-
+                ZLogger.Message("Trying to yield " + otherMap);
                 if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap) && !cantGoUP)
                 {
                     Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
@@ -75,15 +75,17 @@ namespace ZLevels
                     Traverse.Create(pawn).Field("positionInt")
                         .SetValue(position);
                     ZLogger.Message("19 SetPosition for " + pawn + " to " + position);
+                    ZLogger.Message("return " + otherMap);
                     yield return otherMap;
                 }
-                else if (pawn.Map != oldMap && otherMap == oldMap)
+                else if (otherMap == oldMap)
                 {
                     Traverse.Create(pawn).Field("mapIndexOrState")
                         .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                     Traverse.Create(pawn).Field("positionInt")
                         .SetValue(oldPosition);
                     ZLogger.Message("4 SetPosition for " + pawn + " to " + oldPosition);
+                    ZLogger.Message("return " + otherMap);
                     yield return otherMap;
                 }
                 else
@@ -97,6 +99,10 @@ namespace ZLevels
                     {
                         ZLogger.Message(pawn + " cant go down in " + ZTracker.GetMapInfo(otherMap));
                         cantGoDown = true;
+                    }
+                    else
+                    {
+                        ZLogger.Message("My bad...");
                     }
                 }
             }

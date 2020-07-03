@@ -2524,9 +2524,10 @@ namespace ZLevels
                 for (int j = 0; j < list.Count; j++)
                 {
                     WorkGiver workGiver = list[j];
-                    //ZLogger.Message(pawn + " - " + workGiver);
+                    ZLogger.Message(pawn + " - " + workGiver);
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
+                        ZLogger.Message(pawn + " search job in " + ZTracker.GetMapInfo(otherMap));
                         if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                         {
                             break;
