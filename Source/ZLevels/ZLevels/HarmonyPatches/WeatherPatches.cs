@@ -167,6 +167,51 @@ namespace ZLevels
                 return true;
             }
         }
+
+        [HarmonyPatch(typeof(GameConditionManager), "RegisterCondition")]
+        internal static class RegisterConditionPatch
+        {
+            public static bool AddCondition = false;
+
+            public static List<GameConditionDef> blackList = new List<GameConditionDef>
+            {
+                GameConditionDefOf.Aurora,
+                GameConditionDefOf.Eclipse,
+                GameConditionDefOf.SolarFlare,
+                GameConditionDefOf.ToxicFallout,
+                GameConditionDefOf.VolcanicWinter,
+                GameConditionDefOf.Flashstorm,
+                GameConditionDefOf.ToxicSpewer,
+                GameConditionDefOf.WeatherController,
+                GameConditionDef.Named("SunBlocker"),
+                GameConditionDef.Named("GiantSmokeCloud"),
+            };
+            private static bool Prefix(GameConditionManager __instance, GameCondition cond)
+            {
+                var ind = ZUtils.ZTracker.GetZIndexFor(__instance.ownerMap);
+                if (ind == 0)
+                {
+                    AddCondition = true;
+                    foreach (var map in ZUtils.ZTracker.GetAllMaps(__instance.ownerMap.Tile))
+                    {
+                        if (map != __instance.ownerMap)
+                        {
+                            map.gameConditionManager.RegisterCondition(cond);
+                        }
+                    }
+                    AddCondition = false;
+                }
+                else if (ind < 0 && (!AddCondition || blackList.Contains(cond.def)))
+                {
+                    return false;
+                }
+                else if (ind > 0 && !AddCondition)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
     }
 }
 
