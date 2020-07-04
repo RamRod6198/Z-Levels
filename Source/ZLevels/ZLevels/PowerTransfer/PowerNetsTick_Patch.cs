@@ -29,10 +29,47 @@ namespace ZLevels
                 try
                 {
                     var connectedPowerNets = Current.Game.GetComponent<ConnectedPowerNets>();
+                    int? keyToRemove = null;
+                    if (Find.TickManager.TicksGame % 60 == 0)
+                    {
+                        foreach (var powerNet in connectedPowerNets.powerNets)
+                        {
+                            foreach (var powerNet2 in connectedPowerNets.powerNets)
+                            {
+                                foreach (var c1 in powerNet.Value)
+                                {
+                                    foreach (var c2 in powerNet2.Value)
+                                    {
+                                        if (powerNet.Key != powerNet2.Key && c1 == c2)
+                                        {
+                                            ZLogger.Message("PowerNetsTick_Patch: " + c1 + " == " + c2);
+                                            if (powerNet.Value.Count > powerNet2.Value.Count)
+                                            {
+                                                keyToRemove = powerNet2.Key;
+                                            }
+                                            else if (powerNet.Value.Count < powerNet2.Value.Count)
+                                            {
+                                                keyToRemove = powerNet.Key;
+                                            }
+                                            else
+                                            {
+                                                keyToRemove = powerNet2.Key;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (keyToRemove.HasValue)
+                    {
+                        connectedPowerNets.powerNets.Remove(keyToRemove.Value);
+                    }
+
                     foreach (var powerNet in connectedPowerNets.powerNets)
                     {
                         powerNet.Value.RemoveAll(x => x == null);
-                        if (powerNet.Value.Count > 0)
+                        if (powerNet.Value.Count > 1)
                         {
                             Dictionary<CompPowerZTransmitter, float> compPowers = new Dictionary<CompPowerZTransmitter, float>();
                             foreach (var comp in powerNet.Value)
@@ -50,8 +87,8 @@ namespace ZLevels
                                 {
                                     comp.powerOutputInt = newValue - compPowers[comp];
                                 }
-                                //Log.Message(pawn + " - powerNet.Value: " + powerNet.Value.Count + " - newValue: " + newValue, true);
                             }
+                            //Log.Message("powerNet.Value: " + powerNet.Value.Count + " - newValue: " + newValue, true);
                         }
                     }
                 }

@@ -108,12 +108,15 @@ namespace ZLevels
                     var upperMap = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
                     var lowerMap = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
 
-                    //Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperTransmitter: " + this.upperTransmitter);
-                    //Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperTransmitter.Spawned: " + this.upperTransmitter?.Spawned);
-                    //Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperPowerComp: " + this.upperPowerComp);
-                    //Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerTransmitter: " + this.lowerTransmitter);
-                    //Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerTransmitter.Spawned: " + this.lowerTransmitter?.Spawned);
-                    //Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerPowerComp: " + this.lowerPowerComp);
+                    //if (Find.TickManager.TicksGame % 60 == 0)
+                    //{
+                    //    Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperTransmitter: " + this.upperTransmitter);
+                    //    Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperTransmitter.Spawned: " + this.upperTransmitter?.Spawned);
+                    //    Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperPowerComp: " + this.upperPowerComp);
+                    //    Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerTransmitter: " + this.lowerTransmitter);
+                    //    Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerTransmitter.Spawned: " + this.lowerTransmitter?.Spawned);
+                    //    Log.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerPowerComp: " + this.lowerPowerComp);
+                    //}
 
                     if (this.upperPowerComp != null && (upperTransmitter == null || !upperTransmitter.Spawned))
                     {
