@@ -189,13 +189,14 @@ namespace ZLevels
             private static bool Prefix(GameConditionManager __instance, GameCondition cond)
             {
                 var ind = ZUtils.ZTracker.GetZIndexFor(__instance.ownerMap);
-                if (ind == 0)
+                if (ind == 0 && !(__instance.ownerMap.Parent is MapParent_ZLevel))
                 {
                     AddCondition = true;
                     foreach (var map in ZUtils.ZTracker.GetAllMaps(__instance.ownerMap.Tile))
                     {
                         if (map != __instance.ownerMap)
                         {
+                            ZLogger.Message("Register: " + cond + " in the " + map, true);
                             map.gameConditionManager.RegisterCondition(cond);
                         }
                     }
@@ -214,4 +215,3 @@ namespace ZLevels
         }
     }
 }
-
