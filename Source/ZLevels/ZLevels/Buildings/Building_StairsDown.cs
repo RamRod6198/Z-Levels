@@ -70,9 +70,19 @@ namespace ZLevels
             ZTracker.totalStairsDown.Add(this);
         }
 
+        public bool giveDamage = true;
         public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
             base.PostApplyDamage(dinfo, totalDamageDealt);
+            Map lowerLevel = ZUtils.ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
+            if (giveDamage && lowerLevel != null && lowerLevel.listerThings.ThingsOfDef(ZLevelsDefOf.ZL_StairsUp)
+                .Where(x => x.Position == this.Position).FirstOrDefault() is Building_StairsUp stairsUp)
+            {
+                ZLogger.Message(stairsUp + ".HitPoints -= " + (int)totalDamageDealt);
+                stairsUp.giveDamage = false;
+                stairsUp.TakeDamage(dinfo);
+                stairsUp.giveDamage = true;
+            }
         }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
