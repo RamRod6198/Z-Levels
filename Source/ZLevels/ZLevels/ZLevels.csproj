@@ -302,6 +302,7 @@
   <ItemGroup>
     <Compile Include="ActiveArea.cs" />
     <Compile Include="HarmonyPatches\CombatPatches.cs" />
+    <Compile Include="HarmonyPatches\WealthPatches.cs" />
     <Compile Include="HarmonyPatches\TradePatches.cs" />
     <Compile Include="HarmonyPatches\ResourceCounterPatch.cs" />
     <Compile Include="HarmonyPatches\SkyfallerPatches.cs" />
