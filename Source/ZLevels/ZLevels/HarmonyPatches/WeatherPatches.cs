@@ -121,33 +121,22 @@ namespace ZLevels
             {
                 try
                 {
-                    Log.Message(" - Prefix - var ZTracker = ZUtils.ZTracker; - 1", true);
                     var ZTracker = ZUtils.ZTracker;
-                    Log.Message(" - Prefix - if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(___map.Tile) - 2", true);
                     if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(___map.Tile)
                         && ZTracker.GetZIndexFor(___map) < 0)
                     {
-                        Log.Message(" - Prefix - ___map.weatherManager.curWeather = null; - 3", true);
                         ___map.weatherManager.curWeather = null;
-                        Log.Message(" - Prefix - WeatherDef weatherDef = WeatherDefOf.Clear; - 4", true);
                         WeatherDef weatherDef = WeatherDefOf.Clear;
-                        Log.Message(" - Prefix - WeatherDef lastWeather = WeatherDefOf.Clear; - 5", true);
                         WeatherDef lastWeather = WeatherDefOf.Clear;
-                        Log.Message(" - Prefix - ___map.weatherManager.curWeather = weatherDef; - 6", true);
                         ___map.weatherManager.curWeather = weatherDef;
-                        Log.Message(" - Prefix - ___map.weatherManager.lastWeather = lastWeather; - 7", true);
                         ___map.weatherManager.lastWeather = lastWeather;
-                        Log.Message(" - Prefix - ___curWeatherDuration = weatherDef.durationRange.RandomInRange; - 8", true);
                         ___curWeatherDuration = weatherDef.durationRange.RandomInRange;
-                        Log.Message(" - Prefix - ___map.weatherManager.curWeatherAge = Rand.Range(0, ___curWeatherDuration); - 9", true);
                         ___map.weatherManager.curWeatherAge = Rand.Range(0, ___curWeatherDuration);
-                        Log.Message(" - Prefix - return false; - 10", true);
                         return false;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log.Message(" - Prefix - Log.Error(\"[Z-Levels] Patch_WeatherManager patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: \" + ex, true); - 11", true);
                     Log.Error("[Z-Levels] Patch_WeatherManager patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
                 }
                 return true;
