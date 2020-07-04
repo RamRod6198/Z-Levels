@@ -16,8 +16,6 @@ namespace ZLevels
 
         public int Z_LevelIndex = 0;
 
-        public bool finishedGeneration = true;
-
         public List<InfestationData> TotalInfestations;
         public MapParent_ZLevel()
         {
@@ -29,6 +27,7 @@ namespace ZLevels
             Scribe_Collections.Look<InfestationData>(ref this.TotalInfestations, "TotalInfestations", LookMode.Deep, null);
             Scribe_Values.Look<bool>(ref this.shouldBeDeleted, "shouldBeDeleted", false, false);
             Scribe_Values.Look<bool>(ref this.hasCaves, "hasCaves", false, false);
+            Scribe_Values.Look<int>(ref this.Z_LevelIndex, "Z_LevelIndex", 0, false);
         }
 
         public override IEnumerable<Gizmo> GetGizmos()

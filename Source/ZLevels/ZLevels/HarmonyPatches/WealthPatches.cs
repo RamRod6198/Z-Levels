@@ -24,13 +24,16 @@ namespace ZLevels
 		internal static class WealthItemsPatch
 		{
 			[HarmonyPrefix]
-			public static bool WealthItems(WealthWatcher __instance, Map ___map, ref float __result)
+			public static bool WealthItems(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
 				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthItems").GetValue<float>());
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
-					map.wealthWatcher.ForceRecount();
+					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
+					{
+						map.wealthWatcher.ForceRecount();
+					}
 					var value = Traverse.Create(map.wealthWatcher).Field("wealthItems").GetValue<float>();
 					result += value;
 					//Log.Message("Analyzing wealthItems: " + map + " - value: " + value);
@@ -45,13 +48,16 @@ namespace ZLevels
 		internal static class WealthBuildingsPatch
 		{
 			[HarmonyPrefix]
-			public static bool WealthBuildings(WealthWatcher __instance, Map ___map, ref float __result)
+			public static bool WealthBuildings(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
 				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthBuildings").GetValue<float>());
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
-					map.wealthWatcher.ForceRecount();
+					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
+					{
+						map.wealthWatcher.ForceRecount();
+					}
 					var value = Traverse.Create(map.wealthWatcher).Field("wealthBuildings").GetValue<float>();
 					result += value;
 					//Log.Message("Analyzing wealthBuildings: " + map + " - value: " + value);
@@ -66,13 +72,16 @@ namespace ZLevels
 		internal static class WealthFloorsOnlyPatch
 		{
 			[HarmonyPrefix]
-			public static bool WealthFloorsOnly(WealthWatcher __instance, Map ___map, ref float __result)
+			public static bool WealthFloorsOnly(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
 				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthFloorsOnly").GetValue<float>());
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
-					map.wealthWatcher.ForceRecount();
+					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
+					{
+						map.wealthWatcher.ForceRecount();
+					}
 					var value = Traverse.Create(map.wealthWatcher).Field("wealthFloorsOnly").GetValue<float>();
 					result += value;
 					//Log.Message("Analyzing wealthFloorsOnly: " + map + " - value: " + value);
@@ -87,13 +96,16 @@ namespace ZLevels
 		internal static class WealthPawnsPatch
 		{
 			[HarmonyPrefix]
-			public static bool WealthPawns(WealthWatcher __instance, Map ___map, ref float __result)
+			public static bool WealthPawns(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
 				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthPawns").GetValue<float>());
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
-					map.wealthWatcher.ForceRecount();
+					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
+					{
+						map.wealthWatcher.ForceRecount();
+					}
 					var value = Traverse.Create(map.wealthWatcher).Field("wealthPawns").GetValue<float>();
 					result += value;
 					//Log.Message("Analyzing wealthPawns: " + map + " - value: " + value);
@@ -108,7 +120,7 @@ namespace ZLevels
 		internal static class WealthTotalPatch
 		{
 			[HarmonyPrefix]
-			public static bool WealthTotal(WealthWatcher __instance, Map ___map, ref float __result)
+			public static bool WealthTotal(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
 				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthItems").GetValue<float>()
@@ -117,7 +129,10 @@ namespace ZLevels
 
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
-					map.wealthWatcher.ForceRecount();
+					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
+					{
+						map.wealthWatcher.ForceRecount();
+					}
 					var value = Traverse.Create(map.wealthWatcher).Field("wealthItems").GetValue<float>()
 								+ Traverse.Create(map.wealthWatcher).Field("wealthBuildings").GetValue<float>()
 								+ Traverse.Create(map.wealthWatcher).Field("wealthPawns").GetValue<float>();

@@ -217,38 +217,28 @@ namespace ZLevels
         public List<Map> GetAllMaps(int tile)
         {
             List<Map> maps = new List<Map>();
-            try
+            if (this.ZLevelsTracker.ContainsKey(tile))
             {
                 foreach (var map in this.ZLevelsTracker[tile].ZLevels.Values)
                 {
                     maps.Add(map);
                 }
-                return maps;
             }
-            catch
-            {
-                Log.Error("GetAllMaps returned null on " + tile);
-                return null;
-            }
+            return maps;   
         }
 
         public List<Map> GetAllMapsInClosestOrder(Map pawnMap)
         {
             List<Map> maps = new List<Map>();
-            try
+            if (this.ZLevelsTracker.ContainsKey(pawnMap.Tile))
             {
                 foreach (var map in this.ZLevelsTracker[pawnMap.Tile].ZLevels.Values.OrderBy(x =>
-                (int)Mathf.Abs(this.GetZIndexFor(x) - this.GetZIndexFor(pawnMap))))
+                    (int)Mathf.Abs(this.GetZIndexFor(x) - this.GetZIndexFor(pawnMap))))
                 {
                     maps.Add(map);
                 }
-                return maps;
             }
-            catch
-            {
-                Log.Error("GetAllMaps returned null on " + pawnMap);
-                return null;
-            }
+            return maps;
         }
 
         public int GetZIndexFor(Map map)
@@ -258,6 +248,7 @@ namespace ZLevels
                 int index;
                 if (this.mapIndex != null && this.mapIndex.TryGetValue(map, out index))
                 {
+                    //Log.Message("1 return: " + index + " for " + map, true);
                     return index;
                 }
                 else
@@ -268,6 +259,7 @@ namespace ZLevels
                         this.mapIndex = new Dictionary<Map, int>();
                     }
                     this.mapIndex[map] = comp.Z_LevelIndex;
+                    //Log.Message("2 return: " + comp.Z_LevelIndex + " for " + map, true);
                     return comp.Z_LevelIndex;
                 }
             }
@@ -1225,7 +1217,6 @@ namespace ZLevels
             string seedString = Find.World.info.seedString;
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
             Map newMap = null;
-            mapParent.finishedGeneration = false;
             mapParent.Z_LevelIndex = comp.Z_LevelIndex - 1;
             try
             {
@@ -1248,7 +1239,7 @@ namespace ZLevels
             {
                 newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef, mapParent.ExtraGenStepDefs, null);
             }
-            mapParent.finishedGeneration = true;
+            ZUtils.ZTracker.mapIndex[newMap] = mapParent.Z_LevelIndex;
 
             Find.World.info.seedString = seedString;
             try
@@ -1257,6 +1248,7 @@ namespace ZLevels
                 {
                     var newComp = newMap.GetComponent<MapComponentZLevel>();
                     newComp.Z_LevelIndex = comp.Z_LevelIndex - 1;
+                    ZUtils.ZTracker.mapIndex[newMap] = newComp.Z_LevelIndex;
                 }
                 GameCondition_NoSunlight gameCondition_NoSunlight =
                     (GameCondition_NoSunlight)GameConditionMaker.MakeCondition(ZLevelsDefOf.ZL_UndergroundCondition, -1);
@@ -1284,7 +1276,6 @@ namespace ZLevels
             string seedString = Find.World.info.seedString;
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
             Map newMap = null;
-            mapParent.finishedGeneration = false;
             mapParent.Z_LevelIndex = comp.Z_LevelIndex + 1;
             try
             {
@@ -1309,7 +1300,7 @@ namespace ZLevels
                 newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef,
                     mapParent.ExtraGenStepDefs, null);
             };
-            mapParent.finishedGeneration = true;
+            ZUtils.ZTracker.mapIndex[newMap] = mapParent.Z_LevelIndex;
             Find.World.info.seedString = seedString;
             try
             {
@@ -1317,6 +1308,7 @@ namespace ZLevels
                 {
                     var newComp = newMap.GetComponent<MapComponentZLevel>();
                     newComp.Z_LevelIndex = comp.Z_LevelIndex + 1;
+                    ZUtils.ZTracker.mapIndex[newMap] = newComp.Z_LevelIndex;
                     AdjustMapGeneration(newMap);
                 }
             }

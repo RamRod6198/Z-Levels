@@ -22,42 +22,35 @@ namespace ZLevels
         [HarmonyPatch(typeof(Map), "Biome", MethodType.Getter)]
         public class GetBiomePatch
         {
-            [HarmonyPostfix]
-            private static void MapBiomePostfix(Map __instance, ref BiomeDef __result)
+            [HarmonyPrefix]
+            private static bool MapBiomePostfix(Map __instance, ref BiomeDef __result)
             {
                 if (__instance.ParentHolder is MapParent_ZLevel parent)
                 {
-                    try
+                    if (parent.Z_LevelIndex < 0)
                     {
-                        if (parent.finishedGeneration == true)
-                        {
-                            var ind = ZUtils.ZTracker.GetZIndexFor(__instance);
-                            if (ind < 0)
-                            {
-                                __result = ZLevelsDefOf.ZL_UndegroundBiome;
-                            }
-                            else if (ind > 0)
-                            {
-                                __result = ZLevelsDefOf.ZL_UpperBiome;
-                            }
-                        }
-                        else
-                        {
-                            if (parent.Z_LevelIndex < 0)
-                            {
-                                __result = ZLevelsDefOf.ZL_UndegroundBiome;
-                            }
-                            else if (parent.Z_LevelIndex > 0)
-                            {
-                                __result = ZLevelsDefOf.ZL_UpperBiome;
-                            }
-                        }
+                        __result = ZLevelsDefOf.ZL_UndegroundBiome;
                     }
-                    catch (Exception ex)
+                    else if (parent.Z_LevelIndex > 0)
                     {
-                        Log.Error("[Z-Levels] MapBiomePostfix patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
-                    };
+                        __result = ZLevelsDefOf.ZL_UpperBiome;
+                    }
+                    else if (parent.Z_LevelIndex == 0)
+                    {
+                        var ind = ZUtils.ZTracker.GetZIndexFor(__instance);
+                        if (ind < 0)
+                        {
+                            __result = ZLevelsDefOf.ZL_UndegroundBiome;
+                        }
+                        else if (ind > 0)
+                        {
+                            __result = ZLevelsDefOf.ZL_UpperBiome;
+                        }
+                        parent.Z_LevelIndex = ind;
+                    }
+                    return false;
                 }
+                return true;
             }
         }
 
@@ -90,4 +83,3 @@ namespace ZLevels
         }
     }
 }
-

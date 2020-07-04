@@ -24,16 +24,15 @@ namespace ZLevels
         public class UpdateResourceCounts_Patch
         {
             [HarmonyPrefix]
-            private static bool Prefix(ResourceCounter __instance)
+            private static bool Prefix(ResourceCounter __instance, Map ___map)
             {
                 try
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-                    if (ZTracker.ZLevelsTracker.ContainsKey(map.Tile))
+                    if (ZTracker.ZLevelsTracker.ContainsKey(___map.Tile))
                     {
                         Dictionary<ThingDef, int> countedAllAmounts = new Dictionary<ThingDef, int>();
-                        foreach (var map1 in ZTracker.ZLevelsTracker[map.Tile].ZLevels.Values)
+                        foreach (var map1 in ZTracker.ZLevelsTracker[___map.Tile].ZLevels.Values)
                         {
                             map1.resourceCounter.ResetResourceCounts();
                             List<SlotGroup> allGroupsListForReading = map1.haulDestinationManager.AllGroupsListForReading;
@@ -58,7 +57,7 @@ namespace ZLevels
                             }
                         }
 
-                        foreach (var map1 in ZTracker.ZLevelsTracker[map.Tile].ZLevels.Values)
+                        foreach (var map1 in ZTracker.ZLevelsTracker[___map.Tile].ZLevels.Values)
                         {
                             foreach (var d in countedAllAmounts)
                             {

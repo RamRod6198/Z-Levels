@@ -656,7 +656,8 @@ namespace ZLevels
         public class JobGiver_GetFoodPatch
         {
             [HarmonyPrefix]
-            private static bool JobGiver_GetFoodPrefix(JobGiver_GetFood __instance, ref Job __result, Pawn pawn)
+            private static bool JobGiver_GetFoodPrefix(JobGiver_GetFood __instance, ref Job __result
+                , float ___maxLevelPercentage, HungerCategory ___minCategory, Pawn pawn)
             {
                 ZLogger.Message(pawn + " starting food search");
                 if (pawn.def.race.Humanlike)
@@ -734,14 +735,12 @@ namespace ZLevels
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
 
-                        float maxLevelPercentage = Traverse.Create(__instance).Field("maxLevelPercentage").GetValue<float>();
-                        HungerCategory minCategory = Traverse.Create(__instance).Field("minCategory").GetValue<HungerCategory>();
-
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                         {
                             ZLogger.Message("Searching food job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
-                            result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap, maxLevelPercentage, minCategory);
+                            result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap,
+                                ___maxLevelPercentage, ___minCategory);
                             if (result != null)
                             {
                                 ZLogger.Message(pawn + " got food job " + result + " - map: "
@@ -844,7 +843,8 @@ namespace ZLevels
         public class JobGiver_GetJoyPatch
         {
             [HarmonyPrefix]
-            private static bool JobGiver_GetJoyPrefix(JobGiver_GetJoy __instance, ref Job __result, Pawn pawn)
+            private static bool JobGiver_GetJoyPrefix(JobGiver_GetJoy __instance, ref Job __result,
+                 DefMap<JoyGiverDef, float> ___joyGiverChances, Pawn pawn)
             {
                 try
                 {
@@ -981,9 +981,7 @@ namespace ZLevels
                     bool select = false;
                     if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
                     var jobList = new Dictionary<Job, Map>();
-
                     bool CanDoDuringMedicalRest = Traverse.Create(__instance).Field("CanDoDuringMedicalRest").GetValue<bool>();
-                    DefMap<JoyGiverDef, float> joyGiverChances = Traverse.Create(__instance).Field("joyGiverChances").GetValue<DefMap<JoyGiverDef, float>>();
 
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
@@ -991,7 +989,7 @@ namespace ZLevels
                         ZLogger.Message("Searching joy job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                             + " for " + ZTracker.GetMapInfo(oldMap));
 
-                        result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, joyGiverChances, __instance);
+                        result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, ___joyGiverChances, __instance);
                         if (result != null)
                         {
                             ZLogger.Message(pawn + " got joy job " + result + " - map: "
@@ -1084,7 +1082,8 @@ namespace ZLevels
         public class JobGiver_GetRestPatch
         {
             [HarmonyPrefix]
-            private static bool JobGiver_GetRestPrefix(JobGiver_GetFood __instance, ref Job __result, Pawn pawn)
+            private static bool JobGiver_GetRestPrefix(JobGiver_GetFood __instance, ref Job __result,
+                RestCategory ___minCategory, float ___maxLevelPercentage, Pawn pawn)
             {
                 try
                 {
@@ -1175,14 +1174,11 @@ namespace ZLevels
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
 
-                        RestCategory minCategory = Traverse.Create(__instance).Field("minCategory").GetValue<RestCategory>();
-                        float maxLevelPercentage = Traverse.Create(__instance).Field("maxLevelPercentage").GetValue<float>();
-
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                         {
                             ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
-                            result = JobGiver_GetRestPatch.TryGiveJob(pawn, minCategory, maxLevelPercentage);
+                            result = JobGiver_GetRestPatch.TryGiveJob(pawn, ___minCategory, ___maxLevelPercentage);
                             if (result != null && result.targetA.Thing != null)
                             {
                                 ZLogger.Message(pawn + " got rest job " + result + " - map: "
