@@ -22,28 +22,28 @@ namespace ZLevels
         public class AnimalPatch2
         {
             [HarmonyPrefix]
-            private static bool SpawnAnimalPrefix(WildAnimalSpawner __instance, ref IntVec3 loc, ref bool __result)
+            private static bool SpawnAnimalPrefix(WildAnimalSpawner __instance, ref IntVec3 loc, 
+                ref bool __result, Map ___map)
             {
                 try
                 {
-                    Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
                     bool result = false;
-                    var comp = map.GetComponent<MapComponentZLevel>();
+                    var comp = ___map.GetComponent<MapComponentZLevel>();
                     var ZTracker = ZUtils.ZTracker;
-                    if (map.Parent is MapParent_ZLevel && comp != null
-                        && ZTracker.GetUpperLevel(map.Tile, map) != null &&
-                        !ZTracker.GetUpperLevel(map.Tile, map).GetComponent<MapComponentZLevel>()
+                    if (___map.Parent is MapParent_ZLevel && comp != null
+                        && ZTracker.GetUpperLevel(___map.Tile, ___map) != null &&
+                        !ZTracker.GetUpperLevel(___map.Tile, ___map).GetComponent<MapComponentZLevel>()
                         .hasCavesBelow.GetValueOrDefault(false))
                     {
                         result = false;
                     }
                     else
                     {
-                        PawnKindDef pawnKindDef = (from a in map.Biome.AllWildAnimals
-                                                   where map.mapTemperature.SeasonAcceptableFor(a.race)
+                        PawnKindDef pawnKindDef = (from a in ___map.Biome.AllWildAnimals
+                                                   where ___map.mapTemperature.SeasonAcceptableFor(a.race)
                                                    select a)
                                                    .RandomElementByWeight((PawnKindDef def) =>
-                                                   map.Biome.CommonalityOfAnimal(def) / def.wildGroupSize.Average);
+                                                   ___map.Biome.CommonalityOfAnimal(def) / def.wildGroupSize.Average);
                         if (pawnKindDef == null)
                         {
                             Log.Error("No spawnable animals right now.");
@@ -51,17 +51,17 @@ namespace ZLevels
                         }
                         else
                         {
-                            ZLogger.Message("Spawning animal: " + pawnKindDef + " in biome: " + map.Biome);
+                            ZLogger.Message("Spawning animal: " + pawnKindDef + " in biome: " + ___map.Biome);
                             int randomInRange = pawnKindDef.wildGroupSize.RandomInRange;
                             int radius = Mathf.CeilToInt(Mathf.Sqrt((float)pawnKindDef.wildGroupSize.max));
-                            if (map.Parent is MapParent_ZLevel && !loc.Walkable(map))
+                            if (___map.Parent is MapParent_ZLevel && !loc.Walkable(___map))
                             {
-                                loc = CellFinderLoose.RandomCellWith((IntVec3 sq) => sq.Walkable(map), map);
+                                loc = CellFinderLoose.RandomCellWith((IntVec3 sq) => sq.Walkable(___map), ___map);
                             }
                             for (int i = 0; i < randomInRange; i++)
                             {
-                                IntVec3 loc2 = CellFinder.RandomClosewalkCellNear(loc, map, radius, null);
-                                GenSpawn.Spawn(PawnGenerator.GeneratePawn(pawnKindDef, null), loc2, map, WipeMode.Vanish);
+                                IntVec3 loc2 = CellFinder.RandomClosewalkCellNear(loc, ___map, radius, null);
+                                GenSpawn.Spawn(PawnGenerator.GeneratePawn(pawnKindDef, null), loc2, ___map, WipeMode.Vanish);
                             }
                             result = true;
                         }

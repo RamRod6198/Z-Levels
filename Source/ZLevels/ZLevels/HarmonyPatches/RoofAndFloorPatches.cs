@@ -39,7 +39,7 @@ namespace ZLevels
         [HarmonyPatch(typeof(TerrainGrid), "RemoveTopLayer")]
         public static class DestroyedTerrain
         {
-            public static bool Prefix(TerrainGrid __instance, IntVec3 c, bool doLeavings, Map ___map)
+            public static bool Prefix(TerrainGrid __instance, IntVec3 c, bool doLeavings, Map ___map, ref TerrainDef[] ___underGrid)
             {
                 try
                 {
@@ -51,11 +51,10 @@ namespace ZLevels
                         {
                             GenLeaving.DoLeavingsFor(__instance.topGrid[num], c, ___map);
                         }
-                        TerrainDef[] underGrid = Traverse.Create(__instance).Field("underGrid").GetValue<TerrainDef[]>();
-                        if (underGrid[num] != null)
+                        if (___underGrid[num] != null)
                         {
-                            __instance.topGrid[num] = underGrid[num];
-                            underGrid[num] = null;
+                            __instance.topGrid[num] = ___underGrid[num];
+                            ___underGrid[num] = null;
                             Traverse.Create(__instance).Method("DoTerrainChangedEffects", new object[]
                             {
                             c
@@ -140,15 +139,14 @@ namespace ZLevels
         [HarmonyPatch(typeof(RoofGrid), "SetRoof")]
         internal static class Patch_SetRoof
         {
-            private static void Prefix(RoofGrid __instance, ref IntVec3 c, ref RoofDef def)
+            private static void Prefix(RoofGrid __instance, ref IntVec3 c, ref RoofDef def, Map ___map)
             {
                 try
                 {
                     if (def != null && !def.isNatural)
                     {
-                        Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
                         var ZTracker = ZUtils.ZTracker;
-                        var upperMap = ZTracker.GetUpperLevel(map.Tile, map);
+                        var upperMap = ZTracker.GetUpperLevel(___map.Tile, ___map);
                         if (upperMap != null && upperMap.terrainGrid.TerrainAt(c) == ZLevelsDefOf.ZL_OutsideTerrain)
                         {
                             upperMap.terrainGrid.SetTerrain(c, ZLevelsDefOf.ZL_RoofTerrain);
@@ -156,11 +154,10 @@ namespace ZLevels
                     }
                     else if (def == null)
                     {
-                        Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-                        if (c.GetRoof(map) == RoofDefOf.RoofConstructed)
+                        if (c.GetRoof(___map) == RoofDefOf.RoofConstructed)
                         {
                             var ZTracker = ZUtils.ZTracker;
-                            Map upperMap = ZTracker.GetUpperLevel(map.Tile, map);
+                            Map upperMap = ZTracker.GetUpperLevel(___map.Tile, ___map);
                             if (upperMap != null)
                             {
                                 upperMap.terrainGrid.SetTerrain(c, ZLevelsDefOf.ZL_OutsideTerrain);
@@ -170,10 +167,10 @@ namespace ZLevels
                                     if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
                                     {
                                         //Log.Message(thingList[i] + " going down 3");
-                                        ZTracker.SimpleTeleportThing(thingList[i], c, map, false, 10);
+                                        ZTracker.SimpleTeleportThing(thingList[i], c, ___map, false, 10);
                                     }
                                 }
-                                ZLogger.Message("Removing roof " + c.GetRoof(map), true);
+                                ZLogger.Message("Removing roof " + c.GetRoof(___map), true);
                             }
                         }
                     }
@@ -188,15 +185,14 @@ namespace ZLevels
         [HarmonyPatch(typeof(TerrainGrid), "SetTerrain")]
         internal static class Patch_SetTerrain
         {
-            private static void Postfix(TerrainGrid __instance, ref IntVec3 c, ref TerrainDef newTerr)
+            private static void Postfix(TerrainGrid __instance, ref IntVec3 c, ref TerrainDef newTerr, Map ___map)
             {
                 try
                 {
                     if (newTerr != null && newTerr.Removable)
                     {
                         var ZTracker = ZUtils.ZTracker;
-                        Map map = Traverse.Create(__instance).Field("map").GetValue<Map>();
-                        var lowerMap = ZTracker.GetLowerLevel(map.Tile, map);
+                        var lowerMap = ZTracker.GetLowerLevel(___map.Tile, ___map);
                         if (lowerMap != null && lowerMap.roofGrid.RoofAt(c) != RoofDefOf.RoofConstructed)
                         {
                             lowerMap.roofGrid.SetRoof(c, RoofDefOf.RoofConstructed);

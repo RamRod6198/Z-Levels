@@ -28,12 +28,9 @@ namespace ZLevels
 						//ZLogger.Message("Rect: " + ___cachedDrawLocs[i].x + " - " + ___cachedDrawLocs[i].y + " - " 
 						//	+ __instance.Size.x + " - " + __instance.Size.y);
 						Rect rect = new Rect(___cachedDrawLocs[i].x + (__instance.Size.x / 2f),
-							___cachedDrawLocs[i].y + (__instance.Size.y / 2f), __instance.Size.x / 2, __instance.Size.y / 2);
-						Matrix4x4 matrix = GUI.matrix;
-						Color color2 = GUI.color;
+							___cachedDrawLocs[i].y + (__instance.Size.y / 2f),
+							__instance.Size.x / 3, __instance.Size.y / 3);
 						GUI.DrawTexture(rect, AbandonButtonTex);
-						GUI.color = color2;
-						GUI.matrix = matrix;
 						if (Mouse.IsOver(rect))
 						{
 							if (Input.GetMouseButtonDown(0) && ___cachedEntries[i].map != null)

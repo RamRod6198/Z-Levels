@@ -1225,7 +1225,6 @@ namespace ZLevels
             string seedString = Find.World.info.seedString;
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
             Map newMap = null;
-            mapParent.finishedGeneration = false;
             mapParent.Z_LevelIndex = comp.Z_LevelIndex - 1;
             try
             {
@@ -1248,7 +1247,6 @@ namespace ZLevels
             {
                 newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef, mapParent.ExtraGenStepDefs, null);
             }
-            mapParent.finishedGeneration = true;
 
             Find.World.info.seedString = seedString;
             try
@@ -1284,7 +1282,6 @@ namespace ZLevels
             string seedString = Find.World.info.seedString;
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
             Map newMap = null;
-            mapParent.finishedGeneration = false;
             mapParent.Z_LevelIndex = comp.Z_LevelIndex + 1;
             try
             {
@@ -1309,7 +1306,7 @@ namespace ZLevels
                 newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef,
                     mapParent.ExtraGenStepDefs, null);
             };
-            mapParent.finishedGeneration = true;
+
             Find.World.info.seedString = seedString;
             try
             {
