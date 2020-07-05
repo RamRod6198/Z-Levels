@@ -16,6 +16,10 @@ namespace ZLevels
 
         public int Z_LevelIndex = 0;
 
+        public bool IsUnderground = false;
+
+        public bool IsUpperLevel = false;
+
         public List<InfestationData> TotalInfestations;
         public MapParent_ZLevel()
         {
@@ -25,6 +29,8 @@ namespace ZLevels
         {
             base.ExposeData();
             Scribe_Collections.Look<InfestationData>(ref this.TotalInfestations, "TotalInfestations", LookMode.Deep, null);
+            Scribe_Values.Look<bool>(ref this.IsUnderground, "IsUnderground", false, false);
+            Scribe_Values.Look<bool>(ref this.IsUpperLevel, "IsUpperLevel", false, false);
             Scribe_Values.Look<bool>(ref this.shouldBeDeleted, "shouldBeDeleted", false, false);
             Scribe_Values.Look<bool>(ref this.hasCaves, "hasCaves", false, false);
             Scribe_Values.Look<int>(ref this.Z_LevelIndex, "Z_LevelIndex", 0, false);

@@ -23,31 +23,47 @@ namespace ZLevels
         public class GetBiomePatch
         {
             [HarmonyPrefix]
-            private static bool MapBiomePostfix(Map __instance, ref BiomeDef __result)
+            private static bool BiomePatch(Map __instance, ref BiomeDef __result)
             {
                 if (__instance.ParentHolder is MapParent_ZLevel parent)
                 {
-                    if (parent.Z_LevelIndex < 0)
+                    if (parent.IsUnderground)
                     {
                         __result = ZLevelsDefOf.ZL_UndegroundBiome;
                     }
-                    else if (parent.Z_LevelIndex > 0)
+                    else if (parent.IsUpperLevel)
                     {
                         __result = ZLevelsDefOf.ZL_UpperBiome;
                     }
-                    else if (parent.Z_LevelIndex == 0)
+                    else if (!parent.IsUpperLevel && !parent.IsUnderground)
                     {
-                        var ind = ZUtils.ZTracker.GetZIndexFor(__instance);
-                        if (ind < 0)
+                        if (parent.Z_LevelIndex < 0)
                         {
+                            parent.IsUnderground = true;
                             __result = ZLevelsDefOf.ZL_UndegroundBiome;
                         }
-                        else if (ind > 0)
+                        else if (parent.Z_LevelIndex > 0)
                         {
+                            parent.IsUpperLevel = true;
                             __result = ZLevelsDefOf.ZL_UpperBiome;
                         }
-                        parent.Z_LevelIndex = ind;
+                        else if (parent.Z_LevelIndex == 0)
+                        {
+                            var ind = ZUtils.ZTracker.GetZIndexFor(__instance);
+                            if (ind < 0)
+                            {
+                                parent.IsUnderground = true;
+                                __result = ZLevelsDefOf.ZL_UndegroundBiome;
+                            }
+                            else if (ind > 0)
+                            {
+                                parent.IsUpperLevel = true;
+                                __result = ZLevelsDefOf.ZL_UpperBiome;
+                            }
+                            parent.Z_LevelIndex = ind;
+                        }
                     }
+                    Log.Message(__result + " for " + __instance, true);
                     return false;
                 }
                 return true;

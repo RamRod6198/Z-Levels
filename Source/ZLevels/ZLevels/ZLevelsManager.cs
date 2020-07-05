@@ -1247,6 +1247,7 @@ namespace ZLevels
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
             Map newMap = null;
             mapParent.Z_LevelIndex = comp.Z_LevelIndex - 1;
+            mapParent.IsUnderground = true;
             try
             {
                 var pathToLoad = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
@@ -1306,6 +1307,7 @@ namespace ZLevels
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
             Map newMap = null;
             mapParent.Z_LevelIndex = comp.Z_LevelIndex + 1;
+            mapParent.IsUpperLevel = true;
             try
             {
                 var pathToLoad = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
