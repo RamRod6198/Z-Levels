@@ -53,8 +53,6 @@ namespace ZLevels
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed);
-			pawn.Reserve(job.GetTarget(TargetIndex.B), job, 1, -1, null, errorOnFailed);
 			return true;
 		}
 
@@ -74,7 +72,7 @@ namespace ZLevels
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
 			this.FailOnDestroyedOrNull(TargetIndex.A);
-			this.FailOnBurningImmobile(TargetIndex.B);
+			//this.FailOnBurningImmobile(TargetIndex.B);
 			if (!forbiddenInitially)
 			{
 				this.FailOnForbidden(TargetIndex.A);

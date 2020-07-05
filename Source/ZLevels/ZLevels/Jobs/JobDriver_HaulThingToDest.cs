@@ -30,8 +30,8 @@ namespace ZLevels
                     ZLogger.Message("1111111111111: " + this.savedThing);
                     ZLogger.Message("Saved thing: " + this.savedThing);
                     ZLogger.Message("TargetA: " + this.job.targetA.Thing);
-                    ZLogger.Message(ZTracker.ShowJobData(this.job));
-                    ZLogger.Message(ZTracker.ShowJobData(ZTracker.jobTracker[pawn].mainJob));
+                    ZLogger.Message(ZTracker.ShowJobData(this.job, pawn));
+                    ZLogger.Message(ZTracker.ShowJobData(ZTracker.jobTracker[pawn].mainJob, pawn));
                 }
             };
 
@@ -51,8 +51,8 @@ namespace ZLevels
                     ZLogger.Message("22222222222222: " + this.savedThing);
                     ZLogger.Message("Saved thing: " + this.savedThing);
                     ZLogger.Message("TargetA: " + this.job.targetA.Thing);
-                    ZLogger.Message(ZTracker.ShowJobData(this.job));
-                    ZLogger.Message(ZTracker.ShowJobData(ZTracker.jobTracker[pawn].mainJob));
+                    ZLogger.Message(ZTracker.ShowJobData(this.job, pawn));
+                    ZLogger.Message(ZTracker.ShowJobData(ZTracker.jobTracker[pawn].mainJob, pawn));
                 }
             };
 
@@ -135,8 +135,8 @@ namespace ZLevels
                     ZLogger.Message("33333333333333: " + this.savedThing);
                     ZLogger.Message("Saved thing: " + this.savedThing);
                     ZLogger.Message("TargetA: " + this.job.targetA.Thing);
-                    ZLogger.Message(ZTracker.ShowJobData(this.job));
-                    ZLogger.Message(ZTracker.ShowJobData(ZTracker.jobTracker[pawn].mainJob));
+                    ZLogger.Message(ZTracker.ShowJobData(this.job, pawn));
+                    ZLogger.Message(ZTracker.ShowJobData(ZTracker.jobTracker[pawn].mainJob, pawn));
                 }
             };
 

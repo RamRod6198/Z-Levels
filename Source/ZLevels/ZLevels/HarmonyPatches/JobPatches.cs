@@ -2566,35 +2566,36 @@ namespace ZLevels
                                     Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn)
                                     && HasJobOnThing(pawn, t, false) != null;
 
-                                    IEnumerable<Thing> enumerable;
+                                    IEnumerable<Thing> enumerable = scanner.PotentialWorkThingsGlobal(pawn);
 
-                                    if (scanner is WorkGiver_HaulGeneral || scanner is WorkGiver_HaulCorpses)
-                                    {
-                                        //Log.Message("HAULABLES 1: " + pawn.Map
-                                        //    .listerHaulables.ThingsPotentiallyNeedingHauling().Count);
-                                        //foreach (var t in pawn.Map.listerThings.AllThings.Where(x => x.def.EverHaulable))
-                                        //{
-                                        //    if (!pawn.Map.listerHaulables
-                                        //        .ThingsPotentiallyNeedingHauling().Contains(t))
-                                        //    {
-                                        //        Log.Message("Notify_Spawned: " + t);
-                                        //        IsInValidBestStoragePatch.CheckOtherMaps = true;
-                                        //        pawn.Map.listerHaulables.Notify_Spawned(t);
-                                        //        IsInValidBestStoragePatch.CheckOtherMaps = true;
-                                        //        pawn.Map.listerMergeables.Notify_Spawned(t);
-                                        //        IsInValidBestStoragePatch.CheckOtherMaps = false;
-                                        //    }
-                                        //}
-                                        //IsInValidBestStoragePatch.CheckOtherMaps = false;
-                                        //Log.Message("HAULABLES 2: " + pawn.Map
-                                        //    .listerHaulables.ThingsPotentiallyNeedingHauling().Count);
+                                    //if (scanner is WorkGiver_HaulGeneral || scanner is WorkGiver_HaulCorpses)
+                                    //{
+                                    //    //Log.Message("HAULABLES 1: " + pawn.Map
+                                    //    //    .listerHaulables.ThingsPotentiallyNeedingHauling().Count);
+                                    //    //foreach (var t in pawn.Map.listerThings.AllThings.Where(x => x.def.EverHaulable))
+                                    //    //{
+                                    //    //    if (!pawn.Map.listerHaulables
+                                    //    //        .ThingsPotentiallyNeedingHauling().Contains(t))
+                                    //    //    {
+                                    //    //        Log.Message("Notify_Spawned: " + t);
+                                    //    //        IsInValidBestStoragePatch.CheckOtherMaps = true;
+                                    //    //        pawn.Map.listerHaulables.Notify_Spawned(t);
+                                    //    //        IsInValidBestStoragePatch.CheckOtherMaps = true;
+                                    //    //        pawn.Map.listerMergeables.Notify_Spawned(t);
+                                    //    //        IsInValidBestStoragePatch.CheckOtherMaps = false;
+                                    //    //    }
+                                    //    //}
+                                    //    //IsInValidBestStoragePatch.CheckOtherMaps = false;
+                                    //    //Log.Message("HAULABLES 2: " + pawn.Map
+                                    //    //    .listerHaulables.ThingsPotentiallyNeedingHauling().Count);
+                                    //
+                                    //    enumerable = pawn.Map.listerHaulables.ThingsPotentiallyNeedingHauling();
+                                    //}
+                                    //else
+                                    //{
+                                    //    enumerable = scanner.PotentialWorkThingsGlobal(pawn);
+                                    //}
 
-                                        enumerable = pawn.Map.listerHaulables.ThingsPotentiallyNeedingHauling();
-                                    }
-                                    else
-                                    {
-                                        enumerable = scanner.PotentialWorkThingsGlobal(pawn);
-                                    }
                                     Thing thing = null;
                                     if (scanner.Prioritized)
                                     {
