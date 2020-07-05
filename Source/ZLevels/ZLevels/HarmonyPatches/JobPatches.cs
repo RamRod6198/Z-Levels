@@ -751,7 +751,6 @@ namespace ZLevels
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(oldPosition);
 
-                                ZLogger.Message("3 SetPosition for " + pawn + " to " + oldPosition);
                                 ZTracker.BuildJobListFor(pawn, otherMap, result);
                                 __result = ZTracker.jobTracker[pawn].activeJobs[0];
                                 ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -765,7 +764,6 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                             Traverse.Create(pawn).Field("positionInt")
                                 .SetValue(oldPosition);
-                            ZLogger.Message("19 SetPosition for " + pawn + " to " + oldPosition);
                         }
                         if (select) Find.Selector.Select(pawn);
                         return false;
@@ -1878,8 +1876,11 @@ namespace ZLevels
 
                     bool flag = false;
                     var ZTracker = ZUtils.ZTracker;
+                    var workBench = ((Thing)giver);
                     var origMap = giver.Map;
                     var origMap2 = pawn.Map;
+                    var origPosition1 = workBench.Position;
+                    var origPosition2 = pawn.Position;
                     ZLogger.Message(giver + " - billGiver.Map: " + ZTracker.GetMapInfo(giver.Map));
                     foreach (var map in ZTracker.GetAllMapsInClosestOrder(giver.Map))
                     {
@@ -1889,13 +1890,21 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(map));
                             Traverse.Create(pawn).Field("mapIndexOrState")
                                 .SetValue((sbyte)Find.Maps.IndexOf(map));
-
-                            ZLogger.Message("pawn.Map: " + ZTracker.GetMapInfo(pawn.Map));
-                            ZLogger.Message("billGiver.Map: " + ZTracker.GetMapInfo(giver.Map));
+                            if (origPosition1.GetEdifice(map) != null)
+                            {
+                                IntVec3 newGiverPosition = IntVec3.Invalid;
+                                if (CellFinder.TryFindRandomCellNear(origPosition1, map,
+                                    100, c => c.Walkable(map), out newGiverPosition))
+                                {
+                                    Traverse.Create(workBench).Field("positionInt")
+                                        .SetValue(newGiverPosition);
+                                }
+                            }
                             flag = Traverse.Create(scanner).Method("TryFindBestBillIngredients", new object[]
                                     {
                                         bill, pawn, (Thing)giver, chosenIngThings
                                     }).GetValue<bool>();
+                            ZLogger.Message("Found ingredients: " + flag + " in " + ZTracker.GetMapInfo(map) + " for " + bill);
                             if (flag) break;
                         }
                         catch (Exception ex)
@@ -1908,6 +1917,9 @@ namespace ZLevels
                         .SetValue((sbyte)Find.Maps.IndexOf(origMap));
                     Traverse.Create(pawn).Field("mapIndexOrState")
                         .SetValue((sbyte)Find.Maps.IndexOf(origMap2));
+                    Traverse.Create(workBench).Field("positionInt")
+                        .SetValue(origPosition1);
+
 
                     if (!flag)
                     {
@@ -2408,7 +2420,6 @@ namespace ZLevels
                         Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
                         if (lowerMap != null)
                         {
-                            //ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(lowerMap));
                             stairs = ZTracker.stairsUp[lowerMap];
                         }
                         else
@@ -2421,7 +2432,6 @@ namespace ZLevels
                         Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
                         if (upperMap != null)
                         {
-                            //ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(upperMap));
                             stairs = ZTracker.stairsDown[upperMap];
                         }
                         else

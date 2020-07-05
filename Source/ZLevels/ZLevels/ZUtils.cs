@@ -38,13 +38,11 @@ namespace ZLevels
             foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
             {
                 var stairs = new List<Thing>();
-                ZLogger.Message("Trying to yield " + otherMap);
                 if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap) && !cantGoUP)
                 {
                     Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
                     if (lowerMap != null)
                     {
-                        ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
                         stairs = ZTracker.stairsUp[lowerMap];
                     }
                     else
@@ -57,7 +55,6 @@ namespace ZLevels
                     Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
                     if (upperMap != null)
                     {
-                        ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
                         stairs = ZTracker.stairsDown[upperMap];
                     }
                     else
@@ -74,8 +71,6 @@ namespace ZLevels
                         .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                     Traverse.Create(pawn).Field("positionInt")
                         .SetValue(position);
-                    ZLogger.Message("19 SetPosition for " + pawn + " to " + position);
-                    ZLogger.Message("return " + otherMap);
                     yield return otherMap;
                 }
                 else if (otherMap == oldMap)
@@ -90,8 +85,6 @@ namespace ZLevels
                         Traverse.Create(pawn).Field("positionInt")
                             .SetValue(oldPosition);
                     }
-                    ZLogger.Message("4 SetPosition for " + pawn + " to " + oldPosition);
-                    ZLogger.Message("return " + otherMap);
                     yield return otherMap;
                 }
                 else

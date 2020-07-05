@@ -127,7 +127,6 @@ namespace ZLevels
                                 Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
                                 if (lowerMap != null)
                                 {
-                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
                                     stairs = ZTracker.stairsUp[lowerMap];
                                 }
                                 else
@@ -140,7 +139,6 @@ namespace ZLevels
                                 Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
                                 if (upperMap != null)
                                 {
-                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
                                     stairs = ZTracker.stairsDown[upperMap];
                                 }
                                 else
@@ -160,10 +158,9 @@ namespace ZLevels
                                     .SetValue(position);
                         
                                 Traverse.Create(victim).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
+                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                                 Traverse.Create(victim).Field("positionInt")
                                     .SetValue(position);
-                                ZLogger.Message("8 SetPosition for " + pawn + " to " + position);
                             }
                             else if (pawn.Map != oldMap && otherMap == oldMap)
                             {
@@ -176,7 +173,6 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                                 Traverse.Create(victim).Field("positionInt")
                                     .SetValue(oldPosition2);
-                                ZLogger.Message("40 SetPosition for " + pawn + " to " + oldPosition1);
                             }
                         
                         
@@ -185,7 +181,7 @@ namespace ZLevels
                             {
                                 building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, true);
                             }
-                                if (building_Bed != null) break;
+                            if (building_Bed != null) break;
                         }
 
                         Traverse.Create(pawn).Field("mapIndexOrState")
@@ -245,7 +241,6 @@ namespace ZLevels
                                 Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
                                 if (lowerMap != null)
                                 {
-                                    ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
                                     stairs = ZTracker.stairsUp[lowerMap];
                                 }
                                 else
@@ -258,7 +253,6 @@ namespace ZLevels
                                 Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
                                 if (upperMap != null)
                                 {
-                                    ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
                                     stairs = ZTracker.stairsDown[upperMap];
                                 }
                                 else
@@ -281,7 +275,6 @@ namespace ZLevels
                             .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
                                 Traverse.Create(victim).Field("positionInt")
                                     .SetValue(position);
-                                ZLogger.Message("8 SetPosition for " + pawn + " to " + position);
                             }
                             else if (pawn.Map != oldMap && otherMap == oldMap)
                             {
@@ -294,7 +287,6 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                                 Traverse.Create(victim).Field("positionInt")
                                     .SetValue(oldPosition2);
-                                ZLogger.Message("40 SetPosition for " + pawn + " to " + oldPosition1);
                             }
 
                             building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false, checkSocialProperness: false);
