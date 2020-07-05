@@ -72,6 +72,7 @@ namespace ZLevels
                 }
                 catch
                 {
+                    ZLogger.Pause("Error in JobDriver of " + colonist);
                     colonist.jobs.EndCurrentJob(JobCondition.Errored);
                 }
 

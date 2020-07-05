@@ -659,18 +659,28 @@ namespace ZLevels
             private static bool JobGiver_GetFoodPrefix(JobGiver_GetFood __instance, ref Job __result
                 , float ___maxLevelPercentage, HungerCategory ___minCategory, Pawn pawn)
             {
-                ZLogger.Message(pawn + " starting food search");
                 if (pawn.def.race.Humanlike)
                 {
+                    ZLogger.Message(pawn + " starting food search");
                     try
                     {
                         var ZTracker = ZUtils.ZTracker;
+
                         if (ZTracker.jobTracker == null)
                         {
                             ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
                         }
+
                         if (ZTracker.jobTracker.ContainsKey(pawn))
                         {
+                            foreach (var job in pawn.jobs.jobQueue)
+                            {
+                                ZLogger.Message(pawn + " - job in pawn queue: " + job.job);
+                            }
+                            foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
+                            {
+                                ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
+                            }
                             try
                             {
                                 if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
@@ -735,6 +745,13 @@ namespace ZLevels
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
 
+                        if (pawn.MentalStateDef != null)
+                        {
+                            ZLogger.Pause(pawn + " in mental state");
+                            __result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap,
+                                ___maxLevelPercentage, ___minCategory);
+                            return false;
+                        }
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                         {
                             ZLogger.Message("Searching food job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
@@ -980,7 +997,12 @@ namespace ZLevels
                     if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
                     var jobList = new Dictionary<Job, Map>();
                     bool CanDoDuringMedicalRest = Traverse.Create(__instance).Field("CanDoDuringMedicalRest").GetValue<bool>();
-
+                    if (pawn.MentalStateDef != null)
+                    {
+                        ZLogger.Pause(pawn + " in mental state");
+                        __result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, ___joyGiverChances, __instance);
+                        return false;
+                    }
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
                         ZLogger.Message(pawn + " - other map: " + otherMap);
@@ -1171,7 +1193,12 @@ namespace ZLevels
                         var oldPosition = pawn.Position;
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-
+                        if (pawn.MentalStateDef != null)
+                        {
+                            ZLogger.Pause(pawn + " in mental state");
+                            __result = JobGiver_GetRestPatch.TryGiveJob(pawn, ___minCategory, ___maxLevelPercentage);
+                            return false;
+                        }
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                         {
                             ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
