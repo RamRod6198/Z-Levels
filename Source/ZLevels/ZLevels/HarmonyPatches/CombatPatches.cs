@@ -1,43 +1,48 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Configuration;
-//using System.Linq;
-//using System.Linq.Expressions;
-//using System.Reflection;
-//using HarmonyLib;
-//using RimWorld;
-//using RimWorld.Planet;
-//using RimWorld.QuestGen;
-//using UnityEngine;
-//using Verse;
-//using Verse.AI;
-//using Verse.AI.Group;
-//
-//namespace ZLevels
-//{
-//    [StaticConstructorOnStartup]
-//    public static class CombatPatches
-//    {
-//		//  things to look for patching: 
-//		//  \.BestAttackTarget
-//		//	BestShootTargetFromCurrentPosition
-//		//	FindAttackTarget
-//		//	TryFindNewTarget
-//		//	\.enemyTarget
-//		//	FindPawnTarget
-//		//	CheckForAutoAttack
-//		//	TryStartAttack
-//		//	TryGetAttackVerb
-//		//	TryStartCastOn
-//
-//		[HarmonyPatch(typeof(CombatPatches), "BestAttackTarget")]
-//		public class CombatPatches_BestAttackTarget_Patch
-//		{
-//			public static bool Prefix(IAttackTargetSearcher searcher, ref Predicate<Thing> validator)
-//			{
-//				return true;
-//			}
-//		}
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using HarmonyLib;
+using RimWorld;
+using RimWorld.Planet;
+using RimWorld.QuestGen;
+using UnityEngine;
+using Verse;
+using Verse.AI;
+using Verse.AI.Group;
+
+namespace ZLevels
+{
+    [StaticConstructorOnStartup]
+    public static class CombatPatches
+    {
+		//  things to look for patching: 
+		//  \.BestAttackTarget
+		//	BestShootTargetFromCurrentPosition
+		//	FindAttackTarget
+		//	TryFindNewTarget
+		//	\.enemyTarget
+		//	FindPawnTarget
+		//	CheckForAutoAttack
+		//	TryStartAttack
+		//	TryGetAttackVerb
+		//	TryStartCastOn
+
+		[HarmonyPatch(typeof(CombatPatches), "BestAttackTarget")]
+		public class CombatPatches_BestAttackTarget_Patch
+		{
+			public static bool Prefix(IAttackTargetSearcher searcher, ref Predicate<Thing> validator)
+			{
+				Log.Message("TEST");
+				return true;
+			}
+			public static void PostFix(ref IAttackTarget __result, IAttackTargetSearcher searcher, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.40282347E+38f, bool canBash = false, bool canTakeTargetsCloserThanEffectiveMinRange = true)
+			{
+				Log.Message("TEST: " + __result);
+			}
+		}
 //
 //		public static IAttackTarget BestAttackTarget(IAttackTargetSearcher searcher, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.40282347E+38f, bool canBash = false, bool canTakeTargetsCloserThanEffectiveMinRange = true)
 //		{
@@ -699,6 +704,6 @@
 //		private static List<IntVec3> tempDestList = new List<IntVec3>();
 //
 //		private static List<IntVec3> tempSourceList = new List<IntVec3>();
-//	}
-//}
+	}
+}
 

@@ -7,6 +7,7 @@ using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
+using static RimWorld.ColonistBar;
 
 namespace ZLevels
 {
@@ -29,20 +30,74 @@ namespace ZLevels
     public static class ColonistBarOnGUIPatch
     {
         public static Texture2D AbandonButtonTex = ContentFinder<Texture2D>.Get("UI/Buttons/Abandon", true);
-        [HarmonyPostfix]
-        public static void Postfix(ColonistBar __instance, ref List<ColonistBar.Entry> ___cachedEntries, ref ColonistBarDrawLocsFinder ___drawLocsFinder, ref List<Vector2> ___cachedDrawLocs, ref float ___cachedScale)
+        [HarmonyPrefix]
+        public static void Prefix(ColonistBar __instance, ref List<ColonistBar.Entry> ___cachedEntries, 
+            ref List<Vector2> ___cachedDrawLocs)
         {
             try
             {
                 if (ColonistBarPatches.entriesDirty)
                 {
                     ColonistBarPatches.entriesDirty = false;
-                    ___cachedEntries = ___cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
+
+
+                    //for (int i = 0; i < ___cachedEntries.Count; i++)
+                    //{
+                    //    if (ZUtils.ZTracker.GetZIndexFor(___cachedEntries[i].map) < 0)
+                    //    {
+                    //        ___cachedEntries[i] = new Entry(___cachedEntries[i].pawn, ___cachedEntries[i].map, 0);
+                    //    }
+                    //    else if (ZUtils.ZTracker.GetZIndexFor(___cachedEntries[i].map) == 0)
+                    //    {
+                    //        ___cachedEntries[i] = new Entry(___cachedEntries[i].pawn, ___cachedEntries[i].map, 1);
+                    //    }
+                    //    else if (ZUtils.ZTracker.GetZIndexFor(___cachedEntries[i].map) > 0)
+                    //    {
+                    //        ___cachedEntries[i] = new Entry(___cachedEntries[i].pawn, ___cachedEntries[i].map, 2);
+                    //    }
+                    //}
+                    //
+                    //
+                    //var orderedZip = ___cachedEntries.Zip(___cachedDrawLocs, (x, y) => new { x, y })
+                    //                      .OrderBy(pair => pair.x.group)
+                    //                      .ToList();
+                    //___cachedEntries = orderedZip.Select(pair => pair.x).ToList();
+                    //___cachedDrawLocs = orderedZip.Select(pair => pair.y).ToList();
+
+                    //var sorted = ___cachedEntries.Zip(___cachedDrawLocs, (first, second) => new
+                    //{
+                    //    Key = first,
+                    //    Value = second
+                    //}).OrderBy(s => ZUtils.ZTracker.GetZIndexFor(s.Key.map));
+                    //
+                    //___cachedEntries = sorted.Select(s => s.Key).ToList();
+                    //___cachedDrawLocs = sorted.Select(s => s.Value).ToList();
+
+                    //Log.Message("--------------------------------");
+                    //foreach (var t in ___cachedEntries)
+                    //{
+                    //    Log.Message("pawn: " + t.pawn);
+                    //    Log.Message("map: " + t.map);
+                    //    Log.Message("group: " + t.group);
+                    //}
+                    //___cachedEntries = ___cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
+                    //foreach (var t in ___cachedEntries)
+                    //{
+                    //    Log.Message("pawn: " + t.pawn);
+                    //    Log.Message("map: " + t.map);
+                    //    Log.Message("group: " + t.group);
+                    //}
+
                 }
                 if (___cachedDrawLocs.Count == ___cachedEntries.Count)
                 {
                     for (int i = 0; i < ___cachedDrawLocs.Count; i++)
                     {
+                        //if (ShowGroupFrames(___cachedEntries))
+                        //{
+                        //    Log.Message("TEST");
+                        //    __instance.drawer.DrawGroupFrame(___cachedEntries[i].group);
+                        //}
                         if (___cachedEntries[i].pawn == null && ___cachedEntries[i].map.Parent is MapParent_ZLevel)
                         {
                             //ZLogger.Message("Rect: " + ___cachedDrawLocs[i].x + " - " + ___cachedDrawLocs[i].y + " - "
@@ -126,6 +181,16 @@ namespace ZLevels
                 }
             }
             catch { };
+        }
+
+        private static bool ShowGroupFrames(List<Entry> entries)
+        {
+            int num = -1;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                num = Mathf.Max(num, entries[i].group);
+            }
+            return num >= 1;
         }
     }
 }
