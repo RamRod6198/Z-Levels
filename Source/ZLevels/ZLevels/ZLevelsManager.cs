@@ -1347,6 +1347,8 @@ namespace ZLevels
                     (GameCondition_NoSunlight)GameConditionMaker.MakeCondition(ZLevelsDefOf.ZL_UndergroundCondition, -1);
                 gameCondition_NoSunlight.Permanent = true;
                 newMap.gameConditionManager.RegisterCondition(gameCondition_NoSunlight);
+                AdjustLowerMapGeneration(newMap);
+
             }
             catch
             {
@@ -1403,7 +1405,7 @@ namespace ZLevels
                     var newComp = newMap.GetComponent<MapComponentZLevel>();
                     newComp.Z_LevelIndex = comp.Z_LevelIndex + 1;
                     ZUtils.ZTracker.mapIndex[newMap] = newComp.Z_LevelIndex;
-                    AdjustMapGeneration(newMap);
+                    AdjustUpperMapGeneration(newMap);
                 }
             }
             catch
@@ -1441,7 +1443,25 @@ namespace ZLevels
             }
             return false;
         }
-        public void AdjustMapGeneration(Map map)
+
+        public void AdjustLowerMapGeneration(Map map)
+        {
+            try
+            {
+                Map mapUpper = this.GetUpperLevel(map.Tile, map);
+                foreach (var geyser in mapUpper.listerThings.AllThings.Where(x => x is Building_SteamGeyser))
+                {
+                    var newGeyser = ThingMaker.MakeThing(ThingDefOf.SteamGeyser);
+                    GenSpawn.Spawn(newGeyser, geyser.Position, map, WipeMode.Vanish);
+                    foreach (var pos in GenAdj.OccupiedRect(newGeyser))
+                    {
+                        pos.GetEdifice(map).Destroy(DestroyMode.Vanish);
+                    }
+                }
+            }
+            catch { };
+        }
+        public void AdjustUpperMapGeneration(Map map)
         {
             try
             {
