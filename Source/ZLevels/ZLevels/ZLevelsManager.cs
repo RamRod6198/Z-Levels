@@ -353,6 +353,7 @@ namespace ZLevels
             str += "Job.targetC: " + job.targetC + "\n";
             str += "Job.targetC: " + job.targetC.Thing?.Map + "\n";
             str += "Job.targetQueueA: " + job.targetQueueA + "\n";
+            str += "Job.haulOpportunisticDuplicates: " + job.haulOpportunisticDuplicates + "\n";
             try
             {
                 foreach (var t in job.targetQueueA)
@@ -397,6 +398,7 @@ namespace ZLevels
                 ZLogger.Message(pawn + " haul " + jobToDo.targetA.Thing + " to " + dest);
                 this.jobTracker[pawn].dest = dest;
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
+                job.haulOpportunisticDuplicates = false;
                 job.count = jobToDo.count;
                 tempJobs.Add(job);
             }
