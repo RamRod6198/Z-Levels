@@ -1882,6 +1882,7 @@ namespace ZLevels
                     var origPosition1 = workBench.Position;
                     var origPosition2 = pawn.Position;
                     ZLogger.Message(giver + " - billGiver.Map: " + ZTracker.GetMapInfo(giver.Map));
+                    ZLogger.Message(giver + " - billGiver.Position: " + workBench.Position);
                     foreach (var map in ZTracker.GetAllMapsInClosestOrder(giver.Map))
                     {
                         try
@@ -1890,16 +1891,24 @@ namespace ZLevels
                                 .SetValue((sbyte)Find.Maps.IndexOf(map));
                             Traverse.Create(pawn).Field("mapIndexOrState")
                                 .SetValue((sbyte)Find.Maps.IndexOf(map));
-                            if (origPosition1.GetEdifice(map) != null)
+                            if (origMap != map && workBench.Position.GetEdifice(map) != null)
                             {
                                 IntVec3 newGiverPosition = IntVec3.Invalid;
                                 if (CellFinder.TryFindRandomCellNear(origPosition1, map,
                                     100, c => c.Walkable(map), out newGiverPosition))
                                 {
+                                    ZLogger.Message(" 1 Changing position to " + newGiverPosition);
                                     Traverse.Create(workBench).Field("positionInt")
                                         .SetValue(newGiverPosition);
                                 }
                             }
+                            else if (workBench.Position != origPosition1)
+                            {
+                                ZLogger.Message(" 2 Changing position to " + origPosition1);
+                                Traverse.Create(workBench).Field("positionInt")
+                                    .SetValue(origPosition1);
+                            }
+                            ZLogger.Message("Current position " + workBench.Position);
                             flag = Traverse.Create(scanner).Method("TryFindBestBillIngredients", new object[]
                                     {
                                         bill, pawn, (Thing)giver, chosenIngThings
@@ -1912,6 +1921,7 @@ namespace ZLevels
                             Log.Error("Z-Levels failed to process HasJobOnThing of DoBill workgiver. Report about it to devs and provide Hugslib log. Error: " + ex);
                         }
                     }
+                    ZLogger.Message("Final position " + workBench.Position);
 
                     Traverse.Create(giver).Field("mapIndexOrState")
                         .SetValue((sbyte)Find.Maps.IndexOf(origMap));
