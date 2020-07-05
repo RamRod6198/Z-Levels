@@ -21,6 +21,7 @@ namespace ZLevels
 		{
 			try
 			{
+
 				for (int i = 0; i < ___cachedDrawLocs.Count; i++)
 				{
 					if (___cachedEntries[i].pawn == null && ___cachedEntries[i].map.Parent is MapParent_ZLevel)
@@ -106,7 +107,7 @@ namespace ZLevels
 			}
 			catch (Exception ex)
 			{
-
+				Log.Error("Error: " + ex);
 			}
 		}
 	}

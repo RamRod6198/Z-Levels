@@ -63,7 +63,6 @@ namespace ZLevels
                             parent.Z_LevelIndex = ind;
                         }
                     }
-                    Log.Message(__result + " for " + __instance, true);
                     return false;
                 }
                 return true;

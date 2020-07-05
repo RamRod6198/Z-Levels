@@ -301,6 +301,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveArea.cs" />
+    <Compile Include="HarmonyPatches\ColonistBarPatches.cs" />
     <Compile Include="HarmonyPatches\CombatPatches.cs" />
     <Compile Include="HarmonyPatches\WealthPatches.cs" />
     <Compile Include="HarmonyPatches\TradePatches.cs" />
@@ -344,7 +345,6 @@
     <Compile Include="JobTracker.cs" />
     <Compile Include="Map\MapComponentZLevel.cs" />
     <Compile Include="Map\MapParent_ZLevel.cs" />
-    <Compile Include="Map\MapRemover.cs" />
     <Compile Include="ZUtils.cs" />
     <Compile Include="PowerTransfer\CompPowerZTransmitter.cs" />
     <Compile Include="PowerTransfer\CompProperties_PowerZTransmitter.cs" />
