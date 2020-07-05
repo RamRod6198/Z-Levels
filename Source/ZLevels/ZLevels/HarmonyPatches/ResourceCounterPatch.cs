@@ -34,23 +34,26 @@ namespace ZLevels
                         Dictionary<ThingDef, int> countedAllAmounts = new Dictionary<ThingDef, int>();
                         foreach (var map1 in ZTracker.ZLevelsTracker[___map.Tile].ZLevels.Values)
                         {
-                            map1.resourceCounter.ResetResourceCounts();
-                            List<SlotGroup> allGroupsListForReading = map1.haulDestinationManager.AllGroupsListForReading;
-                            for (int i = 0; i < allGroupsListForReading.Count; i++)
+                            if (map1.resourceCounter != null)
                             {
-                                foreach (Thing outerThing in allGroupsListForReading[i].HeldThings)
+                                map1.resourceCounter.ResetResourceCounts();
+                                List<SlotGroup> allGroupsListForReading = map1.haulDestinationManager.AllGroupsListForReading;
+                                for (int i = 0; i < allGroupsListForReading.Count; i++)
                                 {
-                                    Thing innerIfMinified = outerThing.GetInnerIfMinified();
-                                    if (innerIfMinified.def.CountAsResource && !innerIfMinified.IsNotFresh())
+                                    foreach (Thing outerThing in allGroupsListForReading[i].HeldThings)
                                     {
-                                        ThingDef def = innerIfMinified.def;
-                                        if (countedAllAmounts.ContainsKey(def))
+                                        Thing innerIfMinified = outerThing.GetInnerIfMinified();
+                                        if (innerIfMinified.def.CountAsResource && !innerIfMinified.IsNotFresh())
                                         {
-                                            countedAllAmounts[def] += innerIfMinified.stackCount;
-                                        }
-                                        else
-                                        {
-                                            countedAllAmounts[def] = innerIfMinified.stackCount;
+                                            ThingDef def = innerIfMinified.def;
+                                            if (countedAllAmounts.ContainsKey(def))
+                                            {
+                                                countedAllAmounts[def] += innerIfMinified.stackCount;
+                                            }
+                                            else
+                                            {
+                                                countedAllAmounts[def] = innerIfMinified.stackCount;
+                                            }
                                         }
                                     }
                                 }
@@ -59,9 +62,12 @@ namespace ZLevels
 
                         foreach (var map1 in ZTracker.ZLevelsTracker[___map.Tile].ZLevels.Values)
                         {
-                            foreach (var d in countedAllAmounts)
+                            if (map1.resourceCounter != null)
                             {
-                                map1.resourceCounter.AllCountedAmounts[d.Key] = d.Value;
+                                foreach (var d in countedAllAmounts)
+                                {
+                                    map1.resourceCounter.AllCountedAmounts[d.Key] = d.Value;
+                                }
                             }
                         }
                         return false;

@@ -27,6 +27,13 @@ namespace ZLevels
         public override void GameComponentTick()
         {
             base.GameComponentTick();
+            //foreach (var tile in this.ZLevelsTracker)
+            //{
+            //    foreach (var map in this.ZLevelsTracker[tile.Key].ZLevels.Values)
+            //    {
+            //        Log.Message("Tile: " + tile.Key + " - Map: " + this.GetMapInfo(map));
+            //    }
+            //}
             if (Find.TickManager.TicksGame % 60 == 0)
             {
                 foreach (var tile in this.ZLevelsTracker)
@@ -235,8 +242,13 @@ namespace ZLevels
                 foreach (var map in this.ZLevelsTracker[pawnMap.Tile].ZLevels.Values.OrderBy(x =>
                     (int)Mathf.Abs(this.GetZIndexFor(x) - this.GetZIndexFor(pawnMap))))
                 {
+                    //ZLogger.Message("Yielding " + this.GetMapInfo(map));
                     maps.Add(map);
                 }
+            }
+            else
+            {
+                ZLogger.Pause(pawnMap + " has no registered maps");
             }
             return maps;
         }
@@ -286,14 +298,25 @@ namespace ZLevels
         {
             if (this.ZLevelsTracker == null)
             {
+                ZLogger.Message("2 Resetting ZLevelsTracker");
                 this.ZLevelsTracker = new Dictionary<int, ZLevelData>();
+            }
+            if (this.mapIndex == null)
+            {
+                this.mapIndex = new Dictionary<Map, int>();
             }
             if (this.ZLevelsTracker.ContainsKey(map.Tile))
             {
                 if (this.ZLevelsTracker[map.Tile].ZLevels == null)
                     this.ZLevelsTracker[map.Tile].ZLevels = new Dictionary<int, Map>();
                 this.ZLevelsTracker[map.Tile].ZLevels[index] = map;
-                ZLogger.Message("Registering " + this.GetMapInfo(map) + " for index: " + index);
+
+                if (!this.mapIndex.ContainsKey(map))
+                {
+                    this.mapIndex[map] = index;
+                }
+
+                ZLogger.Message("1 Registering " + this.GetMapInfo(map) + " for index: " + index);
                 return true;
             }
             else
@@ -305,7 +328,13 @@ namespace ZLevels
                         [index] = map
                     }
                 };
-                ZLogger.Message("Registering " + this.GetMapInfo(map) + " for index: " + index);
+
+                if (!this.mapIndex.ContainsKey(map))
+                {
+                    this.mapIndex[map] = index;
+                }
+
+                ZLogger.Message("2 Registering " + this.GetMapInfo(map) + " for index: " + index);
                 return true;
             }
             return false;
@@ -1515,6 +1544,45 @@ namespace ZLevels
                 LookMode.Value, ref this.mapKeys, ref this.mapValues);
             Scribe_Collections.Look<int, ZLevelData>(ref this.ZLevelsTracker, "ZLevelsTracker",
                 LookMode.Value, LookMode.Deep, ref this.Z_LevelsKeys, ref this.ZLevelsTrackerValues);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                try
+                {
+                    ZLogger.Message("START");
+                    if (this.mapIndex != null && this.mapIndex.Count > 0)
+                    {
+                        if (this.ZLevelsTracker == null)
+                        {
+                            this.ZLevelsTracker = new Dictionary<int, ZLevelData>();
+                            foreach (var d in this.mapIndex)
+                            {
+                                if (d.Key != null)
+                                {
+                                    ZLogger.Message("1 Registering map: " + d.Key + " - " + d.Value);
+                                    this.TryRegisterMap(d.Key, d.Value);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (var d in this.mapIndex)
+                            {
+                                if (d.Key != null)
+                                {
+                                    ZLogger.Message("2 Registering map: " + d.Key + " - " + d.Value);
+                                    this.TryRegisterMap(d.Key, d.Value);
+                                }
+
+                            }
+                        }
+                    }
+                    ZLogger.Message("END");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Z-Levels produced save reloading error: " + ex);
+                }
+            }
         }
 
         public Dictionary<Pawn, ActiveArea> activeAreas;
@@ -1541,3 +1609,4 @@ namespace ZLevels
 
     }
 }
+
