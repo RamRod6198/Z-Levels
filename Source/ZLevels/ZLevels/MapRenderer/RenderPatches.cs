@@ -46,12 +46,13 @@ namespace ZLevels
 							{
 								try
 								{
-									if (thing.Graphic is Graphic_Mote || thing.Graphic is Graphic_Linked)
+									if (thing.Graphic is Graphic_Mote)
 									{
 
 									}
 									else if (thing.Graphic is Graphic_LinkedCornerFiller
-										|| thing.Graphic is Graphic_RandomRotated)
+										|| thing.Graphic is Graphic_RandomRotated
+										 || thing.Graphic is Graphic_Linked)
 									{
 										thing.Draw();
 									}
