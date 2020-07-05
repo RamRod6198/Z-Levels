@@ -13,27 +13,30 @@ namespace ZLevels
     [HarmonyPatch(typeof(ColonistBar), "CheckRecacheEntries")]
     public static class ColonistBarPatches
     {
-        public static Texture2D AbandonButtonTex = ContentFinder<Texture2D>.Get("UI/Buttons/Abandon", true);
-
         public static bool entriesDirty = false;
 
         [HarmonyPrefix]
         public static void Prefix(ColonistBar __instance, bool ___entriesDirty)
         {
-            if (___entriesDirty)
+            if (___entriesDirty) 
             {
                 entriesDirty = true;
             }
         }
+    }
 
+    [HarmonyPatch(typeof(ColonistBar), "ColonistBarOnGUI")]
+    public static class ColonistBarOnGUIPatch
+    {
+        public static Texture2D AbandonButtonTex = ContentFinder<Texture2D>.Get("UI/Buttons/Abandon", true);
         [HarmonyPostfix]
         public static void Postfix(ColonistBar __instance, ref List<ColonistBar.Entry> ___cachedEntries, ref ColonistBarDrawLocsFinder ___drawLocsFinder, ref List<Vector2> ___cachedDrawLocs, ref float ___cachedScale)
         {
             try
             {
-                if (entriesDirty)
+                if (ColonistBarPatches.entriesDirty)
                 {
-                    entriesDirty = false;
+                    ColonistBarPatches.entriesDirty = false;
                     ___cachedEntries = ___cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
                 }
                 if (___cachedDrawLocs.Count == ___cachedEntries.Count)
