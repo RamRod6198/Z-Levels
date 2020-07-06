@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RimWorld;
 using Verse;
 using Verse.AI;
 
@@ -23,9 +24,9 @@ namespace ZLevels
 
 		public Map dest;
 
-		//public Thing selectedStairs;
-
 		public Job mainJob;
+
+		public List<WorkGiverDef> ignoreGiversInFirstTime;
 
 		public List<Job> activeJobs;
 	}

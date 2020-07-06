@@ -2122,8 +2122,9 @@ namespace ZLevels
                 return null;
             }
 
-            public static bool NoOneHasJobOn(Thing t, Pawn pawn)
+            public static bool NoOneHasSameJob(Job job, Pawn pawn, WorkGiverDef workGiverDef)
             {
+                ZLogger.Message("START JOBCHECK - " + pawn + " for " + workGiverDef);
                 var ZTracker = ZUtils.ZTracker;
                 try
                 {
@@ -2131,20 +2132,97 @@ namespace ZLevels
                     {
                         if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn)
                         {
+
                             var mainJob = ZTracker.jobTracker[jobPawn].mainJob;
-                            if (mainJob != null)
+                            ZLogger.Message("JOBCHECK: Checking " + jobPawn + " - " + mainJob);
+                            if (mainJob != null && mainJob.def == job.def)
                             {
-                                if (mainJob.targetA.Thing == t || mainJob.targetB.Thing == t)
+                                if (mainJob.targetA.Thing == job.targetA.Thing 
+                                    || mainJob.targetB.Thing == job.targetA.Thing)
                                 {
-                                    ZLogger.Message(pawn + "Someone has job on " + t + " - " + jobPawn);
+                                    ZLogger.Message("JOBCHECK: 1: " + pawn + " someone has same job " 
+                                        + mainJob + " - " + jobPawn);
                                     return false;
+                                }
+                                if (mainJob.targetQueueA != null)
+                                {
+                                    foreach (var thing in mainJob.targetQueueA)
+                                    {
+                                        if (job.targetQueueA.Contains(thing) || job.targetQueueA.Contains(thing))
+                                        {
+                                            ZLogger.Message("JOBCHECK: 2: " + pawn + " someone has same job " + job + " - " + jobPawn);
+                                            return false;
+                                        }
+                                    }
+                                }
+                                if (mainJob.targetQueueB != null)
+                                {
+                                    foreach (var thing in mainJob.targetQueueB)
+                                    {
+                                        if (job.targetQueueB.Contains(thing) || job.targetQueueB.Contains(thing))
+                                        {
+                                            ZLogger.Message("JOBCHECK: 3: " + pawn + " someone has same job " + job + " - " + jobPawn);
+                                            return false;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
                 catch { };
-                ZLogger.Message("No one has job on " + t);
+                ZLogger.Message("JOBCHECK: No one has same job " + job);
+                return true;
+            }
+
+            public static bool NoOneHasJobOn(Thing t, Pawn pawn, WorkGiverDef workGiverDef)
+            {
+                ZLogger.Message("START JOBCHECK - " + pawn + " for " + workGiverDef);
+                var ZTracker = ZUtils.ZTracker;
+                try
+                {
+                    foreach (var jobPawn in ZTracker.jobTracker.Keys)
+                    {
+                        if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn)
+                        {
+
+                            var mainJob = ZTracker.jobTracker[jobPawn].mainJob;
+                            ZLogger.Message("JOBCHECK: Checking " + jobPawn + " - " + mainJob);
+                            if (mainJob != null)
+                            {
+                                if (mainJob.targetA.Thing == t || mainJob.targetB.Thing == t)
+                                {
+                                    ZLogger.Message("JOBCHECK: 1: " + pawn + " someone has job on " + t + " - " + jobPawn);
+                                    return false;
+                                }
+                                if (mainJob.targetQueueA != null)
+                                {
+                                    foreach (var thing in mainJob.targetQueueA)
+                                    {
+                                        if (thing == t || thing == t)
+                                        {
+                                            ZLogger.Message("JOBCHECK: 2: " + pawn + " someone has job on " + t + " - " + jobPawn);
+                                            return false;
+                                        }
+                                    }
+                                }
+                                if (mainJob.targetQueueB != null)
+                                {
+                                    foreach (var thing in mainJob.targetQueueB)
+                                    {
+                                        if (thing == t || thing == t)
+                                        {
+                                            ZLogger.Message("JOBCHECK: 3: " + pawn + " someone has job on " + t + " - " + jobPawn);
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { };
+                ZLogger.Message("JOBCHECK: No one has job on " + t);
                 return true;
             }
 
@@ -2574,17 +2652,24 @@ namespace ZLevels
                 for (int j = 0; j < list.Count; j++)
                 {
                     WorkGiver workGiver = list[j];
-                    ZLogger.Message(pawn + " - " + workGiver);
+                    try
+                    {
+                        if (ZTracker.jobTracker[pawn].ignoreGiversInFirstTime.Contains(workGiver.def))
+                        {
+                            ZLogger.Message("Skipping ignored " + workGiver);
+                            continue;
+                        }
+                    }
+                    catch { };
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
-                        ZLogger.Message(pawn + " search job in " + ZTracker.GetMapInfo(otherMap));
                         if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                         {
                             break;
                         }
-
                         if (!PawnCanUseWorkGiver(pawn, workGiver))
                         {
+                            ZLogger.Message(pawn + " CantUseWorkGiver in " + ZTracker.GetMapInfo(otherMap) + " - " + workGiver);
                             continue;
                         }
                         try
@@ -2602,24 +2687,28 @@ namespace ZLevels
                                 if (scanner.def.scanThings)
                                 {
                                     Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) &&
-                                    scanner.HasJobOnThing(pawn, t);
+                                    scanner.HasJobOnThing(pawn, t) && NoOneHasJobOn(t, pawn, scanner.def);
 
-                                    Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn) &&
-                                        JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn, t) != null;
+                                    Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn) 
+                                    && JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn,
+                                    t) != null && NoOneHasJobOn(t, pawn, scanner.def);
 
-                                    Predicate<Thing> deliverResourcesValidator2 = (Thing t) => !t.IsForbidden(pawn) &&
-                                        JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t) != null;
+                                    Predicate<Thing> deliverResourcesValidator2 = (Thing t) => !t.IsForbidden(pawn)
+                                    && JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t)
+                                    != null && NoOneHasJobOn(t, pawn, scanner.def);
 
                                     Predicate<Thing> refuelValidator = (Thing t) => !t.IsForbidden(pawn) &&
-                                        JobOnThing((WorkGiver_Refuel)scanner, pawn, t) != null;
+                                        JobOnThing((WorkGiver_Refuel)scanner, pawn, t) != null
+                                        && NoOneHasJobOn(t, pawn, scanner.def);
 
                                     Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn)
                                     && TryIssueJobPackagePatch.JobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null
-                                    && NoOneHasJobOn(t, pawn);
+                                    && NoOneHasJobOn(t, pawn, scanner.def);
 
                                     Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn)
-                                    && HasJobOnThing(pawn, t, false) != null;
+                                    && HasJobOnThing(pawn, t, false) != null && NoOneHasJobOn(t, pawn, scanner.def);
 
+                                    ZLogger.Message(pawn + " search job in " + ZTracker.GetMapInfo(otherMap) + " - " + workGiver);
                                     IEnumerable<Thing> enumerable = scanner.PotentialWorkThingsGlobal(pawn);
 
                                     //if (scanner is WorkGiver_HaulGeneral || scanner is WorkGiver_HaulCorpses)
@@ -2683,10 +2772,10 @@ namespace ZLevels
                                                 if (enumerable != null)
                                                 {
                                                     ZLogger.Message("Try get thing from enumerable: " + enumerable.Count(), true);
-                                                    foreach (var t in enumerable)
-                                                    {
-                                                        ZLogger.Message(t + " in enumerable: " + ZTracker.GetMapInfo(pawn.Map));
-                                                    }
+                                                    //foreach (var t in enumerable)
+                                                    //{
+                                                    //    ZLogger.Message(t + " in enumerable: " + ZTracker.GetMapInfo(pawn.Map));
+                                                    //}
                                                 }
 
                                                 if (thing != null)
@@ -2897,6 +2986,10 @@ namespace ZLevels
                             }
                             if (job3 != null)
                             {
+                                if (!NoOneHasSameJob(job3, pawn, scannerWhoProvidedTarget.def))
+                                {
+                                    continue;
+                                }
                                 job3.workGiverDef = scannerWhoProvidedTarget.def;
                                 if (dest == null)
                                 {
@@ -2904,7 +2997,7 @@ namespace ZLevels
                                 }
                                 return new ThinkResult(job3, instance, list[j].def.tagToGive);
                             }
-                            Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
+                            //Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
                         }
                         num = workGiver.def.priorityInType;
                     }
