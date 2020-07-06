@@ -117,7 +117,6 @@ namespace ZLevels
                             else if (ZTracker.GetZIndexFor(this.Map) != 0)
                             {
                                 Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
-                                            
                                 pawn.jobs.jobQueue.EnqueueFirst(goToStairs);
                             }
                         }

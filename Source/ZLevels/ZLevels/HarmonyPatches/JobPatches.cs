@@ -1613,7 +1613,6 @@ namespace ZLevels
                                     .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                                 Traverse.Create(pawn).Field("positionInt")
                                     .SetValue(oldPosition);
-                                ZLogger.Message("10 SetPosition for " + pawn + " to " + oldPosition);
                             }
                             ZLogger.Message(pawn + " got job " + result + " - map: "
                                 + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
@@ -1625,19 +1624,6 @@ namespace ZLevels
                             {
                                 ZTracker.BuildJobListFor(pawn, oldMap, result.Job);
                             }
-
-                            try
-                            {
-                                foreach (var d in ZTracker.jobTracker[pawn].activeJobs)
-                                {
-                                    ZLogger.Message("FINAL: Active jobs: " + d + " - " + pawn);
-                                }
-                                foreach (var t in pawn.jobs.jobQueue)
-                                {
-                                    ZLogger.Message("FINAL: Active jobQueue: " + pawn + " - " + t.job);
-                                }
-                            }
-                            catch { }
 
                             __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
                             ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -2669,7 +2655,7 @@ namespace ZLevels
                         }
                         if (!PawnCanUseWorkGiver(pawn, workGiver))
                         {
-                            ZLogger.Message(pawn + " CantUseWorkGiver in " + ZTracker.GetMapInfo(otherMap) + " - " + workGiver);
+                            //ZLogger.Message(pawn + " CantUseWorkGiver in " + ZTracker.GetMapInfo(otherMap) + " - " + workGiver);
                             continue;
                         }
                         try
