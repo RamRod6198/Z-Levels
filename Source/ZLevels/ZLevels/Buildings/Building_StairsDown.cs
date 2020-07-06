@@ -18,6 +18,9 @@ namespace ZLevels
         {
             base.SpawnSetup(map, respawningAfterLoad);
             var ZTracker = ZUtils.ZTracker;
+            if (ZTracker.totalStairsDown == null) ZTracker.totalStairsDown = new HashSet<Thing>();
+            ZTracker.totalStairsDown.Add(this);
+
             if (!ZTracker.stairsDown.ContainsKey(this.Map))
             {
                 ZTracker.stairsDown[this.Map] = new List<Thing>();
@@ -67,7 +70,6 @@ namespace ZLevels
                     }
                 }
             }
-            ZTracker.totalStairsDown.Add(this);
         }
 
         public bool giveDamage = true;

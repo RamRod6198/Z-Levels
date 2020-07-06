@@ -18,6 +18,9 @@ namespace ZLevels
         {
             base.SpawnSetup(map, respawningAfterLoad);
             var ZTracker = ZUtils.ZTracker;
+            if (ZTracker.totalStairsUp == null) ZTracker.totalStairsUp = new HashSet<Thing>();
+            ZTracker.totalStairsUp.Add(this);
+
             if (!ZTracker.stairsUp.ContainsKey(this.Map))
             {
                 ZTracker.stairsUp[this.Map] = new List<Thing>();
@@ -54,7 +57,6 @@ namespace ZLevels
                     }
                 }
             }
-            ZTracker.totalStairsUp.Add(this);
         }
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)

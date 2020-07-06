@@ -35,16 +35,26 @@ namespace ZLevels
                 initAction = delegate ()
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    ZLogger.Message("Pawn: " + pawn);
                     ZLogger.Message("Pawn.map: " + pawn.Map);
                     ZLogger.Message("Dest Map: " + dest);
-                    ZLogger.Message("pawn.CurJob: " + pawn.jobs.curJob);
+                    ZTracker.ReCheckStairs();
+                    ZLogger.Message("1 Total count of stairs up: " 
+                        + pawn.Map.listerThings.AllThings.Where(x => x is Building_StairsUp).Count());
+                    ZLogger.Message("1 Total count of stairs down: "
+                        + pawn.Map.listerThings.AllThings.Where(x => x is Building_StairsDown).Count());
+
+                    ZLogger.Message("2 Total count of stairs up: " + ZTracker.stairsUp[pawn.Map].Count);
+                    ZLogger.Message("2 Total count of stairs down: " + ZTracker.stairsDown[pawn.Map].Count);
                     if (ZTracker.GetZIndexFor(pawn.Map) > ZTracker.GetZIndexFor(dest))
                     {
                         var stairs = ZTracker.stairsDown[pawn.Map];
                         if (stairs?.Count() > 0)
                         {
                             pawn.CurJob.targetC = new LocalTargetInfo(stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position)));
+                        }
+                        else
+                        {
+                            ZLogger.Pause(pawn + " cant find stairs down");
                         }
                     }
                     else if (ZTracker.GetZIndexFor(pawn.Map) < ZTracker.GetZIndexFor(dest))
@@ -53,6 +63,10 @@ namespace ZLevels
                         if (stairs?.Count() > 0)
                         {
                             pawn.CurJob.targetC = new LocalTargetInfo(stairs.MinBy(y => IntVec3Utility.DistanceTo(pawn.Position, y.Position)));
+                        }
+                        else
+                        {
+                            ZLogger.Pause(pawn + " cant find stairs up");
                         }
                     }
                     else

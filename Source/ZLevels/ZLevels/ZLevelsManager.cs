@@ -231,7 +231,7 @@ namespace ZLevels
                     maps.Add(map);
                 }
             }
-            return maps;   
+            return maps;
         }
 
         public List<Map> GetAllMapsInClosestOrder(Map pawnMap)
@@ -456,7 +456,7 @@ namespace ZLevels
                     }
                 }
             }
-            else if (jobToDo?.targetQueueA?.Count > 0 
+            else if (jobToDo?.targetQueueA?.Count > 0
                 && jobToDo?.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
             {
                 ZLogger.Message("Job method 1.8");
@@ -525,7 +525,7 @@ namespace ZLevels
                     }
                 }
             }
-            else if (jobToDo?.targetQueueB?.Count > 0 
+            else if (jobToDo?.targetQueueB?.Count > 0
                 && jobToDo?.targetQueueB.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
             {
                 ZLogger.Message("Job method 2");
@@ -1523,6 +1523,18 @@ namespace ZLevels
                     {
                         this.stairsDown[map] = this.totalStairsDown.Where(x => x.Map == map).ToList();
                         this.stairsUp[map] = this.totalStairsUp.Where(x => x.Map == map).ToList();
+                        if (this.stairsDown[map].Count == 0 && this.GetLowerLevel(tile.Key, map) != null)
+                        {
+                            this.stairsDown[map] = map.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
+                            this.totalStairsDown.AddRange(this.stairsDown[map]);
+                        }
+                        if (this.stairsUp[map].Count == 0 && this.GetUpperLevel(tile.Key, map) != null)
+                        {
+                            this.stairsUp[map] = map.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
+                            this.totalStairsUp.AddRange(this.stairsUp[map]);
+                        }
+                        ZLogger.Message("this.stairsDown[map]: " + this.stairsDown[map].Count);
+                        ZLogger.Message("this.stairsUp[map]: " + this.stairsUp[map].Count);
                         if (this.stairsDown.ContainsKey(map))
                         {
                             for (int i = this.stairsDown[map].Count - 1; i >= 0; i--)
@@ -1672,4 +1684,3 @@ namespace ZLevels
 
     }
 }
-
