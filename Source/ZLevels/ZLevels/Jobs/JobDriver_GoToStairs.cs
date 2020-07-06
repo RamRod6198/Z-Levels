@@ -14,23 +14,6 @@ namespace ZLevels
         }
         protected override IEnumerable<Toil> MakeNewToils()
         {
-            yield return new Toil
-            {
-                initAction = delegate ()
-                {
-                    Log.Message("pawn.curJob: " + pawn.CurJob);
-                    Log.Message("pawn.jobs.jobQueue");
-                    foreach (var job in pawn.jobs.jobQueue)
-                    {
-                        Log.Message(pawn + " - job in pawn queue: " + job.job);
-                    }
-                    Log.Message("ZUtils.ZTracker.jobTracker[pawn].activeJobs");
-                    foreach (var job in ZUtils.ZTracker.jobTracker[pawn].activeJobs)
-                    {
-                        Log.Message(pawn + " - job in ZTracker queue: " + job);
-                    }
-                }
-            };
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
             Toil useStairs = Toils_General.Wait(60, 0);
             ToilEffects.WithProgressBarToilDelay(useStairs, TargetIndex.A, false, -0.5f);
