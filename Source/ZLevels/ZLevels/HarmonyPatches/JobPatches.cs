@@ -1442,10 +1442,10 @@ namespace ZLevels
                     //{
                     //
                     //}
-
+        
                 }
             }
-
+        
             private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
             {
                 if (___pawn.RaceProps.Humanlike)
@@ -1477,9 +1477,9 @@ namespace ZLevels
                         }
                         catch
                         {
-
+        
                         }
-
+        
                     }
                 }
             }
@@ -2151,27 +2151,34 @@ namespace ZLevels
                 {
                     foreach (var jobPawn in ZTracker.jobTracker.Keys)
                     {
-                        if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn)
+                        if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn && pawn.Map != jobPawn.Map)
                         {
 
                             var mainJob = ZTracker.jobTracker[jobPawn].mainJob;
                             ZLogger.Message("JOBCHECK: Checking " + jobPawn + " - " + mainJob);
                             if (mainJob != null && mainJob.def == job.def)
                             {
-                                if (mainJob.targetA.Thing == job.targetA.Thing 
-                                    || mainJob.targetB.Thing == job.targetA.Thing)
+                                if (mainJob.targetA.Thing != null && mainJob.targetA.Thing == job.targetA.Thing 
+                                    || mainJob.targetB.Thing != null && mainJob.targetB.Thing == job.targetB.Thing
+                                    || mainJob.targetA.Thing != null && mainJob.targetA.Thing == job.targetB.Thing
+                                    || mainJob.targetB.Thing != null && mainJob.targetB.Thing == job.targetA.Thing)
                                 {
-                                    ZLogger.Message("JOBCHECK: 1: " + pawn + " someone has same job " 
-                                        + mainJob + " - " + jobPawn);
+                                    ZLogger.Message("mainJob.targetA.Thing: " + mainJob.targetA.Thing);
+                                    ZLogger.Message("job.targetA.Thing: " + job.targetA.Thing);
+                                    ZLogger.Message("mainJob.targetB.Thing: " +  mainJob.targetB.Thing);
+                                    ZLogger.Message("job.targetB.Thing: " + job.targetB.Thing);
+                                    ZLogger.Pause("JOBCHECK: 1: " + pawn + " - " + job + " someone has same job - " 
+                                        + jobPawn + " - " + mainJob);
                                     return false;
                                 }
                                 if (mainJob.targetQueueA != null)
                                 {
                                     foreach (var thing in mainJob.targetQueueA)
                                     {
-                                        if (job.targetQueueA.Contains(thing) || job.targetQueueA.Contains(thing))
+                                        if (job.targetQueueA.Contains(thing))
                                         {
-                                            ZLogger.Message("JOBCHECK: 2: " + pawn + " someone has same job " + job + " - " + jobPawn);
+                                            ZLogger.Pause("JOBCHECK: 2: " + pawn + " - " + job + " someone has same job - "
+                                        + jobPawn + " - " + mainJob);
                                             return false;
                                         }
                                     }
@@ -2180,9 +2187,10 @@ namespace ZLevels
                                 {
                                     foreach (var thing in mainJob.targetQueueB)
                                     {
-                                        if (job.targetQueueB.Contains(thing) || job.targetQueueB.Contains(thing))
+                                        if (job.targetQueueB.Contains(thing))
                                         {
-                                            ZLogger.Message("JOBCHECK: 3: " + pawn + " someone has same job " + job + " - " + jobPawn);
+                                            ZLogger.Pause("JOBCHECK: 3: " + pawn + " - " + job + " someone has same job - "
+                                                + jobPawn + " - " + mainJob);
                                             return false;
                                         }
                                     }
@@ -2204,25 +2212,24 @@ namespace ZLevels
                 {
                     foreach (var jobPawn in ZTracker.jobTracker.Keys)
                     {
-                        if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn)
+                        if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn && pawn.Map != jobPawn.Map)
                         {
-
                             var mainJob = ZTracker.jobTracker[jobPawn].mainJob;
                             ZLogger.Message("JOBCHECK: Checking " + jobPawn + " - " + mainJob);
                             if (mainJob != null)
                             {
                                 if (mainJob.targetA.Thing == t || mainJob.targetB.Thing == t)
                                 {
-                                    ZLogger.Message("JOBCHECK: 1: " + pawn + " someone has job on " + t + " - " + jobPawn);
+                                    ZLogger.Pause("JOBCHECK: 4: " + pawn + " someone has job on " + t + " - " + jobPawn);
                                     return false;
                                 }
                                 if (mainJob.targetQueueA != null)
                                 {
                                     foreach (var thing in mainJob.targetQueueA)
                                     {
-                                        if (thing == t || thing == t)
+                                        if (thing == t)
                                         {
-                                            ZLogger.Message("JOBCHECK: 2: " + pawn + " someone has job on " + t + " - " + jobPawn);
+                                            ZLogger.Pause("JOBCHECK: 5: " + pawn + " someone has job on " + t + " - " + jobPawn);
                                             return false;
                                         }
                                     }
@@ -2231,9 +2238,9 @@ namespace ZLevels
                                 {
                                     foreach (var thing in mainJob.targetQueueB)
                                     {
-                                        if (thing == t || thing == t)
+                                        if (thing == t)
                                         {
-                                            ZLogger.Message("JOBCHECK: 3: " + pawn + " someone has job on " + t + " - " + jobPawn);
+                                            ZLogger.Pause("JOBCHECK: 6: " + pawn + " someone has job on " + t + " - " + jobPawn);
                                             return false;
                                         }
                                     }

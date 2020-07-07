@@ -395,24 +395,6 @@ namespace ZLevels
         //    }
         //}
 
-        [HarmonyPatch(typeof(Pawn_JobTracker))]
-        [HarmonyPatch("StartJob")]
-        internal static class MakeDriver_Patch
-        {
-            public static bool Prefix(Pawn ___pawn, Job newJob, JobCondition lastJobEndCondition = JobCondition.None, ThinkNode jobGiver = null, bool resumeCurJobAfterwards = false, bool cancelBusyStances = true, ThinkTreeDef thinkTree = null, JobTag? tag = null, bool fromQueue = false, bool canReturnCurJobToPool = false)
-            {
-                try
-                {
-                    newJob.MakeDriver(___pawn);
-                }
-                catch
-                {
-                    return false;
-                }
-                return true;
-            }
-        }
-
         [HarmonyPatch(typeof(FloatMenuMakerMap))]
         [HarmonyPatch("AddJobGiverWorkOrders")]
         internal static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
