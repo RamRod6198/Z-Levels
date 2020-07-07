@@ -74,25 +74,43 @@ namespace ZLevels
         public class ExitCells_Patch
         {
             [HarmonyPrefix]
-            private static bool Prefix(ExitMapGrid __instance, ref bool __result)
+            private static bool Prefix(ExitMapGrid __instance, Map ___map, ref bool __result)
+            {
+                if (___map != null && ___map.ParentHolder is MapParent_ZLevel)
+                {
+                    __result = false;
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(GenTemperature), "PushHeat")]
+        [HarmonyPatch(new Type[]
+        {
+            typeof(Thing),
+            typeof(float)
+        }, new ArgumentType[]
+        {
+            0,
+            0
+        })]
+        public class HeatPush_Patch
+        {
+            [HarmonyPrefix]
+            private static bool Prefix(Thing t, float energy)
             {
                 try
                 {
-                    Map map = (Map)typeof(ExitMapGrid).GetField("map", BindingFlags.Instance | BindingFlags.Static
-                            | BindingFlags.Public | BindingFlags.NonPublic).GetValue(__instance);
-                    if (map != null)
+                    if (t is Building_SteamGeyser 
+                        && ZUtils.ZTracker.GetZIndexFor(t.Map) < 0 && ZUtils.ZTracker.GetUpperLevel(t.Map.Tile,
+                        t.Map).listerThings.AllThings.Where(x => x is Building_SteamGeyser 
+                        && x.Position == t.Position).Count() > 0)
                     {
-                        if (map.ParentHolder is MapParent_ZLevel)
-                        {
-                            __result = false;
-                            return false;
-                        }
+                        return false;
                     }
                 }
-                catch (Exception ex)
-                {
-                    Log.Error("[Z-Levels] ExitCells_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
-                };
+                catch { };
                 return true;
             }
         }
