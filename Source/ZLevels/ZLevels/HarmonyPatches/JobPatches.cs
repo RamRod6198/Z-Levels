@@ -1013,11 +1013,14 @@ namespace ZLevels
                     bool select = false;
                     if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
                     var jobList = new Dictionary<Job, Map>();
-                    bool CanDoDuringMedicalRest = Traverse.Create(__instance).Field("CanDoDuringMedicalRest").GetValue<bool>();
+
+                    bool CanDoDuringMedicalRest = Traverse.Create(__instance)
+                        .Field("CanDoDuringMedicalRest").GetValue<bool>();
+                    bool InBed = pawn.InBed();
                     if (pawn.MentalStateDef != null)
                     {
                         ZLogger.Pause(pawn + " in mental state");
-                        __result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, ___joyGiverChances, __instance);
+                        __result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, InBed, ___joyGiverChances, __instance);
                         return false;
                     }
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
@@ -1026,7 +1029,7 @@ namespace ZLevels
                         ZLogger.Message("Searching joy job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                             + " for " + ZTracker.GetMapInfo(oldMap));
 
-                        result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, ___joyGiverChances, __instance);
+                        result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, InBed, ___joyGiverChances, __instance);
                         if (result != null)
                         {
                             ZLogger.Message(pawn + " got joy job " + result + " - map: "
@@ -1067,9 +1070,12 @@ namespace ZLevels
                 }
                 return true;
             }
-            public static Job TryGiveJob(Pawn pawn, bool CanDoDuringMedicalRest, DefMap<JoyGiverDef, float> joyGiverChances, JobGiver_GetJoy __instance)
+            public static Job TryGiveJob(Pawn pawn, bool CanDoDuringMedicalRest, bool InBed, DefMap<JoyGiverDef, float> joyGiverChances, JobGiver_GetJoy __instance)
             {
-                if (!CanDoDuringMedicalRest && pawn.InBed() && HealthAIUtility.ShouldSeekMedicalRest(pawn))
+                ZLogger.Message("!CanDoDuringMedicalRest: " + !CanDoDuringMedicalRest);
+                ZLogger.Message("pawn.InBed(): " + InBed);
+                ZLogger.Message("HealthAIUtility.ShouldSeekMedicalRest(pawn): " + HealthAIUtility.ShouldSeekMedicalRest(pawn));
+                if (!CanDoDuringMedicalRest && InBed && HealthAIUtility.ShouldSeekMedicalRest(pawn))
                 {
                     return null;
                 }

@@ -85,24 +85,6 @@ namespace ZLevels
                     ZLogger.Pause("Error in JobDriver of " + colonist);
                     colonist.jobs.EndCurrentJob(JobCondition.Errored);
                 }
-
-                //Log.Message("colonist.CurJob != null && colonist.jobs.curDriver.asleep: "
-                //    + (colonist.CurJob != null && colonist.jobs.curDriver != null).ToString());
-                //
-                //Log.Message("colonist.CurJob != null && colonist.jobs.curDriver.asleep: " 
-                //    + (colonist.CurJob != null && colonist.jobs.curDriver.asleep).ToString());
-                //
-                //
-                //Log.Message("colonist.InAggroMentalState: " + colonist.InAggroMentalState);
-                //Log.Message("colonist.InMentalState: " + colonist.InMentalState);
-                //Log.Message("colonist.InBed() &&  && colonist.CurrentBed().Medical: " 
-                //    + (colonist.InBed() && colonist.CurrentBed().Medical).ToString());
-                //
-                //
-                //Log.Message("colonist.mindState.IsIdle: " + colonist.mindState.IsIdle);
-                //Log.Message("colonist.IsBurning(): " + colonist.IsBurning());
-                //Log.Message("colonist.Inspired: " + colonist.Inspired);
-
                 return true;
             }
         }
