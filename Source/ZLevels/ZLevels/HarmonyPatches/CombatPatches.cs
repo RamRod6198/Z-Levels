@@ -82,7 +82,7 @@ namespace ZLevels
 		}
 
 		//[HarmonyPatch(typeof(JobGiver_AIFightEnemies), "TryGiveJob")]
-		//public class TryFindShootingPosition_Patch
+		//public class JobGiver_AIFightEnemies_Patch
 		//{
 		//	private static void Postfix(ref JobGiver_AIFightEnemies __instance, ref Job __result, ref Pawn pawn)
 		//	{
@@ -91,15 +91,15 @@ namespace ZLevels
 		//	}
 		//}
 
-		[HarmonyPatch(typeof(JobGiver_AIDefendPoint), "TryGiveJob")]
-		public class JobGiver_AIDefendPoint_Patch
-		{
-			private static void Postfix(ref JobGiver_AIDefendPoint __instance, ref Job __result, ref Pawn pawn)
-			{
-
-				Log.Message(pawn + " - 3 TEST: " + __result);
-			}
-		}
+		//[HarmonyPatch(typeof(JobGiver_AIDefendPoint), "TryGiveJob")]
+		//public class JobGiver_AIDefendPoint_Patch
+		//{
+		//	private static void Postfix(ref JobGiver_AIDefendPoint __instance, ref Job __result, ref Pawn pawn)
+		//	{
+		//
+		//		Log.Message(pawn + " - 3 TEST: " + __result);
+		//	}
+		//}
 
 		[HarmonyPatch(typeof(JobGiver_AIDefendPawn), "TryGiveJob")]
 		public class JobGiver_AIDefendPawn_Patch
@@ -111,12 +111,38 @@ namespace ZLevels
 			}
 		}
 
-		[HarmonyPatch(typeof(JobGiver_AIFightEnemy), "TryFindShootingPosition")]
+		[HarmonyPatch(typeof(JobGiver_AIFightEnemy), "TryGiveJob")]
 		public class JobGiver_AIFightEnemy_Patch
 		{
-			private static void Postfix(ref JobGiver_AIFightEnemy __instance, ref Job __result, ref Pawn pawn)
+			public static bool recursiveTrap = false;
+			private static bool Prefix(ref JobGiver_AIFightEnemy __instance, ref Job __result, ref Pawn pawn)
 			{
-				Log.Message(pawn + " - 3 TEST: " + __result);
+				bool result = true;
+				if (!recursiveTrap)
+				{
+					recursiveTrap = true;
+					Map oldMap = pawn.Map;
+					IntVec3 oldPosition = pawn.Position;
+					foreach (var map in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+					{
+						var job = Traverse.Create(__instance).Method("TryGiveJob", new object[]
+								{
+									pawn
+								}).GetValue<Job>();
+
+						Log.Message("2: " + ZUtils.ZTracker.GetMapInfo(pawn.Map) + " - result: " + job);
+						if (job != null)
+						{
+							__result = job;
+							result = false;
+							break;
+						}
+					}
+					ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+					recursiveTrap = false;
+				}
+				Log.Message(pawn + " - 4 TEST: " + __result);
+				return result;
 			}
 		}
 

@@ -224,12 +224,37 @@ namespace ZLevels
         public List<Map> GetAllMaps(int tile)
         {
             List<Map> maps = new List<Map>();
+            bool deleteTile = false;
             if (this.ZLevelsTracker.ContainsKey(tile))
             {
+
                 foreach (var map in this.ZLevelsTracker[tile].ZLevels.Values)
                 {
-                    maps.Add(map);
+                    if (map == null && this.ZLevelsTracker[tile].ZLevels.Values.Where(x => x != null).Count() > 0)
+                    {
+                        Log.Error("ZLevels contains null map, this should never happen");
+                        foreach (var mapData in this.ZLevelsTracker[tile].ZLevels)
+                        {
+                            Log.Message("Tile: " + tile + " - map index: " + mapData.Key + " - map: " + mapData.Value);
+                        }
+                    }
+                    else
+                    {
+                        if (map == null && this.ZLevelsTracker[tile].ZLevels.Values.Where(x => x != null).Count() == 0)
+                        {
+                            deleteTile = true;
+                        }
+                    }
+                    if (map != null)
+                    {
+                        maps.Add(map);
+                    }
                 }
+            }
+            if (deleteTile)
+            {
+                ZLogger.Pause("Removing " + tile + " from Z-Levels");
+                this.ZLevelsTracker.Remove(tile);
             }
             return maps;
         }
@@ -1051,11 +1076,20 @@ namespace ZLevels
 
         public void ZLevelsFixer(int tile)
         {
-            if (this.ZLevelsTracker[tile]?.ZLevels[0]?.listerThings == null)
+            try
             {
-                var map = Find.WorldObjects.MapParents.Where(x => x.Tile == tile
-                && x.HasMap && x.Map.IsPlayerHome).FirstOrDefault().Map;
-                this.ZLevelsTracker[tile].ZLevels[0] = map;
+                if (this.ZLevelsTracker.ContainsKey(tile) && this.ZLevelsTracker[tile].ZLevels != null
+                    && this.ZLevelsTracker[tile].ZLevels[0] != null
+                    && this.ZLevelsTracker[tile].ZLevels[0].listerThings == null)
+                {
+                    var map = Find.WorldObjects.MapParents.Where(x => x.Tile == tile
+                    && x.HasMap && x.Map != null && x.Map.IsPlayerHome ).FirstOrDefault().Map;
+                    this.ZLevelsTracker[tile].ZLevels[0] = map;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error in ZLevelsFixer: " + ex);
             }
         }
 
@@ -1592,7 +1626,7 @@ namespace ZLevels
             }
             catch (Exception ex)
             {
-                ZLogger.Error("Error in ReCheckStairs: " + ex);
+                Log.Error("Error in ZLevels in ReCheckStairs: " + ex);
             }
         }
 

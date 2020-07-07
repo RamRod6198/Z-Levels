@@ -536,6 +536,10 @@ namespace ZLevels
                                                         job.workGiverDef = workGiver_Scanner.def;
                                                         action = delegate
                                                         {
+                                                            if (!ZTracker.jobTracker.ContainsKey(pawn))
+                                                            {
+                                                                ZTracker.jobTracker[pawn] = new JobTracker();
+                                                            }
                                                             if (dest != null)
                                                             {
                                                                 ZTracker.BuildJobListFor(pawn, dest, job);
