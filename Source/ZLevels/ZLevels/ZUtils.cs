@@ -30,7 +30,7 @@ namespace ZLevels
 			zTracker = null;
 		}
 
-        public static IEnumerable<Map> GetAllMapsInClosestOrder(Pawn pawn, Map oldMap, IntVec3 oldPosition)
+        public static IEnumerable<Map> GetAllMapsInClosestOrder(Thing thing, Map oldMap, IntVec3 oldPosition)
         {
             bool cantGoDown = false;
             bool cantGoUP = false;
@@ -64,39 +64,26 @@ namespace ZLevels
                 }
                 if (stairs != null && stairs.Count > 0)
                 {
-                    var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
+                    var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(thing.Position, x.Position));
                     var position = selectedStairs.Position;
-
-                    Traverse.Create(pawn).Field("mapIndexOrState")
-                        .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                    Traverse.Create(pawn).Field("positionInt")
-                        .SetValue(position);
+                    TeleportThing(thing, otherMap, position);
                     yield return otherMap;
                 }
                 else if (otherMap == oldMap)
                 {
-                    if (pawn.Map != oldMap)
-                    {
-                        Traverse.Create(pawn).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                    }
-                    if (pawn.Position != oldPosition)
-                    {
-                        Traverse.Create(pawn).Field("positionInt")
-                            .SetValue(oldPosition);
-                    }
+                    TeleportThing(thing, oldMap, oldPosition);
                     yield return otherMap;
                 }
                 else
                 {
                     if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
                     {
-                        ZLogger.Message(pawn + " cant go up in " + ZTracker.GetMapInfo(otherMap));
+                        ZLogger.Message(thing + " cant go up in " + ZTracker.GetMapInfo(otherMap));
                         cantGoUP = true;
                     }
                     else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
                     {
-                        ZLogger.Message(pawn + " cant go down in " + ZTracker.GetMapInfo(otherMap));
+                        ZLogger.Message(thing + " cant go down in " + ZTracker.GetMapInfo(otherMap));
                         cantGoDown = true;
                     }
                     else
@@ -104,6 +91,18 @@ namespace ZLevels
                         ZLogger.Message("My bad...");
                     }
                 }
+            }
+        }
+
+        public static void TeleportThing(Thing thing, Map map, IntVec3 position)
+        {
+            if (thing.Map != map)
+            {
+                Traverse.Create(thing).Field("mapIndexOrState").SetValue((sbyte)Find.Maps.IndexOf(map));
+            }
+            if (thing.Position != position)
+            {
+                Traverse.Create(thing).Field("positionInt").SetValue(position);
             }
         }
 

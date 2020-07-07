@@ -690,14 +690,6 @@ namespace ZLevels
 
                         if (ZTracker.jobTracker.ContainsKey(pawn))
                         {
-                            foreach (var job in pawn.jobs.jobQueue)
-                            {
-                                ZLogger.Message(pawn + " - job in pawn queue: " + job.job);
-                            }
-                            foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
-                            {
-                                ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
-                            }
                             try
                             {
                                 if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
@@ -1125,7 +1117,7 @@ namespace ZLevels
         public class JobGiver_GetRestPatch
         {
             [HarmonyPrefix]
-            private static bool JobGiver_GetRestPrefix(JobGiver_GetFood __instance, ref Job __result,
+            private static bool JobGiver_GetRestPrefix(JobGiver_GetRest __instance, ref Job __result,
                 RestCategory ___minCategory, float ___maxLevelPercentage, Pawn pawn)
             {
                 try
@@ -1406,6 +1398,25 @@ namespace ZLevels
                 return true;
             }
         }
+        [HarmonyPatch(typeof(Pawn_JobTracker), "StartJob")]
+        public class StartJobPatch
+        {
+            private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, Job newJob, JobTag? tag)
+            {
+                if (___pawn.RaceProps.Humanlike)
+                {
+                    try
+                    {
+                        ZLogger.Message(___pawn + " starts " + newJob);
+                    }
+                    catch
+                    {
+                        ZLogger.Message(___pawn + " starts " + newJob.def);
+                    }
+                }
+            }
+        }
+
 
         [HarmonyPatch(typeof(Pawn_JobTracker), "EndCurrentJob")]
         public class EndCurrentJobPatch
