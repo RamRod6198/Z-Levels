@@ -1398,24 +1398,25 @@ namespace ZLevels
                 return true;
             }
         }
-        [HarmonyPatch(typeof(Pawn_JobTracker), "StartJob")]
-        public class StartJobPatch
-        {
-            private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, Job newJob, JobTag? tag)
-            {
-                if (___pawn.RaceProps.Humanlike)
-                {
-                    try
-                    {
-                        ZLogger.Message(___pawn + " starts " + newJob);
-                    }
-                    catch
-                    {
-                        ZLogger.Message(___pawn + " starts " + newJob.def);
-                    }
-                }
-            }
-        }
+
+        //[HarmonyPatch(typeof(Pawn_JobTracker), "StartJob")]
+        //public class StartJobPatch
+        //{
+        //    private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, Job newJob, JobTag? tag)
+        //    {
+        //        if (___pawn.RaceProps.Humanlike)
+        //        {
+        //            try
+        //            {
+        //                ZLogger.Message(___pawn + " starts " + newJob);
+        //            }
+        //            catch
+        //            {
+        //                ZLogger.Message(___pawn + " starts " + newJob.def);
+        //            }
+        //        }
+        //    }
+        //}
 
 
         [HarmonyPatch(typeof(Pawn_JobTracker), "EndCurrentJob")]
@@ -1432,15 +1433,15 @@ namespace ZLevels
                         startNewJob = false;
                         TryDropCarriedThingPatch.blockTryDrop = true;
                     }
-                    try
-                    {
-                        //ZLogger.Message("3 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
-                        ZLogger.Message(___pawn + " ends " + __instance.curJob + " - " + startNewJob);
-                    }
-                    catch
-                    {
-
-                    }
+                    //try
+                    //{
+                    //    //ZLogger.Message("3 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
+                    //    ZLogger.Message(___pawn + " ends " + __instance.curJob + " - " + startNewJob);
+                    //}
+                    //catch
+                    //{
+                    //
+                    //}
 
                 }
             }
@@ -1456,22 +1457,22 @@ namespace ZLevels
                         TryDropCarriedThingPatch.blockTryDrop = false;
                         try
                         {
-                            ZLogger.Message(___pawn + " taking first job 1");
-                            try
-                            {
-                                ZLogger.Message("POSTFIX 0: " + ___pawn.CurJob);
-                                foreach (var job in ___pawn.jobs.jobQueue)
-                                {
-                                    ZLogger.Message("POSTFIX 1: " + job.job);
-                                }
-                                foreach (var job in ZTracker.jobTracker[___pawn].activeJobs)
-                                {
-                                    ZLogger.Message("POSTFIX 2: " + job);
-                                }
-                                ZLogger.Message("POSTFIX 3: " + ZTracker.jobTracker[___pawn].activeJobs[0]);
-                                ZLogger.Message("4 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
-                            }
-                            catch { };
+                            //ZLogger.Message(___pawn + " taking first job 1");
+                            //try
+                            //{
+                            //    ZLogger.Message("POSTFIX 0: " + ___pawn.CurJob);
+                            //    foreach (var job in ___pawn.jobs.jobQueue)
+                            //    {
+                            //        ZLogger.Message("POSTFIX 1: " + job.job);
+                            //    }
+                            //    foreach (var job in ZTracker.jobTracker[___pawn].activeJobs)
+                            //    {
+                            //        ZLogger.Message("POSTFIX 2: " + job);
+                            //    }
+                            //    ZLogger.Message("POSTFIX 3: " + ZTracker.jobTracker[___pawn].activeJobs[0]);
+                            //    ZLogger.Message("4 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
+                            //}
+                            //catch { };
                             ZTracker.TryTakeFirstJob(___pawn);
                         }
                         catch
