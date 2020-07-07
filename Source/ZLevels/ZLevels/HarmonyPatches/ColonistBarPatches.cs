@@ -11,18 +11,16 @@ using static RimWorld.ColonistBar;
 
 namespace ZLevels
 {
-    [HarmonyPatch(typeof(ColonistBar), "CheckRecacheEntries")]
-    public static class ColonistBarPatches
-    {
-        public static bool entriesDirty = false;
 
+    [HarmonyPatch(typeof(ColonistBarDrawLocsFinder), "CalculateColonistsInGroup")]
+    public static class CalculateColonistsInGroupPatches
+    {
         [HarmonyPrefix]
-        public static void Prefix(ColonistBar __instance, bool ___entriesDirty)
+        public static void Prefix()
         {
-            if (___entriesDirty) 
-            {
-                entriesDirty = true;
-            }
+            var cachedEntries = Traverse.Create(Find.ColonistBar).Field("cachedEntries").GetValue<List<Entry>>();
+            cachedEntries = cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
+            Traverse.Create(Find.ColonistBar).Field("cachedEntries").SetValue(cachedEntries);
         }
     }
 
@@ -36,68 +34,10 @@ namespace ZLevels
         {
             try
             {
-                if (ColonistBarPatches.entriesDirty)
-                {
-                    ColonistBarPatches.entriesDirty = false;
-
-
-                    //for (int i = 0; i < ___cachedEntries.Count; i++)
-                    //{
-                    //    if (ZUtils.ZTracker.GetZIndexFor(___cachedEntries[i].map) < 0)
-                    //    {
-                    //        ___cachedEntries[i] = new Entry(___cachedEntries[i].pawn, ___cachedEntries[i].map, 0);
-                    //    }
-                    //    else if (ZUtils.ZTracker.GetZIndexFor(___cachedEntries[i].map) == 0)
-                    //    {
-                    //        ___cachedEntries[i] = new Entry(___cachedEntries[i].pawn, ___cachedEntries[i].map, 1);
-                    //    }
-                    //    else if (ZUtils.ZTracker.GetZIndexFor(___cachedEntries[i].map) > 0)
-                    //    {
-                    //        ___cachedEntries[i] = new Entry(___cachedEntries[i].pawn, ___cachedEntries[i].map, 2);
-                    //    }
-                    //}
-                    //
-                    //
-                    //var orderedZip = ___cachedEntries.Zip(___cachedDrawLocs, (x, y) => new { x, y })
-                    //                      .OrderBy(pair => pair.x.group)
-                    //                      .ToList();
-                    //___cachedEntries = orderedZip.Select(pair => pair.x).ToList();
-                    //___cachedDrawLocs = orderedZip.Select(pair => pair.y).ToList();
-
-                    //var sorted = ___cachedEntries.Zip(___cachedDrawLocs, (first, second) => new
-                    //{
-                    //    Key = first,
-                    //    Value = second
-                    //}).OrderBy(s => ZUtils.ZTracker.GetZIndexFor(s.Key.map));
-                    //
-                    //___cachedEntries = sorted.Select(s => s.Key).ToList();
-                    //___cachedDrawLocs = sorted.Select(s => s.Value).ToList();
-
-                    //Log.Message("--------------------------------");
-                    //foreach (var t in ___cachedEntries)
-                    //{
-                    //    Log.Message("pawn: " + t.pawn);
-                    //    Log.Message("map: " + t.map);
-                    //    Log.Message("group: " + t.group);
-                    //}
-                    //___cachedEntries = ___cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
-                    //foreach (var t in ___cachedEntries)
-                    //{
-                    //    Log.Message("pawn: " + t.pawn);
-                    //    Log.Message("map: " + t.map);
-                    //    Log.Message("group: " + t.group);
-                    //}
-
-                }
                 if (___cachedDrawLocs.Count == ___cachedEntries.Count)
                 {
                     for (int i = 0; i < ___cachedDrawLocs.Count; i++)
                     {
-                        //if (ShowGroupFrames(___cachedEntries))
-                        //{
-                        //    Log.Message("TEST");
-                        //    __instance.drawer.DrawGroupFrame(___cachedEntries[i].group);
-                        //}
                         if (___cachedEntries[i].pawn == null && ___cachedEntries[i].map.Parent is MapParent_ZLevel)
                         {
                             //ZLogger.Message("Rect: " + ___cachedDrawLocs[i].x + " - " + ___cachedDrawLocs[i].y + " - "

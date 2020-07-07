@@ -59,15 +59,6 @@ namespace ZLevels
             }
         }
 
-        //[HarmonyPatch(typeof(PawnRenderer), "DrawEquipment")]
-        //public static class AvP_PawnRenderer_DrawEquipment_Cloak_Patch
-        //{
-        //    public static bool Prefix(PawnRenderer __instance)
-        //    {
-        //        return false;
-        //    }
-        //}
-
         [HarmonyPatch(typeof(ColonistBarColonistDrawer), "DrawIcons")]
         public static class DrawIcons_Patch
         {
