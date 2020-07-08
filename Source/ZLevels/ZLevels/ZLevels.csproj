@@ -312,7 +312,6 @@
     <Compile Include="Jobs\JobDriver_HaulThingToDestAndToCell.cs" />
     <Compile Include="MapRenderer\PawnRendererScaled.cs" />
     <Compile Include="MapRenderer\RenderPatches.cs" />
-    <Compile Include="MapRenderer\SectionLayer_LowerFogOfWar.cs" />
     <Compile Include="MapRenderer\SectionLayer_LowerTerrain.cs" />
     <Compile Include="MapRenderer\SectionLayer_LowerThings.cs" />
     <Compile Include="Map\BiomeWorker_NeverSpawn.cs" />
