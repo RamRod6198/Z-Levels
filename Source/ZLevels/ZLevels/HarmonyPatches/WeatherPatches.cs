@@ -170,7 +170,7 @@ namespace ZLevels
         internal static class RegisterConditionPatch
         {
             public static bool AddCondition = false;
-
+        
             public static List<GameConditionDef> blackList = new List<GameConditionDef>
             {
                 GameConditionDefOf.Aurora,
@@ -192,10 +192,16 @@ namespace ZLevels
                     AddCondition = true;
                     foreach (var map in ZUtils.ZTracker.GetAllMaps(__instance.ownerMap.Tile))
                     {
-                        if (map != __instance.ownerMap)
+                        if (map != __instance.ownerMap && (ZUtils.ZTracker.GetZIndexFor(map) < 0 
+                            && !blackList.Contains(cond.def) || ZUtils.ZTracker.GetZIndexFor(map) > 0))
                         {
-                            ZLogger.Message("Register: " + cond + " in the " + map, true);
-                            map.gameConditionManager.RegisterCondition(cond);
+                            var newCond = GameConditionMaker.MakeCondition(cond.def, cond.Duration);
+                            newCond.conditionCauser = cond.conditionCauser;
+                            newCond.Permanent = cond.Permanent;
+                            newCond.startTick = cond.startTick;
+                            newCond.quest = cond.quest;
+                            ZLogger.Message("Register: " + newCond + " in the " + ZUtils.ZTracker.GetMapInfo(map), true);
+                            map.gameConditionManager.RegisterCondition(newCond);
                         }
                     }
                     AddCondition = false;

@@ -21,6 +21,7 @@ namespace ZLevels
 			Scribe_Collections.Look<Job>(ref this.activeJobs, "activeJobs", LookMode.Deep);
 			Scribe_References.Look<Job>(ref this.mainJob, "mainJob");
 		}
+		public Map oldMap;
 
 		public Map dest;
 

@@ -2151,7 +2151,8 @@ namespace ZLevels
                 {
                     foreach (var jobPawn in ZTracker.jobTracker.Keys)
                     {
-                        if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn && pawn.Map != jobPawn.Map)
+                        if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn 
+                            && ZTracker.jobTracker[pawn].oldMap != jobPawn.Map)
                         {
 
                             var mainJob = ZTracker.jobTracker[jobPawn].mainJob;
@@ -2212,7 +2213,8 @@ namespace ZLevels
                 {
                     foreach (var jobPawn in ZTracker.jobTracker.Keys)
                     {
-                        if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn && pawn.Map != jobPawn.Map)
+                        if (jobPawn.Spawned && !jobPawn.Dead && pawn != jobPawn
+                            && ZTracker.jobTracker[pawn].oldMap != jobPawn.Map)
                         {
                             var mainJob = ZTracker.jobTracker[jobPawn].mainJob;
                             ZLogger.Message("JOBCHECK: Checking " + jobPawn + " - " + mainJob);

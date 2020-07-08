@@ -481,6 +481,27 @@ namespace ZLevels
                     }
                 }
             }
+            else if (jobToDo.def == JobDefOf.Clean)
+            {
+                if (dest != null)
+                {
+                    ZLogger.Message("Job method 1.78");
+                    log += "Job method 1.78\n";
+                    this.jobTracker[pawn].dest = dest;
+                    tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
+                }
+                else
+                {
+                    var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
+                    if (target != null && target.Thing?.Map != null)
+                    {
+                        ZLogger.Message("Job method 1.79");
+                        log += "Job method 1.79\n";
+                        this.jobTracker[pawn].dest = target.Thing?.Map;
+                        tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
+                    }
+                }
+            }
             else if (jobToDo?.targetQueueA?.Count > 0
                 && jobToDo?.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
             {

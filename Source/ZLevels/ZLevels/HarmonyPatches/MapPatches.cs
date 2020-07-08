@@ -114,5 +114,26 @@ namespace ZLevels
                 return true;
             }
         }
+
+        [HarmonyPatch(typeof(CompAssignableToPawn))]
+        [HarmonyPatch("get_AssigningCandidates")]
+        internal static class Patch_CandidatesFromAllLevels
+        {
+            private static void Postfix(ref IEnumerable<Pawn> __result, CompAssignableToPawn __instance)
+            {
+                if (__instance.parent.Spawned)
+                {
+                    var list = __result.ToList();
+                    foreach (var map in ZUtils.ZTracker.GetAllMaps(__instance.parent.Map.Tile))
+                    {
+                        if (map != __instance.parent.Map)
+                        {
+                            list.AddRange(map.mapPawns.FreeColonists);
+                        }
+                    }
+                    __result = list;
+                }
+            }
+        }
     }
 }
