@@ -754,14 +754,22 @@ namespace ZLevels
                         var oldPosition = pawn.Position;
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-
                         if (pawn.MentalStateDef != null)
                         {
-                            ZLogger.Pause(pawn + " in mental state");
-                            __result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap,
+                            result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap,
                                 ___maxLevelPercentage, ___minCategory);
-                            return false;
+                            ZLogger.Pause(pawn + " in mental state, result: " + result);
+                            if (result.targetA.Thing != null && result.targetA.Thing.Map == pawn.Map)
+                            {
+                                __result = result;
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
                         }
+
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                         {
                             ZLogger.Message("Searching food job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
@@ -873,6 +881,7 @@ namespace ZLevels
             {
                 try
                 {
+                    ZLogger.Message(pawn + " starting joy search");
                     var ZTracker = ZUtils.ZTracker;
                     try
                     {
@@ -1010,10 +1019,26 @@ namespace ZLevels
                     bool CanDoDuringMedicalRest = Traverse.Create(__instance)
                         .Field("CanDoDuringMedicalRest").GetValue<bool>();
                     bool InBed = pawn.InBed();
+
+                    //if (pawn.MentalStateDef != null)
+                    //{
+                    //    result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, InBed, ___joyGiverChances, __instance);
+                    //    ZLogger.Pause(pawn + " in mental state, result: " + result);
+                    //    if (result.targetA.Thing == null && result.targetA.Thing.Map == pawn.Map)
+                    //    {
+                    //        __result = result;
+                    //        return false;
+                    //    }
+                    //    else
+                    //    {
+                    //        return true;
+                    //    }
+                    //}
+
                     if (pawn.MentalStateDef != null)
                     {
-                        ZLogger.Pause(pawn + " in mental state");
                         __result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, InBed, ___joyGiverChances, __instance);
+                        ZLogger.Pause(pawn + " in mental state, result: " + __result);
                         return false;
                     }
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
@@ -1211,9 +1236,17 @@ namespace ZLevels
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
                         if (pawn.MentalStateDef != null)
                         {
-                            ZLogger.Pause(pawn + " in mental state");
-                            __result = JobGiver_GetRestPatch.TryGiveJob(pawn, ___minCategory, ___maxLevelPercentage);
-                            return false;
+                            result = JobGiver_GetRestPatch.TryGiveJob(pawn, ___minCategory, ___maxLevelPercentage);
+                            ZLogger.Pause(pawn + " in mental state, result: " + result);
+                            if (result.targetA.Thing == null && result.targetA.Thing.Map == pawn.Map)
+                            {
+                                __result = result;
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
                         }
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                         {
