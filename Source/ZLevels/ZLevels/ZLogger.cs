@@ -51,11 +51,11 @@ namespace ZLevels
 			if (ZLogger.DebugEnabled)
 			{
 				Log.Error("Pausing, reason: " + reason, true);
-				Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+				//Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
 			}
 		}
 
-		public static readonly bool DebugEnabled = false;
+		public static readonly bool DebugEnabled = true;
 
 		private static readonly string Prefix = "[Z-Levels] ";
 	}

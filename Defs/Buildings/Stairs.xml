@@ -4,7 +4,7 @@
 	<ThingDef Abstract="True" ParentName="FurnitureWithQualityBase" Name="StairsBase">
 		<description>Stairs.</description>
 		<altitudeLayer>Building</altitudeLayer>
-		<passability>Standable</passability>
+		<passability>Walkable</passability>
 		<fillPercent>0.15</fillPercent>
 		<building>
 			<isEdifice>false</isEdifice>

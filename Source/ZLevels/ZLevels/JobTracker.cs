@@ -20,6 +20,7 @@ namespace ZLevels
 			}
 			Scribe_Collections.Look<Job>(ref this.activeJobs, "activeJobs", LookMode.Deep);
 			Scribe_References.Look<Job>(ref this.mainJob, "mainJob");
+			Scribe_References.Look<Map>(ref this.dest, "dest");
 		}
 		public Map oldMap;
 
@@ -27,7 +28,7 @@ namespace ZLevels
 
 		public Job mainJob;
 
-		public List<WorkGiverDef> ignoreGiversInFirstTime;
+		public HashSet<WorkGiverDef> ignoreGiversInFirstTime;
 
 		public List<Job> activeJobs;
 	}

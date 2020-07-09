@@ -69,7 +69,8 @@ namespace ZLevels
                         bool firstTime = false;
                         if (lowerMap == null)
                         {
-                            lowerMap = ZTracker.CreateLowerLevel(___map, c);
+                            return false;
+                            //lowerMap = ZTracker.CreateLowerLevel(___map, c);
                             firstTime = true;
                         }
 
@@ -112,8 +113,8 @@ namespace ZLevels
                         bool firstTime = false;
                         if (lowerMap == null)
                         {
-                            lowerMap = ZTracker.CreateLowerLevel(__instance.Map, __instance.Position);
-                            firstTime = true;
+                            return;
+                            //lowerMap = ZTracker.CreateLowerLevel(__instance.Map, __instance.Position);
                         }
                         var thingList = __instance.Position.GetThingList(__instance.Map);
                         if (thingList.Where(x => x is Blueprint || x is Frame).Count() == 0)

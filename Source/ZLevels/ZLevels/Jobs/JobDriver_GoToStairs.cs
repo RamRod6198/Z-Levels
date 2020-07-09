@@ -59,6 +59,7 @@ namespace ZLevels
                         Map map = ZTracker.GetLowerLevel(this.pawn.Map.Tile, this.pawn.Map);
                         if (map == null)
                         {
+                            //Log.Message("CREATING LOWER LEVEL AGAIG", true);
                             map = ZTracker.CreateLowerLevel(this.pawn.Map, stairsDown.Position);
                             if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
                             {

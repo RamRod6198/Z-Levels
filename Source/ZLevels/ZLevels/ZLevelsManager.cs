@@ -27,17 +27,14 @@ namespace ZLevels
         public override void GameComponentTick()
         {
             base.GameComponentTick();
-            //foreach (var tile in this.ZLevelsTracker)
-            //{
-            //    foreach (var map in this.ZLevelsTracker[tile.Key].ZLevels.Values)
-            //    {
-            //        Log.Message("Tile: " + tile.Key + " - Map: " + this.GetMapInfo(map));
-            //    }
-            //}
             if (Find.TickManager.TicksGame % 60 == 0)
             {
                 foreach (var tile in this.ZLevelsTracker)
                 {
+                    //foreach (var map in this.GetAllMaps(tile.Key))
+                    //{
+                    //    Log.Message(this.GetMapInfo(map) + " - " + map.Biome);
+                    //}
                     this.ZLevelsFixer(tile.Key);
                 }
             }
@@ -950,7 +947,7 @@ namespace ZLevels
                             ZLogger.Message("Adding " + job.workGiverDef + " to ignored workgivers");
                             if (this.jobTracker[pawn].ignoreGiversInFirstTime == null)
                             {
-                                this.jobTracker[pawn].ignoreGiversInFirstTime = new List<WorkGiverDef>();
+                                this.jobTracker[pawn].ignoreGiversInFirstTime = new HashSet<WorkGiverDef>();
                             }
                             this.jobTracker[pawn].ignoreGiversInFirstTime.Add(job.workGiverDef);
                         }
@@ -1104,7 +1101,7 @@ namespace ZLevels
                     && this.ZLevelsTracker[tile].ZLevels[0].listerThings == null)
                 {
                     var map = Find.WorldObjects.MapParents.Where(x => x.Tile == tile
-                    && x.HasMap && x.Map != null && x.Map.IsPlayerHome ).FirstOrDefault().Map;
+                    && x.HasMap && x.Map != null && x.Map.IsPlayerHome).FirstOrDefault().Map;
                     this.ZLevelsTracker[tile].ZLevels[0] = map;
                 }
             }
@@ -1352,8 +1349,10 @@ namespace ZLevels
                 if (fileInfo.Exists)
                 {
                     ZLogger.Message("Loading from " + pathToLoad);
+
                     newMap = MapGenerator.GenerateMap(origin.Size, mapParent,
                         ZLevelsDefOf.ZL_EmptyMap, mapParent.ExtraGenStepDefs, null);
+
                     BlueprintUtility.LoadEverything(newMap, pathToLoad);
                 }
                 else
@@ -1389,6 +1388,7 @@ namespace ZLevels
             }
             return newMap;
         }
+
 
         public Map CreateUpperLevel(Map origin, IntVec3 playerStartSpot)
         {

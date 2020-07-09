@@ -35,8 +35,8 @@ namespace ZLevels
                 initAction = delegate ()
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    ZLogger.Message("Pawn.map: " + pawn.Map);
-                    ZLogger.Message("Dest Map: " + dest);
+                    Log.Message("Pawn.map: " + pawn.Map);
+                    Log.Message("Dest Map: " + dest);
                     ZTracker.ReCheckStairs();
                     ZLogger.Message("1 Total count of stairs up: " 
                         + pawn.Map.listerThings.AllThings.Where(x => x is Building_StairsUp).Count());
@@ -118,14 +118,14 @@ namespace ZLevels
                         Map map = ZTracker.GetLowerLevel(pawn.Map.Tile, pawn.Map);
                         if (map == null)
                         {
-                            map = ZTracker.CreateLowerLevel(pawn.Map, stairsDown.Position);
-                            if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
-                            {
-                                var comp = map.GetComponent<MapComponentZLevel>();
-                                comp.DoGeneration = true;
-                                comp.path = stairsDown.pathToPreset;
-                            }
-                            ZTracker.TeleportPawn(pawn, pawn.Position, map, true, true);
+                            //map = ZTracker.CreateLowerLevel(pawn.Map, stairsDown.Position);
+                            //if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
+                            //{
+                            //    var comp = map.GetComponent<MapComponentZLevel>();
+                            //    comp.DoGeneration = true;
+                            //    comp.path = stairsDown.pathToPreset;
+                            //}
+                            //ZTracker.TeleportPawn(pawn, pawn.Position, map, true, true);
                         }
                         else
                         {

@@ -41,13 +41,14 @@ namespace ZLevels
                 if (ZLogger.DebugEnabled)
                 {
                     if (!text.Contains("VisiblePants")
-                        && !text.Contains("GiddyUpRideAndRoll"))
+                        && !text.Contains("GiddyUpRideAndRoll")
+                        && !text.Contains("Unknown crown type"))
                     {
-                        try
-                        {
-                            Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-                        }
-                        catch { };
+                        //try
+                        //{
+                        //    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+                        //}
+                        //catch { };
                         ignoreStopLoggingLimit = true;
                     }
                     else
