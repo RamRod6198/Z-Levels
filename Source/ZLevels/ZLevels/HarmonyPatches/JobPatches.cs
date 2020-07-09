@@ -2118,42 +2118,20 @@ namespace ZLevels
                 {
                     pawn, blueprint, true
                 });
-
-                Job job2 = method.GetValue<Job>();
-                if (job2 == null)
+                var oldMap = pawn.Map;
+                var oldPosition = pawn.Position;
+                foreach (var map in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                 {
-                    var oldMap = pawn.Map;
-                    var oldPosition = pawn.Position;
-
-                    var ZTracker = ZUtils.ZTracker;
-
-                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+                    Log.Message("Searching in " + map);
+                    Job job2 = method.GetValue<Job>();
+                    if (job2 != null)
                     {
-                        if (otherMap != oldMap)
-                        {
-                            Log.Message("Searching in " + otherMap);
-                            job2 = method.GetValue<Job>();
-                            if (job2 != null)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    if (pawn.Map != oldMap)
-                    {
-                        Traverse.Create(pawn).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                        Traverse.Create(pawn).Field("positionInt")
-                            .SetValue(oldPosition);
-                        ZLogger.Message("14 SetPosition for " + pawn + " to " + oldPosition);
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                        Log.Message("Return 3: " + job2);
+                        return job2;
                     }
                 }
-
-                if (job2 != null)
-                {
-                    Log.Message("Return 3: " + job2);
-                    return job2;
-                }
+                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
                 if (scanner.def.workType != WorkTypeDefOf.Hauling)
                 {
                     Job job3 = Traverse.Create(scanner).Method("NoCostFrameMakeJobFor", new object[]
