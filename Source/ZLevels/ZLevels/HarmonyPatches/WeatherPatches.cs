@@ -22,7 +22,7 @@ namespace ZLevels
         [HarmonyPatch(typeof(WeatherDecider), "ChooseNextWeather")]
         internal static class Patch_ChooseNextWeather
         {
-            private static void Postfix(WeatherDecider __instance, WeatherDef __result, Map ___map)
+            private static void Postfix(WeatherDecider __instance, ref WeatherDef __result, Map ___map)
             {
                 try
                 {

@@ -24,7 +24,7 @@ namespace ZLevels
         [HarmonyPatch(new Type[] { typeof(ThingDef), typeof(IntVec3), typeof(Map) })]
         internal static class Patch_SpawnSkyfaller1
         {
-            private static void Postfix(Skyfaller __result, ThingDef skyfaller, IntVec3 pos, Map map)
+            private static void Postfix(ref Skyfaller __result, ThingDef skyfaller, IntVec3 pos, Map map)
             {
                 ZLogger.Message("Spawning " + __result);
 
@@ -55,7 +55,7 @@ namespace ZLevels
         [HarmonyPatch(new Type[] { typeof(ThingDef), typeof(ThingDef), typeof(IntVec3), typeof(Map) })]
         internal static class Patch_SpawnSkyfaller2
         {
-            private static void Postfix(Skyfaller __result, ThingDef skyfaller, ThingDef innerThing, IntVec3 pos, Map map)
+            private static void Postfix(ref Skyfaller __result, ThingDef skyfaller, ThingDef innerThing, IntVec3 pos, Map map)
             {
                 ZLogger.Message("Spawning " + __result);
 
@@ -86,7 +86,7 @@ namespace ZLevels
         [HarmonyPatch(new Type[] { typeof(ThingDef), typeof(Thing), typeof(IntVec3), typeof(Map) })]
         internal static class Patch_SpawnSkyfaller3
         {
-            private static void Postfix(Skyfaller __result, ThingDef skyfaller, Thing innerThing, IntVec3 pos, Map map)
+            private static void Postfix(ref Skyfaller __result, ThingDef skyfaller, Thing innerThing, IntVec3 pos, Map map)
             {
                 ZLogger.Message("Spawning " + __result);
 
@@ -117,7 +117,7 @@ namespace ZLevels
         [HarmonyPatch(new Type[] { typeof(ThingDef), typeof(IEnumerable<Thing>), typeof(IntVec3), typeof(Map) })]
         internal static class Patch_SpawnSkyfaller4
         {
-            private static void Postfix(Skyfaller __result, ThingDef skyfaller, IEnumerable<Thing> things, IntVec3 pos, Map map)
+            private static void Postfix(ref Skyfaller __result, ThingDef skyfaller, IEnumerable<Thing> things, IntVec3 pos, Map map)
             {
                 ZLogger.Message("Spawning " + __result);
                 if (pos.Roofed(map))

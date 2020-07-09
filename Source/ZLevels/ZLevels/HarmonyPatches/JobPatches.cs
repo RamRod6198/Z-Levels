@@ -84,7 +84,7 @@ namespace ZLevels
         //[HarmonyPatch(typeof(ThinkNode_ConditionalShouldFollowMaster), "ShouldFollowMaster")]
         //internal static class ShouldFollowMasterPatch
         //{
-        //    private static bool Prefix(Pawn pawn, bool __result)
+        //    private static bool Prefix(Pawn pawn, ref bool __result)
         //    {
         //        if (!pawn.Spawned || pawn.playerSettings == null)
         //        {
@@ -1318,46 +1318,53 @@ namespace ZLevels
             }
         }
 
-        //[HarmonyPatch(typeof(ListerHaulables), "ShouldBeHaulable")]
-        //public static class ShouldBeHaulablePatch
-        //{
-        //    public static bool Prefix(ListerHaulables __instance, List<Thing> ___haulables, Map ___map, bool __result, Thing t)
-        //    {
-        //        if (t.IsForbidden(Faction.OfPlayer))
-        //        {
-        //            __result = false;
-        //            return false;
-        //        }
-        //        if (!t.def.alwaysHaulable)
-        //        {
-        //            if (!t.def.EverHaulable)
-        //            {
-        //                __result = false;
-        //                return false;
-        //            }
-        //            if (___map.designationManager.DesignationOn(t, DesignationDefOf.Haul) == null && !t.IsInAnyStorage())
-        //            {
-        //                __result = false;
-        //                return false;
-        //            }
-        //        }
-        //        if (t.IsInValidBestStorage())
-        //        {
-        //            __result = false;
-        //            return false;
-        //
-        //        }
-        //        __result = true;
-        //        if (t.def.defName.Contains("Chunk"))
-        //        {
-        //            Log.Message("ShouldBeHaulable - " + t + " - map: " + t.Map + " - position: "
-        //                + t.Position, true);
-        //        }
-        //        return false;
-        //    }
-        //}
+        [HarmonyPatch(typeof(GenConstruct), "CanConstruct")]
+        public static class CanConstructPatch
+        {
+            public static bool Prefix(ref bool __result, Thing t, Pawn p, bool checkSkills = true, bool forced = false)
+            {
+                try
+                {
+                    if (!p.CanReserveAndReach(t, PathEndMode.Touch, forced ? Danger.Deadly
+                        : p.NormalMaxDanger(), 1, -1, null, forced)
+                        && ZUtils.ZTracker.jobTracker.ContainsKey(p)
+                        && ZUtils.ZTracker.jobTracker[p].searchingJobsNow
+                        && t.Map != ZUtils.ZTracker.jobTracker[p].oldMap)
+                    {
+                        __result = true;
+                        return false;
+                    }
+                }
+                catch { }
+                return true;
+            }
+        }
 
-
+        [HarmonyPatch(typeof(WorkGiver_ConstructDeliverResources), "IsNewValidNearbyNeeder")]
+        public static class IsNewValidNearbyNeederPatch
+        {
+            public static bool Prefix(ref bool __result, Thing t, HashSet<Thing> nearbyNeeders, IConstructible constructible, Pawn pawn)
+            {
+                try
+                {
+                    if (!(t is IConstructible) || t == constructible ||
+                        t is Blueprint_Install
+                        || t.Faction != pawn.Faction
+                        || t.IsForbidden(pawn)
+                        || nearbyNeeders.Contains(t)
+                        || !GenConstruct.CanConstruct(t, pawn, checkSkills: false)
+                        )
+                    {
+                        __result = false;
+                        return false;
+                    }
+                    __result = true;
+                    return false;
+                }
+                catch { }
+                return true;
+            }
+        }
 
         [HarmonyPatch(typeof(StoreUtility), "IsInValidBestStorage")]
         public static class IsInValidBestStoragePatch
@@ -1659,7 +1666,11 @@ namespace ZLevels
                     Map dest = null;
                     try
                     {
+                        ZTracker.jobTracker[pawn].searchingJobsNow = true;
+                        ZTracker.jobTracker[pawn].oldMap = pawn.Map;
                         result = TryIssueJobPackage(pawn, jobParams, __instance, ___emergency, ref dest, oldMap, oldPosition);
+                        ZTracker.jobTracker[pawn].searchingJobsNow = false;
+
                         if (result.Job != null)
                         {
                             if (pawn.Map != oldMap)
@@ -2090,7 +2101,6 @@ namespace ZLevels
                 }
                 if (GenConstruct.FirstBlockingThing(blueprint, pawn) != null)
                 {
-                    Log.Message("Return 1: " + GenConstruct.HandleBlockingThingJob(blueprint, pawn, forced));
                     return GenConstruct.HandleBlockingThingJob(blueprint, pawn, forced);
                 }
                 bool flag = scanner.def.workType == WorkTypeDefOf.Construction;
@@ -2111,7 +2121,6 @@ namespace ZLevels
 
                 if (job != null)
                 {
-                    Log.Message("Return 2: " + job);
                     return job;
                 }
                 var method = Traverse.Create(scanner).Method("ResourceDeliverJobFor", new object[]
@@ -2122,12 +2131,10 @@ namespace ZLevels
                 var oldPosition = pawn.Position;
                 foreach (var map in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                 {
-                    Log.Message("Searching in " + map);
                     Job job2 = method.GetValue<Job>();
                     if (job2 != null)
                     {
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                        Log.Message("Return 3: " + job2);
                         return job2;
                     }
                 }
@@ -2140,7 +2147,6 @@ namespace ZLevels
                     }).GetValue<Job>();
                     if (job3 != null)
                     {
-                        Log.Message("Return 4: " + job3);
                         return job3;
                     }
                 }

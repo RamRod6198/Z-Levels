@@ -664,7 +664,7 @@ namespace ZLevels
             {
                 log += "Added job: " + j + "\n";
             }
-            Log.Message(this.ShowJobData(jobToDo, pawn, dest) + log);
+            ZLogger.Message(this.ShowJobData(jobToDo, pawn, dest) + log);
         }
 
         public void ResetJobs(Pawn pawn)

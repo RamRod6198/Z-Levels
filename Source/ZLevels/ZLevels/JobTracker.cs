@@ -22,6 +22,9 @@ namespace ZLevels
 			Scribe_References.Look<Job>(ref this.mainJob, "mainJob");
 			Scribe_References.Look<Map>(ref this.dest, "dest");
 		}
+
+		public bool searchingJobsNow = false;
+
 		public Map oldMap;
 
 		public Map dest;

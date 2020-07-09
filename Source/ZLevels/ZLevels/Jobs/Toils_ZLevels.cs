@@ -35,8 +35,6 @@ namespace ZLevels
                 initAction = delegate ()
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    Log.Message("Pawn.map: " + pawn.Map);
-                    Log.Message("Dest Map: " + dest);
                     ZTracker.ReCheckStairs();
                     ZLogger.Message("1 Total count of stairs up: " 
                         + pawn.Map.listerThings.AllThings.Where(x => x is Building_StairsUp).Count());

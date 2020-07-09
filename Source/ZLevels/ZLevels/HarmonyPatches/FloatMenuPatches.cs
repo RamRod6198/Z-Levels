@@ -22,7 +22,7 @@ namespace ZLevels
         [HarmonyPatch(typeof(FloatMenuOption), "Disabled", MethodType.Getter)]
         internal static class Patch_FloatDisabled
         {
-            private static bool Prefix(FloatMenuOption __instance, bool __result)
+            private static bool Prefix(FloatMenuOption __instance, ref bool __result)
             {
                 if (__instance.Label == "GoDown".Translate() || __instance.Label == "GoUP".Translate())
                 {
