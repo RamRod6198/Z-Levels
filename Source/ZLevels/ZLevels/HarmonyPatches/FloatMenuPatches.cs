@@ -439,7 +439,7 @@ namespace ZLevels
                                                         job = JobPatches.TryIssueJobPackagePatch.
                                                             JobOnThing(scanner1, pawn, item, true);
                                                     }
-                                                    else if (workGiver_Scanner is WorkGiver_HaulGeneral || workGiver_Scanner is WorkGiver_HaulCorpses)
+                                                    else if (workGiver_Scanner.def.defName == "HaulGeneral" || workGiver_Scanner.def.defName == "HaulCorpses")
                                                     {
                                                         job = JobPatches.TryIssueJobPackagePatch.
                                                             JobOnThing(pawn, item, ref dest);

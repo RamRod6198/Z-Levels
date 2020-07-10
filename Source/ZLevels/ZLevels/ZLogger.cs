@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using Verse;
 
 namespace ZLevels
 {
 	public static class ZLogger
 	{
+		//[Conditional("Debug")]
 		public static void Message(string message, bool temp = true)
 		{
 			if (ZLogger.DebugEnabled)

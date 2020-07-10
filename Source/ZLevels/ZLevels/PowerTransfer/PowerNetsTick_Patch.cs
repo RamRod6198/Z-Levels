@@ -24,7 +24,7 @@ namespace ZLevels
         public class PowerNetsTick_Patch
         {
             [HarmonyPrefix]
-            private static bool Prefix()
+            private static void Prefix()
             {
                 try
                 {
@@ -42,7 +42,7 @@ namespace ZLevels
                                     {
                                         if (powerNet.Key != powerNet2.Key && c1 == c2)
                                         {
-                                            ZLogger.Message("PowerNetsTick_Patch: " + c1 + " == " + c2);
+                                            //Log.Message("PowerNetsTick_Patch: " + c1 + " == " + c2);
                                             if (powerNet.Value.Count > powerNet2.Value.Count)
                                             {
                                                 keyToRemove = powerNet2.Key;
@@ -74,18 +74,66 @@ namespace ZLevels
                             Dictionary<CompPowerZTransmitter, float> compPowers = new Dictionary<CompPowerZTransmitter, float>();
                             foreach (var comp in powerNet.Value)
                             {
+                                comp.powerOutputInt = 0;
+                                //Log.Message("1 Powernet has: " + comp + " - " + comp.PowerNet.Map + " - " + comp.GetHashCode() + " - " + comp.PowerNet.GetHashCode(), true);
+                            }
+
+                            foreach (var comp in powerNet.Value)
+                            {
+                                var newPowerNet = comp.PowerNet.transmitters.FirstOrDefault()?.PowerNet;
+
+                                if (newPowerNet != null && comp.PowerNet != newPowerNet)
+                                {
+                                    foreach (var comp2 in powerNet.Value)
+                                    {
+                                        if (comp2.PowerNet.Map == newPowerNet.Map
+                                            && comp2.PowerNet != newPowerNet)
+                                        {
+                                            //Log.Message("Replacing " + comp2.GetHashCode() + " - " + comp2.PowerNet.GetHashCode() 
+                                            //    + " with " + newPowerNet.GetHashCode() + " in " + comp2.PowerNet.Map, true);
+                                            comp2.PowerNet.DeregisterConnector(comp2);
+                                            comp2.transNet = newPowerNet;
+                                            newPowerNet.RegisterConnector(comp2);
+                                        }
+                                    }
+                                }
+
                                 if (comp.PowerNet != null)
                                 {
-                                    compPowers[comp] = (comp.PowerNet.CurrentEnergyGainRate()
-                                        / CompPower.WattsToWattDaysPerTick) - comp.powerOutputInt;
+                                    compPowers[comp] = comp.PowerNet.CurrentEnergyGainRate()
+                                        / CompPower.WattsToWattDaysPerTick;
                                 }
                             }
                             var newValue = compPowers.Sum(x => x.Value) / compPowers.Count;
+                            //Log.Message("------------------", true);
+                            //foreach (var comp in powerNet.Value)
+                            //{
+                            //    Log.Message("2 Powernet has: " + comp + " - " + comp.PowerNet.Map + " - " + comp.GetHashCode() + " - " + comp.PowerNet.GetHashCode(), true);
+                            //}
+                            //Log.Message("------------------", true);
                             foreach (var comp in powerNet.Value)
                             {
                                 if (compPowers.ContainsKey(comp))
                                 {
+                                    if (!comp.PowerNet.powerComps.Contains(comp))
+                                    {
+                                        comp.PowerNet.powerComps.RemoveAll(x => x is CompPowerZTransmitter trans && trans.PowerNet != comp.PowerNet);
+                                        //Log.Message("Adding " + comp + " - " + comp.GetHashCode() + " to " + comp.PowerNet.GetHashCode(), true);
+                                        comp.PowerNet.powerComps.Add(comp);
+                                    }
+                                    //Log.Message("comp.powerNet energy: " + comp.PowerNet.Map + " - " + comp.PowerNet.CurrentEnergyGainRate()
+                                    //        / CompPower.WattsToWattDaysPerTick + " - " + comp.GetHashCode() + " - "
+                                    //        + comp.PowerNet.GetHashCode(), true);
+                                    //foreach (var p in comp.PowerNet.powerComps)
+                                    //{
+                                    //    Log.Message("powerComp: " + p + " - " + p.powerOutputInt + " - " + p.GetHashCode() + " - " + p.PowerNet.GetHashCode(), true);
+                                    //}
+                                    
                                     comp.powerOutputInt = newValue - compPowers[comp];
+                                    //Log.Message("comp.powerOutputInt: " + comp.powerOutputInt + " - " 
+                                    //    + comp.PowerNet.Map + " - " + comp.PowerNet.CurrentEnergyGainRate() 
+                                    //    / CompPower.WattsToWattDaysPerTick + " - " + comp.GetHashCode() + " - "
+                                    //    + comp.PowerNet.GetHashCode(), true);
                                 }
                             }
                             //Log.Message("powerNet.Value: " + powerNet.Value.Count + " - newValue: " + newValue, true);
@@ -96,7 +144,6 @@ namespace ZLevels
                 {
                     Log.Error("[Z-Levels] PowerNetsTick_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
                 }
-                return true;
             }
         }
     }

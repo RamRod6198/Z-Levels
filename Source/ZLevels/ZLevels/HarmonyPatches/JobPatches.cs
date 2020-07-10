@@ -2770,34 +2770,34 @@ namespace ZLevels
                                 {
                                     Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) &&
                                     scanner.HasJobOnThing(pawn, t) 
-                                    //&& NoOneHasJobOn(t, pawn, scanner.def)
+                                    && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
 
                                     Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn)
                                     && JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn,
                                     t) != null 
-                                    //&& NoOneHasJobOn(t, pawn, scanner.def)
+                                    && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
 
                                     Predicate<Thing> deliverResourcesValidator2 = (Thing t) => !t.IsForbidden(pawn)
                                     && JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t)
                                     != null 
-                                    //&& NoOneHasJobOn(t, pawn, scanner.def)
+                                    && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
 
                                     Predicate<Thing> refuelValidator = (Thing t) => !t.IsForbidden(pawn) &&
                                         JobOnThing((WorkGiver_Refuel)scanner, pawn, t) != null
-                                        //&& NoOneHasJobOn(t, pawn, scanner.def)
+                                        && NoOneHasJobOn(t, pawn, scanner.def)
                                         ;
 
                                     Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn)
                                     && TryIssueJobPackagePatch.JobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null
-                                    //&& NoOneHasJobOn(t, pawn, scanner.def)
+                                    && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
 
                                     Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn)
                                     && HasJobOnThing(scanner, pawn, t, false) != null 
-                                    //&& NoOneHasJobOn(t, pawn, scanner.def)
+                                    && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
 
                                     ZLogger.Message(pawn + " search job in " + ZTracker.GetMapInfo(otherMap) + " - " + workGiver);
@@ -3082,7 +3082,7 @@ namespace ZLevels
                     //ZLogger.Message(pawn + " cannot use " + giver + " - reason: pawn.WorkTagIsDisabled(giver.def.workTags)");
                     return false;
                 }
-                if (giver is WorkGiver_Haul || giver is WorkGiver_HaulCorpses)
+                if (giver.def.defName == "HaulGeneral" || giver.def.defName == "HaulCorpses")
                 {
 
                 }

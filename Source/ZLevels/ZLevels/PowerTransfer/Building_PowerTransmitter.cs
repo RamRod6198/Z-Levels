@@ -66,18 +66,20 @@ namespace ZLevels
                 if (baseComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).Count() > 1
                     && this.lowerPowerComp == null && this.upperPowerComp == null)
                 {
+                    //Log.Message("1 Removing " + baseComp + " - " + baseComp.GetHashCode(), true);
                     baseComp.PowerNet.powerComps.Remove(baseComp);
                 }
                 else if (baseComp != null && baseComp.PowerNet.powerComps.Contains(baseComp))
                 {
                     if (!baseComp.PowerNet.powerComps.Contains(baseComp))
                     {
+                        //Log.Message("1 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
                         baseComp.PowerNet.powerComps.Add(baseComp);
                     }
                     var powerComps = new List<CompPowerZTransmitter>();
                     if (connectedPowerNets.powerNets == null)
                     {
-                        //Log.Message(this + " Add1 ", true);
+                        //Log.Message("2 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
                         powerComps.Add(baseComp);
                         connectedPowerNets.powerNets = new Dictionary<int, List<CompPowerZTransmitter>>
                         {
@@ -86,14 +88,14 @@ namespace ZLevels
                     }
                     else if (connectedPowerNets.powerNets.Count == 0)
                     {
-                        //Log.Message(this + " Add2 ", true);
+                        //Log.Message("3 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
                         powerComps.Add(baseComp);
                         connectedPowerNets.powerNets.Add(0, powerComps);
                     }
                     else if (connectedPowerNets.powerNets.Values.Where(x => x.Where(y => y.PowerNet == baseComp.PowerNet
                         && y.PowerNet.powerComps.Exists(c => c is CompPowerZTransmitter)).Count() > 0).Count() == 0)
                     {
-                        //Log.Message(this + " Add3 ", true);
+                        //Log.Message("4 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
                         powerComps.Add(baseComp);
                         int maxKey = connectedPowerNets.powerNets.Max(x => x.Key);
                         connectedPowerNets.powerNets.Add(maxKey + 1, powerComps);
@@ -151,10 +153,12 @@ namespace ZLevels
                                             transNet = upperComp.transNet
                                         };
                                         upperPowerComp.Initialize(new CompProperties_PowerZTransmitter());
+                                        //Log.Message("5 Adding " + upperPowerComp + " - " + upperPowerComp.GetHashCode(), true);
                                         upperComp.PowerNet.powerComps.Add(upperPowerComp);
                                     }
                                     if (upperPowerComp != null && !powerComps.Contains(upperPowerComp))
                                     {
+                                        //Log.Message("6 Adding " + upperPowerComp + " - " + upperPowerComp.GetHashCode(), true);
                                         powerComps.Add(upperPowerComp);
                                     }
                                     break;
@@ -184,11 +188,13 @@ namespace ZLevels
                                             //PowerOn = true
                                         };
                                         lowerPowerComp.Initialize(new CompProperties_PowerZTransmitter());
+                                        //Log.Message("7 Adding " + lowerPowerComp + " - " + lowerPowerComp.GetHashCode(), true);
                                         lowerComp.PowerNet.powerComps.Add(lowerPowerComp);
                                     }
                                     if (lowerPowerComp != null && !powerComps.Contains(lowerPowerComp))
                                     {
                                         //Log.Message(this + " Lower add " + lowerPowerComp);
+                                        //Log.Message("8 Adding " + lowerPowerComp + " - " + lowerPowerComp.GetHashCode(), true);
                                         powerComps.Add(lowerPowerComp);
                                     }
                                     break;
