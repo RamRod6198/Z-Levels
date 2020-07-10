@@ -317,7 +317,7 @@ namespace ZLevels
                             Job job = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
                             job.count = 1;
                             ZTracker.BuildJobListFor(pawn, pawn.Map, job);
-                            ZLogger.Message(pawn + " taking first job 2");
+                            Log.Message(pawn + " taking first job 2");
                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
                             PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
                         }
@@ -530,11 +530,9 @@ namespace ZLevels
                                                             {
                                                                 ZTracker.BuildJobListFor(pawn, oldMap, job);
                                                             }
-                                                            ZLogger.Message(pawn + " taking job " + ZTracker.jobTracker[pawn].activeJobs[0]);
-                                                            if (pawn.jobs.TryTakeOrderedJob(ZTracker.jobTracker[pawn].activeJobs[0]) 
-                                                            && workGiver2.forceMote != null)
+                                                            pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+                                                            if (workGiver2.forceMote != null)
                                                             {
-                                                                ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                                                 MoteMaker.MakeStaticMote(clickCell, pawn.Map, workGiver2.forceMote);
                                                             }
                                                         };
