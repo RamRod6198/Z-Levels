@@ -43,6 +43,9 @@ namespace ZLevels
 
                     ZLogger.Message("2 Total count of stairs up: " + ZTracker.stairsUp[pawn.Map].Count);
                     ZLogger.Message("2 Total count of stairs down: " + ZTracker.stairsDown[pawn.Map].Count);
+                    ZLogger.Message("pawn: " + pawn);
+                    ZLogger.Message("pawn.Map: " + pawn.Map);
+                    ZLogger.Message("dest: " + dest);
                     if (ZTracker.GetZIndexFor(pawn.Map) > ZTracker.GetZIndexFor(dest))
                     {
                         var stairs = ZTracker.stairsDown[pawn.Map];

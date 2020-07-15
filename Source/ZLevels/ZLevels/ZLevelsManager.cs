@@ -299,9 +299,7 @@ namespace ZLevels
             }
             catch (Exception ex)
             {
-                Log.Error("[Z-Levels] GetZIndexFor produced an error. " +
-                    "That should not happen and will break things. " +
-                    "Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                ZLogger.Error("[Z-Levels] GetZIndexFor produced an error: " + ex);
                 return -99999;
             }
         }
@@ -369,6 +367,7 @@ namespace ZLevels
             {
                 str += pawn + " - " + job + "\n";
                 str += "Pawn map: " + pawn.Map + "\n";
+                str += "ZTracker dest map: " + this.jobTracker[pawn].dest + "\n";
                 str += "Dest map: " + dest + "\n";
                 str += "Job.workGiverDef: " + job.workGiverDef + "\n";
                 str += "Job.jobGiver: " + job.jobGiver + "\n";
@@ -695,6 +694,7 @@ namespace ZLevels
                     activeJobs = new List<Job>()
                 };
             }
+            pawn.jobs.EndCurrentJob(JobCondition.Errored);
         }
 
         public bool TryTakeFirstJob(Pawn pawn, bool forced = false)
@@ -1225,22 +1225,6 @@ namespace ZLevels
                 this.SaveArea(pawnToTeleport);
             }
             catch { }
-
-            if (pawnToTeleport.RaceProps.Humanlike)
-            {
-                foreach (var animal in pawnToTeleport.relations.DirectRelations
-                    .Where(x => x.def == PawnRelationDefOf.Bond && x.otherPawn.Spawned
-                    && pawnToTeleport.Position.InHorDistOf(x.otherPawn.Position, 15)))
-                {
-                    var stairs = pawnToTeleport.Position.GetThingList(pawnToTeleport.Map)
-                        .Where(x => x is Building_StairsDown || x is Building_StairsUp).FirstOrDefault();
-                    if (stairs != null)
-                    {
-                        Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, stairs);
-                        animal.otherPawn.jobs.jobQueue.EnqueueFirst(goToStairs);
-                    }
-                }
-            }
 
             RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
             pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);

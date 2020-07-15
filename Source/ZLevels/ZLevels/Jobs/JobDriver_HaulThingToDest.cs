@@ -34,8 +34,10 @@ namespace ZLevels
             };
 
             Toil reserveItem = Toils_Reserve.Reserve(TargetIndex.A);
+            ZLogger.Message(pawn + " 8 ZUtils.ZTracker.jobTracker[pawn].dest: " + TargetA.Thing.Map);
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), TargetA.Thing.Map, this))
             {
+                ZLogger.Message(pawn + " 9 ZUtils.ZTracker.jobTracker[pawn].dest: " + TargetA.Thing.Map);
                 yield return toil;
             }
             yield return new Toil
@@ -143,9 +145,12 @@ namespace ZLevels
                     ZLogger.Message("TargetA: " + this.job.targetA.Thing);
                 }
             };
+            ZLogger.Message(pawn + " 6 ZUtils.ZTracker.jobTracker[pawn].dest: " + ZTracker.jobTracker[pawn].dest);
 
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].dest, this))
             {
+                ZLogger.Message(pawn + " 7 ZUtils.ZTracker.jobTracker[pawn].dest: " + ZTracker.jobTracker[pawn].dest);
+
                 yield return toil;
             }
         }

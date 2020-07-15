@@ -81,469 +81,286 @@ namespace ZLevels
         //    }
         //}
 
-        //[HarmonyPatch(typeof(ThinkNode_ConditionalShouldFollowMaster), "ShouldFollowMaster")]
-        //internal static class ShouldFollowMasterPatch
-        //{
-        //    private static bool Prefix(Pawn pawn, ref bool __result)
-        //    {
-        //        if (!pawn.Spawned || pawn.playerSettings == null)
-        //        {
-        //            __result = false;
-        //        }
-        //        Pawn respectedMaster = pawn.playerSettings.RespectedMaster;
-        //        if (respectedMaster == null)
-        //        {
-        //            __result = false;
-        //        }
-        //        if (respectedMaster.Spawned)
-        //        {
-        //            if (pawn.playerSettings.followDrafted 
-        //                && respectedMaster.Drafted)
-        //                //&& pawn.CanReach(respectedMaster, PathEndMode.OnCell, Danger.Deadly))
-        //            {
-        //                __result = true;
-        //            }
-        //            if (pawn.playerSettings.followFieldwork 
-        //                && respectedMaster.mindState.lastJobTag == JobTag.Fieldwork)
-        //                //&& pawn.CanReach(respectedMaster, PathEndMode.OnCell, Danger.Deadly))
-        //            {
-        //                __result = true;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            Pawn carriedBy = respectedMaster.CarriedBy;
-        //            if (carriedBy != null && carriedBy.HostileTo(respectedMaster) && pawn.CanReach(carriedBy, PathEndMode.OnCell, Danger.Deadly))
-        //            {
-        //                __result = true;
-        //            }
-        //        }
-        //        return false;
-        //    }
-        //}
-        //
-        //[HarmonyPatch(typeof(JobGiver_AIFollowPawn), "TryGiveJob")]
-        //public class JobGiver_AIFollowPawnPatch
-        //{
-        //    [HarmonyPrefix]
-        //    private static bool JobGiver_AIFollowPawnPrefix(JobGiver_AIFollowPawn __instance, ref Job __result, Pawn pawn)
-        //    {
-        //        Log.Message("starting following search");
-        //        __result = JobMaker.MakeJob(JobDefOf.GotoWander, pawn.Position);
-        //        //ZLogger.Message(pawn + " starting following search");
-        //        //try
-        //        //{
-        //        //    var ZTracker = ZUtils.ZTracker;
-        //        //
-        //        //    if (ZTracker.jobTracker == null)
-        //        //    {
-        //        //        ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
-        //        //    }
-        //        //
-        //        //    if (ZTracker.jobTracker.ContainsKey(pawn))
-        //        //    {
-        //        //        try
-        //        //        {
-        //        //            if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
-        //        //            {
-        //        //                if (pawn.needs.food.CurCategory < HungerCategory.Starving
-        //        //                    && !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
-        //        //                {
-        //        //                    if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory"
-        //        //                        && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
-        //        //                    {
-        //        //                        ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-        //        //                        pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
-        //        //                        return false;
-        //        //                    }
-        //        //                }
-        //        //                else if (pawn.needs.food.CurCategory < HungerCategory.Starving
-        //        //                    && pawn.jobs.curJob == null
-        //        //                    && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
-        //        //                {
-        //        //                    ZLogger.Message("1 START JOB "
-        //        //                        + ZTracker.jobTracker[pawn].activeJobs[0] + " FOR " + pawn);
-        //        //                    __result = ZTracker.jobTracker[pawn].activeJobs[0];
-        //        //                    ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-        //        //
-        //        //                    return false;
-        //        //                }
-        //        //                else if (pawn.jobs.curJob == null && ZTracker.jobTracker[pawn].activeJobs[0] != null)
-        //        //                {
-        //        //                    ZLogger.Message("2 START JOB " + ZTracker.jobTracker[pawn].activeJobs[0]
-        //        //                        + " FOR " + pawn);
-        //        //                    __result = ZTracker.jobTracker[pawn].activeJobs[0];
-        //        //                    ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-        //        //                    return false;
-        //        //                    //ZLogger.Message("1 RESETTING JOB TRACKER FOR " + pawn);
-        //        //                    //ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
-        //        //                    //ZLogger.Message(pawn + " - ZTracker.jobTracker[pawn].activeJobs[0]: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-        //        //                    //foreach (var job in pawn.jobs.jobQueue)
-        //        //                    //{
-        //        //                    //    ZLogger.Message(pawn + " - job in pawn queue: " + job.job);
-        //        //                    //}
-        //        //                    //foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
-        //        //                    //{
-        //        //                    //    ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
-        //        //                    //}
-        //        //                    //ZTracker.ResetJobTrackerFor(pawn);
-        //        //                }
-        //        //            }
-        //        //        }
-        //        //        catch (Exception ex)
-        //        //        {
-        //        //            ZLogger.Message("Error2: " + ex);
-        //        //        };
-        //        //    }
-        //        //    else
-        //        //    {
-        //        //        ZTracker.jobTracker[pawn] = new JobTracker();
-        //        //    }
-        //        //
-        //        //    Job result;
-        //        //    var oldMap = pawn.Map;
-        //        //    var oldPosition = pawn.Position;
-        //        //    bool select = false;
-        //        //    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-        //        //
-        //        //    if (pawn.MentalStateDef != null)
-        //        //    {
-        //        //        ZLogger.Pause(pawn + " in mental state");
-        //        //        __result = JobGiver_AIFollowPawnPatch.TryGiveJob(pawn, __instance);
-        //        //        return false;
-        //        //    }
-        //        //    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
-        //        //    {
-        //        //        ZLogger.Message("Searching follow job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
-        //        //            + " for " + ZTracker.GetMapInfo(oldMap));
-        //        //        result = JobGiver_AIFollowPawnPatch.TryGiveJob(pawn, __instance);
-        //        //        if (result != null)
-        //        //        {
-        //        //            ZLogger.Message(pawn + " got follow job " + result + " - map: "
-        //        //                + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
-        //        //
-        //        //            Traverse.Create(pawn).Field("mapIndexOrState")
-        //        //                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-        //        //            Traverse.Create(pawn).Field("positionInt")
-        //        //                .SetValue(oldPosition);
-        //        //
-        //        //            ZTracker.BuildJobListFor(pawn, otherMap, result);
-        //        //            __result = ZTracker.jobTracker[pawn].activeJobs[0];
-        //        //            ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-        //        //            break;
-        //        //        }
-        //        //    }
-        //        //    if (pawn.Map != oldMap)
-        //        //    {
-        //        //        Traverse.Create(pawn).Field("mapIndexOrState")
-        //        //            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-        //        //        Traverse.Create(pawn).Field("positionInt")
-        //        //            .SetValue(oldPosition);
-        //        //    }
-        //        //    if (select) Find.Selector.Select(pawn);
-        //        //    return false;
-        //        //}
-        //        //catch (Exception ex)
-        //        //{
-        //        //    Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
-        //        //}
-        //        return true;
-        //    }
-        //
-        //    public static Job TryGiveJob(Pawn pawn, JobGiver_AIFollowPawn __instance)
-        //    {
-        //        Pawn followee = Traverse.Create(__instance).Method("GetFollowee", new object[]
-        //                            {
-        //                                pawn
-        //                            }).GetValue<Pawn>();
-        //        if (followee == null)
-        //        {
-        //            return null;
-        //        }
-        //        if (!followee.Spawned || !pawn.CanReach(followee, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
-        //        {
-        //            return null;
-        //        }
-        //
-        //        float radius = Traverse.Create(__instance).Method("GetRadius", new object[]
-        //                        {
-        //                            pawn
-        //                        }).GetValue<float>();
-        //        if (!JobDriver_FollowClose.FarEnoughAndPossibleToStartJob(pawn, followee, radius))
-        //        {
-        //            return null;
-        //        }
-        //        Job job = JobMaker.MakeJob(JobDefOf.FollowClose, followee);
-        //        job.expiryInterval = Traverse.Create(__instance).Field("FollowJobExpireInterval").GetValue<int>(); ;
-        //        job.checkOverrideOnExpire = true;
-        //        job.followRadius = radius;
-        //        return job;
-        //    }
-        //}
+        [HarmonyPatch(typeof(ThinkNode_ConditionalShouldFollowMaster), "ShouldFollowMaster")]
+        internal static class ShouldFollowMasterPatch
+        {
+            private static bool Prefix(Pawn pawn, ref bool __result)
+            {
+                if (!pawn.Spawned || pawn.playerSettings == null)
+                {
+                    __result = false;
+                    return false;
+                }
+                Pawn respectedMaster = pawn.playerSettings.RespectedMaster;
+                if (respectedMaster == null)
+                {
+                    __result = false;
+                    return false;
+                }
+                if (respectedMaster.Spawned)
+                {
+                    if (pawn.playerSettings.followDrafted 
+                        && respectedMaster.Drafted)
+                        //&& pawn.CanReach(respectedMaster, PathEndMode.OnCell, Danger.Deadly))
+                    {
+                        __result = true;
+                        return false;
+                    }
+                    if (pawn.playerSettings.followFieldwork 
+                        && respectedMaster.mindState.lastJobTag == JobTag.Fieldwork)
+                        //&& pawn.CanReach(respectedMaster, PathEndMode.OnCell, Danger.Deadly))
+                    {
+                        __result = true;
+                        return false;
+                    }
+                }
+                else
+                {
+                    Pawn carriedBy = respectedMaster.CarriedBy;
+                    if (carriedBy != null && carriedBy.HostileTo(respectedMaster) && pawn.CanReach(carriedBy, PathEndMode.OnCell, Danger.Deadly))
+                    {
+                        __result = true;
+                        return false;
 
-        //[HarmonyPatch(typeof(JobGiver_ConfigurableHostilityResponse), "TryGiveJob")]
-        //public class JobGiver_ConfigurableHostilityResponsePatch
-        //{
-        //    [HarmonyPostfix]
-        //    private static void JobGiver_ConfigurableHostilityResponsePostfix(JobGiver_ConfigurableHostilityResponse __instance, ref Job __result, Pawn pawn)
-        //    {
-        //        try
-        //        {
-        //            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-        //            if (pawn.def.race.Humanlike && pawn.Faction != Faction.OfPlayer && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
-        //            {
-        //                if (ZTracker.jobTracker == null)
-        //                {
-        //                    ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
-        //                }
-        //                if (ZTracker.jobTracker.ContainsKey(pawn))
-        //                {
-        //                    try
-        //                    {
-        //                        if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
-        //                        {
-        //                            if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
-        //                            {
-        //                                ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-        //                                pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
-        //                                return;
-        //                            }
-        //                            else if (pawn.jobs.jobQueue[0].job.targetA.Thing.Map != pawn.Map)
-        //                            {
-        //                                ZTracker.ResetJobTrackerFor(pawn);
-        //                            }
-        //                            else
-        //                            {
-        //                                return;
-        //                            }
-        //                        }
-        //                    }
-        //                    catch (Exception ex)
-        //                    {
-        //                        ZLogger.Message("Error2: " + ex);
-        //                    };
-        //                }
-        //                else
-        //                {
-        //                    ZTracker.jobTracker[pawn] = new JobTracker();
-        //                }
-        //                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
-        //                // minimal job interval check per pawn is 200 ticks
-        //                {
-        //                    return;
-        //                }
-        //
-        //                Map playerMap = ZTracker.GetMapByIndex(pawn.Map.Tile, 0);
-        //                if (pawn.Map != playerMap)
-        //                {
-        //                    ZTracker.BuildJobListFor(pawn, pawn.Map, playerMap, JobMaker.MakeJob(JobDefOf.Wait_Combat, JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange, true), null);
-        //                    try
-        //                    {
-        //                        ZLogger.Message("3 lastTick");
-        //                        ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame;
-        //                    }
-        //                    catch { }
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
-        //        }
-        //    }
-        //}
-        //
-        //[HarmonyPatch(typeof(JobGiver_AIGotoNearestHostile), "TryGiveJob")]
-        //public class JobGiver_AIGotoNearestHostilePatch
-        //{
-        //    [HarmonyPostfix]
-        //    private static void JobGiver_AIGotoNearestHostilePostfix(JobGiver_AIGotoNearestHostile __instance, ref Job __result, Pawn pawn)
-        //    {
-        //        try
-        //        {
-        //            var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
-        //            if (pawn.def.race.Humanlike && pawn.Faction != Faction.OfPlayer && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
-        //            {
-        //                if (ZTracker.jobTracker == null)
-        //                {
-        //                    ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
-        //                }
-        //                if (ZTracker.jobTracker.ContainsKey(pawn))
-        //                {
-        //                    try
-        //                    {
-        //                        if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
-        //                        {
-        //                            if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
-        //                            {
-        //                                ZLogger.Message("Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-        //                                pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
-        //                                return;
-        //                            }
-        //                            else if (pawn.jobs.jobQueue[0].job.targetA.Thing.Map != pawn.Map)
-        //                            {
-        //                                ZTracker.ResetJobTrackerFor(pawn);
-        //                            }
-        //                            else
-        //                            {
-        //                                return;
-        //                            }
-        //                        }
-        //                    }
-        //                    catch (Exception ex)
-        //                    {
-        //                        ZLogger.Message("Error2: " + ex);
-        //                    };
-        //                }
-        //                else
-        //                {
-        //                    ZTracker.jobTracker[pawn] = new JobTracker();
-        //                }
-        //                if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
-        //                // minimal job interval check per pawn is 200 ticks
-        //                {
-        //                    return;
-        //                }
-        //                Job result = null;
-        //                var oldMap = pawn.Map;
-        //                var oldPosition = pawn.Position;
-        //                bool select = false;
-        //
-        //                foreach (var otherMap in ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Values)
-        //                {
-        //                    if (otherMap != oldMap)
-        //                    {
-        //                        if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
-        //                        {
-        //                            return;
-        //                        }
-        //                        ZLogger.Message("Searching figth job for " + pawn);
-        //                        var stairs = new List<Thing>();
-        //
-        //                        ZLogger.Message("Searching job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
-        //                            + " for " + ZTracker.GetMapInfo(oldMap));
-        //
-        //                        if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-        //                        {
-        //                            Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-        //                            if (lowerMap != null)
-        //                            {
-        //                                ZLogger.Message("Searching stairs up in " + ZTracker.GetMapInfo(otherMap));
-        //                                stairs = lowerMap.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
-        //                            }
-        //                            else
-        //                            {
-        //                                ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-        //                            }
-        //                        }
-        //                        else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-        //                        {
-        //                            Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-        //                            if (upperMap != null)
-        //                            {
-        //                                ZLogger.Message("Searching stairs down in " + ZTracker.GetMapInfo(otherMap));
-        //                                stairs = upperMap.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
-        //                            }
-        //                            else
-        //                            {
-        //                                ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-        //                            }
-        //                        }
-        //                        if (Find.TickManager.TicksGame - ZTracker.jobTracker[pawn].lastTick < 200)
-        //                        // minimal job interval check per pawn is 200 ticks
-        //                        {
-        //                            return;
-        //                        }
-        //
-        //                        if (stairs != null && stairs.Count() > 0)
-        //                        {
-        //                            var selectedStairs = GenClosest.ClosestThing_Global(pawn.Position, stairs, 99999f);
-        //                            var position = selectedStairs.Position;
-        //
-        //                            if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-        //                            JobManagerPatches.manualDespawn = true;
-        //                            pawn.DeSpawn();
-        //                            JobManagerPatches.manualDespawn = false;
-        //                            GenPlace.TryPlaceThing(pawn, position, otherMap, ThingPlaceMode.Direct);
-        //
-        //                            result = JobGiver_AIGotoNearestHostilePatch.TryGiveJob(pawn);
-        //
-        //                            if (result != null)
-        //                            {
-        //                                ZLogger.Message(pawn + " gets food job " + result);
-        //                                ZLogger.Message("TryIssueJobPackage: " + pawn + " - map: " + ZTracker.GetMapInfo(pawn.Map)
-        //                                    + " - " + pawn.Position + " result " + result);
-        //                                JobManagerPatches.manualDespawn = true;
-        //                                pawn.DeSpawn();
-        //                                JobManagerPatches.manualDespawn = false;
-        //                                GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-        //                                if (select) Find.Selector.Select(pawn);
-        //                                ZTracker.BuildJobListFor(pawn, oldMap, otherMap, result, null);
-        //                                break;
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //                if (pawn.Map != oldMap)
-        //                {
-        //                    JobManagerPatches.manualDespawn = true;
-        //                    pawn.DeSpawn();
-        //                    JobManagerPatches.manualDespawn = false;
-        //                    GenPlace.TryPlaceThing(pawn, oldPosition, oldMap, ThingPlaceMode.Direct);
-        //                    if (select) Find.Selector.Select(pawn);
-        //                }
-        //                if (result == null)
-        //                {
-        //                    Map playerMap = ZTracker.GetMapByIndex(oldMap.Tile, 0);
-        //                    if (pawn.Map != playerMap)
-        //                    {
-        //                        ZTracker.BuildJobListFor(pawn, oldMap, playerMap, JobMaker.MakeJob(JobDefOf.Wait_Combat, JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange, true), null);
-        //                    }
-        //                }
-        //                try
-        //                {
-        //                    ZLogger.Message("4 lastTick");
-        //                    ZTracker.jobTracker[pawn].lastTick = Find.TickManager.TicksGame;
-        //                }
-        //                catch { }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
-        //        }
-        //    }
-        //
-        //    public static Job TryGiveJob(Pawn pawn)
-        //    {
-        //        float num = float.MaxValue;
-        //        Thing thing = null;
-        //        List<IAttackTarget> potentialTargetsFor = pawn.Map.attackTargetsCache.GetPotentialTargetsFor(pawn);
-        //        for (int i = 0; i < potentialTargetsFor.Count; i++)
-        //        {
-        //            IAttackTarget attackTarget = potentialTargetsFor[i];
-        //            if (!attackTarget.ThreatDisabled(pawn) && AttackTargetFinder.IsAutoTargetable(attackTarget))
-        //            {
-        //                Thing thing2 = (Thing)attackTarget;
-        //                int num2 = thing2.Position.DistanceToSquared(pawn.Position);
-        //                if ((float)num2 < num && pawn.CanReach(thing2, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
-        //                {
-        //                    num = (float)num2;
-        //                    thing = thing2;
-        //                }
-        //            }
-        //        }
-        //        if (thing != null)
-        //        {
-        //            Job job = JobMaker.MakeJob(JobDefOf.Goto, thing);
-        //            job.checkOverrideOnExpire = true;
-        //            job.expiryInterval = 500;
-        //            job.collideWithPawns = true;
-        //            return job;
-        //        }
-        //        return null;
-        //    }
-        //}
+                    }
+                }
+                __result = false;
+                return false;
+            }
+        }
+        
+        [HarmonyPatch(typeof(JobGiver_AIFollowPawn), "TryGiveJob")]
+        public class JobGiver_AIFollowPawnPatch
+        {
+            [HarmonyPrefix]
+            private static bool JobGiver_AIFollowPawnPrefix(JobGiver_AIFollowPawn __instance, ref Job __result, Pawn pawn)
+            {
+                try
+                {
+                    var ZTracker = ZUtils.ZTracker;
+                    if (ZTracker.jobTracker == null)
+                    {
+                        ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+                    }
+                    if (ZTracker.jobTracker.ContainsKey(pawn))
+                    {
+                        try
+                        {
+                            if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+                            {
+                                if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
+                                {
+                                    if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory"
+                                        && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
+                                    {
+                                        __result = ZTracker.jobTracker[pawn].activeJobs[0];
+                                        ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                                        return false;
+                                    }
+                                }
+                                else if (pawn.jobs.curJob == null)
+                                {
+                                    __result = ZTracker.jobTracker[pawn].activeJobs[0];
+                                    ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                                    return false;
+                                }
+                                else if (pawn.jobs.curJob != ZTracker.jobTracker[pawn].activeJobs[0])
+                                {
+                                    __result = ZTracker.jobTracker[pawn].activeJobs[0];
+                                    ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                                    return false;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ZLogger.Message("Error2: " + ex);
+                        };
+                    }
+                    else
+                    {
+                        ZTracker.jobTracker[pawn] = new JobTracker();
+                    }
+                
+                    Job result;
+                    var oldMap = pawn.Map;
+                    var oldPosition = pawn.Position;
+                    bool select = false;
+                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                
+                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+                    {
+                        ZLogger.Message("Searching follow job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                            + " for " + ZTracker.GetMapInfo(oldMap));
+                        result = JobGiver_AIFollowPawnPatch.TryGiveJob(pawn, __instance);
+                        if (result != null)
+                        {
+                            ZLogger.Message(pawn + " got follow job " + result + " - map: "
+                                + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
+                            ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+
+                            ZTracker.BuildJobListFor(pawn, otherMap, result);
+                            __result = ZTracker.jobTracker[pawn].activeJobs[0];
+                            ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                            break;
+                        }
+                    }
+                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                    if (select) Find.Selector.Select(pawn);
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+                }
+                return true;
+            }
+        
+            public static Job TryGiveJob(Pawn pawn, JobGiver_AIFollowPawn __instance)
+            {
+                Pawn followee = Traverse.Create(__instance).Method("GetFollowee", new object[]
+                                    {
+                                        pawn
+                                    }).GetValue<Pawn>();
+
+                if (followee == null)
+                {
+                    return null;
+                }
+                if (!followee.Spawned || !pawn.CanReach(followee, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+                {
+                    return null;
+                }
+                Log.Message(pawn + " starting following " + followee);
+                float radius = Traverse.Create(__instance).Method("GetRadius", new object[]
+                                {
+                                    pawn
+                                }).GetValue<float>();
+                if (!JobDriver_FollowClose.FarEnoughAndPossibleToStartJob(pawn, followee, radius))
+                {
+                    return null;
+                }
+                Job job = JobMaker.MakeJob(JobDefOf.FollowClose, followee);
+                job.expiryInterval = Traverse.Create(__instance).Field("FollowJobExpireInterval").GetValue<int>(); ;
+                job.checkOverrideOnExpire = true;
+                job.followRadius = radius;
+                return job;
+            }
+        }
+
+        [HarmonyPatch(typeof(JobGiver_ConfigurableHostilityResponse), "TryGiveJob")]
+        public class JobGiver_ConfigurableHostilityResponsePatch
+        {
+            [HarmonyPostfix]
+            private static void JobGiver_ConfigurableHostilityResponsePostfix(JobGiver_ConfigurableHostilityResponse __instance, ref Job __result, Pawn pawn)
+            {
+                try
+                {
+                    var ZTracker = ZUtils.ZTracker;
+                    if (pawn.def.race.Humanlike && pawn.Faction != Faction.OfPlayer && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
+                    {
+                        if (ZTracker.jobTracker == null)
+                        {
+                            ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+                        }
+                        if (!ZTracker.jobTracker.ContainsKey(pawn))
+                        {
+                            ZTracker.jobTracker[pawn] = new JobTracker();
+                        }
+                        Map playerMap = ZTracker.GetMapByIndex(pawn.Map.Tile, 0);
+                        if (pawn.Map != playerMap)
+                        {
+                            ZTracker.BuildJobListFor(pawn, playerMap, JobMaker.MakeJob(JobDefOf.Wait_Combat, JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange, true));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(JobGiver_AIGotoNearestHostile), "TryGiveJob")]
+        public class JobGiver_AIGotoNearestHostilePatch
+        {
+            [HarmonyPostfix]
+            private static void JobGiver_AIGotoNearestHostilePostfix(JobGiver_AIGotoNearestHostile __instance, ref Job __result, Pawn pawn)
+            {
+                try
+                {
+                    var ZTracker = ZUtils.ZTracker;
+                    if (pawn.def.race.Humanlike && pawn.Faction != Faction.OfPlayer && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
+                    {
+                        if (ZTracker.jobTracker == null)
+                        {
+                            ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+                        }
+                        if (!ZTracker.jobTracker.ContainsKey(pawn))
+                        {
+                            ZTracker.jobTracker[pawn] = new JobTracker();
+                        }
+
+                        Job result = null;
+                        var oldMap = pawn.Map;
+                        var oldPosition = pawn.Position;
+                        bool select = false;
+                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                        foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+                        {
+                            ZLogger.Message("Searching combat job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                + " for " + ZTracker.GetMapInfo(oldMap));
+                            result = JobGiver_AIGotoNearestHostilePatch.TryGiveJob(pawn);
+                            if (result != null)
+                            {
+                                ZLogger.Message(pawn + " got combat job " + result + " - map: "
+                                    + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
+                                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+
+                                ZTracker.BuildJobListFor(pawn, otherMap, result);
+                                __result = ZTracker.jobTracker[pawn].activeJobs[0];
+                                ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                                break;
+                            }
+                        }
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                        if (select) Find.Selector.Select(pawn);
+
+                    }
+                }
+                catch { }
+            }
+           
+            public static Job TryGiveJob(Pawn pawn)
+            {
+                float num = float.MaxValue;
+                Thing thing = null;
+                List<IAttackTarget> potentialTargetsFor = pawn.Map.attackTargetsCache.GetPotentialTargetsFor(pawn);
+                for (int i = 0; i < potentialTargetsFor.Count; i++)
+                {
+                    IAttackTarget attackTarget = potentialTargetsFor[i];
+                    if (!attackTarget.ThreatDisabled(pawn) && AttackTargetFinder.IsAutoTargetable(attackTarget))
+                    {
+                        Thing thing2 = (Thing)attackTarget;
+                        int num2 = thing2.Position.DistanceToSquared(pawn.Position);
+                        if ((float)num2 < num && pawn.CanReach(thing2, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+                        {
+                            num = (float)num2;
+                            thing = thing2;
+                        }
+                    }
+                }
+                if (thing != null)
+                {
+                    Job job = JobMaker.MakeJob(JobDefOf.Goto, thing);
+                    job.checkOverrideOnExpire = true;
+                    job.expiryInterval = 500;
+                    job.collideWithPawns = true;
+                    return job;
+                }
+                return null;
+            }
+        }
 
         [HarmonyPatch(typeof(JobDriver_Ingest))]
         [HarmonyPatch("PrepareToIngestToils_ToolUser")]
@@ -655,12 +472,16 @@ namespace ZLevels
                 {
                     if (!IngestibleSource.def.IsDrug)
                     {
+                        ZLogger.Message(__instance.GetActor() + " 4 ZUtils.ZTracker.jobTracker[pawn].dest: " + thing.Map);
+
                         list.InsertRange(list.Count - 2, Toils_ZLevels.GoToMap(__instance.GetActor()
                             , thing.Map, __instance));
                         ZLogger.Message("Adding: " + thing + " in " + actor);
                     }
                     else
                     {
+                        ZLogger.Message(__instance.GetActor() + " 5 ZUtils.ZTracker.jobTracker[pawn].dest: " + thing.Map);
+
                         list.InsertRange(list.Count - 1, Toils_ZLevels.GoToMap(__instance.GetActor()
                             , thing.Map, __instance));
                         ZLogger.Message("Adding 2: " + thing + " in " + actor);
@@ -780,11 +601,7 @@ namespace ZLevels
                             {
                                 ZLogger.Message(pawn + " got food job " + result + " - map: "
                                     + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
-
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(oldPosition);
+                                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
 
                                 ZTracker.BuildJobListFor(pawn, otherMap, result);
                                 __result = ZTracker.jobTracker[pawn].activeJobs[0];
@@ -793,13 +610,7 @@ namespace ZLevels
                             }
                         }
 
-                        if (pawn.Map != oldMap)
-                        {
-                            Traverse.Create(pawn).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                            Traverse.Create(pawn).Field("positionInt")
-                                .SetValue(oldPosition);
-                        }
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition);
                         if (select) Find.Selector.Select(pawn);
                         return false;
                     }
@@ -1058,10 +869,7 @@ namespace ZLevels
 
                     if (pawn.Map != oldMap)
                     {
-                        Traverse.Create(pawn).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                        Traverse.Create(pawn).Field("positionInt")
-                            .SetValue(oldPosition);
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition);
                         ZLogger.Message("7 SetPosition for " + pawn + " to " + oldPosition);
                     }
 
@@ -1257,35 +1065,21 @@ namespace ZLevels
                             {
                                 ZLogger.Message(pawn + " got rest job " + result + " - map: "
                                     + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
-                                if (pawn.Map != oldMap)
-                                {
-                                    Traverse.Create(pawn).Field("mapIndexOrState")
-                                        .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                    Traverse.Create(pawn).Field("positionInt")
-                                        .SetValue(oldPosition);
-                                    ZLogger.Message("1 SetPosition for " + pawn + " to " + oldPosition);
-                                }
+                                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+
                                 ZTracker.BuildJobListFor(pawn, result.targetA.Thing.Map, result);
                                 __result = ZTracker.jobTracker[pawn].activeJobs[0];
                                 ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                                 break;
                             }
                         }
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition);
 
-                        if (pawn.Map != oldMap)
-                        {
-                            Traverse.Create(pawn).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                            Traverse.Create(pawn).Field("positionInt")
-                                .SetValue(oldPosition);
-                            ZLogger.Message("9 SetPosition for " + pawn + " to " + oldPosition);
-                        }
                         if (result.targetA.Thing == null)
                         {
                             ZLogger.Message(pawn + " taking rest on the ground");
                             __result = JobMaker.MakeJob(JobDefOf.LayDown, FindGroundSleepSpotFor(pawn));
                         }
-
                         if (select) Find.Selector.Select(pawn);
 
                         return false;
@@ -1533,6 +1327,7 @@ namespace ZLevels
                             //    ZLogger.Message("4 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
                             //}
                             //catch { };
+
                             ZTracker.TryTakeFirstJob(___pawn);
                         }
                         catch
@@ -1706,13 +1501,8 @@ namespace ZLevels
 
                         if (result.Job != null)
                         {
-                            if (pawn.Map != oldMap)
-                            {
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(oldPosition);
-                            }
+                            ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+
                             ZLogger.Message(pawn + " got job " + result + " - map: "
                                 + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
                             if (dest != null)
@@ -1739,21 +1529,7 @@ namespace ZLevels
                         Log.Message("Exception in TryIssueJobPackagePatch: " + ex);
                     }
 
-                    if (pawn.Map != oldMap)
-                    {
-                        Traverse.Create(pawn).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                        Traverse.Create(pawn).Field("positionInt")
-                            .SetValue(oldPosition);
-                        ZLogger.Message("11 SetPosition for " + pawn + " to " + oldPosition);
-                    }
-                    if (pawn.Position != oldPosition)
-                    {
-                        Traverse.Create(pawn).Field("positionInt")
-                            .SetValue(oldPosition);
-                        ZLogger.Message("12 SetPosition for " + pawn + " to " + oldPosition);
-                    }
-
+                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
                     if (select) Find.Selector.Select(pawn);
                     return false;
                 }
@@ -2339,14 +2115,7 @@ namespace ZLevels
                             }
                         }
                     }
-                    if (pawn.Map != oldMap)
-                    {
-                        Traverse.Create(pawn).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                        Traverse.Create(pawn).Field("positionInt")
-                            .SetValue(oldPosition);
-                        ZLogger.Message("16 SetPosition for " + pawn + " to " + oldPosition);
-                    }
+                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
                 }
                 return job2;
             }

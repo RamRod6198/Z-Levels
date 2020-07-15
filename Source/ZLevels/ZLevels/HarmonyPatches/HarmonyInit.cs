@@ -33,6 +33,7 @@ namespace ZLevels
                     || text.Contains("clearing group grid square") // same
                     || text.Contains("threw exception while executing toil's finish action (0), jobDriver=RimWorld.JobDriver_LayDown")
                     || text.Contains("threw exception while executing toil's finish action (1), jobDriver=RimWorld.JobDriver_LayDown")
+                    || text.Contains("Haul designation has no target! Deleting.")
                     )
                 {
                     //ZLogger.Message("The error: " + text);
