@@ -241,5 +241,5 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 
-# Ignore .dll files
-*.dll
+# Ignore files in dependency folder
+SourceDLLs/
