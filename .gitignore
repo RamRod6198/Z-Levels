@@ -1,0 +1,11 @@
+
+*.txt
+*.cache
+*.pxd
+*.pdb
+#Needed to get my DLL in there for some reason... dunno, it won't mess with anyone else's stuff anyways
+!*.dll
+
+.vs/
+obj/
+bin/
