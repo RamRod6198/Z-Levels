@@ -243,3 +243,6 @@ ModelManifest.xml
 
 # Ignore files in dependency folder
 SourceDLLs/
+
+# Not sure what the purpose of this file is but lets ignore it
+Source/ZLevels/ZLevels/obj/Debug/ZLevels.csproj.FileListAbsolute.txt
