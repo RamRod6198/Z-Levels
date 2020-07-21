@@ -57,7 +57,7 @@ namespace ZLevels
 			}
 		}
 
-		public static readonly bool DebugEnabled = false;
+		public static readonly bool DebugEnabled = ZLevels.settings.DebugEnabled;
 
 		private static readonly string Prefix = "[Z-Levels] ";
 	}
