@@ -14,7 +14,7 @@ namespace ZLevels
 
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref DebugEnabled, "DebugEnabled");
+            Scribe_Values.Look<bool>(ref DebugEnabled, "DebugEnabled", false);
             base.ExposeData();
         }
 
