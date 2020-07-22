@@ -5,5 +5,6 @@
 	<ZAbandonPermanentlyConfirmation>Are you sure you want to permamently abandon the map? It cannot be restored later from the preset.</ZAbandonPermanentlyConfirmation>
 	<GoUP>Go Up</GoUP>
 	<GoDown>Go Down</GoDown>
+	<debugEnabledExplanation>Enable debug logging</debugEnabledExplanation>
 
 </LanguageData>
