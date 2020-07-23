@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using HarmonyLib;
-using Multiplayer.API;
+﻿using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
-using RimWorld.QuestGen;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -99,16 +92,16 @@ namespace ZLevels
                 }
                 if (respectedMaster.Spawned)
                 {
-                    if (pawn.playerSettings.followDrafted 
+                    if (pawn.playerSettings.followDrafted
                         && respectedMaster.Drafted)
-                        //&& pawn.CanReach(respectedMaster, PathEndMode.OnCell, Danger.Deadly))
+                    //&& pawn.CanReach(respectedMaster, PathEndMode.OnCell, Danger.Deadly))
                     {
                         __result = true;
                         return false;
                     }
-                    if (pawn.playerSettings.followFieldwork 
+                    if (pawn.playerSettings.followFieldwork
                         && respectedMaster.mindState.lastJobTag == JobTag.Fieldwork)
-                        //&& pawn.CanReach(respectedMaster, PathEndMode.OnCell, Danger.Deadly))
+                    //&& pawn.CanReach(respectedMaster, PathEndMode.OnCell, Danger.Deadly))
                     {
                         __result = true;
                         return false;
@@ -128,7 +121,7 @@ namespace ZLevels
                 return false;
             }
         }
-        
+
         [HarmonyPatch(typeof(JobGiver_AIFollowPawn), "TryGiveJob")]
         public class JobGiver_AIFollowPawnPatch
         {
@@ -181,13 +174,16 @@ namespace ZLevels
                     {
                         ZTracker.jobTracker[pawn] = new JobTracker();
                     }
-                
+
                     Job result;
                     var oldMap = pawn.Map;
                     var oldPosition = pawn.Position;
                     bool select = false;
-                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                
+                    if (Find.Selector.SelectedObjects.Contains(pawn))
+                    {
+                        select = true;
+                    }
+
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
                         ZLogger.Message("Searching follow job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
@@ -206,7 +202,11 @@ namespace ZLevels
                         }
                     }
                     ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                    if (select) Find.Selector.Select(pawn);
+                    if (select)
+                    {
+                        Find.Selector.Select(pawn);
+                    }
+
                     return false;
                 }
                 catch (Exception ex)
@@ -215,7 +215,7 @@ namespace ZLevels
                 }
                 return true;
             }
-        
+
             public static Job TryGiveJob(Pawn pawn, JobGiver_AIFollowPawn __instance)
             {
                 Pawn followee = Traverse.Create(__instance).Method("GetFollowee", new object[]
@@ -280,7 +280,7 @@ namespace ZLevels
                 }
             }
         }
-        
+
         [HarmonyPatch(typeof(JobGiver_AIGotoNearestHostile), "TryGiveJob")]
         public class JobGiver_AIGotoNearestHostilePatch
         {
@@ -305,7 +305,11 @@ namespace ZLevels
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
                         bool select = false;
-                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                        if (Find.Selector.SelectedObjects.Contains(pawn))
+                        {
+                            select = true;
+                        }
+
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                         {
                             ZLogger.Message("Searching combat job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
@@ -324,13 +328,15 @@ namespace ZLevels
                             }
                         }
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                        if (select) Find.Selector.Select(pawn);
-
+                        if (select)
+                        {
+                            Find.Selector.Select(pawn);
+                        }
                     }
                 }
                 catch { }
             }
-           
+
             public static Job TryGiveJob(Pawn pawn)
             {
                 float num = float.MaxValue;
@@ -343,9 +349,9 @@ namespace ZLevels
                     {
                         Thing thing2 = (Thing)attackTarget;
                         int num2 = thing2.Position.DistanceToSquared(pawn.Position);
-                        if ((float)num2 < num && pawn.CanReach(thing2, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+                        if (num2 < num && pawn.CanReach(thing2, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
                         {
-                            num = (float)num2;
+                            num = num2;
                             thing = thing2;
                         }
                     }
@@ -377,7 +383,10 @@ namespace ZLevels
                 var ZTracker = ZUtils.ZTracker;
                 var oldMap = actor.Map;
                 bool select = false;
-                if (Find.Selector.SelectedObjects.Contains(actor)) select = true;
+                if (Find.Selector.SelectedObjects.Contains(actor))
+                {
+                    select = true;
+                }
 
                 Predicate<Thing> baseChairValidator = delegate (Thing t)
                 {
@@ -466,7 +475,10 @@ namespace ZLevels
                     Traverse.Create(actor).Field("mapIndexOrState")
                         .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
                 }
-                if (select) Find.Selector.Select(actor);
+                if (select)
+                {
+                    Find.Selector.Select(actor);
+                }
 
                 if (thing != null && thing.Map != null && thing.Map != actor.Map)
                 {
@@ -498,6 +510,8 @@ namespace ZLevels
             private static bool JobGiver_GetFoodPrefix(JobGiver_GetFood __instance, ref Job __result
                 , float ___maxLevelPercentage, HungerCategory ___minCategory, Pawn pawn)
             {
+                ZLogger.Message("JobGiver_GetFoodPatch Prefix");
+
                 if (pawn.def.race.Humanlike)
                 {
                     ZLogger.Message(pawn + " starting food search");
@@ -574,7 +588,11 @@ namespace ZLevels
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
                         bool select = false;
-                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                        if (Find.Selector.SelectedObjects.Contains(pawn))
+                        {
+                            select = true;
+                        }
+
                         if (pawn.MentalStateDef != null)
                         {
                             result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap,
@@ -611,7 +629,11 @@ namespace ZLevels
                         }
 
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                        if (select) Find.Selector.Select(pawn);
+                        if (select)
+                        {
+                            Find.Selector.Select(pawn);
+                        }
+
                         return false;
                     }
                     catch (Exception ex)
@@ -824,7 +846,11 @@ namespace ZLevels
                     var oldMap = pawn.Map;
                     var oldPosition = pawn.Position;
                     bool select = false;
-                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                    if (Find.Selector.SelectedObjects.Contains(pawn))
+                    {
+                        select = true;
+                    }
+
                     var jobList = new Dictionary<Job, Map>();
 
                     bool CanDoDuringMedicalRest = Traverse.Create(__instance)
@@ -886,7 +912,10 @@ namespace ZLevels
                         ZLogger.Message(pawn + " cant find joy job");
                     }
 
-                    if (select) Find.Selector.Select(pawn);
+                    if (select)
+                    {
+                        Find.Selector.Select(pawn);
+                    }
 
                     return false;
                 }
@@ -959,6 +988,7 @@ namespace ZLevels
                     var ZTracker = ZUtils.ZTracker;
                     if (pawn.Faction == Faction.OfPlayer)
                     {
+                        Messages.Message($"{pawn } search for rest job", null, null, false);
                         ZLogger.Message(pawn + " search for rest job");
                         if (ZTracker.jobTracker == null)
                         {
@@ -1041,7 +1071,11 @@ namespace ZLevels
                         var oldMap = pawn.Map;
                         var oldPosition = pawn.Position;
                         bool select = false;
-                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                        if (Find.Selector.SelectedObjects.Contains(pawn))
+                        {
+                            select = true;
+                        }
+
                         if (pawn.MentalStateDef != null)
                         {
                             result = JobGiver_GetRestPatch.TryGiveJob(pawn, ___minCategory, ___maxLevelPercentage);
@@ -1080,7 +1114,10 @@ namespace ZLevels
                             ZLogger.Message(pawn + " taking rest on the ground");
                             __result = JobMaker.MakeJob(JobDefOf.LayDown, FindGroundSleepSpotFor(pawn));
                         }
-                        if (select) Find.Selector.Select(pawn);
+                        if (select)
+                        {
+                            Find.Selector.Select(pawn);
+                        }
 
                         return false;
                     }
@@ -1207,9 +1244,9 @@ namespace ZLevels
                 var ZTracker = ZUtils.ZTracker;
                 foreach (var map in ZTracker.GetAllMapsInClosestOrder(t.Map))
                 {
-                    if (StoreUtility.TryFindBestBetterStorageFor(t, null, map, 
-                        haulDestination.GetStoreSettings().Priority, 
-                        Faction.OfPlayer, out IntVec3 _, out IHaulDestination _, 
+                    if (StoreUtility.TryFindBestBetterStorageFor(t, null, map,
+                        haulDestination.GetStoreSettings().Priority,
+                        Faction.OfPlayer, out IntVec3 _, out IHaulDestination _,
                         needAccurateResult: false))
                     {
                         __result = false;
@@ -1273,6 +1310,13 @@ namespace ZLevels
         //}
 
 
+
+
+
+
+
+    
+
         [HarmonyPatch(typeof(Pawn_JobTracker), "EndCurrentJob")]
         public class EndCurrentJobPatch
         {
@@ -1334,6 +1378,7 @@ namespace ZLevels
                         {
 
                         }
+
 
                     }
                 }
@@ -1489,7 +1534,10 @@ namespace ZLevels
                     var oldMap = pawn.Map;
                     var oldPosition = pawn.Position;
                     bool select = false;
-                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                    if (Find.Selector.SelectedObjects.Contains(pawn))
+                    {
+                        select = true;
+                    }
 
                     Map dest = null;
                     try
@@ -1530,7 +1578,11 @@ namespace ZLevels
                     }
 
                     ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                    if (select) Find.Selector.Select(pawn);
+                    if (select)
+                    {
+                        Find.Selector.Select(pawn);
+                    }
+
                     return false;
                 }
                 catch (Exception ex)
@@ -1615,7 +1667,7 @@ namespace ZLevels
                 int num;
                 if (needAccurateResult)
                 {
-                    num = Mathf.FloorToInt((float)count * Rand.Range(0.005f, 0.018f));
+                    num = Mathf.FloorToInt(count * Rand.Range(0.005f, 0.018f));
                 }
                 else
                 {
@@ -1625,7 +1677,7 @@ namespace ZLevels
                 {
                     IntVec3 intVec = cellsList[i];
                     //ZLogger.Message("Checking " + intVec + " in " + slotGroup + " in " + slotGroup.parent.Map);
-                    float num2 = (float)(a - intVec).LengthHorizontalSquared;
+                    float num2 = (a - intVec).LengthHorizontalSquared;
                     if (num2 <= closestDistSquared && IsGoodStoreCell(intVec, slotGroup.parent.Map, t, carrier, faction))
                     {
                         closestSlot = intVec;
@@ -1809,7 +1861,10 @@ namespace ZLevels
                                         bill, pawn, (Thing)giver, chosenIngThings
                                     }).GetValue<bool>();
                             ZLogger.Message("Found ingredients: " + flag + " in " + ZTracker.GetMapInfo(map) + " for " + bill);
-                            if (flag) break;
+                            if (flag)
+                            {
+                                break;
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -2344,7 +2399,7 @@ namespace ZLevels
                             Thing thing2 = p.Map.thingGrid.ThingAt(cellsList[i], t.def);
                             num = ((thing2 == null || thing2 == t) ? (num + t.def.stackLimit) :
                                 (num + Mathf.Max(t.def.stackLimit - thing2.stackCount, 0)));
-                            if (num >= job.count || (float)num >= statValue)
+                            if (num >= job.count || num >= statValue)
                             {
                                 break;
                             }
@@ -2454,7 +2509,10 @@ namespace ZLevels
                     {
                         job.count = job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompRefuelable>().GetFuelCountToFullyRefuel();
                     }
-                    if (job != null) break;
+                    if (job != null)
+                    {
+                        break;
+                    }
                 }
                 Traverse.Create(pawn).Field("mapIndexOrState")
                     .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
@@ -2538,19 +2596,19 @@ namespace ZLevels
                                 if (scanner.def.scanThings)
                                 {
                                     Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) &&
-                                    scanner.HasJobOnThing(pawn, t) 
+                                    scanner.HasJobOnThing(pawn, t)
                                     && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
 
                                     Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn)
                                     && JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn,
-                                    t) != null 
+                                    t) != null
                                     && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
 
                                     Predicate<Thing> deliverResourcesValidator2 = (Thing t) => !t.IsForbidden(pawn)
                                     && JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t)
-                                    != null 
+                                    != null
                                     && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
 
@@ -2565,7 +2623,7 @@ namespace ZLevels
                                     ;
 
                                     Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn)
-                                    && HasJobOnThing(scanner, pawn, t, false) != null 
+                                    && HasJobOnThing(scanner, pawn, t, false) != null
                                     && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
 
