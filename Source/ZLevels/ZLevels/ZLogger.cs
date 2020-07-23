@@ -15,7 +15,7 @@ namespace ZLevels
 
 		public static void Warning(string message)
 		{
-			if (DebugEnabled)
+//			if (DebugEnabled)
 
 				Log.Warning(Prefix + message, true);
 		}

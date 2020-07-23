@@ -1,11 +1,10 @@
-﻿using System;
+﻿using HarmonyLib;
+using RimWorld;
+using RimWorld.Planet;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
-using HarmonyLib;
-using RimWorld;
-using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -148,7 +147,11 @@ namespace ZLevels
 
         public void SaveArea(Pawn pawn)
         {
-            if (activeAreas == null) activeAreas = new Dictionary<Pawn, ActiveArea>();
+            if (activeAreas == null)
+            {
+                activeAreas = new Dictionary<Pawn, ActiveArea>();
+            }
+
             if (activeAreas.ContainsKey(pawn))
             {
                 if (activeAreas[pawn].activeAreas == null)
@@ -262,7 +265,7 @@ namespace ZLevels
             if (ZLevelsTracker.ContainsKey(pawnMap.Tile))
             {
                 foreach (Map map in ZLevelsTracker[pawnMap.Tile].ZLevels.Values.OrderBy(x =>
-                    (int)Mathf.Abs(GetZIndexFor(x) - GetZIndexFor(pawnMap))))
+                    Mathf.Abs(GetZIndexFor(x) - GetZIndexFor(pawnMap))))
                 {
                     //ZLogger.Message("Yielding " + this.GetMapInfo(map));
                     maps.Add(map);
@@ -328,7 +331,10 @@ namespace ZLevels
             if (ZLevelsTracker.ContainsKey(map.Tile))
             {
                 if (ZLevelsTracker[map.Tile].ZLevels == null)
+                {
                     ZLevelsTracker[map.Tile].ZLevels = new Dictionary<int, Map>();
+                }
+
                 ZLevelsTracker[map.Tile].ZLevels[index] = map;
 
                 if (!mapIndex.ContainsKey(map))
@@ -1316,7 +1322,7 @@ namespace ZLevels
             mapParent.TotalInfestations = comp.TotalInfestations;
             mapParent.hasCaves = comp.hasCavesBelow.GetValueOrDefault(false);
             Find.WorldObjects.Add(mapParent);
-            
+
             string seedString = Find.World.info.seedString;
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
             Map newMap = null;
