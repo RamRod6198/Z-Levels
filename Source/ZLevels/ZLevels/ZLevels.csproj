@@ -25,8 +25,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>..\..\..\Assemblies\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -34,8 +35,9 @@
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\Shared Libs\Rimworld\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="0MultiplayerAPI">
-      <HintPath>..\..\SourceDLLs\0MultiplayerAPI.dll</HintPath>
+    <Reference Include="0MultiplayerAPI, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Assemblies\0MultiplayerAPI.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\Shared Libs\Rimworld\Assembly-CSharp.dll</HintPath>

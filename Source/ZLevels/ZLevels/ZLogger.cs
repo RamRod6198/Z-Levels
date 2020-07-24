@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using Verse;
 
 namespace ZLevels
@@ -9,48 +8,48 @@ namespace ZLevels
 		//[Conditional("Debug")]
 		public static void Message(string message, bool temp = true)
 		{
-			if (ZLogger.DebugEnabled)
+			if (DebugEnabled)
 
-				Log.Message(ZLogger.Prefix + message, true);
+				Log.Message(Prefix + message, true);
 		}
 
 		public static void Warning(string message)
 		{
-			if (ZLogger.DebugEnabled)
+//			if (DebugEnabled)
 
-				Log.Warning(ZLogger.Prefix + message, true);
+				Log.Warning(Prefix + message, true);
 		}
 
 		public static void Warning(string message, Exception e)
 		{
-			if (ZLogger.DebugEnabled)
+			if (DebugEnabled)
 
-				Log.Warning(ZLogger.Prefix + message + "\n" + (e?.ToString()), true);
+				Log.Warning(Prefix + message + "\n" + (e), true);
 		}
 
 		public static void Error(string message)
 		{
-			if (ZLogger.DebugEnabled)
+			if (DebugEnabled)
 
-				Log.Error(ZLogger.Prefix + message, true);
+				Log.Error(Prefix + message, true);
 		}
 
 		public static void Error(string message, Exception e)
 		{
-			if (ZLogger.DebugEnabled)
+			if (DebugEnabled)
 
-				Log.Error(ZLogger.Prefix + message + "\n" + (e?.ToString()), true);
+				Log.Error(Prefix + message + "\n" + (e), true);
 		}
 
 		public static void ErrorOnce(string message, bool test)
 		{
-			if (ZLogger.DebugEnabled)
-			Log.Error(ZLogger.Prefix + message, true);
+			if (DebugEnabled)
+			Log.Error(Prefix + message, true);
 		}
 
 		public static void Pause(string reason)
 		{
-			if (ZLogger.DebugEnabled)
+			if (DebugEnabled)
 			{
 				Log.Error("Pausing, reason: " + reason, true);
 				Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
