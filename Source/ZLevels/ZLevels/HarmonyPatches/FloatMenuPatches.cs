@@ -115,67 +115,8 @@ namespace ZLevels
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
 
                         Building building_Bed = null;
-                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+                        foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1, victim, oldMap, oldPosition2))
                         {
-                            ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
-                                + " for " + ZTracker.GetMapInfo(oldMap));
-                        
-                            var stairs = new List<Thing>();
-                        
-                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                if (lowerMap != null)
-                                {
-                                    stairs = ZTracker.stairsUp[lowerMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                if (upperMap != null)
-                                {
-                                    stairs = ZTracker.stairsDown[upperMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-                        
-                            if (stairs != null && stairs.Count() > 0)
-                            {
-                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                var position = selectedStairs.Position;
-                        
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(position);
-                        
-                                Traverse.Create(victim).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                                Traverse.Create(victim).Field("positionInt")
-                                    .SetValue(position);
-                            }
-                            else if (pawn.Map != oldMap && otherMap == oldMap)
-                            {
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(oldPosition1);
-                        
-                                Traverse.Create(victim).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                Traverse.Create(victim).Field("positionInt")
-                                    .SetValue(oldPosition2);
-                            }
-                        
-                        
                             building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, false);
                             if (building_Bed == null)
                             {
@@ -184,15 +125,8 @@ namespace ZLevels
                             if (building_Bed != null) break;
                         }
 
-                        Traverse.Create(pawn).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                        Traverse.Create(pawn).Field("positionInt")
-                            .SetValue(oldPosition1);
-
-                        Traverse.Create(victim).Field("mapIndexOrState")
-                        .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                        Traverse.Create(victim).Field("positionInt")
-                            .SetValue(oldPosition2);
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
+                        ZUtils.TeleportThing(victim, oldMap, oldPosition2);
 
                         if (select) Find.Selector.Select(pawn);
 
@@ -227,68 +161,12 @@ namespace ZLevels
                         var oldPosition2 = victim.Position;
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-
                         Building building_Bed = null;
-                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+
+                        foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1, victim, oldMap, oldPosition2))
                         {
                             ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
-
-                            var stairs = new List<Thing>();
-
-                            if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                                if (lowerMap != null)
-                                {
-                                    stairs = ZTracker.stairsUp[lowerMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-                            else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                            {
-                                Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                                if (upperMap != null)
-                                {
-                                    stairs = ZTracker.stairsDown[upperMap];
-                                }
-                                else
-                                {
-                                    ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                                }
-                            }
-
-                            if (stairs != null && stairs.Count() > 0)
-                            {
-                                var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                                var position = selectedStairs.Position;
-
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(position);
-
-                                Traverse.Create(victim).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(otherMap));
-                                Traverse.Create(victim).Field("positionInt")
-                                    .SetValue(position);
-                            }
-                            else if (pawn.Map != oldMap && otherMap == oldMap)
-                            {
-                                Traverse.Create(pawn).Field("mapIndexOrState")
-                                    .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                Traverse.Create(pawn).Field("positionInt")
-                                    .SetValue(oldPosition1);
-
-                                Traverse.Create(victim).Field("mapIndexOrState")
-                                .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                                Traverse.Create(victim).Field("positionInt")
-                                    .SetValue(oldPosition2);
-                            }
-
                             building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false, checkSocialProperness: false);
                             if (building_Bed == null)
                             {
@@ -297,15 +175,8 @@ namespace ZLevels
                             if (building_Bed != null) break;
                         }
                         if (select) Find.Selector.Select(pawn);
-                        Traverse.Create(pawn).Field("mapIndexOrState")
-                            .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                        Traverse.Create(pawn).Field("positionInt")
-                            .SetValue(oldPosition1);
-
-                        Traverse.Create(victim).Field("mapIndexOrState")
-                        .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
-                        Traverse.Create(victim).Field("positionInt")
-                            .SetValue(oldPosition2);
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
+                        ZUtils.TeleportThing(victim, oldMap, oldPosition2);
 
                         if (building_Bed == null)
                         {

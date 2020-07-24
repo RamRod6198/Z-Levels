@@ -32,14 +32,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\SourceDLLs\0Harmony.dll</HintPath>
+      <HintPath>..\..\..\..\Harmony\v1.1\Assemblies\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="0MultiplayerAPI">
       <HintPath>..\..\SourceDLLs\0MultiplayerAPI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\SourceDLLs\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -51,251 +52,251 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\SourceDLLs\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\SourceDLLs\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AccessibilityModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.AccessibilityModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.AccessibilityModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.AIModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.AIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AndroidJNIModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.AndroidJNIModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.AndroidJNIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ARModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.ARModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.ARModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ClothModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.ClothModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.ClothModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ClusterInputModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.ClusterInputModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.ClusterInputModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ClusterRendererModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.ClusterRendererModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.ClusterRendererModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CrashReportingModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.CrashReportingModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CrashReportingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.DirectorModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.DirectorModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.DSPGraphModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.DSPGraphModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.DSPGraphModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.FileSystemHttpModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.FileSystemHttpModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.FileSystemHttpModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.GameCenterModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.GameCenterModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.GameCenterModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.GridModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.GridModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.GridModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.HotReloadModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.HotReloadModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.HotReloadModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.InputModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.InputModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.LocalizationModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.LocalizationModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.LocalizationModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.PerformanceReportingModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.PerformanceReportingModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.PerformanceReportingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.Physics2DModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.Physics2DModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ProfilerModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.ProfilerModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.ProfilerModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ScreenCaptureModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.ScreenCaptureModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.ScreenCaptureModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.SharedInternalsModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.SharedInternalsModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.SharedInternalsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.SpriteMaskModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.SpriteMaskModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.SpriteMaskModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.SpriteShapeModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.SpriteShapeModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.SpriteShapeModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.StreamingModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.StreamingModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.StreamingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.SubstanceModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.SubstanceModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.SubstanceModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TerrainModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.TerrainModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TerrainPhysicsModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TerrainPhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextCoreModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.TextCoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextCoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TilemapModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.TilemapModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TilemapModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TLSModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.TLSModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TLSModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIElementsModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UIElementsModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UmbraModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UmbraModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UmbraModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UNETModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UNETModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UNETModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UnityAnalyticsModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UnityAnalyticsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UnityConnectModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UnityConnectModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UnityConnectModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UnityTestProtocolModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UnityTestProtocolModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UnityTestProtocolModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestAudioModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestTextureModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestWWWModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.VehiclesModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.VehiclesModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.VehiclesModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.VFXModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.VFXModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.VFXModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.VideoModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.VideoModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.VRModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.VRModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.VRModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.WindModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.WindModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.WindModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.XRModule">
-      <HintPath>..\..\SourceDLLs\UnityEngine.XRModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.XRModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
