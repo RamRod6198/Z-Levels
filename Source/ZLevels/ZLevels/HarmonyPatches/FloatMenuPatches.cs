@@ -91,6 +91,7 @@ namespace ZLevels
                         opts.Remove(floatMenuOption);
                         opts.Add(AddHumanlikeOrders_Patch.AddRescueOption(pawn, pawn2));
                     }
+
                     TaggedString toCheck2 = "Capture".Translate(pawn2.LabelCap, pawn2);
                     FloatMenuOption floatMenuOption2 = opts.FirstOrDefault((FloatMenuOption x) => x.Label.Contains
                     (toCheck2));
@@ -99,9 +100,74 @@ namespace ZLevels
                         opts.Remove(floatMenuOption2);
                         opts.Add(AddHumanlikeOrders_Patch.AddCaptureOption(pawn, pawn2));
                     }
+
+                    TaggedString toCheck3 = "TryToArrest".Translate(pawn2.LabelCap, pawn2, pawn2.GetAcceptArrestChance(pawn).ToStringPercent());
+                    FloatMenuOption floatMenuOption3 = opts.FirstOrDefault((FloatMenuOption x) => x.Label.Contains
+                    (toCheck3));
+                    if (floatMenuOption3 != null && (pawn.Drafted || pawn2.IsWildMan()))
+                    {
+                        opts.Remove(floatMenuOption3);
+                        opts.Add(AddHumanlikeOrders_Patch.AddArrestOption(pawn, pawn2));
+                    }
                 }
             }
 
+            public static FloatMenuOption AddArrestOption(Pawn pawn, Pawn victim)
+            {
+                if (!pawn.CanReach(victim, PathEndMode.OnCell, Danger.Deadly))
+                {
+                    return new FloatMenuOption("CannotArrest".Translate() + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+                }
+                else
+                {
+                    Pawn pTarg2 = victim;
+                    Action action = delegate
+                    {
+                        var ZTracker = ZUtils.ZTracker;
+                        var oldMap = pawn.Map;
+                        var oldPosition1 = pawn.Position;
+                        var oldPosition2 = victim.Position;
+                        bool select = false;
+                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                        
+                        Building building_Bed3 = null;
+                        foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1, victim, oldMap, oldPosition2))
+                        {
+                            building_Bed3 = RestUtility.FindBedFor(pTarg2, pawn, sleeperWillBePrisoner: true, checkSocialProperness: false);
+                            if (building_Bed3 == null)
+                            {
+                                building_Bed3 = RestUtility.FindBedFor(pTarg2, pawn, sleeperWillBePrisoner: true, checkSocialProperness: false, ignoreOtherReservations: true);
+                            }
+                            if (building_Bed3 != null) break;
+                        }
+                        
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
+                        ZUtils.TeleportThing(victim, oldMap, oldPosition2);
+                        
+                        if (select) Find.Selector.Select(pawn);
+
+                        if (building_Bed3 == null)
+                        {
+                            Messages.Message("CannotArrest".Translate() + ": " + "NoPrisonerBed".Translate(), pTarg2, MessageTypeDefOf.RejectInput, historical: false);
+                        }
+                        else
+                        {
+                            Job job = JobMaker.MakeJob(JobDefOf.Arrest, pTarg2, building_Bed3);
+                            job.count = 1;
+                            ZTracker.BuildJobListFor(pawn, pawn.Map, job);
+                            ZLogger.Message(pawn + " taking first job 3");
+                            pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
+
+                            if (pTarg2.Faction != null && ((pTarg2.Faction != Faction.OfPlayer && !pTarg2.Faction.def.hidden) || pTarg2.IsQuestLodger()))
+                            {
+                                TutorUtility.DoModalDialogIfNotKnown(ConceptDefOf.ArrestingCreatesEnemies);
+                            }
+                        }
+                    };
+                    return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("TryToArrest".Translate(victim.LabelCap, victim, pTarg2.GetAcceptArrestChance(pawn).ToStringPercent()), action, MenuOptionPriority.High, null, victim), pawn, pTarg2);
+                }
+            }
+        
             public static FloatMenuOption AddCaptureOption(Pawn pawn, Pawn victim)
             {
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Capture".Translate
