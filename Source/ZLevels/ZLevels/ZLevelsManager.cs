@@ -440,7 +440,7 @@ namespace ZLevels
                 job.count = jobToDo.count;
                 tempJobs.Add(job);
             }
-            else if (jobToDo.def == JobDefOf.Rescue || jobToDo.def == JobDefOf.Capture)
+            else if (jobToDo.def == JobDefOf.Rescue || jobToDo.def == JobDefOf.Capture || jobToDo.def == JobDefOf.Arrest)
             {
                 ZLogger.Message("Job method 1.5: " + jobToDo.targetA.Thing);
                 log += "Job method 1.5: " + jobToDo.targetA.Thing + "\n";
