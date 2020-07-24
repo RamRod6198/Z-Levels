@@ -110,53 +110,6 @@ namespace ZLevels
                     Building building_Bed = null;
                     foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
                     {
-                        ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
-                                        + " for " + ZTracker.GetMapInfo(oldMap));
-
-                        var stairs = new List<Thing>();
-
-                        if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
-                        {
-                            Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
-                            if (lowerMap != null)
-                            {
-                                stairs = ZTracker.stairsUp[lowerMap];
-                            }
-                            else
-                            {
-                                ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
-                            }
-                        }
-                        else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
-                        {
-                            Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
-                            if (upperMap != null)
-                            {
-                                stairs = ZTracker.stairsDown[upperMap];
-                            }
-                            else
-                            {
-                                ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
-                            }
-                        }
-
-                        if (stairs != null && stairs.Count() > 0)
-                        {
-                            var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position));
-                            var position = selectedStairs.Position;
-
-                            ZUtils.TeleportThing(pawn, otherMap, position);
-                            ZUtils.TeleportThing(victim, otherMap, position);
-
-                        }
-                        else if (pawn.Map != oldMap && otherMap == oldMap)
-                        {
-                            ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
-                            ZUtils.TeleportThing(victim, oldMap, oldPosition2);
-                                
-                        }
-
-
                         building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, false);
                         if (building_Bed == null)
                         {
@@ -170,7 +123,6 @@ namespace ZLevels
 
                     ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
                     ZUtils.TeleportThing(victim, oldMap, oldPosition2);
-
 
                     if (select)
                     {
@@ -213,7 +165,7 @@ namespace ZLevels
                         }
 
                         Building building_Bed = null;
-                        foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+                        foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition1))
                         {
                             ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
