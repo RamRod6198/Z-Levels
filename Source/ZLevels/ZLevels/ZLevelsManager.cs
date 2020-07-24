@@ -1700,16 +1700,16 @@ namespace ZLevels
         }
 
         public Dictionary<Pawn, ActiveArea> activeAreas;
-        public List<Pawn> ActiveAreasKeys = new List<Pawn>();
-        public List<ActiveArea> ActiveAreasValues = new List<ActiveArea>();
+        private List<Pawn> ActiveAreasKeys = new List<Pawn>();
+        private List<ActiveArea> ActiveAreasValues = new List<ActiveArea>();
 
         public Dictionary<Pawn, JobTracker> jobTracker;
-        public List<Pawn> JobTrackerKeys = new List<Pawn>();
-        public List<JobTracker> JobTrackerValues = new List<JobTracker>();
+        private List<Pawn> JobTrackerKeys = new List<Pawn>();
+        private List<JobTracker> JobTrackerValues = new List<JobTracker>();
 
-        public List<int> Z_LevelsKeys = new List<int>();
         public Dictionary<int, ZLevelData> ZLevelsTracker = new Dictionary<int, ZLevelData>();
-        public List<ZLevelData> ZLevelsTrackerValues = new List<ZLevelData>();
+        private List<int> Z_LevelsKeys = new List<int>();
+        private List<ZLevelData> ZLevelsTrackerValues = new List<ZLevelData>();
 
         public Dictionary<Map, List<Thing>> stairsUp = new Dictionary<Map, List<Thing>>();
         public Dictionary<Map, List<Thing>> stairsDown = new Dictionary<Map, List<Thing>>();
@@ -1718,8 +1718,8 @@ namespace ZLevels
         public HashSet<Thing> totalStairsUp = new HashSet<Thing>();
 
         public Dictionary<Map, int> mapIndex;
-        public List<Map> mapKeys = new List<Map>();
-        public List<int> mapValues = new List<int>();
+        private List<Map> mapKeys = new List<Map>();
+        private List<int> mapValues = new List<int>();
 
     }
 }
