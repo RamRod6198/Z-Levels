@@ -148,43 +148,57 @@ namespace ZLevels
 
         public void SaveArea(Pawn pawn)
         {
-            if (this.activeAreas == null) this.activeAreas = new Dictionary<Pawn, ActiveArea>();
-            if (this.activeAreas.ContainsKey(pawn))
+            try
             {
-                if (this.activeAreas[pawn].activeAreas == null)
+                if (this.activeAreas == null) this.activeAreas = new Dictionary<Pawn, ActiveArea>();
+                if (this.activeAreas.ContainsKey(pawn))
                 {
-                    this.activeAreas[pawn].activeAreas = new Dictionary<Map, Area>()
+                    if (this.activeAreas[pawn].activeAreas == null)
+                    {
+                        this.activeAreas[pawn].activeAreas = new Dictionary<Map, Area>()
                     {
                         {pawn.Map, pawn.playerSettings.AreaRestriction}
                     };
+                    }
+                    else
+                    {
+                        this.activeAreas[pawn].activeAreas[pawn.Map] = pawn.playerSettings.AreaRestriction;
+                    }
                 }
                 else
                 {
-                    this.activeAreas[pawn].activeAreas[pawn.Map] = pawn.playerSettings.AreaRestriction;
-                }
-            }
-            else
-            {
-                this.activeAreas[pawn] = new ActiveArea
-                {
-                    activeAreas = new Dictionary<Map, Area>()
+                    this.activeAreas[pawn] = new ActiveArea
+                    {
+                        activeAreas = new Dictionary<Map, Area>()
                     {
                         {pawn.Map, pawn.playerSettings.AreaRestriction}
                     }
-                };
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Exception of saving pawn area for Z-Levels: " + ex);
             }
         }
 
         public void LoadArea(Pawn pawn)
         {
-            if (this.activeAreas.ContainsKey(pawn) &&
-                this.activeAreas[pawn].activeAreas.ContainsKey(pawn.Map))
+            try
             {
-                pawn.playerSettings.AreaRestriction = this.activeAreas[pawn].activeAreas[pawn.Map];
+                if (this.activeAreas.ContainsKey(pawn) &&
+                    this.activeAreas[pawn].activeAreas.ContainsKey(pawn.Map))
+                {
+                    pawn.playerSettings.AreaRestriction = this.activeAreas[pawn].activeAreas[pawn.Map];
+                }
+                else
+                {
+                    pawn.playerSettings.AreaRestriction = null;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                pawn.playerSettings.AreaRestriction = null;
+                Log.Error("Exception of loading pawn area for Z-Levels: " + ex);
             }
         }
 
@@ -968,130 +982,6 @@ namespace ZLevels
             return false;
         }
 
-        public void SimpleTeleportThing(Thing thingToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, int dealDamage = 0)
-        {
-            if (mapToTeleport.thingGrid.ThingsListAt(cellToTeleport).Any())
-            {
-                for (int i = mapToTeleport.thingGrid.ThingsListAt(cellToTeleport).Count - 1; i >= 0; i--)
-                {
-                    Thing thing = mapToTeleport.thingGrid.ThingsListAt(cellToTeleport)[i];
-                    if (thing is Building)
-                    {
-                        if (thing.Spawned)
-                        {
-                            thing.DeSpawn(DestroyMode.Refund);
-                        }
-                    }
-                }
-            }
-
-            bool jump = false;
-            bool draft = false;
-            if (thingToTeleport is Pawn pawnToTeleport)
-            {
-                if (Find.Selector.SelectedObjects.Contains(pawnToTeleport))
-                {
-                    jump = true;
-                }
-                if (pawnToTeleport.Drafted)
-                {
-                    draft = true;
-                }
-
-                try
-                {
-                    this.SaveArea(pawnToTeleport);
-                }
-                catch { }
-            }
-
-            RegionListersUpdater.DeregisterInRegions(thingToTeleport, thingToTeleport.Map);
-            thingToTeleport.Map?.spawnedThings.Remove(thingToTeleport);
-            thingToTeleport.Map?.listerThings.Remove(thingToTeleport);
-            thingToTeleport.Map?.thingGrid.Deregister(thingToTeleport);
-            thingToTeleport.Map?.coverGrid.DeRegister(thingToTeleport);
-            thingToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(thingToTeleport);
-            thingToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(thingToTeleport);
-            thingToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(thingToTeleport);
-            StealAIDebugDrawer.Notify_ThingChanged(thingToTeleport);
-            thingToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(thingToTeleport);
-            if (thingToTeleport is Pawn pawn1)
-            {
-                thingToTeleport.Map?.mapPawns.DeRegisterPawn(pawn1);
-            }
-
-            Traverse.Create(thingToTeleport).Field("mapIndexOrState")
-                .SetValue((sbyte)Find.Maps.IndexOf(mapToTeleport));
-
-            RegionListersUpdater.RegisterInRegions(thingToTeleport, mapToTeleport);
-            mapToTeleport.spawnedThings.TryAdd(thingToTeleport);
-            mapToTeleport.listerThings.Add(thingToTeleport);
-            mapToTeleport.thingGrid.Register(thingToTeleport);
-            mapToTeleport.coverGrid.Register(thingToTeleport);
-            mapToTeleport.tooltipGiverList.Notify_ThingSpawned(thingToTeleport);
-            mapToTeleport.attackTargetsCache.Notify_ThingSpawned(thingToTeleport);
-            StealAIDebugDrawer.Notify_ThingChanged(thingToTeleport);
-            mapToTeleport.dynamicDrawManager.RegisterDrawable(thingToTeleport);
-            if (thingToTeleport is Pawn pawn2)
-            {
-                mapToTeleport.mapPawns.RegisterPawn(pawn2);
-            }
-
-            if (thingToTeleport is Pawn pawnToTeleport2)
-            {
-                try
-                {
-                    this.LoadArea(pawnToTeleport2);
-                }
-                catch { }
-
-                if (jump)
-                {
-                    Current.Game.CurrentMap = mapToTeleport;
-                    CameraJumper.TryJumpAndSelect(pawnToTeleport2);
-                }
-                if (draft)
-                {
-                    try
-                    {
-                        pawnToTeleport2.drafter.Drafted = true;
-                    }
-                    catch { }
-                }
-            }
-            if (dealDamage > 0)
-            {
-                if (thingToTeleport.def.useHitPoints)
-                {
-                    thingToTeleport.HitPoints -= dealDamage;
-                }
-                else if (thingToTeleport is Pawn pawn)
-                {
-                    pawn.TakeDamage(new DamageInfo(DamageDefOf.Blunt, dealDamage));
-                }
-            }
-
-            ZLogger.Message("Thing: " + thingToTeleport + " teleported to " + this.GetMapInfo(mapToTeleport) + " - " + cellToTeleport);
-            if (firstTime)
-            {
-                ZLogger.Message("Map: " + mapToTeleport);
-                try
-                {
-                    FloodFillerFog.DebugRefogMap(mapToTeleport);
-                    foreach (var cell in mapToTeleport.AllCells)
-                    {
-                        FloodFillerFog.FloodUnfog(cell, mapToTeleport);
-                    }
-                }
-                catch { };
-            }
-
-            FloodFillerFog.FloodUnfog(thingToTeleport.Position, mapToTeleport);
-
-            AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
-            { thingToTeleport.PositionHeld });
-        }
-
         public void ZLevelsFixer(int tile)
         {
             try
@@ -1111,105 +1001,76 @@ namespace ZLevels
             }
         }
 
-        public void TeleportPawn(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, bool spawnStairsBelow = false, bool spawnStairsUpper = false)
+        public void SpawnStairsUpper(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport)
         {
-            //ZLogger.Message("Trying to teleport to " + mapToTeleport);
-            bool jump = false;
-            bool draft = false;
-            if (Find.Selector.SelectedObjects.Contains(pawnToTeleport))
+            if (this.GetZIndexFor(pawnToTeleport.Map) < this.GetZIndexFor(mapToTeleport))
             {
-                jump = true;
-            }
-            if (pawnToTeleport.Drafted)
-            {
-                draft = true;
-            }
-            if (mapToTeleport.thingGrid.ThingsListAt(cellToTeleport).Any())
-            {
-                for (int i = mapToTeleport.thingGrid.ThingsListAt(cellToTeleport).Count - 1; i >= 0; i--)
+                var stairs = this.GetLowerLevel(mapToTeleport.Tile, mapToTeleport)?.thingGrid?
+                    .ThingsListAt(cellToTeleport)?.Where(x => x is Building_StairsUp)?.FirstOrDefault();
+                if (stairs != null && stairs.Stuff != null)
                 {
-                    Thing thing = mapToTeleport.thingGrid.ThingsListAt(cellToTeleport)[i];
-                    if (thing is Mineable)
+                    var thingToMake = ZLevelsDefOf.ZL_StairsDown;
+                    if (cellToTeleport.GetThingList(mapToTeleport).Where(x => x.def == thingToMake).Count() == 0)
                     {
-                        if (thing.Spawned)
-                        {
-                            thing.DeSpawn(DestroyMode.WillReplace);
-                        }
+                        var newStairs = ThingMaker.MakeThing(thingToMake, stairs.Stuff);
+                        newStairs.SetFaction(stairs.Faction);
+                        GenPlace.TryPlaceThing(newStairs, cellToTeleport, mapToTeleport, ThingPlaceMode.Direct);
                     }
                 }
             }
-            var mapComp = mapToTeleport.GetComponent<MapComponentZLevel>();
+        }
 
-            if (spawnStairsUpper)
+        public void SpawnStairsBelow(Pawn pawn, IntVec3 cell, Map map)
+        {
+            if (this.GetZIndexFor(pawn.Map) > this.GetZIndexFor(map))
             {
-                if (this.GetZIndexFor(pawnToTeleport.Map) < this.GetZIndexFor(mapToTeleport))
+                var stairs = pawn.Map.thingGrid.ThingsListAt(cell)?
+                    .Where(x => x is Building_StairsDown)?.FirstOrDefault();
+                ZLogger.Message("Stairs: " + stairs);
+                if (stairs != null)
                 {
-                    var stairs = this.GetLowerLevel(mapToTeleport.Tile, mapToTeleport)?.thingGrid?
-                        .ThingsListAt(cellToTeleport)?.Where(x => x is Building_StairsUp)?.FirstOrDefault();
-                    if (stairs != null && stairs.Stuff != null)
+                    if (stairs.Stuff != null)
                     {
-                        var thingToMake = ZLevelsDefOf.ZL_StairsDown;
-                        if (cellToTeleport.GetThingList(mapToTeleport).Where(x => x.def == thingToMake).Count() == 0)
+                        var thingToMake = ZLevelsDefOf.ZL_StairsUp;
+                        if (cell.GetThingList(map).Where(x => x.def == thingToMake).Count() == 0)
                         {
                             var newStairs = ThingMaker.MakeThing(thingToMake, stairs.Stuff);
                             newStairs.SetFaction(stairs.Faction);
-                            GenPlace.TryPlaceThing(newStairs, cellToTeleport, mapToTeleport, ThingPlaceMode.Direct);
+                            GenPlace.TryPlaceThing(newStairs, cell, map, ThingPlaceMode.Direct);
                         }
                     }
-                }
-            }
-            if (spawnStairsBelow)
-            {
-                if (this.GetZIndexFor(pawnToTeleport.Map) > this.GetZIndexFor(mapToTeleport))
-                {
-                    var stairs = pawnToTeleport.Map.thingGrid.ThingsListAt(cellToTeleport)?
-                        .Where(x => x is Building_StairsDown)?.FirstOrDefault();
-                    ZLogger.Message("Stairs: " + stairs);
-                    if (stairs != null)
+                    else if (stairs.def.defName == ZLevelsDefOf.ZL_NaturalHole.defName)
                     {
-                        if (stairs.Stuff != null)
+                        foreach (var thing in pawn.Map.listerThings.AllThings)
                         {
-                            var thingToMake = ZLevelsDefOf.ZL_StairsUp;
-                            if (cellToTeleport.GetThingList(mapToTeleport).Where(x => x.def == thingToMake).Count() == 0)
+                            if (thing is Building_StairsDown naturalHole && naturalHole.def.defName == ZLevelsDefOf.ZL_NaturalHole.defName)
                             {
-                                var newStairs = ThingMaker.MakeThing(thingToMake, stairs.Stuff);
-                                newStairs.SetFaction(stairs.Faction);
-                                GenPlace.TryPlaceThing(newStairs, cellToTeleport, mapToTeleport, ThingPlaceMode.Direct);
-                            }
-                        }
-                        else if (stairs.def.defName == ZLevelsDefOf.ZL_NaturalHole.defName)
-                        {
-                            foreach (var thing in pawnToTeleport.Map.listerThings.AllThings)
-                            {
-                                if (thing is Building_StairsDown naturalHole && naturalHole.def.defName == ZLevelsDefOf.ZL_NaturalHole.defName)
+                                var infestatorsPlace = IntVec3.Invalid;
+                                Thing infestator = null;
+                                if (naturalHole?.infestationData?.infestators != null)
                                 {
-                                    var infestatorsPlace = IntVec3.Invalid;
-                                    Thing pawn = null;
-                                    if (naturalHole?.infestationData?.infestators != null)
+                                    Predicate<Thing> validator = delegate (Thing t)
                                     {
-                                        Predicate<Thing> validator = delegate (Thing t)
-                                        {
-                                            return naturalHole.infestationData.infestators.Contains(((Pawn)t).kindDef);
-                                        };
-                                        pawn = GenClosest.ClosestThing_Global(naturalHole.Position,
-                                            mapToTeleport.mapPawns.AllPawns, 99999f, validator);
-                                    }
-                                    if (pawn != null)
+                                        return naturalHole.infestationData.infestators.Contains(((Pawn)t).kindDef);
+                                    };
+                                    infestator = GenClosest.ClosestThing_Global(naturalHole.Position,
+                                        map.mapPawns.AllPawns, 99999f, validator);
+                                }
+                                if (infestator != null)
+                                {
+                                    infestatorsPlace = infestator.Position;
+                                    var tunnel = map.pathFinder.FindPath
+                                        (naturalHole.Position, infestator, TraverseParms.For
+                                        (TraverseMode.PassAllDestroyableThings, Danger.Deadly),
+                                        PathEndMode.OnCell);
+                                    if (tunnel?.NodesReversed != null && tunnel.NodesReversed.Count > 0)
                                     {
-                                        infestatorsPlace = pawn.Position;
-                                        var tunnel = mapToTeleport.pathFinder.FindPath
-                                            (naturalHole.Position, pawn, TraverseParms.For
-                                            (TraverseMode.PassAllDestroyableThings, Danger.Deadly),
-                                            PathEndMode.OnCell);
-                                        if (tunnel?.NodesReversed != null && tunnel.NodesReversed.Count > 0)
+                                        foreach (var tile in tunnel.NodesReversed)
                                         {
-                                            foreach (var tile in tunnel.NodesReversed)
+                                            var building = tile.GetFirstBuilding(map);
+                                            if (building != null)
                                             {
-                                                var building = tile.GetFirstBuilding(mapToTeleport);
-                                                if (building != null)
-                                                {
-                                                    building.DeSpawn(DestroyMode.WillReplace);
-                                                }
+                                                building.DeSpawn(DestroyMode.WillReplace);
                                             }
                                         }
                                     }
@@ -1219,67 +1080,175 @@ namespace ZLevels
                     }
                 }
             }
+        }
 
-            try
+        public void DestroyMineableBelow(Map map, IntVec3 cell)
+        {
+            if (map.thingGrid.ThingsListAt(cell).Any())
+            {
+                for (int i = map.thingGrid.ThingsListAt(cell).Count - 1; i >= 0; i--)
+                {
+                    Thing thing = map.thingGrid.ThingsListAt(cell)[i];
+                    if (thing is Mineable)
+                    {
+                        if (thing.Spawned)
+                        {
+                            thing.DeSpawn(DestroyMode.WillReplace);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void MoveThingToAnotherMap(Thing thingToTeleport, Map mapToTeleport)
+        {
+            Log.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
+            RegionListersUpdater.DeregisterInRegions(thingToTeleport, thingToTeleport.Map);
+            thingToTeleport.Map?.spawnedThings.Remove(thingToTeleport);
+            thingToTeleport.Map?.listerThings.Remove(thingToTeleport);
+            thingToTeleport.Map?.thingGrid.Deregister(thingToTeleport);
+            thingToTeleport.Map?.coverGrid.DeRegister(thingToTeleport);
+            thingToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(thingToTeleport);
+            thingToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(thingToTeleport);
+            thingToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(thingToTeleport);
+            StealAIDebugDrawer.Notify_ThingChanged(thingToTeleport);
+            thingToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(thingToTeleport);
+            if (thingToTeleport is Pawn)
+            {
+                thingToTeleport.Map?.mapPawns.DeRegisterPawn((Pawn)thingToTeleport);
+            }
+
+            Traverse.Create(thingToTeleport).Field("mapIndexOrState")
+                .SetValue((sbyte)Find.Maps.IndexOf(mapToTeleport));
+
+            RegionListersUpdater.RegisterInRegions(thingToTeleport, mapToTeleport);
+            mapToTeleport.spawnedThings.TryAdd(thingToTeleport);
+            mapToTeleport.listerThings.Add(thingToTeleport);
+            mapToTeleport.thingGrid.Register(thingToTeleport);
+            mapToTeleport.coverGrid.Register(thingToTeleport);
+            mapToTeleport.tooltipGiverList.Notify_ThingSpawned(thingToTeleport);
+            mapToTeleport.attackTargetsCache.Notify_ThingSpawned(thingToTeleport);
+            StealAIDebugDrawer.Notify_ThingChanged(thingToTeleport);
+            mapToTeleport.dynamicDrawManager.RegisterDrawable(thingToTeleport);
+            if (thingToTeleport is Pawn)
+            {
+                mapToTeleport.mapPawns.RegisterPawn((Pawn)thingToTeleport);
+            }
+        }
+
+        public bool ShouldCameraJump(Thing thing)
+        {
+            if (Find.Selector.SelectedObjects.Contains(thing))
+                return true;
+            return false;
+        }
+
+        public void DoCameraJumpToThing(Thing thing)
+        {
+            var rememberedCamera = Current.Game.CurrentMap.rememberedCameraPos;
+            Current.Game.CurrentMap = thing.Map;
+            Find.CameraDriver.SetRootPosAndSize(rememberedCamera.rootPos, rememberedCamera.rootSize);
+            CameraJumper.TryJumpAndSelect(thing);
+        }
+
+        public bool ShouldRemainDrafted(Thing thing)
+        {
+            if (thing is Pawn pawn && pawn.Drafted)
+                return true;
+            return false;
+        }
+
+        public void TeleportThing(Thing thingToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, int dealDamage = 0)
+        {
+            bool jump = this.ShouldCameraJump(thingToTeleport);
+            bool draft = this.ShouldRemainDrafted(thingToTeleport);
+
+            if (thingToTeleport is Pawn pawnToTeleport)
             {
                 this.SaveArea(pawnToTeleport);
             }
-            catch { }
 
-            Log.Message("CHECK: trying to teleport " + pawnToTeleport + " from " + pawnToTeleport.Map + " to " + mapToTeleport, true);
-            RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
-            pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);
-            pawnToTeleport.Map?.listerThings.Remove(pawnToTeleport);
-            pawnToTeleport.Map?.thingGrid.Deregister(pawnToTeleport);
-            pawnToTeleport.Map?.coverGrid.DeRegister(pawnToTeleport);
-            pawnToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(pawnToTeleport);
-            pawnToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(pawnToTeleport);
-            pawnToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(pawnToTeleport);
-            StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
-            pawnToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(pawnToTeleport);
-            pawnToTeleport.Map?.mapPawns.DeRegisterPawn(pawnToTeleport);
-
-            Traverse.Create(pawnToTeleport).Field("mapIndexOrState")
-                .SetValue((sbyte)Find.Maps.IndexOf(mapToTeleport));
-
-            RegionListersUpdater.RegisterInRegions(pawnToTeleport, mapToTeleport);
-            mapToTeleport.spawnedThings.TryAdd(pawnToTeleport);
-            mapToTeleport.listerThings.Add(pawnToTeleport);
-            mapToTeleport.thingGrid.Register(pawnToTeleport);
-            mapToTeleport.coverGrid.Register(pawnToTeleport);
-            mapToTeleport.tooltipGiverList.Notify_ThingSpawned(pawnToTeleport);
-            mapToTeleport.attackTargetsCache.Notify_ThingSpawned(pawnToTeleport);
-            StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
-            mapToTeleport.dynamicDrawManager.RegisterDrawable(pawnToTeleport);
-            mapToTeleport.mapPawns.RegisterPawn(pawnToTeleport);
-
-            try
-            {
-                this.LoadArea(pawnToTeleport);
-            }
-            catch { }
-
-            ZLogger.Message("Pawn: " + pawnToTeleport + " teleported to " + this.GetMapInfo(mapToTeleport));
+            MoveThingToAnotherMap(thingToTeleport, mapToTeleport);
             if (jump)
             {
-                var rememberedCamera = Current.Game.CurrentMap.rememberedCameraPos;
-                Current.Game.CurrentMap = mapToTeleport;
-                Find.CameraDriver.SetRootPosAndSize(rememberedCamera.rootPos, rememberedCamera.rootSize);
-                CameraJumper.TryJumpAndSelect(pawnToTeleport);
+                this.DoCameraJumpToThing(thingToTeleport);
             }
-            if (draft)
+            if (thingToTeleport is Pawn pawnToTeleport2)
             {
-                try
+                this.LoadArea(pawnToTeleport2);
+                if (draft && pawnToTeleport2.drafter != null)
                 {
-                    pawnToTeleport.drafter.Drafted = true;
+                    pawnToTeleport2.drafter.Drafted = true;
                 }
-                catch { }
             }
+
+            if (dealDamage > 0)
+            {
+                if (thingToTeleport.def.useHitPoints)
+                {
+                    thingToTeleport.HitPoints -= dealDamage;
+                }
+                else if (thingToTeleport is Pawn pawn)
+                {
+                    pawn.TakeDamage(new DamageInfo(DamageDefOf.Blunt, dealDamage));
+                }
+            }
+
+            ZLogger.Message("Thing: " + thingToTeleport + " teleported to " + this.GetMapInfo(mapToTeleport) + " - " + cellToTeleport);
             if (firstTime)
             {
                 try
                 {
-                    ZLogger.Message("Map: " + mapToTeleport);
+                    FloodFillerFog.DebugRefogMap(mapToTeleport);
+                    foreach (var cell in mapToTeleport.AllCells)
+                    {
+                        FloodFillerFog.FloodUnfog(cell, mapToTeleport);
+                    }
+                }
+                catch { };
+            }
+            FloodFillerFog.FloodUnfog(thingToTeleport.Position, mapToTeleport);
+            AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
+            { thingToTeleport.PositionHeld });
+        }
+        public void TeleportPawn(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, bool spawnStairsBelow = false, bool spawnStairsUpper = false)
+        {
+            bool jump = this.ShouldCameraJump(pawnToTeleport);
+            bool draft = this.ShouldRemainDrafted(pawnToTeleport);
+
+            DestroyMineableBelow(mapToTeleport, cellToTeleport);
+
+            if (spawnStairsUpper)
+            {
+                this.SpawnStairsUpper(pawnToTeleport, cellToTeleport, mapToTeleport);
+            }
+            if (spawnStairsBelow)
+            {
+                this.SpawnStairsBelow(pawnToTeleport, cellToTeleport, mapToTeleport);
+            }
+
+            this.SaveArea(pawnToTeleport);
+
+            MoveThingToAnotherMap(pawnToTeleport, mapToTeleport);
+
+            this.LoadArea(pawnToTeleport);
+
+            ZLogger.Message("Pawn: " + pawnToTeleport + " teleported to " + this.GetMapInfo(mapToTeleport));
+
+            if (jump)
+            {
+                this.DoCameraJumpToThing(pawnToTeleport);
+            }
+
+            if (draft && pawnToTeleport.drafter != null)
+            {
+                pawnToTeleport.drafter.Drafted = true;
+            }
+
+            if (firstTime)
+            {
+                try
+                {
                     FloodFillerFog.DebugRefogMap(mapToTeleport);
                     foreach (var cell in mapToTeleport.AllCells)
                     {
@@ -1292,21 +1261,6 @@ namespace ZLevels
             FloodFillerFog.FloodUnfog(pawnToTeleport.Position, mapToTeleport);
             AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
             { pawnToTeleport.PositionHeld });
-
-            try
-            {
-                ZLogger.Message("--------------------------");
-                for (int i = this.jobTracker[pawnToTeleport].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                {
-                    var target = this.jobTracker[pawnToTeleport].mainJob.targetQueueB[i];
-
-                    ZLogger.Message("TeleportPawn job.targetQueueB: " + target.Thing);
-                    ZLogger.Message("TeleportPawn job.targetQueueB.Map: " + target.Thing.Map);
-                    ZLogger.Message("TeleportPawn job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                    ZLogger.Message("TeleportPawn job.targetQueueB.countQueue: " + this.jobTracker[pawnToTeleport].mainJob.countQueue[i]);
-                }
-            }
-            catch { }
             this.ReCheckStairs();
         }
 
