@@ -233,70 +233,81 @@ namespace ZLevels
                     {
                         if (map.Key < 0 && RegisterConditionPatch.blackList.Contains(__instance.def))
                         {
-                            Log.Message("Removing from maps: " + map.Value + " - " + __instance.def);
+                            //Log.Message("Removing from maps: " + map.Value + " - " + __instance.def);
                             __result.Remove(map.Value);
                         }
                     }
                 }
             }
         }
-        [HarmonyPatch(typeof(GameConditionManager), "DoConditionsUI")]
-        internal static class DoConditionsUIPatch
-        {
-            [HarmonyPrefix]
-            public static bool Prefix(GameConditionManager __instance, Rect rect)
-            {
-                if (__instance.ownerMap == null && ZUtils.ZTracker.GetZIndexFor(Find.CurrentMap) < 0)
-                {
-                    DoConditionsUI(rect, __instance);
-                    return false;
-                }
-                return true;
-            }
 
-            public static void DoConditionsUI(Rect rect, GameConditionManager __instance)
-            {
-                GUI.BeginGroup(rect);
-                float num = 0f;
-                var activeConditions = __instance.ActiveConditions;
-                for (int i = 0; i < activeConditions.Count; i++)
-                {
-                    if (RegisterConditionPatch.blackList.Contains(activeConditions[i].def)) continue;
-                    string labelCap = activeConditions[i].LabelCap;
-                    Rect rect2 = new Rect(0f, num, rect.width, Text.CalcHeight(labelCap, rect.width - 6f));
-                    Text.Font = GameFont.Small;
-                    Text.Anchor = TextAnchor.MiddleRight;
-                    Widgets.DrawHighlightIfMouseover(rect2);
-                    Rect rect3 = rect2;
-                    rect3.width -= 6f;
-                    Widgets.Label(rect3, labelCap);
-                    if (Mouse.IsOver(rect2))
-                    {
-                        TooltipHandler.TipRegion(rect2, new TipSignal(activeConditions[i].TooltipString, 0x3A2DF42A ^ i));
-                    }
-                    if (Widgets.ButtonInvisible(rect2))
-                    {
-                        if (activeConditions[i].conditionCauser != null && CameraJumper.CanJump(activeConditions[i].conditionCauser))
-                        {
-                            CameraJumper.TryJumpAndSelect(activeConditions[i].conditionCauser);
-                        }
-                        else if (activeConditions[i].quest != null)
-                        {
-                            Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Quests);
-                            ((MainTabWindow_Quests)MainButtonDefOf.Quests.TabWindow).Select(activeConditions[i].quest);
-                        }
-                    }
-                    num += rect2.height;
-                }
-                rect.yMin += num;
-                GUI.EndGroup();
-                Text.Anchor = TextAnchor.UpperLeft;
-                if (__instance.Parent != null)
-                {
-                    __instance.Parent.DoConditionsUI(rect);
-                }
-            }
-        }
-        
+        //[HarmonyPatch(typeof(GameConditionManager), "ElectricityDisabled", MethodType.Getter)]
+        //internal static class ElectricityDisabledPatch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(GameConditionManager __instance, ref bool __result)
+        //    {
+        //        Log.Message("TEST: " + __instance.ownerMap + " - " + __result);
+        //    }
+        //}
+        //
+        //
+        //[HarmonyPatch(typeof(GameConditionManager), "DoConditionsUI")]
+        //internal static class DoConditionsUIPatch
+        //{
+        //    [HarmonyPrefix]
+        //    public static bool Prefix(GameConditionManager __instance, Rect rect)
+        //    {
+        //        if (__instance.ownerMap == null && ZUtils.ZTracker.GetZIndexFor(Find.CurrentMap) < 0)
+        //        {
+        //            DoConditionsUI(rect, __instance);
+        //            return false;
+        //        }
+        //        return true;
+        //    }
+        //
+        //    public static void DoConditionsUI(Rect rect, GameConditionManager __instance)
+        //    {
+        //        GUI.BeginGroup(rect);
+        //        float num = 0f;
+        //        var activeConditions = __instance.ActiveConditions;
+        //        for (int i = 0; i < activeConditions.Count; i++)
+        //        {
+        //            if (RegisterConditionPatch.blackList.Contains(activeConditions[i].def)) continue;
+        //            string labelCap = activeConditions[i].LabelCap;
+        //            Rect rect2 = new Rect(0f, num, rect.width, Text.CalcHeight(labelCap, rect.width - 6f));
+        //            Text.Font = GameFont.Small;
+        //            Text.Anchor = TextAnchor.MiddleRight;
+        //            Widgets.DrawHighlightIfMouseover(rect2);
+        //            Rect rect3 = rect2;
+        //            rect3.width -= 6f;
+        //            Widgets.Label(rect3, labelCap);
+        //            if (Mouse.IsOver(rect2))
+        //            {
+        //                TooltipHandler.TipRegion(rect2, new TipSignal(activeConditions[i].TooltipString, 0x3A2DF42A ^ i));
+        //            }
+        //            if (Widgets.ButtonInvisible(rect2))
+        //            {
+        //                if (activeConditions[i].conditionCauser != null && CameraJumper.CanJump(activeConditions[i].conditionCauser))
+        //                {
+        //                    CameraJumper.TryJumpAndSelect(activeConditions[i].conditionCauser);
+        //                }
+        //                else if (activeConditions[i].quest != null)
+        //                {
+        //                    Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Quests);
+        //                    ((MainTabWindow_Quests)MainButtonDefOf.Quests.TabWindow).Select(activeConditions[i].quest);
+        //                }
+        //            }
+        //            num += rect2.height;
+        //        }
+        //        rect.yMin += num;
+        //        GUI.EndGroup();
+        //        Text.Anchor = TextAnchor.UpperLeft;
+        //        if (__instance.Parent != null)
+        //        {
+        //            __instance.Parent.DoConditionsUI(rect);
+        //        }
+        //    }
+        //}
     }
 }
