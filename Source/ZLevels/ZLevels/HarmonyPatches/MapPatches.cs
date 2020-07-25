@@ -76,11 +76,15 @@ namespace ZLevels
             [HarmonyPrefix]
             private static bool Prefix(Map __instance, ref Faction __result)
             {
-                if (__instance != null && __instance.ParentHolder is MapParent_ZLevel)
+                try
                 {
-                    __result = ZUtils.ZTracker.GetMapByIndex(__instance.Tile, 0).ParentFaction;;
-                    return false;
+                    if (__instance != null && __instance.ParentHolder is MapParent_ZLevel)
+                    {
+                        __result = ZUtils.ZTracker.GetMapByIndex(__instance.Tile, 0).ParentFaction; ;
+                        return false;
+                    }
                 }
+                catch { };
                 return true;
             }
         }

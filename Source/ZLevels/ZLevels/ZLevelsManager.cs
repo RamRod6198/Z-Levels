@@ -1226,6 +1226,7 @@ namespace ZLevels
             }
             catch { }
 
+            Log.Message("CHECK: trying to teleport " + pawnToTeleport + " from " + pawnToTeleport.Map + " to " + mapToTeleport, true);
             RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
             pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);
             pawnToTeleport.Map?.listerThings.Remove(pawnToTeleport);
