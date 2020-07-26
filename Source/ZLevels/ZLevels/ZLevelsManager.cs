@@ -1103,6 +1103,11 @@ namespace ZLevels
         public void MoveThingToAnotherMap(Thing thingToTeleport, Map mapToTeleport)
         {
             Log.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
+            if (thingToTeleport.Map == mapToTeleport) return;
+            if (mapToTeleport.spawnedThings.Contains(thingToTeleport)) return;
+            if (mapToTeleport.listerThings.Contains(thingToTeleport)) return;
+            if (thingToTeleport is Pawn pawn && mapToTeleport.mapPawns.AllPawns.Contains(pawn)) return;
+
             RegionListersUpdater.DeregisterInRegions(thingToTeleport, thingToTeleport.Map);
             thingToTeleport.Map?.spawnedThings.Remove(thingToTeleport);
             thingToTeleport.Map?.listerThings.Remove(thingToTeleport);
