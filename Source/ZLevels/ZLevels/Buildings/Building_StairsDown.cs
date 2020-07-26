@@ -12,7 +12,7 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class Building_StairsDown : Building, IAttackTarget
+    public class Building_StairsDown : Building_Stairs, IAttackTarget
     {
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {

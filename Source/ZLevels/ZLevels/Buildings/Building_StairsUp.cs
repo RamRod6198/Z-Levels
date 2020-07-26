@@ -12,7 +12,27 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class Building_StairsUp : Building, IAttackTarget
+
+    public class Building_Stairs : Building
+    {
+        Building_Stairs GetMatchingStair()
+        {
+            if (this is Building_StairsUp)
+            {
+                return (Building_Stairs) Position.GetThingList(ZUtils.ZTracker.GetUpperLevel(Map.Tile, Map))
+                    .FirstOrDefault(x => x is Building_StairsDown);
+            }
+            else
+            {
+                return (Building_Stairs)Position.GetThingList(ZUtils.ZTracker.GetLowerLevel(Map.Tile, Map))
+                    .FirstOrDefault(x => x is Building_StairsUp);
+            }
+        }
+
+    }
+
+
+    public class Building_StairsUp : Building_Stairs, IAttackTarget
     {
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
