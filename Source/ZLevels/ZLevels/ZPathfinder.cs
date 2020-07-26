@@ -146,6 +146,7 @@ namespace ZLevels.Properties
                     var map = sinkDown
                         ? ZUtils.ZTracker.GetLowerLevel(source.Tile, source.Map)
                         : ZUtils.ZTracker.GetUpperLevel(source.Tile, source.Map);
+                    
                     if (sinkDown)
                     {
                         nextSource = stair.Position.GetThingList(map).FirstOrDefault(x => x is Building_StairsUp);
