@@ -1566,6 +1566,7 @@ namespace ZLevels
                 {
                     foreach (var map in GetAllMaps(tile.Key))
                     {
+                        ZPathfinder.Instance.AddMap(map);
                         stairsDown[map] = totalStairsDown.Where(x => x.Map == map).ToList();
                         stairsUp[map] = totalStairsUp.Where(x => x.Map == map).ToList();
                         if (stairsDown[map].Count == 0 && GetLowerLevel(tile.Key, map) != null)
@@ -1606,7 +1607,7 @@ namespace ZLevels
                     }
                     foreach (var map in GetAllMaps(tile.Key))
                     {
-                        if (stairsDown.ContainsKey(map))
+                            if (stairsDown.ContainsKey(map))
                         {
                             for (int i = stairsDown[map].Count - 1; i >= 0; i--)
                             {
@@ -1634,6 +1635,8 @@ namespace ZLevels
                         }
                     }
                 }
+                ZPathfinder.Instance.CalculateStairPaths();
+                
             }
             catch (Exception ex)
             {
@@ -1689,7 +1692,7 @@ namespace ZLevels
                             foreach (var d in mapIndex)
                             {
                                 if (d.Key != null)
-                                {
+                                { 
                                     ZLogger.Message("2 Registering map: " + d.Key + " - " + d.Value);
                                     TryRegisterMap(d.Key, d.Value);
                                 }
