@@ -1524,12 +1524,12 @@ namespace ZLevels
                         this.stairsUp[map] = this.totalStairsUp.Where(x => x.Map == map).ToList();
                         if (this.stairsDown[map].Count == 0 && this.GetLowerLevel(tile.Key, map) != null)
                         {
-                            this.stairsDown[map] = map.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
+                            this.stairsDown[map] = map.listerThings.AllThings.Where(x => x is Building_StairsDown).Cast<Building_StairsDown>().ToList();
                             this.totalStairsDown.AddRange(this.stairsDown[map]);
                         }
                         if (this.stairsUp[map].Count == 0 && this.GetUpperLevel(tile.Key, map) != null)
                         {
-                            this.stairsUp[map] = map.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
+                            this.stairsUp[map] = map.listerThings.AllThings.Where(x => x is Building_StairsUp).Cast<Building_StairsUp>().ToList();
                             this.totalStairsUp.AddRange(this.stairsUp[map]);
                         }
                         ZLogger.Message("this.stairsDown[map]: " + this.stairsDown[map].Count);
@@ -1671,11 +1671,11 @@ namespace ZLevels
         private List<int> Z_LevelsKeys = new List<int>();
         private List<ZLevelData> ZLevelsTrackerValues = new List<ZLevelData>();
 
-        public Dictionary<Map, List<Thing>> stairsUp = new Dictionary<Map, List<Thing>>();
-        public Dictionary<Map, List<Thing>> stairsDown = new Dictionary<Map, List<Thing>>();
+        public Dictionary<Map, List<Building_StairsUp>> stairsUp = new Dictionary<Map, List<Building_StairsUp>>();
+        public Dictionary<Map, List<Building_StairsDown>> stairsDown = new Dictionary<Map, List<Building_StairsDown>>();
 
-        public HashSet<Thing> totalStairsDown = new HashSet<Thing>();
-        public HashSet<Thing> totalStairsUp = new HashSet<Thing>();
+        public HashSet<Building_StairsDown> totalStairsDown = new HashSet<Building_StairsDown>();
+        public HashSet<Building_StairsUp> totalStairsUp = new HashSet<Building_StairsUp>();
 
         public Dictionary<Map, int> mapIndex;
         private List<Map> mapKeys = new List<Map>();
