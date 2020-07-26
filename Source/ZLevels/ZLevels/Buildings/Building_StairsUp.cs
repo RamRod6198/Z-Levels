@@ -63,7 +63,15 @@ namespace ZLevels
         {
             get
             {
-                return (Building_StairsDown)this.Position.GetThingList(ZUtils.ZTracker.GetLowerLevel(this.Map.Tile, this.Map)).FirstOrDefault(x => x is Building_StairsDown);
+                Map lowerMap = ZUtils.ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
+                if (lowerMap != null)
+                {
+                    return (Building_StairsDown)this.Position.GetThingList(lowerMap).FirstOrDefault(x => x is Building_StairsDown);
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)

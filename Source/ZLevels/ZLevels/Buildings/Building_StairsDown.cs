@@ -76,7 +76,15 @@ namespace ZLevels
         {
             get
             {
-                return (Building_StairsUp)this.Position.GetThingList(ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map)).FirstOrDefault(x => x is Building_StairsUp);
+                Map upperMap = ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
+                if (upperMap != null)
+                {
+                    return (Building_StairsUp)this.Position.GetThingList(upperMap).FirstOrDefault(x => x is Building_StairsUp);
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
