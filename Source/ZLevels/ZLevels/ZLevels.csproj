@@ -282,7 +282,7 @@
     <Compile Include="JobTracker.cs" />
     <Compile Include="Map\MapComponentZLevel.cs" />
     <Compile Include="Map\MapParent_ZLevel.cs" />
-    <Compile Include="Properties\Pathfinder.cs" />
+    <Compile Include="ZPathfinder.cs" />
     <Compile Include="ZLevels.cs" />
     <Compile Include="ZLevelsSettings.cs" />
     <Compile Include="ZUtils.cs" />

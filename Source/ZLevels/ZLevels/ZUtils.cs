@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Multiplayer.API;
 using Verse;
+using ZLevels.Properties;
 
 namespace ZLevels
 {
@@ -28,7 +29,9 @@ namespace ZLevels
 		public static void ResetZTracker()
 		{
 			zTracker = null;
-		}
+            ZPathfinder.ResetPathfinder();
+            
+        }
 
         public static IEnumerable<Map> GetAllMapsInClosestOrder(Thing thing, Map oldMap, IntVec3 oldPosition)
         {
