@@ -59,7 +59,7 @@ namespace ZLevels
             }
         }
 
-        public Building_StairsDown GetStairsDownInLowerMap
+        public Building_StairsDown GetMatchingStair
         {
             get
             {
