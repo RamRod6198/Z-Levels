@@ -8,6 +8,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using ZLevels.Properties;
 
 namespace ZLevels
 {
@@ -15,7 +16,7 @@ namespace ZLevels
     {
         public ZLevelsManager()
         {
-
+            
         }
 
         public ZLevelsManager(Game game)
@@ -319,6 +320,8 @@ namespace ZLevels
 
         public bool TryRegisterMap(Map map, int index)
         {
+            ZLogger.Message("Registering " + GetMapInfo(map) + " for index: " + index);
+
             if (ZLevelsTracker == null)
             {
                 ZLogger.Message("2 Resetting ZLevelsTracker");
@@ -1642,6 +1645,7 @@ namespace ZLevels
         {
             base.StartedNewGame();
             ZUtils.ResetZTracker();
+
         }
         public override void LoadedGame()
         {
