@@ -38,12 +38,12 @@ namespace ZLevels
         {
             base.SpawnSetup(map, respawningAfterLoad);
             var ZTracker = ZUtils.ZTracker;
-            if (ZTracker.totalStairsUp == null) ZTracker.totalStairsUp = new HashSet<Building_StairsUp>();
+            if (ZTracker.totalStairsUp == null) ZTracker.totalStairsUp = new HashSet<Building_Stairs>();
             ZTracker.totalStairsUp.Add(this);
 
             if (!ZTracker.stairsUp.ContainsKey(this.Map))
             {
-                ZTracker.stairsUp[this.Map] = new List<Building_StairsUp>();
+                ZTracker.stairsUp[this.Map] = new List<Building_Stairs>();
             }
             if (!ZTracker.stairsUp[this.Map].Contains(this))
             {

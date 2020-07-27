@@ -16,7 +16,7 @@ namespace ZLevels
     {
         public ZLevelsManager()
         {
-            
+
         }
 
         public ZLevelsManager(Game game)
@@ -1569,45 +1569,59 @@ namespace ZLevels
                         ZPathfinder.Instance.AddMap(map);
                         stairsDown[map] = totalStairsDown.Where(x => x.Map == map).ToList();
                         stairsUp[map] = totalStairsUp.Where(x => x.Map == map).ToList();
-                        if (stairsDown[map].Count == 0 && GetLowerLevel(tile.Key, map) != null)
+                        if (stairsDown[map].Count == 0 && GetLowerLevel(tile.Key, map) != null ||
+                            stairsUp[map].Count == 0 && GetUpperLevel(tile.Key, map) != null)
                         {
-                            stairsDown[map] = map.listerThings.AllThings.Where(x => x is Building_StairsDown).ToList();
-                            totalStairsDown.AddRange(stairsDown[map]);
-                        }
-                        if (stairsUp[map].Count == 0 && GetUpperLevel(tile.Key, map) != null)
-                        {
-                            stairsUp[map] = map.listerThings.AllThings.Where(x => x is Building_StairsUp).ToList();
-                            totalStairsUp.AddRange(stairsUp[map]);
-                        }
-                        ZLogger.Message("this.stairsDown[map]: " + stairsDown[map].Count);
-                        ZLogger.Message("this.stairsUp[map]: " + stairsUp[map].Count);
-                        if (stairsDown.ContainsKey(map))
-                        {
-                            for (int i = stairsDown[map].Count - 1; i >= 0; i--)
+                            foreach (var thing in map.listerThings.AllThings.Where(x => x is Building_Stairs).ToList())
                             {
-                                if (!stairsDown[map][i].Position.Walkable(map))
+                                if (thing is Building_StairsDown)
                                 {
-                                    ZLogger.Message(stairsDown[map][i] + " not walkable, removing it");
-                                    stairsDown[map].RemoveAt(i);
+                                    stairsDown[map].Add(thing as Building_StairsDown);
+                                }
+                                else if (thing is Building_StairsUp)
+                                {
+                                    stairsUp[map].Add(thing as Building_StairsDown);
+                                }
+
+                                break;
+
+                            }
+
+                            totalStairsUp.AddRange(stairsUp[map]);
+                            totalStairsDown.AddRange(stairsDown[map]);
+
+                            ZLogger.Message("this.stairsDown[map]: " + stairsDown[map].Count);
+                            ZLogger.Message("this.stairsUp[map]: " + stairsUp[map].Count);
+                            if (stairsDown.ContainsKey(map))
+                            {
+                                for (int i = stairsDown[map].Count - 1; i >= 0; i--)
+                                {
+                                    if (!stairsDown[map][i].Position.Walkable(map))
+                                    {
+                                        ZLogger.Message(stairsDown[map][i] + " not walkable, removing it");
+                                        stairsDown[map].RemoveAt(i);
+                                    }
                                 }
                             }
-                        }
-                        if (stairsUp.ContainsKey(map))
-                        {
-                            for (int i = stairsUp[map].Count - 1; i >= 0; i--)
-                            {
 
-                                if (!stairsUp[map][i].Position.Walkable(map))
+                            if (stairsUp.ContainsKey(map))
+                            {
+                                for (int i = stairsUp[map].Count - 1; i >= 0; i--)
                                 {
-                                    ZLogger.Message(stairsUp[map][i] + " not walkable, removing it");
-                                    stairsUp[map].RemoveAt(i);
+
+                                    if (!stairsUp[map][i].Position.Walkable(map))
+                                    {
+                                        ZLogger.Message(stairsUp[map][i] + " not walkable, removing it");
+                                        stairsUp[map].RemoveAt(i);
+                                    }
                                 }
                             }
                         }
                     }
+
                     foreach (var map in GetAllMaps(tile.Key))
                     {
-                            if (stairsDown.ContainsKey(map))
+                        if (stairsDown.ContainsKey(map))
                         {
                             for (int i = stairsDown[map].Count - 1; i >= 0; i--)
                             {
@@ -1636,7 +1650,7 @@ namespace ZLevels
                     }
                 }
                 ZPathfinder.Instance.CalculateStairPaths();
-                
+
             }
             catch (Exception ex)
             {
@@ -1692,7 +1706,7 @@ namespace ZLevels
                             foreach (var d in mapIndex)
                             {
                                 if (d.Key != null)
-                                { 
+                                {
                                     ZLogger.Message("2 Registering map: " + d.Key + " - " + d.Value);
                                     TryRegisterMap(d.Key, d.Value);
                                 }
@@ -1721,11 +1735,13 @@ namespace ZLevels
         public Dictionary<int, ZLevelData> ZLevelsTracker = new Dictionary<int, ZLevelData>();
         public List<ZLevelData> ZLevelsTrackerValues = new List<ZLevelData>();
 
-        public Dictionary<Map, List<Thing>> stairsUp = new Dictionary<Map, List<Thing>>();
-        public Dictionary<Map, List<Thing>> stairsDown = new Dictionary<Map, List<Thing>>();
+        public Dictionary<Map, List<Building_Stairs>> stairsUp = new Dictionary<Map, List<Building_Stairs>>();
+        public Dictionary<Map, List<Building_Stairs>> stairsDown = new Dictionary<Map, List<Building_Stairs>>();
 
-        public HashSet<Thing> totalStairsDown = new HashSet<Thing>();
-        public HashSet<Thing> totalStairsUp = new HashSet<Thing>();
+        public HashSet<Building_Stairs> totalStairsDown = new HashSet<Building_Stairs>();
+        public HashSet<Building_Stairs> totalStairsUp = new HashSet<Building_Stairs>();
+
+
 
         public Dictionary<Map, int> mapIndex;
         public List<Map> mapKeys = new List<Map>();

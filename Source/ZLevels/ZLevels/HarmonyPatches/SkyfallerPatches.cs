@@ -37,7 +37,7 @@ namespace ZLevels
                         .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
                     if (upperMap != null)
                     {
-                        ZTracker.TeleportThing(__result, pos, upperMap);
+                        ZTracker.SimpleTeleportThing(__result, pos, upperMap);
                         ZLogger.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
                     }
                     else
@@ -68,7 +68,7 @@ namespace ZLevels
                         .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault(); 
                     if (upperMap != null)
                     {
-                        ZTracker.TeleportThing(__result, pos, upperMap);
+                        ZTracker.SimpleTeleportThing(__result, pos, upperMap);
                         ZLogger.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
                     }
                     else
@@ -99,7 +99,7 @@ namespace ZLevels
                         .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
                     if (upperMap != null)
                     {
-                        ZTracker.TeleportThing(__result, pos, upperMap);
+                        ZTracker.SimpleTeleportThing(__result, pos, upperMap);
                         ZLogger.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
                     }
                     else
@@ -129,7 +129,7 @@ namespace ZLevels
                         .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault(); 
                     if (upperMap != null)
                     {
-                        ZTracker.TeleportThing(__result, pos, upperMap);
+                        ZTracker.SimpleTeleportThing(__result, pos, upperMap);
                         ZLogger.Message("Skyfaller: " + __result + " spawning in " + ZTracker.GetMapInfo(upperMap));
                     }
                     else

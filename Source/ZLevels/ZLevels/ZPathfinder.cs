@@ -134,7 +134,7 @@ namespace ZLevels.Properties
             //case 2: No direct connection, but source and sink go different directions
             if (sourceDown != sinkDown)
             {
-                List<Thing> stairs = sinkDown ? ZUtils.ZTracker.stairsDown[sink.Map] : ZUtils.ZTracker.stairsUp[sink.Map];
+                List<Building_Stairs> stairs = sinkDown ? ZUtils.ZTracker.stairsDown[sink.Map] : ZUtils.ZTracker.stairsUp[sink.Map];
                 foreach (Thing stair in stairs)
                 {
                     if (stair == source || stair == sink)
