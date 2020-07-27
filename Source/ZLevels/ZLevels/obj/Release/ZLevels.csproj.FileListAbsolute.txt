@@ -11,7 +11,6 @@ C:\Users\Isaac\Source\Repos\Z-Levels\Assemblies\ZLevels.pdb
 C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.csproj.CoreCompileInputs.cache
 C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\bin\Release\ZLevels.dll
 C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\bin\Release\ZLevels.pdb
-C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.csprojAssemblyReference.cache
 C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.dll
 C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.pdb
 C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.csproj.CopyComplete

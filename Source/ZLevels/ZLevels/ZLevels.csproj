@@ -305,9 +305,9 @@
     <PostBuildEvent>
         xcopy "..\About\*"  "$(RimworldModsZlevels)About\" /Y /E /d
         xcopy "..\Defs\*"  "$(RimworldModsZlevels)Defs\" /Y /E /d	              
-        xcopy "..\Assemblies\*"  "$(RimworldModsZlevels)\Assemblies\" /Y /E /d	
+        xcopy "..\Assemblies\Zlevels*"  "$(RimworldModsZlevels)\Assemblies\" /Y /E /d	
         xcopy "..\Languages\*"   "$(RimworldModsZlevels)\Languages\" /Y /E /d	  
         xcopy "..\Textures\*"    "$(RimworldModsZlevels)\Textures\" /Y /E /d
-    </PostBuildEvent>
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

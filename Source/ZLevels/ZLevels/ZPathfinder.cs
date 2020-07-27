@@ -141,29 +141,31 @@ namespace ZLevels.Properties
                     {
                         continue;
                     }
-
                     Thing nextSink, nextSource;
-                    var map = sinkDown
-                        ? ZUtils.ZTracker.GetLowerLevel(source.Tile, source.Map)
-                        : ZUtils.ZTracker.GetUpperLevel(source.Tile, source.Map);
-                    
-                    if (sinkDown)
+                    while (newPath == null)
                     {
-                        nextSource = stair.Position.GetThingList(map).FirstOrDefault(x => x is Building_StairsUp);
-                        nextSink = sink.Position.GetThingList(map).FirstOrDefault(x => x is Building_StairsUp);
-                    }
-                    else
-                    {
-                        nextSource = stair.Position.GetThingList(map).FirstOrDefault(x => x is Building_StairsDown);
-                        nextSink = sink.Position.GetThingList(map).FirstOrDefault(x => x is Building_StairsDown);
-                    }
+                        var map = sinkDown
+                            ? ZUtils.ZTracker.GetLowerLevel(source.Tile, source.Map)
+                            : ZUtils.ZTracker.GetUpperLevel(source.Tile, source.Map);
 
-                    RecursiveFindPath(nextSource, nextSink, newPath);
-                    
-                    if (CheckStairPathsForKeyPair(sink, stair, out newPath))
-                    {
-                        //found a path between those two
-                        break;
+                        if (sinkDown)
+                        {
+                            nextSource = stair.Position.GetThingList(map).FirstOrDefault(x => x is Building_StairsUp);
+                            nextSink = sink.Position.GetThingList(map).FirstOrDefault(x => x is Building_StairsUp);
+                        }
+                        else
+                        {
+                            nextSource = stair.Position.GetThingList(map).FirstOrDefault(x => x is Building_StairsDown);
+                            nextSink = sink.Position.GetThingList(map).FirstOrDefault(x => x is Building_StairsDown);
+                        }
+
+                        RecursiveFindPath(nextSource, nextSink, newPath);
+
+                        if (CheckStairPathsForKeyPair(sink, stair, out newPath))
+                        {
+                            //found a path between those two
+                            break;
+                        }
                     }
                 }
             }
