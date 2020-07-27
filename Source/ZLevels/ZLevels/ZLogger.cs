@@ -52,7 +52,7 @@ namespace ZLevels
 			if (DebugEnabled)
 			{
 				Log.Error("Pausing, reason: " + reason, true);
-				Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+				//Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
 			}
 		}
 

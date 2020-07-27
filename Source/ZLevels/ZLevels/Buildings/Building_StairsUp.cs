@@ -38,12 +38,12 @@ namespace ZLevels
         {
             base.SpawnSetup(map, respawningAfterLoad);
             var ZTracker = ZUtils.ZTracker;
-            if (ZTracker.totalStairsUp == null) ZTracker.totalStairsUp = new HashSet<Thing>();
+            if (ZTracker.totalStairsUp == null) ZTracker.totalStairsUp = new HashSet<Building_StairsUp>();
             ZTracker.totalStairsUp.Add(this);
 
             if (!ZTracker.stairsUp.ContainsKey(this.Map))
             {
-                ZTracker.stairsUp[this.Map] = new List<Thing>();
+                ZTracker.stairsUp[this.Map] = new List<Building_StairsUp>();
             }
             if (!ZTracker.stairsUp[this.Map].Contains(this))
             {
@@ -79,6 +79,21 @@ namespace ZLevels
             }
         }
 
+        public Building_StairsDown GetMatchingStair
+        {
+            get
+            {
+                Map lowerMap = ZUtils.ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
+                if (lowerMap != null)
+                {
+                    return (Building_StairsDown)this.Position.GetThingList(lowerMap).FirstOrDefault(x => x is Building_StairsDown);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
             var ZTracker = ZUtils.ZTracker;

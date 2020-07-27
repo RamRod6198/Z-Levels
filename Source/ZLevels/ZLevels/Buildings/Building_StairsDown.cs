@@ -18,12 +18,12 @@ namespace ZLevels
         {
             base.SpawnSetup(map, respawningAfterLoad);
             var ZTracker = ZUtils.ZTracker;
-            if (ZTracker.totalStairsDown == null) ZTracker.totalStairsDown = new HashSet<Thing>();
+            if (ZTracker.totalStairsDown == null) ZTracker.totalStairsDown = new HashSet<Building_StairsDown>();
             ZTracker.totalStairsDown.Add(this);
 
             if (!ZTracker.stairsDown.ContainsKey(this.Map))
             {
-                ZTracker.stairsDown[this.Map] = new List<Thing>();
+                ZTracker.stairsDown[this.Map] = new List<Building_StairsDown>();
             }
             if (!ZTracker.stairsDown[this.Map].Contains(this))
             {
@@ -68,6 +68,22 @@ namespace ZLevels
                     {
                         ZLogger.Message("Index: " + ZTracker.GetMapInfo(map2));
                     }
+                }
+            }
+        }
+
+        public Building_StairsUp GetMatchingStair
+        {
+            get
+            {
+                Map upperMap = ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
+                if (upperMap != null)
+                {
+                    return (Building_StairsUp)this.Position.GetThingList(upperMap).FirstOrDefault(x => x is Building_StairsUp);
+                }
+                else
+                {
+                    return null;
                 }
             }
         }

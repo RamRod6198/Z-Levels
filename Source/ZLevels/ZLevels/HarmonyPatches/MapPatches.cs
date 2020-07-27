@@ -69,6 +69,26 @@ namespace ZLevels
             }
         }
 
+        [HarmonyPatch(typeof(Map))]
+        [HarmonyPatch("ParentFaction", MethodType.Getter)]
+        public class ParentFaction_Patch
+        {
+            [HarmonyPrefix]
+            private static bool Prefix(Map __instance, ref Faction __result)
+            {
+                try
+                {
+                    if (__instance != null && __instance.ParentHolder is MapParent_ZLevel)
+                    {
+                        __result = ZUtils.ZTracker.GetMapByIndex(__instance.Tile, 0).ParentFaction; ;
+                        return false;
+                    }
+                }
+                catch { };
+                return true;
+            }
+        }
+
         [HarmonyPatch(typeof(ExitMapGrid))]
         [HarmonyPatch("MapUsesExitGrid", MethodType.Getter)]
         public class ExitCells_Patch

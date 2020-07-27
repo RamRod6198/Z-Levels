@@ -40,7 +40,7 @@ namespace ZLevels
 
             foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
             {
-                var stairs = new List<Thing>();
+                var stairs = new List<Building_Stairs>();
                 if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap) && !cantGoUP)
                 {
                     Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
@@ -105,7 +105,7 @@ namespace ZLevels
 
             foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
             {
-                var stairs = new List<Thing>();
+                var stairs = new List<Building_Stairs>();
                 if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap) && !cantGoUP)
                 {
                     Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
