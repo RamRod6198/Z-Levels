@@ -2387,7 +2387,7 @@ namespace ZLevels
                 var entryPoints = new Dictionary<Map, IntVec3>();
                 foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(t.Map))
                 {
-                    var stairs = new List<Thing>();
+                    var stairs = new List<Building_Stairs>();
                     if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
                     {
                         Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);

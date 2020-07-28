@@ -12,18 +12,36 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class Building_StairsUp : Building, IAttackTarget
+    public class Building_Stairs : Building
+    {
+        Building_Stairs GetMatchingStair()
+        {
+            if (this is Building_StairsUp)
+            {
+                return (Building_Stairs)Position.GetThingList(ZUtils.ZTracker.GetUpperLevel(Map.Tile, Map))
+                    .FirstOrDefault(x => x is Building_StairsDown);
+            }
+            else
+            {
+                return (Building_Stairs)Position.GetThingList(ZUtils.ZTracker.GetLowerLevel(Map.Tile, Map))
+                    .FirstOrDefault(x => x is Building_StairsUp);
+            }
+        }
+
+    }
+
+    public class Building_StairsUp : Building_Stairs, IAttackTarget
     {
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
             var ZTracker = ZUtils.ZTracker;
-            if (ZTracker.totalStairsUp == null) ZTracker.totalStairsUp = new HashSet<Building_StairsUp>();
+            if (ZTracker.totalStairsUp == null) ZTracker.totalStairsUp = new HashSet<Building_Stairs>();
             ZTracker.totalStairsUp.Add(this);
 
             if (!ZTracker.stairsUp.ContainsKey(this.Map))
             {
-                ZTracker.stairsUp[this.Map] = new List<Building_StairsUp>();
+                ZTracker.stairsUp[this.Map] = new List<Building_Stairs>();
             }
             if (!ZTracker.stairsUp[this.Map].Contains(this))
             {

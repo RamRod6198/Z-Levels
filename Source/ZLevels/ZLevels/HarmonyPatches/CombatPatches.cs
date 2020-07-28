@@ -15,9 +15,9 @@ using Verse.AI.Group;
 
 namespace ZLevels
 {
-    [StaticConstructorOnStartup]
-    public static class CombatPatches
-    {
+	[StaticConstructorOnStartup]
+	public static class CombatPatches
+	{
 		//  things to look for patching: 
 		//  \.BestAttackTarget
 		//	BestShootTargetFromCurrentPosition
@@ -34,9 +34,9 @@ namespace ZLevels
 		public class CombatPatches_BestAttackTarget_Patch
 		{
 			public static bool recursiveTrap = false;
-			public static bool Prefix(ref IAttackTarget __result, IAttackTargetSearcher searcher, 
-				TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, 
-				float maxDist = 9999f, IntVec3 locus = default(IntVec3), 
+			public static bool Prefix(ref IAttackTarget __result, IAttackTargetSearcher searcher,
+				TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f,
+				float maxDist = 9999f, IntVec3 locus = default(IntVec3),
 				float maxTravelRadiusFromLocus = 3.40282347E+38f, bool canBash = false,
 				bool canTakeTargetsCloserThanEffectiveMinRange = true)
 			{
@@ -50,7 +50,7 @@ namespace ZLevels
 					{
 						var target = AttackTargetFinder.BestAttackTarget(searcher, flags, validator, minDist,
 							maxDist, locus, maxTravelRadiusFromLocus, canBash, canTakeTargetsCloserThanEffectiveMinRange);
-						Log.Message(ZUtils.ZTracker.GetMapInfo(searcher.Thing.Map) + " - result: " + target);
+						Log.Message("1: " + ZUtils.ZTracker.GetMapInfo(searcher.Thing.Map) + " - result: " + target);
 						if (target != null)
 						{
 							__result = target;
@@ -73,13 +73,318 @@ namespace ZLevels
 		[HarmonyPatch(typeof(AttackTargetFinder), "BestShootTargetFromCurrentPosition")]
 		public class BestShootTargetFromCurrentPosition_Patch
 		{
-			public static void Postfix(ref IAttackTarget __result, IAttackTargetSearcher searcher, 
-				TargetScanFlags flags, Predicate<Thing> validator = null, float minDistance = 0f, 
+			public static void Postfix(ref IAttackTarget __result, IAttackTargetSearcher searcher,
+				TargetScanFlags flags, Predicate<Thing> validator = null, float minDistance = 0f,
 				float maxDistance = 9999f)
 			{
 				Log.Message(searcher + " - 2 TEST: " + __result);
 			}
 		}
+
+		[HarmonyPatch(typeof(Pawn), "TryStartAttack")]
+		public class TryStartAttack_Patch
+		{
+			public static void Postfix(Pawn __instance, ref bool __result, LocalTargetInfo targ)
+			{
+				bool allowManualCastWeapons = !__instance.IsColonist;
+				Verb verb = __instance.TryGetAttackVerb(targ.Thing, allowManualCastWeapons);
+				Log.Message("verb: " + verb);
+				Log.Message("result: " + (verb?.TryStartCastOn(targ) ?? false).ToString());
+				Log.Message(__instance + " - 2.5 TEST: " + __result + " - " + targ.Thing);
+			}
+		}
+
+		[HarmonyPatch(typeof(Verb), "TryStartCastOn", new Type[]
+		{
+		typeof(LocalTargetInfo),
+		typeof(LocalTargetInfo),
+		typeof(bool),
+		typeof(bool)
+		})]
+		public class TryStartCastOn_Patch
+		{
+			public static void Postfix(Verb __instance, ref bool __result, LocalTargetInfo castTarg)
+			{
+				Log.Message(" - Postfix - if (__instance.caster == null) - 1", true);
+				if (__instance.caster == null)
+				{
+					Log.Message(" - Postfix - Log.Error(\"Verb \" + __instance.GetUniqueLoadID() + \" needs caster to work (possibly lost during saving/loading).\"); - 2", true);
+					Log.Error("Verb " + __instance.GetUniqueLoadID() + " needs caster to work (possibly lost during saving/loading).");
+					Log.Message(" - Postfix - return; - 3", true);
+					return;
+				}
+				Log.Message(" - Postfix - if (!__instance.caster.Spawned) - 4", true);
+				if (!__instance.caster.Spawned)
+				{
+					Log.Message(" - Postfix - return; - 5", true);
+					return;
+				}
+				Log.Message(" - Postfix - if (__instance.state == VerbState.Bursting || !__instance.CanHitTarget(castTarg)) - 6", true);
+				if (__instance.state == VerbState.Bursting || !__instance.CanHitTarget(castTarg))
+				{
+					Log.Message(" - Postfix - return; - 7", true);
+					return;
+				}
+				//__instance.surpriseAttack = surpriseAttack;
+				//__instance.canHitNonTargetPawnsNow = canHitNonTargetPawns;
+				//__instance.currentTarget = castTarg;
+				//__instance.currentDestination = destTarg;
+				Log.Message(" - Postfix - if (__instance.CasterIsPawn && __instance.verbProps.warmupTime > 0f) - 12", true);
+				if (__instance.CasterIsPawn && __instance.verbProps.warmupTime > 0f)
+				{
+					Log.Message(" - Postfix - if (!__instance.TryFindShootLineFromTo(__instance.caster.Position, castTarg, out ShootLine resultingLine)) - 13", true);
+					if (!__instance.TryFindShootLineFromTo(__instance.caster.Position, castTarg, out ShootLine resultingLine))
+					{
+						Log.Message(" - Postfix - return; - 14", true);
+						return;
+					}
+					__instance.CasterPawn.Drawer.Notify_WarmingCastAlongLine(resultingLine, __instance.caster.Position);
+					Log.Message(" - Postfix - float statValue = __instance.CasterPawn.GetStatValue(StatDefOf.AimingDelayFactor); - 16", true);
+					float statValue = __instance.CasterPawn.GetStatValue(StatDefOf.AimingDelayFactor);
+					int ticks = (__instance.verbProps.warmupTime * statValue).SecondsToTicks();
+					Log.Message(" - Postfix - __instance.CasterPawn.stances.SetStance(new Stance_Warmup(ticks, castTarg, __instance)); - 18", true);
+					__instance.CasterPawn.stances.SetStance(new Stance_Warmup(ticks, castTarg, __instance));
+				}
+				else
+				{
+					Log.Message(" - Postfix - __instance.WarmupComplete(); - 19", true);
+					__instance.WarmupComplete();
+				}
+				return;
+			}
+		}
+
+
+		[HarmonyPatch(typeof(Verb), "TryFindShootLineFromTo")]
+		public static class TryFindShootLineFromTo_Patch
+		{
+			public static bool Prefix(Verb __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine, ref bool __result)
+			{
+				//if (targ.HasThing && targ.Thing.Map != __instance.caster.Map)
+				//{
+				//	resultingLine = default(ShootLine);
+				//	__result = false;
+				//	return false;
+				//}
+				if (__instance.verbProps.IsMeleeAttack || __instance.verbProps.range <= 1.42f)
+				{
+					resultingLine = new ShootLine(root, targ.Cell);
+					__result = ReachabilityImmediate.CanReachImmediate(root, targ, __instance.caster.Map, PathEndMode.Touch, null);
+					return false;
+				}
+				CellRect cellRect = targ.HasThing ? targ.Thing.OccupiedRect() : CellRect.SingleCell(targ.Cell);
+				float num = __instance.verbProps.EffectiveMinRange(targ, __instance.caster);
+				float num2 = cellRect.ClosestDistSquaredTo(root);
+				if (num2 > __instance.verbProps.range * __instance.verbProps.range || num2 < num * num)
+				{
+					resultingLine = new ShootLine(root, targ.Cell);
+					__result = false;
+					return false;
+				}
+				if (!__instance.verbProps.requireLineOfSight)
+				{
+					resultingLine = new ShootLine(root, targ.Cell);
+					__result = true;
+					return false;
+				}
+				IntVec3 goodDest;
+				if (__instance.CasterIsPawn)
+				{
+					if (CanHitFromCellIgnoringRange(__instance, root, ___tempDestList, targ, out goodDest))
+					{
+						resultingLine = new ShootLine(root, goodDest);
+						__result = true;
+						return false;
+					}
+					ShootLeanUtility.LeanShootingSourcesFromTo(root, cellRect.ClosestCellTo(root), __instance.caster.Map, ___tempLeanShootSources);
+					for (int i = 0; i < ___tempLeanShootSources.Count; i++)
+					{
+						IntVec3 intVec = ___tempLeanShootSources[i];
+						if (CanHitFromCellIgnoringRange(__instance, intVec, ___tempDestList, targ, out goodDest))
+						{
+							resultingLine = new ShootLine(intVec, goodDest);
+							__result = true;
+							return false;
+						}
+					}
+				}
+				else
+				{
+					foreach (IntVec3 item in __instance.caster.OccupiedRect())
+					{
+						if (CanHitFromCellIgnoringRange(__instance, item, ___tempDestList, targ, out goodDest))
+						{
+							resultingLine = new ShootLine(item, goodDest);
+							__result = true;
+							return false;
+						}
+					}
+				}
+				resultingLine = new ShootLine(root, targ.Cell);
+				__result = false;
+				return false;
+			}
+			private static bool CanHitFromCellIgnoringRange(Verb __instance, IntVec3 sourceCell, List<IntVec3> ___tempDestList, LocalTargetInfo targ, out IntVec3 goodDest)
+			{
+				if (targ.Thing != null)
+				{
+					//if (targ.Thing.Map != __instance.caster.Map)
+					//{
+					//	goodDest = IntVec3.Invalid;
+					//	return false;
+					//}
+					ShootLeanUtility.CalcShootableCellsOf(___tempDestList, targ.Thing);
+					for (int i = 0; i < ___tempDestList.Count; i++)
+					{
+						if (CanHitCellFromCellIgnoringRange(__instance, sourceCell, ___tempDestList[i], targ.Thing.def.Fillage == FillCategory.Full))
+						{
+							goodDest = ___tempDestList[i];
+							return true;
+						}
+					}
+				}
+				else if (CanHitCellFromCellIgnoringRange(__instance, sourceCell, targ.Cell))
+				{
+					goodDest = targ.Cell;
+					return true;
+				}
+				goodDest = IntVec3.Invalid;
+				return false;
+			}
+
+			private static bool CanHitCellFromCellIgnoringRange(Verb __intance, IntVec3 sourceSq, IntVec3 targetLoc, bool includeCorners = false)
+			{
+				if (__intance.verbProps.mustCastOnOpenGround && (!targetLoc.Standable(__intance.caster.Map)
+						|| __intance.caster.Map.thingGrid.CellContains(targetLoc, ThingCategory.Pawn)))
+				{
+					return false;
+				}
+				if (__intance.verbProps.requireLineOfSight)
+				{
+					if (!includeCorners)
+					{
+						if (!GenSight.LineOfSight(sourceSq, targetLoc, __intance.caster.Map, skipFirstCell: true))
+						{
+							return false;
+						}
+					}
+					else if (!GenSight.LineOfSightToEdges(sourceSq, targetLoc, __intance.caster.Map, skipFirstCell: true))
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+
+
+
+		[HarmonyPatch(typeof(Verb_LaunchProjectile), "TryCastShot")]
+		public static class TryCastShot_Patch
+		{
+			public static bool Prefix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
+			{
+				//if (___currentTarget.HasThing && ___currentTarget.Thing.Map != __instance.caster.Map)
+				//{
+				//	return false;
+				//}
+				ThingDef projectile = __instance.Projectile;
+				if (projectile == null)
+				{
+					return false;
+				}
+				ShootLine resultingLine;
+				bool flag = false;
+				TryFindShootLineFromTo_Patch.Prefix(__instance, ___tempLeanShootSources, ___tempDestList, __instance.caster.Position, 
+					___currentTarget, out resultingLine, ref flag);
+
+				if (__instance.verbProps.stopBurstWithoutLos && !flag)
+				{
+					return false;
+				}
+				if (__instance.EquipmentSource != null)
+				{
+					__instance.EquipmentSource.GetComp<CompChangeableProjectile>()?.Notify_ProjectileLaunched();
+				}
+				Thing launcher = __instance.caster;
+				Thing equipment = __instance.EquipmentSource;
+				CompMannable compMannable = __instance.caster.TryGetComp<CompMannable>();
+				if (compMannable != null && compMannable.ManningPawn != null)
+				{
+					launcher = compMannable.ManningPawn;
+					equipment = __instance.caster;
+				}
+				Vector3 drawPos = __instance.caster.DrawPos;
+				Projectile projectile2 = (Projectile)GenSpawn.Spawn(projectile, resultingLine.Source, __instance.caster.Map);
+				if (__instance.verbProps.forcedMissRadius > 0.5f)
+				{
+					float num = VerbUtility.CalculateAdjustedForcedMiss(__instance.verbProps.forcedMissRadius, ___currentTarget.Cell - __instance.caster.Position);
+					if (num > 0.5f)
+					{
+						int max = GenRadial.NumCellsInRadius(num);
+						int num2 = Rand.Range(0, max);
+						if (num2 > 0)
+						{
+							IntVec3 c = ___currentTarget.Cell + GenRadial.RadialPattern[num2];
+							ProjectileHitFlags projectileHitFlags = ProjectileHitFlags.NonTargetWorld;
+							if (Rand.Chance(0.5f))
+							{
+								projectileHitFlags = ProjectileHitFlags.All;
+							}
+							if (!Traverse.Create(__instance).Field("canHitNonTargetPawnsNow").GetValue<bool>())
+							{
+								projectileHitFlags &= ~ProjectileHitFlags.NonTargetPawns;
+							}
+							projectile2.Launch(launcher, drawPos, c, ___currentTarget, projectileHitFlags, equipment);
+							return true;
+						}
+					}
+				}
+				ShotReport shotReport = ShotReport.HitReportFor(__instance.caster, __instance, ___currentTarget);
+				Thing randomCoverToMissInto = shotReport.GetRandomCoverToMissInto();
+				ThingDef targetCoverDef = randomCoverToMissInto?.def;
+				if (!Rand.Chance(shotReport.AimOnTargetChance_IgnoringPosture))
+				{
+					resultingLine.ChangeDestToMissWild(shotReport.AimOnTargetChance_StandardTarget);
+					ProjectileHitFlags projectileHitFlags2 = ProjectileHitFlags.NonTargetWorld;
+					if (Rand.Chance(0.5f) && Traverse.Create(__instance).Field("canHitNonTargetPawnsNow").GetValue<bool>())
+					{
+						projectileHitFlags2 |= ProjectileHitFlags.NonTargetPawns;
+					}
+					projectile2.Launch(launcher, drawPos, resultingLine.Dest, ___currentTarget, projectileHitFlags2, equipment, targetCoverDef);
+					return true;
+				}
+				if (___currentTarget.Thing != null && ___currentTarget.Thing.def.category == ThingCategory.Pawn && !Rand.Chance(shotReport.PassCoverChance))
+				{
+					ProjectileHitFlags projectileHitFlags3 = ProjectileHitFlags.NonTargetWorld;
+					if (Traverse.Create(__instance).Field("canHitNonTargetPawnsNow").GetValue<bool>())
+					{
+						projectileHitFlags3 |= ProjectileHitFlags.NonTargetPawns;
+					}
+					projectile2.Launch(launcher, drawPos, randomCoverToMissInto, ___currentTarget, projectileHitFlags3, equipment, targetCoverDef);
+					return true;
+				}
+				ProjectileHitFlags projectileHitFlags4 = ProjectileHitFlags.IntendedTarget;
+				if (Traverse.Create(__instance).Field("canHitNonTargetPawnsNow").GetValue<bool>())
+				{
+					projectileHitFlags4 |= ProjectileHitFlags.NonTargetPawns;
+				}
+				if (!___currentTarget.HasThing || ___currentTarget.Thing.def.Fillage == FillCategory.Full)
+				{
+					projectileHitFlags4 |= ProjectileHitFlags.NonTargetWorld;
+				}
+				if (___currentTarget.Thing != null)
+				{
+					projectile2.Launch(launcher, drawPos, ___currentTarget, ___currentTarget, projectileHitFlags4, equipment, targetCoverDef);
+				}
+				else
+				{
+					projectile2.Launch(launcher, drawPos, resultingLine.Dest, ___currentTarget, projectileHitFlags4, equipment, targetCoverDef);
+				}
+				return true;
+			}
+		}
+				
 
 		//[HarmonyPatch(typeof(JobGiver_AIFightEnemies), "TryGiveJob")]
 		//public class JobGiver_AIFightEnemies_Patch
@@ -130,7 +435,7 @@ namespace ZLevels
 									pawn
 								}).GetValue<Job>();
 
-						Log.Message("2: " + ZUtils.ZTracker.GetMapInfo(pawn.Map) + " - result: " + job);
+						Log.Message("4: " + ZUtils.ZTracker.GetMapInfo(pawn.Map) + " - result: " + job);
 						if (job != null)
 						{
 							__result = job;
@@ -147,4 +452,3 @@ namespace ZLevels
 		}
 	}
 }
-
