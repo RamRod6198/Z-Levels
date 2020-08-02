@@ -15,17 +15,17 @@ namespace ZLevels
 
     public class Building_Stairs : Building
     {
-        Building_Stairs GetMatchingStair()
+        public Building_Stairs GetMatchingStair()
         {
             if (this is Building_StairsUp)
             {
                 return (Building_Stairs) Position.GetThingList(ZUtils.ZTracker.GetUpperLevel(Map.Tile, Map))
-                    .FirstOrDefault(x => x is Building_StairsDown);
+                    .FirstOrDefault(x => x is Building_StairsDown && x.Position == Position);
             }
             else
             {
                 return (Building_Stairs)Position.GetThingList(ZUtils.ZTracker.GetLowerLevel(Map.Tile, Map))
-                    .FirstOrDefault(x => x is Building_StairsUp);
+                    .FirstOrDefault(x => x is Building_StairsUp && x.Position == Position);
             }
         }
 
@@ -79,7 +79,7 @@ namespace ZLevels
             }
         }
 
-        public Building_StairsDown GetMatchingStair
+        new public Building_StairsDown GetMatchingStair
         {
             get
             {

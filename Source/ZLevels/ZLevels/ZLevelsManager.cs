@@ -1482,8 +1482,9 @@ namespace ZLevels
                     }
                 }
             }
-            catch { };
+            catch { }
         }
+
         public void AdjustUpperMapGeneration(Map map)
         {
             try
@@ -1566,7 +1567,6 @@ namespace ZLevels
                 {
                     foreach (var map in GetAllMaps(tile.Key))
                     {
-                        ZPathfinder.Instance.AddMap(map);
                         stairsDown[map] = totalStairsDown.Where(x => x.Map == map).ToList();
                         stairsUp[map] = totalStairsUp.Where(x => x.Map == map).ToList();
                         if (stairsDown[map].Count == 0 && GetLowerLevel(tile.Key, map) != null ||
