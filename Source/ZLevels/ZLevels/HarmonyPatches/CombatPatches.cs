@@ -81,7 +81,7 @@ namespace ZLevels
         public static bool teleportBack;
         public static void Prefix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
-            if (__instance.caster.Map != ___currentTarget.Thing.Map && __instance.caster.Map.Tile == ___currentTarget.Thing.Map.Tile)
+            if (__instance.caster.Map != ___currentTarget.Thing?.Map && __instance.caster.Map.Tile == ___currentTarget.Thing?.Map.Tile)
             {
                 var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
                 var ind2 = ZUtils.ZTracker.GetZIndexFor(___currentTarget.Thing.Map);
