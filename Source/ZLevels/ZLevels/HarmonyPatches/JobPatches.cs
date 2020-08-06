@@ -867,11 +867,7 @@ namespace ZLevels
                         }
                     }
 
-                    if (pawn.Map != oldMap)
-                    {
-                        ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                        ZLogger.Message("7 SetPosition for " + pawn + " to " + oldPosition);
-                    }
+                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
 
                     if (jobList.Count > 0)
                     {
@@ -1278,14 +1274,15 @@ namespace ZLevels
         {
             private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
             {
+
                 if (___pawn.RaceProps.Humanlike)
                 {
                     var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
                         && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
                     {
-                        startNewJob = false;
                         TryDropCarriedThingPatch.blockTryDrop = true;
+                        startNewJob = false;
                     }
                     //try
                     //{
@@ -1302,6 +1299,7 @@ namespace ZLevels
 
             private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
             {
+
                 if (___pawn.RaceProps.Humanlike)
                 {
                     var ZTracker = ZUtils.ZTracker;
@@ -1309,32 +1307,31 @@ namespace ZLevels
                         && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
                     {
                         TryDropCarriedThingPatch.blockTryDrop = false;
-                        try
-                        {
-                            //ZLogger.Message(___pawn + " taking first job 1");
-                            //try
-                            //{
-                            //    ZLogger.Message("POSTFIX 0: " + ___pawn.CurJob);
-                            //    foreach (var job in ___pawn.jobs.jobQueue)
-                            //    {
-                            //        ZLogger.Message("POSTFIX 1: " + job.job);
-                            //    }
-                            //    foreach (var job in ZTracker.jobTracker[___pawn].activeJobs)
-                            //    {
-                            //        ZLogger.Message("POSTFIX 2: " + job);
-                            //    }
-                            //    ZLogger.Message("POSTFIX 3: " + ZTracker.jobTracker[___pawn].activeJobs[0]);
-                            //    ZLogger.Message("4 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
-                            //}
-                            //catch { };
-
-                            ZTracker.TryTakeFirstJob(___pawn);
-                        }
-                        catch
-                        {
-
-                        }
-
+                        ZTracker.TryTakeFirstJob(___pawn);
+                        //try
+                        //{
+                        //    ZLogger.Message(___pawn + " taking first job 1");
+                        //    try
+                        //    {
+                        //        ZLogger.Message("POSTFIX 0: " + ___pawn.CurJob);
+                        //        foreach (var job in ___pawn.jobs.jobQueue)
+                        //        {
+                        //            ZLogger.Message("POSTFIX 1: " + job.job);
+                        //        }
+                        //        foreach (var job in ZTracker.jobTracker[___pawn].activeJobs)
+                        //        {
+                        //            ZLogger.Message("POSTFIX 2: " + job);
+                        //        }
+                        //        ZLogger.Message("POSTFIX 3: " + ZTracker.jobTracker[___pawn].activeJobs[0]);
+                        //        ZLogger.Message("4 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
+                        //    }
+                        //    catch { };
+                        //
+                        //}
+                        //catch
+                        //{
+                        //
+                        //}
                     }
                 }
             }
@@ -1498,7 +1495,6 @@ namespace ZLevels
                         ZTracker.jobTracker[pawn].oldMap = pawn.Map;
                         result = TryIssueJobPackage(pawn, jobParams, __instance, ___emergency, ref dest, oldMap, oldPosition);
                         ZTracker.jobTracker[pawn].searchingJobsNow = false;
-
                         if (result.Job != null)
                         {
                             ZUtils.TeleportThing(pawn, oldMap, oldPosition);
@@ -1513,10 +1509,8 @@ namespace ZLevels
                             {
                                 ZTracker.BuildJobListFor(pawn, oldMap, result.Job);
                             }
-
                             __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
                             ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-
                         }
                         else
                         {
@@ -2387,7 +2381,7 @@ namespace ZLevels
                 var entryPoints = new Dictionary<Map, IntVec3>();
                 foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(t.Map))
                 {
-                    var stairs = new List<Thing>();
+                    var stairs = new List<Building_Stairs>();
                     if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
                     {
                         Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
@@ -2500,18 +2494,15 @@ namespace ZLevels
                 Danger maxPathDanger;
                 var ZTracker = ZUtils.ZTracker;
                 var entryPoints = new Dictionary<Map, IntVec3>();
+                bool checkForIgnoredWorkgivers = ZTracker.jobTracker.ContainsKey(pawn) && ZTracker.jobTracker[pawn].ignoreGiversInFirstTime != null;
                 for (int j = 0; j < list.Count; j++)
                 {
                     WorkGiver workGiver = list[j];
-                    try
+                    if (checkForIgnoredWorkgivers && ZTracker.jobTracker[pawn].ignoreGiversInFirstTime.Contains(workGiver.def))
                     {
-                        if (ZTracker.jobTracker[pawn].ignoreGiversInFirstTime.Contains(workGiver.def))
-                        {
-                            ZLogger.Message("Skipping ignored " + workGiver);
-                            continue;
-                        }
+                        ZLogger.Message("Skipping ignored " + workGiver);
+                        continue;
                     }
-                    catch { };
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
                         if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)

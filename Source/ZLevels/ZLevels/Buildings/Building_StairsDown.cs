@@ -12,18 +12,18 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class Building_StairsDown : Building, IAttackTarget
+    public class Building_StairsDown : Building_Stairs, IAttackTarget
     {
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
             var ZTracker = ZUtils.ZTracker;
-            if (ZTracker.totalStairsDown == null) ZTracker.totalStairsDown = new HashSet<Building_StairsDown>();
+            if (ZTracker.totalStairsDown == null) ZTracker.totalStairsDown = new HashSet<Building_Stairs>();
             ZTracker.totalStairsDown.Add(this);
 
             if (!ZTracker.stairsDown.ContainsKey(this.Map))
             {
-                ZTracker.stairsDown[this.Map] = new List<Building_StairsDown>();
+                ZTracker.stairsDown[this.Map] = new List<Building_Stairs>();
             }
             if (!ZTracker.stairsDown[this.Map].Contains(this))
             {
