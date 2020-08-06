@@ -72,83 +72,151 @@ namespace ZLevels
         }
     }
 
-    [HarmonyPatch(typeof(Verb), "TryFindShootLineFromTo")]
-    public static class TryFindShootLineFromTo_Patch
-    {
-        public static Map oldMap;
-
-        public static bool alterResult;
-        public static void Prefix(Verb __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, IntVec3 root, LocalTargetInfo targ, ref ShootLine resultingLine, ref bool __result)
-        {
-            if (__instance.caster.Map != targ.Thing.Map && __instance.caster.Map.Tile == targ.Thing.Map.Tile)
-            {
-                oldMap = targ.Thing.Map;
-                alterResult = true;
-                ZUtils.TeleportThing(targ.Thing, __instance.caster.Map, targ.Thing.Position);
-            }
-        }
-        public static void Postfix(Verb __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, IntVec3 root, LocalTargetInfo targ, ref ShootLine resultingLine, ref bool __result)
-        {
-            if (alterResult)
-            {
-                ZUtils.TeleportThing(targ.Thing, oldMap, targ.Thing.Position);
-                oldMap = null;
-                alterResult = false;
-                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
-                var ind2 = ZUtils.ZTracker.GetZIndexFor(targ.Thing.Map);
-                if (ind1 > ind2 && !IsVoidsEverywhereInShootingLine(resultingLine, __instance.caster.Map))
-                {
-                    Log.Message(__instance.caster + " shouldnt shoot 1", true);
-                    __result = false;
-                }
-                else if (ind1 < ind2 && !IsVoidsEverywhereInShootingLine(resultingLine, targ.Thing.Map))
-                {
-                    Log.Message(__instance.caster + " shouldnt shoot 2", true);
-                    __result = false;
-                }
-            }
-        }
-
-        public static bool IsVoidsEverywhereInShootingLine(ShootLine resultingLine, Map map)
-        {
-            foreach (var c in resultingLine.Points())
-            {
-                if (c != resultingLine.Source)
-                {
-                    if (c.GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain)
-                    {
-                        Log.Message(c + " - " + c.GetTerrain(map) + " - " + map);
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-    }
-
     [HarmonyPatch(typeof(Verb_LaunchProjectile), "TryCastShot")]
     public static class TryCastShot_Patch
     {
-        public static Map oldMap;
+        public static Map oldMap1;
+        public static Map oldMap2;
 
         public static bool teleportBack;
         public static void Prefix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
             if (__instance.caster.Map != ___currentTarget.Thing.Map && __instance.caster.Map.Tile == ___currentTarget.Thing.Map.Tile)
             {
-                oldMap = ___currentTarget.Thing.Map;
-                teleportBack = true;
-                ZUtils.TeleportThing(___currentTarget.Thing, __instance.caster.Map, ___currentTarget.Thing.Position);
+                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
+                var ind2 = ZUtils.ZTracker.GetZIndexFor(___currentTarget.Thing.Map);
+                if (ind1 > ind2)
+                {
+                    teleportBack = true;
+                    oldMap1 = ___currentTarget.Thing.Map;
+                    ZUtils.TeleportThing(___currentTarget.Thing, __instance.caster.Map, ___currentTarget.Thing.Position);
+                }
+                else if (ind1 < ind2)
+                {
+                    teleportBack = true;
+                    oldMap2 = __instance.caster.Map;
+                    ZUtils.TeleportThing(__instance.caster, ___currentTarget.Thing.Map, __instance.caster.Position);
+                }
             }
         }
         public static void Postfix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
             if (teleportBack)
             {
-                ZUtils.TeleportThing(___currentTarget.Thing, oldMap, ___currentTarget.Thing.Position);
-                oldMap = null;
-                teleportBack = false;
+                if (oldMap1 != null)
+                {
+                    ZUtils.TeleportThing(___currentTarget.Thing, oldMap1, ___currentTarget.Thing.Position);
+                    oldMap1 = null;
+                }
+                else if (oldMap2 != null)
+                {
+                    ZUtils.TeleportThing(__instance.caster, oldMap2, __instance.caster.Position);
+                    oldMap2 = null;
+                }
             }
+        }
+    }
+
+
+    [HarmonyPatch(typeof(Verb), "TryFindShootLineFromTo")]
+    public static class TryFindShootLineFromTo_Patch
+    {
+        public static Map oldMap1;
+        public static Map oldMap2;
+
+        public static bool teleportBack;
+        public static void Prefix(Verb __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, IntVec3 root, LocalTargetInfo targ, ref ShootLine resultingLine, ref bool __result)
+        {
+            if (__instance.caster?.Map != targ.Thing?.Map && __instance.caster?.Map?.Tile == targ.Thing?.Map?.Tile)
+            {
+                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
+                var ind2 = ZUtils.ZTracker.GetZIndexFor(targ.Thing.Map);
+                if (ind1 > ind2)
+                {
+                    teleportBack = true;
+                    oldMap1 = targ.Thing.Map;
+                    ZUtils.TeleportThing(targ.Thing, __instance.caster.Map, targ.Thing.Position);
+                }
+                else if (ind1 < ind2)
+                {
+                    teleportBack = true;
+                    oldMap2 = __instance.caster.Map;
+                    ZUtils.TeleportThing(__instance.caster, targ.Thing.Map, __instance.caster.Position);
+                }
+            }
+        }
+        public static void Postfix(Verb __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, IntVec3 root, LocalTargetInfo targ, ref ShootLine resultingLine, ref bool __result)
+        {
+            if (teleportBack)
+            {
+                if (oldMap1 != null)
+                {
+                    ZUtils.TeleportThing(targ.Thing, oldMap1, targ.Thing.Position);
+                    oldMap1 = null;
+                }
+                else if (oldMap2 != null)
+                {
+                    ZUtils.TeleportThing(__instance.caster, oldMap2, __instance.caster.Position);
+                    oldMap2 = null;
+                }
+                teleportBack = false;
+                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
+                var ind2 = ZUtils.ZTracker.GetZIndexFor(targ.Thing.Map);
+                if (ind1 > ind2 && !IsVoidsEverywhereInShootingLine(resultingLine, __instance.caster.Map))
+                {
+                    Log.Message(__instance.caster + " shouldnt shoot 1", true);
+                    //__result = false;
+                }
+                else if (ind1 < ind2 && !IsVoidsEverywhereInShootingLineInBackWard(resultingLine, targ.Thing.Map))
+                {
+                    Log.Message(__instance.caster + " shouldnt shoot 2", true);
+                    //__result = false;
+                }
+            }
+        }
+
+        public static bool IsVoidsEverywhereInShootingLine(ShootLine resultingLine, Map map)
+        {
+            var points = resultingLine.Points().ToList();
+            for (int i = 0; i < points.Count; i++)
+            {
+                if (points[i] != resultingLine.Source)
+                {
+                    if (i > 1 && points[i].GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain)
+                    {
+                        Log.Message(i + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map, true);
+                        return false;
+                    }
+                    else if (i == 1 && points[i].GetCover(map)?.def?.Fillage == FillCategory.Full)
+                    {
+                        Log.Message(i + " - " + points[i] + " - " + points[i].GetCover(map) + " - " + map, true);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public static bool IsVoidsEverywhereInShootingLineInBackWard(ShootLine resultingLine, Map map)
+        {
+            var points = resultingLine.Points().ToList();
+            for (int i = points.Count - 1; i >= 0; i--)
+            {
+                if (points[i] != resultingLine.Dest)
+                {
+                    if (i > points.Count - 1 && points[i].GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain)
+                    {
+                        Log.Message(i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map, true);
+                        return false;
+                    }
+                    else if (i == points.Count - 1 && points[i].GetCover(map)?.def?.Fillage == FillCategory.Full)
+                    {
+                        Log.Message(i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetCover(map) + " - " + map, true);
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 
