@@ -1102,7 +1102,7 @@ namespace ZLevels
 
         public void MoveThingToAnotherMap(Thing thingToTeleport, Map mapToTeleport)
         {
-            Log.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
+            ZLogger.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
             if (thingToTeleport.Map == mapToTeleport) return;
             if (mapToTeleport.spawnedThings.Contains(thingToTeleport)) return;
             if (mapToTeleport.listerThings.Contains(thingToTeleport)) return;

@@ -19,6 +19,21 @@ namespace ZLevels
         }
 
         [HarmonyPatch(typeof(Log))]
+        [HarmonyPatch(nameof(Log.Warning))]
+        static class Log_Warning_Patch
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(string text, ref bool ignoreStopLoggingLimit)
+            {
+                if (text.Contains("without a specific job end condition"))
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Log))]
         [HarmonyPatch(nameof(Log.Error))]
         static class Log_Error_Patch
         {

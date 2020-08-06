@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\Harmony\v1.1\Assemblies\0Harmony.dll</HintPath>
+      <HintPath>..\..\..\..\Harmony\Current\Assemblies\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="0MultiplayerAPI">
