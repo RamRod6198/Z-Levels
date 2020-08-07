@@ -699,6 +699,8 @@ namespace ZLevels
                 }
                 this.jobTracker[pawn].dest = null;
                 this.jobTracker[pawn].mainJob = null;
+                this.jobTracker[pawn].forceGoToDestMap = false;
+                Log.Message("Resetting forceGoToDestMap");
             }
             else
             {
@@ -936,9 +938,13 @@ namespace ZLevels
                                 catch { }
                             }
                         }
-
                         ZLogger.Message(pawn + " TryMakePreToilReservations job " + job + " in " + this.GetMapInfo(pawn.Map));
-                        if (job.TryMakePreToilReservations(pawn, ZLogger.DebugEnabled))
+                        if (job == this.jobTracker[pawn].mainJob && this.jobTracker[pawn].forceGoToDestMap && pawn.Map != this.jobTracker[pawn].dest)
+                        {
+                            ZLogger.Message(pawn + " force taking go to map " + job + " in " + this.GetMapInfo(pawn.Map));
+                            pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
+                        }
+                        else if (job.TryMakePreToilReservations(pawn, ZLogger.DebugEnabled))
                         {
                             ZLogger.Message(pawn + " taking job " + job + " in " + this.GetMapInfo(pawn.Map));
                             if (forced)

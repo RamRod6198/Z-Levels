@@ -139,44 +139,6 @@ namespace ZLevels
             yield return opt2;
         }
 
-        public override void Tick()
-        {
-            base.Tick();
-            //if (Find.TickManager.TicksGame % 60 == 0)
-            //{
-            //    foreach (var dir in GenRadial.RadialCellsAround(this.Position, 20, true))
-            //    {
-            //        foreach (var t in dir.GetThingList(this.Map))
-            //        {
-            //            if (t is Pawn pawn &&
-            //                pawn.HostileTo(this.Faction) && !pawn.mindState.MeleeThreatStillThreat
-            //                && GenSight.LineOfSight(this.Position, pawn.Position, this.Map))
-            //            {
-            //                if (this.visitedPawns == null) this.visitedPawns = new HashSet<string>();
-            //                var ZTracker = ZUtils.ZTracker;
-            //
-            //                if (!this.visitedPawns.Contains(pawn.ThingID))
-            //                {
-            //                    Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
-            //                    pawn.jobs.jobQueue.EnqueueFirst(goToStairs);
-            //                    this.visitedPawns.Add(pawn.ThingID);
-            //                }
-            //                else if (ZTracker.GetLowerLevel(this.Map.Tile, this.Map) != null && ZTracker.GetLowerLevel(this.Map.Tile, this.Map).mapPawns.AllPawnsSpawned.Where(x => pawn.HostileTo(x)).Any())
-            //                {
-            //                    Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
-            //                    pawn.jobs.jobQueue.EnqueueFirst(goToStairs);
-            //                }
-            //                else if (ZTracker.GetZIndexFor(this.Map) != 0)
-            //                {
-            //                    Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
-            //                    pawn.jobs.jobQueue.EnqueueFirst(goToStairs);
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-        }
-
         public override void ExposeData()
         {
             base.ExposeData();

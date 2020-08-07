@@ -36,7 +36,7 @@ namespace ZLevels
                 {
                     var ZTracker = ZUtils.ZTracker;
                     ZTracker.ReCheckStairs();
-                    ZLogger.Message("1 Total count of stairs up: " 
+                    ZLogger.Message("1 Total count of stairs up: "
                         + pawn.Map.listerThings.AllThings.Where(x => x is Building_StairsUp).Count());
                     ZLogger.Message("1 Total count of stairs down: "
                         + pawn.Map.listerThings.AllThings.Where(x => x is Building_StairsDown).Count());
@@ -78,6 +78,10 @@ namespace ZLevels
                 }
             };
             var goToStairs = Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.OnCell);
+            if (pawn.HostileTo(Faction.OfPlayer))
+            {
+                pawn.CurJob.canBash = true;
+            }
             Toil useStairs = Toils_General.Wait(60, 0);
             ToilEffects.WithProgressBarToilDelay(useStairs, TargetIndex.C, false, -0.5f);
             //ToilFailConditions.FailOnDespawnedNullOrForbidden<Toil>(useStairs, TargetIndex.C);
@@ -156,4 +160,3 @@ namespace ZLevels
         }
     }
 }
-

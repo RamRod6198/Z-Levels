@@ -31,6 +31,8 @@ namespace ZLevels
 
 		public Job mainJob;
 
+		public bool forceGoToDestMap;
+
 		public HashSet<WorkGiverDef> ignoreGiversInFirstTime;
 
 		public List<Job> activeJobs;
