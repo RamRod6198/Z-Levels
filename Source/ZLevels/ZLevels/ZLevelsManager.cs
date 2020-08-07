@@ -1120,27 +1120,18 @@ namespace ZLevels
         public void TeleportPawn(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, bool spawnStairsBelow = false, bool spawnStairsUpper = false)
         {
             //ZLogger.Message("Trying to teleport to " + mapToTeleport);
-            bool jump = false;
-            bool draft = false;
-            if (Find.Selector.SelectedObjects.Contains(pawnToTeleport))
-            {
-                jump = true;
-            }
-            if (pawnToTeleport.Drafted)
-            {
-                draft = true;
-            }
+            bool jump = Find.Selector.SelectedObjects.Contains(pawnToTeleport);
+            bool draft = pawnToTeleport.Drafted;
+
             if (mapToTeleport.thingGrid.ThingsListAt(cellToTeleport).Any())
             {
                 for (int i = mapToTeleport.thingGrid.ThingsListAt(cellToTeleport).Count - 1; i >= 0; i--)
                 {
                     Thing thing = mapToTeleport.thingGrid.ThingsListAt(cellToTeleport)[i];
-                    if (thing is Mineable)
+                    if (!(thing is Mineable)) continue;
+                    if (thing.Spawned)
                     {
-                        if (thing.Spawned)
-                        {
-                            thing.DeSpawn(DestroyMode.WillReplace);
-                        }
+                        thing.DeSpawn(DestroyMode.WillReplace);
                     }
                 }
             }
@@ -1204,8 +1195,8 @@ namespace ZLevels
                                     {
                                         infestatorsPlace = pawn.Position;
                                         var tunnel = mapToTeleport.pathFinder.FindPath
-                                            (naturalHole.Position, pawn, TraverseParms.For
-                                            (TraverseMode.PassAllDestroyableThings, Danger.Deadly),
+                                        (naturalHole.Position, pawn, TraverseParms.For
+                                                (TraverseMode.PassAllDestroyableThings, Danger.Deadly),
                                             PathEndMode.OnCell);
                                         if (tunnel?.NodesReversed != null && tunnel.NodesReversed.Count > 0)
                                         {
@@ -1296,7 +1287,7 @@ namespace ZLevels
 
             FloodFillerFog.FloodUnfog(pawnToTeleport.Position, mapToTeleport);
             AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
-            { pawnToTeleport.PositionHeld });
+                { pawnToTeleport.PositionHeld });
 
             try
             {
@@ -1649,7 +1640,7 @@ namespace ZLevels
                         }
                     }
                 }
-                ZPathfinder.Instance.CalculateStairPaths();
+                //ZPathfinder.Instance.CalculateStairPaths();
 
             }
             catch (Exception ex)
