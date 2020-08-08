@@ -47,7 +47,8 @@ namespace ZLevels
                 recursiveTrap = true;
                 Map oldMap = searcher.Thing.Map;
                 IntVec3 oldPosition = searcher.Thing.Position;
-                foreach (var map in ZUtils.GetAllMapsInClosestOrder(searcher.Thing, oldMap, oldPosition))
+                bool dontCheckForStairs = searcher.Thing is Building;
+                foreach (var map in ZUtils.GetAllMapsInClosestOrder(searcher.Thing, oldMap, oldPosition, dontCheckForStairs: dontCheckForStairs))
                 {
                     if (ZUtils.ZTracker.GetZIndexFor(map) < ZUtils.ZTracker.GetZIndexFor(oldMap))
                     {
@@ -160,22 +161,21 @@ namespace ZLevels
         {
             if (TryCastShot_Patch.targetOldMap != null && launcher.Map != TryCastShot_Patch.targetOldMap)
             {
-                Log.Message("1 TELEPORT " + __instance, true);
                 ZUtils.ZTracker.TeleportThing(__instance, __instance.Position, TryCastShot_Patch.targetOldMap);
             }
             else if (TryCastShot_Patch.casterOldMap != null && intendedTarget.Thing.Map != TryCastShot_Patch.casterOldMap)
             {
-                Log.Message("2 TELEPORT " + __instance, true);
                 ZUtils.ZTracker.TeleportThing(__instance, __instance.Position, intendedTarget.Thing.Map);
             }
+        }
+    }
 
-            Log.Message("__instance: " + __instance, true);
-            Log.Message("launcher: " + launcher, true);
-            Log.Message("launcher.Map: " + launcher.Map, true);
-            Log.Message("intendedTarget.Thing: " + intendedTarget.Thing, true);
-            Log.Message("intendedTarget.Thing.Map: " + intendedTarget.Thing.Map, true);
-            Log.Message("TryCastShot_Patch.casterOldMap: " + TryCastShot_Patch.casterOldMap, true);
-            Log.Message("TryCastShot_Patch.targetOldMap: " + TryCastShot_Patch.targetOldMap, true);
+    [HarmonyPatch(typeof(Building_TurretGun), "TryFindNewTarget")]
+    public class TryFindNewTarget_Patch
+    {
+        public static void Postfix(ref Building_TurretGun __instance, ref LocalTargetInfo __result)
+        {
+            Log.Message(__instance + " got target " + __result, true);
         }
     }
 
