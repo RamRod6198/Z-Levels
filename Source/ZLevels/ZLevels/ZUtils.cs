@@ -25,7 +25,19 @@ namespace ZLevels
 			}
 		}
 
-		public static void ResetZTracker()
+        private static Dictionary<Map, MapComponentZLevel> mapComponents = new Dictionary<Map, MapComponentZLevel>();
+        public static MapComponentZLevel MapComponentZLevel(Map key)
+        {
+            mapComponents.TryGetValue(key, out MapComponentZLevel mapComponentZLevel);
+            if (mapComponentZLevel == null)
+            {
+                var comp = key.GetComponent<MapComponentZLevel>();
+                mapComponents[key] = comp;
+                return comp;
+            }
+            return mapComponentZLevel;
+        }
+        public static void ResetZTracker()
 		{
 			zTracker = null;
 		}

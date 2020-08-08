@@ -166,6 +166,34 @@ namespace ZLevels
             }
         }
 
+        [HarmonyPatch(typeof(GameCondition), "End")]
+        internal static class End_Patch
+        {
+            private static void Postfix(GameCondition __instance)
+            {
+                foreach (var map in __instance.AffectedMaps)
+                {
+                    if (ZUtils.ZTracker.GetZIndexFor(map) == 0)
+                    {
+                        foreach (var otherMap in ZUtils.ZTracker.GetAllMaps(map.Tile))
+                        {
+                            if (ZUtils.ZTracker.GetZIndexFor(otherMap) != 0)
+                            {
+                                for (int num = otherMap.gameConditionManager.ActiveConditions.Count - 1; num >= 0; num--)
+                                {
+                                    if (otherMap.gameConditionManager.ActiveConditions[num].def == __instance.def)
+                                    {
+                                        otherMap.gameConditionManager.ActiveConditions[num].End();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(GameConditionManager), "RegisterCondition")]
         internal static class RegisterConditionPatch
         {
