@@ -30,7 +30,7 @@ namespace ZLevels
 			zTracker = null;
 		}
 
-        public static IEnumerable<Map> GetAllMapsInClosestOrder(Thing thing, Map oldMap, IntVec3 oldPosition)
+        public static IEnumerable<Map> GetAllMapsInClosestOrder(Thing thing, Map oldMap, IntVec3 oldPosition, bool skipOldMap = false)
         {
             bool cantGoDown = false;
             bool cantGoUP = false;
@@ -67,9 +67,12 @@ namespace ZLevels
                     var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(thing.Position, x.Position));
                     var position = selectedStairs.Position;
                     TeleportThing(thing, otherMap, position);
-                    yield return otherMap;
+                    if (!skipOldMap || skipOldMap && otherMap != oldMap)
+                    {
+                        yield return otherMap;
+                    }
                 }
-                else if (otherMap == oldMap)
+                else if (otherMap == oldMap && !skipOldMap)
                 {
                     TeleportThing(thing, oldMap, oldPosition);
                     yield return otherMap;
@@ -85,10 +88,6 @@ namespace ZLevels
                     {
                         ZLogger.Message(thing + " cant go down in " + ZTracker.GetMapInfo(otherMap));
                         cantGoDown = true;
-                    }
-                    else
-                    {
-                        ZLogger.Message("My bad...");
                     }
                 }
             }
@@ -152,10 +151,6 @@ namespace ZLevels
                     {
                         ZLogger.Message(thing + " cant go down in " + ZTracker.GetMapInfo(otherMap));
                         cantGoDown = true;
-                    }
-                    else
-                    {
-                        ZLogger.Message("My bad...");
                     }
                 }
             }

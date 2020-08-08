@@ -150,31 +150,35 @@ namespace ZLevels
         {
             try
             {
-                if (this.activeAreas == null) this.activeAreas = new Dictionary<Pawn, ActiveArea>();
-                if (this.activeAreas.ContainsKey(pawn))
+                if (pawn.playerSettings != null && pawn.playerSettings.AreaRestriction != null)
                 {
-                    if (this.activeAreas[pawn].activeAreas == null)
+                    if (this.activeAreas == null) this.activeAreas = new Dictionary<Pawn, ActiveArea>();
+                    if (this.activeAreas.ContainsKey(pawn))
                     {
-                        this.activeAreas[pawn].activeAreas = new Dictionary<Map, Area>()
+                        if (this.activeAreas[pawn].activeAreas == null)
+                        {
+                            this.activeAreas[pawn].activeAreas = new Dictionary<Map, Area>()
                     {
                         {pawn.Map, pawn.playerSettings.AreaRestriction}
                     };
+                        }
+                        else
+                        {
+                            this.activeAreas[pawn].activeAreas[pawn.Map] = pawn.playerSettings.AreaRestriction;
+                        }
                     }
                     else
                     {
-                        this.activeAreas[pawn].activeAreas[pawn.Map] = pawn.playerSettings.AreaRestriction;
-                    }
-                }
-                else
-                {
-                    this.activeAreas[pawn] = new ActiveArea
-                    {
-                        activeAreas = new Dictionary<Map, Area>()
+                        this.activeAreas[pawn] = new ActiveArea
+                        {
+                            activeAreas = new Dictionary<Map, Area>()
                     {
                         {pawn.Map, pawn.playerSettings.AreaRestriction}
                     }
-                    };
+                        };
+                    }
                 }
+
             }
             catch (Exception ex)
             {
@@ -186,13 +190,14 @@ namespace ZLevels
         {
             try
             {
-                if (this.activeAreas.ContainsKey(pawn) &&
-                    this.activeAreas[pawn].activeAreas.ContainsKey(pawn.Map))
+                if (this.activeAreas.ContainsKey(pawn) && this.activeAreas[pawn].activeAreas.ContainsKey(pawn.Map))
                 {
+                    if (pawn.playerSettings == null) pawn.playerSettings = new Pawn_PlayerSettings(pawn);
                     pawn.playerSettings.AreaRestriction = this.activeAreas[pawn].activeAreas[pawn.Map];
                 }
                 else
                 {
+                    if (pawn.playerSettings == null) pawn.playerSettings = new Pawn_PlayerSettings(pawn);
                     pawn.playerSettings.AreaRestriction = null;
                 }
             }
@@ -1538,8 +1543,6 @@ namespace ZLevels
                             this.stairsUp[map] = map.listerThings.AllThings.Where(x => x is Building_StairsUp).Cast<Building_Stairs>().ToList();
                             this.totalStairsUp.AddRange(this.stairsUp[map]);
                         }
-                        ZLogger.Message("this.stairsDown[map]: " + this.stairsDown[map].Count);
-                        ZLogger.Message("this.stairsUp[map]: " + this.stairsUp[map].Count);
                         if (this.stairsDown.ContainsKey(map))
                         {
                             for (int i = this.stairsDown[map].Count - 1; i >= 0; i--)

@@ -358,19 +358,13 @@ namespace ZLevels
                 {
                     if (!IngestibleSource.def.IsDrug)
                     {
-                        ZLogger.Message(__instance.GetActor() + " 4 ZUtils.ZTracker.jobTracker[pawn].dest: " + thing.Map);
-
                         list.InsertRange(list.Count - 2, Toils_ZLevels.GoToMap(__instance.GetActor()
                             , thing.Map, __instance));
-                        ZLogger.Message("Adding: " + thing + " in " + actor);
                     }
                     else
                     {
-                        ZLogger.Message(__instance.GetActor() + " 5 ZUtils.ZTracker.jobTracker[pawn].dest: " + thing.Map);
-
                         list.InsertRange(list.Count - 1, Toils_ZLevels.GoToMap(__instance.GetActor()
                             , thing.Map, __instance));
-                        ZLogger.Message("Adding 2: " + thing + " in " + actor);
                     }
                 }
                 __result = list;
@@ -1140,7 +1134,7 @@ namespace ZLevels
         {
             private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, Job newJob, JobTag? tag)
             {
-                if (___pawn.RaceProps.Humanlike)
+                if (___pawn.RaceProps.Humanlike || ___pawn.RaceProps.IsMechanoid)
                 {
                     try
                     {
@@ -1161,7 +1155,7 @@ namespace ZLevels
             private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
             {
 
-                if (___pawn.RaceProps.Humanlike)
+                if (___pawn.RaceProps.Humanlike || ___pawn.RaceProps.IsMechanoid)
                 {
                     var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)

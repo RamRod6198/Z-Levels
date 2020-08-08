@@ -16,11 +16,25 @@ using Verse.AI.Group;
 
 namespace ZLevels
 {
+    [HarmonyPatch(typeof(AttackTargetFinder), "BestShootTargetFromCurrentPosition")]
+    public static class BestShootTargetFromCurrentPosition_Patch
+    {
+        private static void Prefix()
+        {
+            CombatPatches_BestAttackTarget_Patch.multiMapSearch = true;
+        }
+        private static void Postfix()
+        {
+            CombatPatches_BestAttackTarget_Patch.multiMapSearch = false;
+        }
+    }
+
     [HarmonyPatch(typeof(AttackTargetFinder), "BestAttackTarget")]
     public static class CombatPatches_BestAttackTarget_Patch
     {
-
         public static bool recursiveTrap = false;
+    
+        public static bool multiMapSearch = false;
         public static bool Prefix(ref IAttackTarget __result, List<IAttackTarget> ___tmpTargets, List<Pair<IAttackTarget, float>> ___availableShootingTargets,
                 List<float> ___tmpTargetScores, List<bool> ___tmpCanShootAtTarget, List<IntVec3> ___tempDestList, List<IntVec3> ___tempSourceList,
                 IAttackTargetSearcher searcher, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f,
@@ -28,7 +42,7 @@ namespace ZLevels
                 bool canTakeTargetsCloserThanEffectiveMinRange = true)
         {
             bool result = true;
-            if (!recursiveTrap)
+            if (!recursiveTrap && multiMapSearch)
             {
                 recursiveTrap = true;
                 Map oldMap = searcher.Thing.Map;
@@ -52,6 +66,10 @@ namespace ZLevels
                 ZUtils.TeleportThing(searcher.Thing, oldMap, oldPosition);
                 recursiveTrap = false;
                 CanBeSeenOverFast_Patch.returnTrue = false;
+            }
+            else if (!multiMapSearch)
+            {
+                Log.Message("BestAttackTarget: multiMapSearch: " + multiMapSearch, true);
             }
             return result;
         }
@@ -81,7 +99,15 @@ namespace ZLevels
         public static bool teleportBack;
         public static void Prefix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
-            if (__instance.caster.Map != ___currentTarget.Thing?.Map && __instance.caster.Map.Tile == ___currentTarget.Thing?.Map.Tile)
+            //Log.Message("__instance.caster: " + __instance.caster, true);
+            //Log.Message("__instance.caster.Map: " + __instance.caster.Map, true);
+            //Log.Message("__instance.caster.Map.Tile: " + __instance.caster.Map.Tile, true);
+            //
+            //Log.Message("___currentTarget.Thing: " + ___currentTarget.Thing, true);
+            //Log.Message("___currentTarget.Thing?.Map: " + ___currentTarget.Thing?.Map, true);
+            //Log.Message("___currentTarget.Thing?.Map.Tile: " + ___currentTarget.Thing?.Map.Tile, true);
+
+            if (__instance.caster.Map != ___currentTarget.Thing?.Map && __instance.caster.Map.Tile == ___currentTarget.Thing?.Map?.Tile)
             {
                 var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
                 var ind2 = ZUtils.ZTracker.GetZIndexFor(___currentTarget.Thing.Map);
@@ -99,6 +125,7 @@ namespace ZLevels
                 }
             }
         }
+
         public static void Postfix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
             if (teleportBack)
@@ -352,46 +379,58 @@ namespace ZLevels
     public class JobGiver_AIFightEnemy_Patch
     {
         public static bool recursiveTrap = false;
-        private static bool Prefix(ref JobGiver_AIFightEnemy __instance, ref Job __result, ref Pawn pawn)
+        private static void Postfix(ref JobGiver_AIFightEnemy __instance, ref Job __result, ref Pawn pawn)
         {
-            bool result = true;
-            if (!recursiveTrap)
+            Log.Message(pawn + " got response 5: " + __result, true);
+            if (__result == null && !recursiveTrap)
             {
                 recursiveTrap = true;
+                CombatPatches_BestAttackTarget_Patch.multiMapSearch = true;
                 Map oldMap = pawn.Map;
                 IntVec3 oldPosition = pawn.Position;
-                foreach (var map in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+                foreach (var map in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition, skipOldMap: true))
                 {
                     var job = Traverse.Create(__instance).Method("TryGiveJob", new object[] { pawn }).GetValue<Job>();
-                    Log.Message("4: " + ZUtils.ZTracker.GetMapInfo(pawn.Map) + " - result: " + job + " - enemyTarget: " + pawn.mindState.enemyTarget, true);
+                    Log.Message(pawn + " got job 5: " + job + " in " + map, true);
                     if (job != null)
                     {
-                        if (job.def == JobDefOf.Wait_Combat && pawn.mindState.enemyTarget != null && pawn.mindState.enemyTarget.Map != oldMap)
-                        {
-                            ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                            ZUtils.ZTracker.BuildJobListFor(pawn, map, job);
-                            ZUtils.ZTracker.jobTracker[pawn].dest = map;
-                            ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
-                            __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
-                            ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-                        }
-                        else
-                        {
-                            __result = job;
-                        }
-                        result = false;
+                        __result = job;
+                        //ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                        //ZUtils.ZTracker.BuildJobListFor(pawn, map, job);
+                        //ZUtils.ZTracker.jobTracker[pawn].dest = map;
+                        //ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
+                        //__result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
+                        //ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                         break;
                     }
                 }
                 ZUtils.TeleportThing(pawn, oldMap, oldPosition);
                 recursiveTrap = false;
+                CombatPatches_BestAttackTarget_Patch.multiMapSearch = false;
             }
-            Log.Message(pawn + " - 4 TEST: " + __result);
-            return result;
+            else if (__result != null && __result.targetA.Thing?.Map != null && __result.targetA.Thing.Map != pawn.Map)
+            {
+                Log.Message("Second block: " + __result, true);
+                ZUtils.ZTracker.BuildJobListFor(pawn, __result.targetA.Thing.Map, __result);
+                ZUtils.ZTracker.jobTracker[pawn].dest = __result.targetA.Thing.Map;
+                ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
+                __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
+                ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+            }
+            Log.Message(pawn + " got result 5: " + __result + " in " + pawn.Map, true);
         }
-        private static void Postfix(ref JobGiver_AIFightEnemy __instance, ref Job __result, ref Pawn pawn)
+    }
+
+    [HarmonyPatch(typeof(JobGiver_AIFightEnemy), "FindAttackTarget")]
+    public class FindAttackTarget_Patch
+    {
+        private static void Prefix()
         {
-            Log.Message(pawn + " got response 5: " + __result);
+            CombatPatches_BestAttackTarget_Patch.multiMapSearch = true;
+        }
+        private static void Postfix()
+        {
+            CombatPatches_BestAttackTarget_Patch.multiMapSearch = false;
         }
     }
 }
