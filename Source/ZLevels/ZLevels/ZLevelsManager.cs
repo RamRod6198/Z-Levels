@@ -1612,6 +1612,13 @@ namespace ZLevels
         {
             base.StartedNewGame();
             ZUtils.ResetZTracker();
+            foreach (var map in Find.Maps)
+            {
+                if (map.IsPlayerHome)
+                {
+                    TryRegisterMap(map, 0);
+                }
+            }
         }
         public override void LoadedGame()
         {
