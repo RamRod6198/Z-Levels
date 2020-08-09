@@ -21,21 +21,23 @@ namespace ZLevels
 					zTracker = Current.Game.GetComponent<ZLevelsManager>();
 					return zTracker;
 				}
-				return zTracker;
+                return zTracker;
 			}
 		}
 
         private static Dictionary<Map, MapComponentZLevel> mapComponents = new Dictionary<Map, MapComponentZLevel>();
-        public static MapComponentZLevel MapComponentZLevel(Map key)
+        public static MapComponentZLevel GetMapComponentZLevel(Map key)
         {
-            mapComponents.TryGetValue(key, out MapComponentZLevel mapComponentZLevel);
-            if (mapComponentZLevel == null)
+            if (mapComponents.TryGetValue(key, out MapComponentZLevel mapComponentZLevel) && mapComponentZLevel != null)
+            {
+                return mapComponentZLevel;
+            }
+            else
             {
                 var comp = key.GetComponent<MapComponentZLevel>();
                 mapComponents[key] = comp;
                 return comp;
             }
-            return mapComponentZLevel;
         }
         public static void ResetZTracker()
 		{

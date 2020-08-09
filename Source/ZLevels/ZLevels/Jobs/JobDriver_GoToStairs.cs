@@ -35,7 +35,7 @@ namespace ZLevels
                             map = ZTracker.CreateUpperLevel(this.pawn.Map, stairsUp.Position);
                             if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
                             {
-                                var comp = map.GetComponent<MapComponentZLevel>();
+                                var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
                                 comp.path = stairsUp.pathToPreset;
                             }
@@ -45,7 +45,7 @@ namespace ZLevels
                         {
                             if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
                             {
-                                var comp = map.GetComponent<MapComponentZLevel>();
+                                var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
                                 comp.path = stairsUp.pathToPreset;
                             }
@@ -63,7 +63,7 @@ namespace ZLevels
                             map = ZTracker.CreateLowerLevel(this.pawn.Map, stairsDown.Position);
                             if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
                             {
-                                var comp = map.GetComponent<MapComponentZLevel>();
+                                var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
                                 comp.path = stairsDown.pathToPreset;
                             }
@@ -73,7 +73,7 @@ namespace ZLevels
                         {
                             if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
                             {
-                                var comp = map.GetComponent<MapComponentZLevel>();
+                                var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
                                 comp.path = stairsDown.pathToPreset;
                             }

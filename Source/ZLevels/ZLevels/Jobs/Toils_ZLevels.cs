@@ -90,7 +90,7 @@ namespace ZLevels
                             map = ZTracker.CreateUpperLevel(pawn.Map, stairsUp.Position);
                             if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
                             {
-                                var comp = map.GetComponent<MapComponentZLevel>();
+                                var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
                                 comp.path = stairsUp.pathToPreset;
                             }
@@ -100,7 +100,7 @@ namespace ZLevels
                         {
                             if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
                             {
-                                var comp = map.GetComponent<MapComponentZLevel>();
+                                var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
                                 comp.path = stairsUp.pathToPreset;
                             }
@@ -111,22 +111,11 @@ namespace ZLevels
                     else if (pawn.CurJob.targetC.Thing is Building_StairsDown stairsDown)
                     {
                         Map map = ZTracker.GetLowerLevel(pawn.Map.Tile, pawn.Map);
-                        if (map == null)
-                        {
-                            //map = ZTracker.CreateLowerLevel(pawn.Map, stairsDown.Position);
-                            //if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
-                            //{
-                            //    var comp = map.GetComponent<MapComponentZLevel>();
-                            //    comp.DoGeneration = true;
-                            //    comp.path = stairsDown.pathToPreset;
-                            //}
-                            //ZTracker.TeleportPawn(pawn, pawn.Position, map, true, true);
-                        }
-                        else
+                        if (map != null)
                         {
                             if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
                             {
-                                var comp = map.GetComponent<MapComponentZLevel>();
+                                var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
                                 comp.path = stairsDown.pathToPreset;
                             }

@@ -53,7 +53,7 @@ namespace ZLevels
                                     Map map = ___cachedEntries[i].map;
                                     Find.WindowStack.Add(new Dialog_MessageBox("ZAbandonConfirmation".Translate(), "Yes".Translate(), delegate ()
                                     {
-                                        var comp = map.GetComponent<MapComponentZLevel>();
+                                        var comp = ZUtils.GetMapComponentZLevel(map);
                                         var pathToWrite = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
                                                 "SavedMaps"), map.Tile + " - " + comp.Z_LevelIndex + ".xml");
                                         if (map.listerThings.AllThings.Count > 0)
@@ -68,7 +68,7 @@ namespace ZLevels
 
                                         foreach (var map2 in Find.Maps)
                                         {
-                                            var comp2 = map2.GetComponent<MapComponentZLevel>();
+                                            var comp2 = ZUtils.GetMapComponentZLevel(map2);
                                             if (ZTracker.ZLevelsTracker[map2.Tile] != null)
                                             {
                                                 foreach (var d in ZTracker.ZLevelsTracker[map2.Tile].ZLevels)
@@ -84,7 +84,7 @@ namespace ZLevels
                                     Map map = ___cachedEntries[i].map;
                                     Find.WindowStack.Add(new Dialog_MessageBox("ZAbandonPermanentlyConfirmation".Translate(), "Yes".Translate(), delegate ()
                                     {
-                                        var comp = map.GetComponent<MapComponentZLevel>();
+                                        var comp = ZUtils.GetMapComponentZLevel(map);
                                         try
                                         {
                                             var pathToDelete = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
@@ -104,7 +104,7 @@ namespace ZLevels
 
                                         foreach (var map2 in Find.Maps)
                                         {
-                                            var comp2 = map2.GetComponent<MapComponentZLevel>();
+                                            var comp2 = ZUtils.GetMapComponentZLevel(map2);
                                             if (ZTracker.ZLevelsTracker[map2.Tile] != null)
                                             {
                                                 foreach (var d in ZTracker.ZLevelsTracker[map2.Tile].ZLevels)

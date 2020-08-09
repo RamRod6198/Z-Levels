@@ -306,7 +306,7 @@ namespace ZLevels
                 }
                 else
                 {
-                    var comp = map.GetComponent<MapComponentZLevel>();
+                    var comp = ZUtils.GetMapComponentZLevel(map);
                     if (this.mapIndex == null)
                     {
                         this.mapIndex = new Dictionary<Map, int>();
@@ -335,50 +335,54 @@ namespace ZLevels
 
         public bool TryRegisterMap(Map map, int index)
         {
-            if (this.ZLevelsTracker == null)
-            {
-                ZLogger.Message("2 Resetting ZLevelsTracker");
-                this.ZLevelsTracker = new Dictionary<int, ZLevelData>();
-            }
+            Log.Message(" - TryRegisterMap - if (this.ZLevelsTracker == null) - 1", true);
+            if (this.ZLevelsTracker == null) this.ZLevelsTracker = new Dictionary<int, ZLevelData>();
+
+            Log.Message(" - TryRegisterMap - if (this.mapIndex == null) - 4", true);
             if (this.mapIndex == null)
             {
+                Log.Message(" - TryRegisterMap - this.mapIndex = new Dictionary<Map, int>(); - 5", true);
                 this.mapIndex = new Dictionary<Map, int>();
             }
+            Log.Message(" - TryRegisterMap - if (this.ZLevelsTracker.ContainsKey(map.Tile)) - 6", true);
             if (this.ZLevelsTracker.ContainsKey(map.Tile))
             {
-                if (this.ZLevelsTracker[map.Tile].ZLevels == null)
-                    this.ZLevelsTracker[map.Tile].ZLevels = new Dictionary<int, Map>();
+                Log.Message(" - TryRegisterMap - if (this.ZLevelsTracker[map.Tile].ZLevels == null) - 7", true);
+                if (this.ZLevelsTracker[map.Tile].ZLevels == null) this.ZLevelsTracker[map.Tile].ZLevels = new Dictionary<int, Map>();
+                    
+                Log.Message(" - TryRegisterMap - this.ZLevelsTracker[map.Tile].ZLevels[index] = map; - 9", true);
                 this.ZLevelsTracker[map.Tile].ZLevels[index] = map;
 
+                Log.Message(" - TryRegisterMap - if (!this.mapIndex.ContainsKey(map)) - 10", true);
                 if (!this.mapIndex.ContainsKey(map))
                 {
+                    Log.Message(" - TryRegisterMap - this.mapIndex[map] = index; - 11", true);
                     this.mapIndex[map] = index;
                 }
 
                 ZLogger.Message("1 Registering " + this.GetMapInfo(map) + " for index: " + index);
+                Log.Message(" - TryRegisterMap - return true; - 13", true);
                 return true;
             }
             else
             {
                 this.ZLevelsTracker[map.Tile] = new ZLevelData
-                {
-                    ZLevels = new Dictionary<int, Map>
-                    {
-                        [index] = map
-                    }
-                };
+                                                    {
+                                                        ZLevels = new Dictionary<int, Map>
+                                                        {
+                                                            [index] = map
+                                                        }
+                                                    };
 
+                Log.Message("this.ZLevelsTracker.ContainsKey(map.Tile): " + this.ZLevelsTracker.ContainsKey(map.Tile) + " - " + map.Tile + " - " + map, true);
                 if (!this.mapIndex.ContainsKey(map))
                 {
                     this.mapIndex[map] = index;
                 }
-
-                ZLogger.Message("2 Registering " + this.GetMapInfo(map) + " for index: " + index);
                 return true;
             }
             return false;
         }
-
         public string ShowJobData(Job job, Pawn pawn, Map dest)
         {
             string str = "-------------------------\n";
@@ -1282,7 +1286,7 @@ namespace ZLevels
 
         public Map CreateLowerLevel(Map origin, IntVec3 playerStartSpot)
         {
-            var comp = origin.GetComponent<MapComponentZLevel>();
+            var comp = ZUtils.GetMapComponentZLevel(origin);
             var mapParent = (MapParent_ZLevel)WorldObjectMaker.MakeWorldObject(ZLevelsDefOf.ZL_Underground);
 
             mapParent.Tile = origin.Tile;
@@ -1326,7 +1330,7 @@ namespace ZLevels
             {
                 if (this.TryRegisterMap(newMap, comp.Z_LevelIndex - 1))
                 {
-                    var newComp = newMap.GetComponent<MapComponentZLevel>();
+                    var newComp = ZUtils.GetMapComponentZLevel(newMap);
                     newComp.Z_LevelIndex = comp.Z_LevelIndex - 1;
                     ZUtils.ZTracker.mapIndex[newMap] = newComp.Z_LevelIndex;
                 }
@@ -1349,7 +1353,7 @@ namespace ZLevels
         {
             var mapParent = (MapParent_ZLevel)WorldObjectMaker.MakeWorldObject(ZLevelsDefOf.ZL_Upper);
 
-            var comp = origin.GetComponent<MapComponentZLevel>();
+            var comp = ZUtils.GetMapComponentZLevel(origin);
 
             mapParent.Tile = origin.Tile;
             mapParent.PlayerStartSpot = playerStartSpot;
@@ -1390,7 +1394,7 @@ namespace ZLevels
             {
                 if (this.TryRegisterMap(newMap, comp.Z_LevelIndex + 1))
                 {
-                    var newComp = newMap.GetComponent<MapComponentZLevel>();
+                    var newComp = ZUtils.GetMapComponentZLevel(newMap);
                     newComp.Z_LevelIndex = comp.Z_LevelIndex + 1;
                     ZUtils.ZTracker.mapIndex[newMap] = newComp.Z_LevelIndex;
                     AdjustUpperMapGeneration(newMap);

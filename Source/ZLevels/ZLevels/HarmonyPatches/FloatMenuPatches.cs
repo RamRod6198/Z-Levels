@@ -78,7 +78,7 @@ namespace ZLevels
             {
                 Pawn pawn2 = GridsUtility.GetThingList(IntVec3.FromVector3(clickPos), pawn.Map)
                     .FirstOrDefault((Thing x) => x is Pawn) as Pawn;
-                var mapComp = pawn.Map.GetComponent<MapComponentZLevel>();
+                var mapComp = ZUtils.GetMapComponentZLevel(pawn.Map);
                 var ZTracker = ZUtils.ZTracker;
 
                 if (pawn2 != null && ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Count > 1)
