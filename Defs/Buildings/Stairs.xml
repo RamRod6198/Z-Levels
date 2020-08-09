@@ -101,6 +101,7 @@
 		<fillPercent>0.0</fillPercent>
 		<staticSunShadowHeight>0.0</staticSunShadowHeight>
 		<pathCost>10</pathCost>
+		<tradeability>None</tradeability>
 	</ThingDef>
 
 

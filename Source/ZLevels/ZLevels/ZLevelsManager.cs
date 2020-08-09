@@ -1554,51 +1554,39 @@ namespace ZLevels
         {
             try
             {
-                foreach (var tile in ZLevelsTracker)
+                foreach (var tile in this.ZLevelsTracker)
                 {
-                    foreach (var map in GetAllMaps(tile.Key))
+                    foreach (var map in this.GetAllMaps(tile.Key))
                     {
-                        stairsDown[map] = totalStairsDown.Where(x => x.Map == map).ToList();
-                        stairsUp[map] = totalStairsUp.Where(x => x.Map == map).ToList();
-                        if (stairsDown[map].Count == 0 && GetLowerLevel(tile.Key, map) != null ||
-                            stairsUp[map].Count == 0 && GetUpperLevel(tile.Key, map) != null)
+                        this.stairsDown[map] = this.totalStairsDown.Where(x => x.Map == map).ToList();
+                        this.stairsUp[map] = this.totalStairsUp.Where(x => x.Map == map).ToList();
+                        if (this.stairsDown[map].Count == 0 && this.GetLowerLevel(tile.Key, map) != null)
                         {
-                            foreach (var thing in map.listerThings.AllThings.Where(x => x is Building_Stairs).ToList())
+                            this.stairsDown[map] = map.listerThings.AllThings.Where(x => x is Building_StairsDown).Cast<Building_Stairs>().ToList();
+                            this.totalStairsDown.AddRange(this.stairsDown[map]);
+                        }
+                        if (this.stairsUp[map].Count == 0 && this.GetUpperLevel(tile.Key, map) != null)
+                        {
+                            this.stairsUp[map] = map.listerThings.AllThings.Where(x => x is Building_StairsUp).Cast<Building_Stairs>().ToList();
+                            this.totalStairsUp.AddRange(this.stairsUp[map]);
+                        }
+                        ZLogger.Message("this.stairsDown[map]: " + this.stairsDown[map].Count);
+                        ZLogger.Message("this.stairsUp[map]: " + this.stairsUp[map].Count);
+                        if (this.stairsDown.ContainsKey(map))
+                        {
+                            for (int i = this.stairsDown[map].Count - 1; i >= 0; i--)
                             {
-                                if (thing is Building_StairsDown)
+                                if (!this.stairsDown[map][i].Position.Walkable(map))
                                 {
-                                    stairsDown[map].Add(thing as Building_StairsDown);
-                                }
-                                else if (thing is Building_StairsUp)
-                                {
-                                    stairsUp[map].Add(thing as Building_StairsDown);
-                                }
-
-                                break;
-
-                            }
-
-                            totalStairsUp.AddRange(stairsUp[map]);
-                            totalStairsDown.AddRange(stairsDown[map]);
-
-                            ZLogger.Message("this.stairsDown[map]: " + stairsDown[map].Count);
-                            ZLogger.Message("this.stairsUp[map]: " + stairsUp[map].Count);
-                            if (stairsDown.ContainsKey(map))
-                            {
-                                for (int i = stairsDown[map].Count - 1; i >= 0; i--)
-                                {
-                                    if (!stairsDown[map][i].Position.Walkable(map))
-                                    {
-                                        ZLogger.Message(stairsDown[map][i] + " not walkable, removing it");
-                                        stairsDown[map].RemoveAt(i);
-                                    }
+                                    ZLogger.Message(this.stairsDown[map][i] + " not walkable, removing it");
+                                    this.stairsDown[map].RemoveAt(i);
                                 }
                             }
-
-                            if (stairsUp.ContainsKey(map))
+                        }
+                        if (this.stairsUp.ContainsKey(map))
+                        {
+                            for (int i = this.stairsUp[map].Count - 1; i >= 0; i--)
                             {
-                                for (int i = stairsUp[map].Count - 1; i >= 0; i--)
-                                {
 
                                     if (!stairsUp[map][i].Position.Walkable(map))
                                     {
