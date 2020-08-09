@@ -96,7 +96,7 @@ namespace ZLevels
     {
         public static Map casterOldMap;
         public static Map targetOldMap;
-    
+
         public static bool teleportBack;
         public static void Prefix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
@@ -107,7 +107,7 @@ namespace ZLevels
             //Log.Message("___currentTarget.Thing: " + ___currentTarget.Thing, true);
             //Log.Message("___currentTarget.Thing?.Map: " + ___currentTarget.Thing?.Map, true);
             //Log.Message("___currentTarget.Thing?.Map.Tile: " + ___currentTarget.Thing?.Map.Tile, true);
-    
+
             if (__instance.caster.Map != ___currentTarget.Thing?.Map && __instance.caster.Map.Tile == ___currentTarget.Thing?.Map?.Tile)
             {
                 var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
@@ -126,7 +126,7 @@ namespace ZLevels
                 }
             }
         }
-    
+
         public static void Postfix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
             if (teleportBack)
@@ -293,84 +293,50 @@ namespace ZLevels
         {
             try
             {
-                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - var ZTracker = ZUtils.ZTracker; - 1", true);
                 var ZTracker = ZUtils.ZTracker;
-                Log.Message("ZTracker.ZLevelsTracker.Count: " + ZTracker.ZLevelsTracker.Count, true);
-                foreach (var t in ZTracker.ZLevelsTracker)
-                {
-                    foreach (var z in t.Value.ZLevels)
-                    {
-                        Log.Message(t.Key + " - " + z.Key + " - " + z.Value, true);
-                    }
-                }
-                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - if (!recursiveTrap && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1) - 2", true);
-                Log.Message("ZTracker?.ZLevelsTracker.ContainsKey(pawn.Map.Tile): " + ZTracker?.ZLevelsTracker.ContainsKey(pawn.Map.Tile) + " - " + pawn.Map.Tile + " - " + pawn.Map + " - " + pawn, true);
                 if (!recursiveTrap && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
                 {
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - if (ZTracker.jobTracker == null) - 3", true);
                     if (ZTracker.jobTracker == null)
                     {
-                        Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>(); - 4", true);
                         ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
                     }
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - if (!ZTracker.jobTracker.ContainsKey(pawn)) - 5", true);
                     if (!ZTracker.jobTracker.ContainsKey(pawn))
                     {
-                        Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - ZTracker.jobTracker[pawn] = new JobTracker(); - 6", true);
                         ZTracker.jobTracker[pawn] = new JobTracker();
                     }
                     recursiveTrap = true;
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - Job result = null; - 8", true);
                     Job result = null;
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - var oldMap = pawn.Map; - 9", true);
                     var oldMap = pawn.Map;
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - var oldPosition = pawn.Position; - 10", true);
                     var oldPosition = pawn.Position;
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - bool select = false; - 11", true);
                     bool select = false;
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - if (Find.Selector.SelectedObjects.Contains(pawn)) select = true; - 12", true);
                     if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition)) - 13", true);
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
-                        Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - if (otherMap != oldMap) - 14", true);
                         if (otherMap != oldMap)
                         {
-                            Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - result = Traverse.Create(__instance).Method(\"TryGiveJob\", new object[] { pawn }).GetValue<Job>(); - 15", true);
                             result = Traverse.Create(__instance).Method("TryGiveJob", new object[] { pawn }).GetValue<Job>();
                             //ZLogger.Message("Searching combat job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap) + " - result: " + result, true);
-                            Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - if (result != null) - 17", true);
                             if (result != null)
                             {
                                 //ZLogger.Message(pawn + " got combat job " + result + " - map: "
                                 //    + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
-                                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - ZUtils.TeleportThing(pawn, oldMap, oldPosition); - 19", true);
                                 ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - ZTracker.BuildJobListFor(pawn, otherMap, result); - 20", true);
                                 ZTracker.BuildJobListFor(pawn, otherMap, result);
-                                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - ZUtils.ZTracker.jobTracker[pawn].dest = otherMap; - 21", true);
                                 ZUtils.ZTracker.jobTracker[pawn].dest = otherMap;
-                                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true; - 22", true);
                                 ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
-                                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - __result = ZTracker.jobTracker[pawn].activeJobs[0]; - 23", true);
                                 __result = ZTracker.jobTracker[pawn].activeJobs[0];
-                                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0); - 24", true);
                                 ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-                                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - break; - 25", true);
                                 break;
                             }
                         }
                     }
                     ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - if (select) Find.Selector.Select(pawn); - 27", true);
                     if (select) Find.Selector.Select(pawn);
-                    Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - recursiveTrap = false; - 28", true);
                     recursiveTrap = false;
                 }
             }
             catch (Exception ex)
             {
-                Log.Message(" - JobGiver_ConfigurableHostilityResponsePostfix - Log.Error(\"Some kind of error occurred in Z-Levels JobManager: \" + ex); - 29", true);
                 Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
             }
         }
