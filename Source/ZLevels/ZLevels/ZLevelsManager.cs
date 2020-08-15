@@ -1563,43 +1563,45 @@ namespace ZLevels
                             for (int i = this.stairsUp[map].Count - 1; i >= 0; i--)
                             {
 
-                                if (!this.stairsUp[map][i].Position.Walkable(map))
+                                if (!stairsUp[map][i].Position.Walkable(map))
                                 {
-                                    ZLogger.Message(this.stairsUp[map][i] + " not walkable, removing it");
-                                    this.stairsUp[map].RemoveAt(i);
+                                    ZLogger.Message(stairsUp[map][i] + " not walkable, removing it");
+                                    stairsUp[map].RemoveAt(i);
                                 }
                             }
                         }
                     }
-                    foreach (var map in this.GetAllMaps(tile.Key))
+                
+
+                foreach (var map in GetAllMaps(tile.Key))
+                {
+                    if (stairsDown.ContainsKey(map))
                     {
-                        if (this.stairsDown.ContainsKey(map))
+                        for (int i = stairsDown[map].Count - 1; i >= 0; i--)
                         {
-                            for (int i = this.stairsDown[map].Count - 1; i >= 0; i--)
+                            Map lowerMap = GetLowerLevel(tile.Key, map);
+                            if (lowerMap != null && stairsUp?[lowerMap]?.Where(x => x.Position
+                                == stairsDown[map][i].Position).Count() == 0)
                             {
-                                Map lowerMap = this.GetLowerLevel(tile.Key, map);
-                                if (lowerMap != null && this.stairsUp?[lowerMap]?.Where(x => x.Position
-                                    == this.stairsDown[map][i].Position).Count() == 0)
-                                {
-                                    ZLogger.Message(this.stairsDown[map][i] + " - has no stairs upper, removing it");
-                                    this.stairsDown[map].RemoveAt(i);
-                                }
-                            }
-                        }
-                        if (this.stairsUp.ContainsKey(map))
-                        {
-                            for (int i = this.stairsUp[map].Count - 1; i >= 0; i--)
-                            {
-                                Map upperMap = this.GetUpperLevel(tile.Key, map);
-                                if (upperMap != null && this.stairsDown?[upperMap]?.Where(x => x.Position
-                                    == this.stairsUp[map][i].Position).Count() == 0)
-                                {
-                                    ZLogger.Message(this.stairsUp[map][i] + " - has no stairs below, removing it");
-                                    this.stairsUp[map].RemoveAt(i);
-                                }
+                                ZLogger.Message(stairsDown[map][i] + " - has no stairs upper, removing it");
+                                stairsDown[map].RemoveAt(i);
                             }
                         }
                     }
+                    if (stairsUp.ContainsKey(map))
+                    {
+                        for (int i = stairsUp[map].Count - 1; i >= 0; i--)
+                        {
+                            Map upperMap = GetUpperLevel(tile.Key, map);
+                            if (upperMap != null && stairsDown?[upperMap]?.Where(x => x.Position
+                                == stairsUp[map][i].Position).Count() == 0)
+                            {
+                                ZLogger.Message(stairsUp[map][i] + " - has no stairs below, removing it");
+                                stairsUp[map].RemoveAt(i);
+                            }
+                        }
+                    }
+                }
                 }
             }
             catch (Exception ex)
@@ -1666,7 +1668,6 @@ namespace ZLevels
                                     ZLogger.Message("2 Registering map: " + d.Key + " - " + d.Value);
                                     this.TryRegisterMap(d.Key, d.Value);
                                 }
-
                             }
                         }
                     }

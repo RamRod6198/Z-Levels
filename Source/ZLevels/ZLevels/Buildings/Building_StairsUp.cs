@@ -15,11 +15,12 @@ namespace ZLevels
 
     public class Building_Stairs : Building
     {
+        public Region StairRegion;
         public Building_Stairs GetMatchingStair()
         {
             if (this is Building_StairsUp)
             {
-                return (Building_Stairs) Position.GetThingList(ZUtils.ZTracker.GetUpperLevel(Map.Tile, Map))
+                return (Building_Stairs)Position.GetThingList(ZUtils.ZTracker.GetUpperLevel(Map.Tile, Map))
                     .FirstOrDefault(x => x is Building_StairsDown && x.Position == Position);
             }
             else
@@ -29,8 +30,26 @@ namespace ZLevels
             }
         }
 
+        public override void SpawnSetup(Map map, bool respawningAfterLoad)
+        {
+            base.SpawnSetup(map, respawningAfterLoad);
+            RegionLink regionLink = new RegionLink();
+            regionLink.RegionA = map.regionGrid.GetValidRegionAt(Position);
+            Building_Stairs match = GetMatchingStair();
+
+            StairRegion = Region.MakeNewUnfilled(Position, map);
+            StairRegion.extentsLimit.minX = StairRegion.extentsLimit.maxX = Position.x;
+            StairRegion.extentsLimit.minZ = StairRegion.extentsLimit.maxZ = Position.z;
+            StairRegion.type = RegionType.Portal;
+            if (match != null)
+            {
+                regionLink.RegionB = match.Map.regionGrid.GetValidRegionAt(Position);
+            }
+            StairRegion.links.Add(regionLink);
+            map.regionGrid.SetRegionAt(Position, StairRegion);
+        }
     }
-     
+
 
     public class Building_StairsUp : Building_Stairs, IAttackTarget
     {
@@ -50,7 +69,6 @@ namespace ZLevels
                 ZTracker.stairsUp[Map].Add(this);
             }
             ZLogger.Message("Spawning " + this);
-
             if (!respawningAfterLoad)
             {
                 if (Position.GetTerrain(Map) == ZLevelsDefOf.ZL_OutsideTerrain)
@@ -60,7 +78,7 @@ namespace ZLevels
                 Map mapUpper = ZTracker.GetUpperLevel(Map.Tile, Map);
                 if (mapUpper != null && mapUpper != Map)
                 {
-                    if (Position.GetThingList(mapUpper).Where(x => x.def == ZLevelsDefOf.ZL_StairsDown).Count() == 0)
+                    if (Position.GetThingList(mapUpper).Count(x => x.def == ZLevelsDefOf.ZL_StairsDown) == 0)
                     {
                         mapUpper.terrainGrid.SetTerrain(Position, ZLevelsDefOf.ZL_OutsideTerrainTwo);
                         var stairsToSpawn = ThingMaker.MakeThing(ZLevelsDefOf.ZL_StairsDown, Stuff);
@@ -137,9 +155,10 @@ namespace ZLevels
                     yield return opt;
                 }
             }
-            var opt2 = new FloatMenuOption(text, () => {
+            var opt2 = new FloatMenuOption(text, () =>
+            {
                 GiveJob(selPawn, this);
-                }, MenuOptionPriority.Default, null, this);
+            }, MenuOptionPriority.Default, null, this);
             yield return opt2;
 
         }
