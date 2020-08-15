@@ -28,12 +28,12 @@ namespace ZLevels
                 try
                 {
                     bool result = false;
-                    var comp = ___map.GetComponent<MapComponentZLevel>();
+                    var comp = ZUtils.GetMapComponentZLevel(___map);
                     var ZTracker = ZUtils.ZTracker;
                     if (___map.Parent is MapParent_ZLevel && comp != null
                         && ZTracker.GetUpperLevel(___map.Tile, ___map) != null &&
-                        !ZTracker.GetUpperLevel(___map.Tile, ___map).GetComponent<MapComponentZLevel>()
-                        .hasCavesBelow.GetValueOrDefault(false))
+                        !ZUtils.GetMapComponentZLevel(ZTracker.GetUpperLevel(___map.Tile, ___map))
+                            .hasCavesBelow.GetValueOrDefault(false))
                     {
                         result = false;
                     }
@@ -85,7 +85,7 @@ namespace ZLevels
                 try
                 {
                     Map map = (Map)parms.target;
-                    var comp = map.GetComponent<MapComponentZLevel>();
+                    var comp = ZUtils.GetMapComponentZLevel(map);
                     if (comp.hasCavesBelow.HasValue && comp.hasCavesBelow.Value)
                     {
                         var foods = map.listerThings.AllThings.Where(x => !(x is Plant) && !(x is Pawn)
