@@ -178,17 +178,31 @@ namespace ZLevels
                 }
             }
         }
+
         public static void TeleportThing(Thing thing, Map map, IntVec3 position)
         {
             //    var mth = new StackTrace().GetFrame(1).GetMethod();
             //    var cls = mth.ReflectedType.Name;
             //    ZLogger.Message(cls + " - " + mth.Name + " - teleport " + thing + " from " + thing.Map + " to " + map + " from " + thing.Position + " to " + position, true);
-            
-            if (thing.Map != map)
+            if (zTracker.cachedMapIndex.TryGetValue(map, out sbyte value))
             {
-                thing.mapIndexOrState = (sbyte)Find.Maps.IndexOf(map);
+                if (thing.mapIndexOrState != value)
+                {
+                    thing.mapIndexOrState = value;
+                }
             }
-            if (thing.Position != position)
+            else
+            {
+                var value2 = (sbyte)Find.Maps.IndexOf(map);
+                ZTracker.cachedMapIndex[map] = value2;
+                if (thing.mapIndexOrState != value2)
+                {
+                    thing.mapIndexOrState = value2;
+                }
+                Log.Message("Caching: " + map);
+            }
+
+            if (thing.positionInt != position)
             {
                 thing.positionInt = position;
             }

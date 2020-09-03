@@ -296,30 +296,22 @@ namespace ZLevels
 
         public int GetZIndexFor(Map map)
         {
-            try
+            int index;
+            if (this.mapIndex != null && this.mapIndex.TryGetValue(map, out index))
             {
-                int index;
-                if (this.mapIndex != null && this.mapIndex.TryGetValue(map, out index))
-                {
-                    //ZLogger.Message("1 return: " + index + " for " + map, true);
-                    return index;
-                }
-                else
-                {
-                    var comp = ZUtils.GetMapComponentZLevel(map);
-                    if (this.mapIndex == null)
-                    {
-                        this.mapIndex = new Dictionary<Map, int>();
-                    }
-                    this.mapIndex[map] = comp.Z_LevelIndex;
-                    //ZLogger.Message("2 return: " + comp.Z_LevelIndex + " for " + map, true);
-                    return comp.Z_LevelIndex;
-                }
+                //ZLogger.Message("1 return: " + index + " for " + map, true);
+                return index;
             }
-            catch (Exception ex)
+            else
             {
-                ZLogger.Error("[Z-Levels] GetZIndexFor produced an error: " + ex);
-                return -99999;
+                var comp = ZUtils.GetMapComponentZLevel(map);
+                if (this.mapIndex == null)
+                {
+                    this.mapIndex = new Dictionary<Map, int>();
+                }
+                this.mapIndex[map] = comp.Z_LevelIndex;
+                //ZLogger.Message("2 return: " + comp.Z_LevelIndex + " for " + map, true);
+                return comp.Z_LevelIndex;
             }
         }
 
@@ -1697,5 +1689,6 @@ namespace ZLevels
         private List<Map> mapKeys = new List<Map>();
         private List<int> mapValues = new List<int>();
 
+        public Dictionary<Map, sbyte> cachedMapIndex = new Dictionary<Map, sbyte>();
     }
 }

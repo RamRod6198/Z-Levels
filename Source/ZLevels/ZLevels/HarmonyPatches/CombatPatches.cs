@@ -28,7 +28,7 @@ namespace ZLevels
             CombatPatches_BestAttackTarget_Patch.multiMapSearch = false;
         }
     }
-
+    
     [HarmonyPatch(typeof(JobGiver_AIFightEnemy), "FindAttackTarget")]
     public class FindAttackTarget_Patch
     {
@@ -41,7 +41,7 @@ namespace ZLevels
             CombatPatches_BestAttackTarget_Patch.multiMapSearch = false;
         }
     }
-
+    
     [HarmonyPatch(typeof(AttackTargetFinder), "BestAttackTarget")]
     public static class CombatPatches_BestAttackTarget_Patch
     {
@@ -87,7 +87,7 @@ namespace ZLevels
                 CanBeSeenOverFast_Patch.upperMap = null;
                 CanBeSeenOverFast_Patch.lowerMap = null;
                 CanBeSeenOverFast_Patch.caster = null;
-
+    
             }
             else if (!multiMapSearch)
             {
@@ -96,53 +96,53 @@ namespace ZLevels
             return result;
         }
     }
-
+    
     [HarmonyPatch(typeof(GenGrid), "CanBeSeenOverFast")]
     public static class CanBeSeenOverFast_Patch
     {
         public static bool checkLevels = false;
-
+    
         public static Map upperMap = null;
-
+    
         public static Map lowerMap = null;
-
+    
         public static Thing caster = null;
         public static bool Prefix(IntVec3 c, Map map, ref bool __result)
         {
-            if (checkLevels)
-            {
-                __result = true;
-                return false;
-            }
-            if (checkLevels && c.GetTerrain(upperMap) == ZLevelsDefOf.ZL_OutsideTerrain)
-            {
-                ZLogger.Message(c + " - Return true: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap), true);
-                ZLogger.Message(c + " - Return true: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap), true);
-                __result = true;
-                return false;
-            }
-            else if (checkLevels && c != caster.positionInt)
-            {
-                ZLogger.Message(caster + " - " + c + " - Return false: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap), true);
-                ZLogger.Message(caster + " - " + c + " - Return false: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap), true);
-            }
-            else if (checkLevels && c == caster.positionInt)
-            {
-                ZLogger.Message(c + " - Return true: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap), true);
-                ZLogger.Message(c + " - Return true: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap), true);
-                __result = true;
-                return false;
-            }
+            //if (checkLevels)
+            //{
+            //    __result = true;
+            //    return false;
+            //}
+            //if (checkLevels && c.GetTerrain(upperMap) == ZLevelsDefOf.ZL_OutsideTerrain)
+            //{
+            //    ZLogger.Message(c + " - Return true: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap), true);
+            //    ZLogger.Message(c + " - Return true: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap), true);
+            //    __result = true;
+            //    return false;
+            //}
+            //else if (checkLevels && c != caster.positionInt)
+            //{
+            //    ZLogger.Message(caster + " - " + c + " - Return false: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap), true);
+            //    ZLogger.Message(caster + " - " + c + " - Return false: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap), true);
+            //}
+            //else if (checkLevels && c == caster.positionInt)
+            //{
+            //    ZLogger.Message(c + " - Return true: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap), true);
+            //    ZLogger.Message(c + " - Return true: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap), true);
+            //    __result = true;
+            //    return false;
+            //}
             return true;
         }
     }
-
+    
     [HarmonyPatch(typeof(Verb_LaunchProjectile), "TryCastShot")]
     public static class TryCastShot_Patch
     {
         public static Map casterOldMap;
         public static Map targetOldMap;
-
+    
         public static bool teleportBack;
         public static void Prefix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
@@ -153,7 +153,7 @@ namespace ZLevels
             //ZLogger.Message("___currentTarget.Thing: " + ___currentTarget.Thing, true);
             //ZLogger.Message("___currentTarget.Thing?.Map: " + ___currentTarget.Thing?.Map, true);
             //ZLogger.Message("___currentTarget.Thing?.Map.Tile: " + ___currentTarget.Thing?.Map.Tile, true);
-
+    
             if (__instance.caster.Map != ___currentTarget.Thing?.Map && __instance.caster.Map.Tile == ___currentTarget.Thing?.Map?.Tile)
             {
                 var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
@@ -172,7 +172,7 @@ namespace ZLevels
                 }
             }
         }
-
+    
         public static void Postfix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
             if (teleportBack)
@@ -190,7 +190,7 @@ namespace ZLevels
             }
         }
     }
-
+    
     [HarmonyPatch(typeof(Projectile), "Launch", new Type[]
     {
         typeof(Thing),
@@ -215,7 +215,7 @@ namespace ZLevels
             }
         }
     }
-
+    
     [HarmonyPatch(typeof(Building_TurretGun), "TryFindNewTarget")]
     public class TryFindNewTarget_Patch
     {
@@ -224,14 +224,16 @@ namespace ZLevels
             ZLogger.Message(__instance + " got target " + __result, true);
         }
     }
-
-
+    
+    
     [HarmonyPatch(typeof(Verb), "TryFindShootLineFromTo")]
     public static class TryFindShootLineFromTo_Patch
     {
         public static Map oldMap1;
         public static Map oldMap2;
         public static bool teleportBack;
+        public static int ind1 = 0;
+        public static int ind2 = 0;
 
         public static bool TryFindShootLineFromTo(Verb verb, IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine)
         {
@@ -293,14 +295,14 @@ namespace ZLevels
             Log.Message(verb.caster + " - TryFindShootLineFromTo - return false; - 31", true);
             return false;
         }
-
+    
         public static void Prefix(Verb __instance, IntVec3 root, LocalTargetInfo targ, ref ShootLine resultingLine, ref bool __result)
         {
-            TryFindShootLineFromTo(__instance, root, targ, out resultingLine);
+            //TryFindShootLineFromTo(__instance, root, targ, out resultingLine);
             if (__instance.caster?.Map != targ.Thing?.Map && __instance.caster?.Map?.Tile == targ.Thing?.Map?.Tile)
             {
-                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
-                var ind2 = ZUtils.ZTracker.GetZIndexFor(targ.Thing.Map);
+                ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
+                ind2 = ZUtils.ZTracker.GetZIndexFor(targ.Thing.Map);
                 if (ind1 > ind2)
                 {
                     teleportBack = true;
@@ -329,21 +331,25 @@ namespace ZLevels
                     ZUtils.TeleportThing(__instance.caster, oldMap2, __instance.caster.Position);
                     oldMap2 = null;
                 }
-                teleportBack = false;
-                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
-                var ind2 = ZUtils.ZTracker.GetZIndexFor(targ.Thing.Map);
 
-                if (ind1 > ind2 && !IsVoidsEverywhereInShootingLine(resultingLine, __instance.caster.Map, __instance.caster, targ.Thing))
-                {
-                    __result = false;
-                }
-                else if (ind1 < ind2 && !IsVoidsEverywhereInShootingLineInBackWard(resultingLine, targ.Thing.Map, __instance.caster, targ.Thing))
-                {
-                    __result = false;
-                }
+                //if (__result)
+                //{
+                //    if (ind1 > ind2 && !IsVoidsEverywhereInShootingLine(resultingLine, __instance.caster.Map, __instance.caster, targ.Thing))
+                //    {
+                //        __result = false;
+                //    }
+                //    else if (ind1 < ind2 && !IsVoidsEverywhereInShootingLineInBackWard(resultingLine, targ.Thing.Map, __instance.caster, targ.Thing))
+                //    {
+                //        __result = false;
+                //    }
+                //}
+
+                ind1 = 0;
+                ind2 = 0;
+                teleportBack = false;
             }
         }
-
+    
         public static bool IsVoidsEverywhereInShootingLine(ShootLine resultingLine, Map map, Thing caster, Thing target)
         {
             var points = resultingLine.Points().ToList();
@@ -387,7 +393,7 @@ namespace ZLevels
             }
             return true;
         }
-
+    
         public static bool IsVoidsEverywhereInShootingLineInBackWard(ShootLine resultingLine, Map map, Thing caster, Thing target)
         {
             var points = resultingLine.Points().ToList();
@@ -437,11 +443,12 @@ namespace ZLevels
             return true;
         }
     }
-
+    
     [HarmonyPatch(typeof(JobGiver_ConfigurableHostilityResponse), "TryGiveJob")]
     public class JobGiver_ConfigurableHostilityResponsePatch
     {
         public static bool recursiveTrap = false;
+    
         [HarmonyPostfix]
         private static void JobGiver_ConfigurableHostilityResponsePostfix(JobGiver_ConfigurableHostilityResponse __instance, ref Job __result, Pawn pawn)
         {
@@ -526,16 +533,16 @@ namespace ZLevels
             ZLogger.Message(pawn + " got result 4: " + __result + " in " + pawn.Map + " - " + __result?.targetA.Thing?.Map + " - mind enemy: " + pawn.mindState.enemyTarget, true);
         }
     }
-
-    //[HarmonyPatch(typeof(JobGiver_AIDefendPawn), "TryGiveJob")]
-    //public class JobGiver_AIDefendPawn_Patch
-    //{
-    //    private static void Postfix(ref JobGiver_AIDefendPawn __instance, ref Job __result, ref Pawn pawn)
-    //    {
-    //        ZLogger.Message(pawn + " got response 4: " + __result);
-    //    }
-    //}
-
+    
+    [HarmonyPatch(typeof(JobGiver_AIDefendPawn), "TryGiveJob")]
+    public class JobGiver_AIDefendPawn_Patch
+    {
+        private static void Postfix(ref JobGiver_AIDefendPawn __instance, ref Job __result, ref Pawn pawn)
+        {
+            ZLogger.Message(pawn + " got response 4: " + __result);
+        }
+    }
+    
     [HarmonyPatch(typeof(JobGiver_AIFightEnemy), "TryGiveJob")]
     public class JobGiver_AIFightEnemy_Patch
     {
