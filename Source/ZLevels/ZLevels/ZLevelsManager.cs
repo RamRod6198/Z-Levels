@@ -33,7 +33,7 @@ namespace ZLevels
                 {
                     //foreach (var map in this.GetAllMaps(tile.Key))
                     //{
-                    //    Log.Message(this.GetMapInfo(map) + " - " + map.Biome);
+                    //    ZLogger.Message(this.GetMapInfo(map) + " - " + map.Biome);
                     //}
                     this.ZLevelsFixer(tile.Key);
                 }
@@ -83,7 +83,7 @@ namespace ZLevels
             }
             Map map = (thing != null) ? thing.Map : ((Zone)obj).Map;
 
-            List<object> selected = Traverse.Create(Find.Selector).Field("selected").GetValue<List<object>>();
+            List<object> selected = Find.Selector.selected;
 
             for (int i = selected.Count - 1; i >= 0; i--)
             {
@@ -102,7 +102,7 @@ namespace ZLevels
                 selected.Add(obj);
                 SelectionDrawer.Notify_Selected(obj);
             }
-            Traverse.Create(Find.Selector).Field("selected").SetValue(selected);
+            Find.Selector.selected = selected;
         }
         public void CheckHotkeys()
         {
@@ -251,7 +251,7 @@ namespace ZLevels
                         Log.Error("ZLevels contains null map, this should never happen");
                         foreach (var mapData in this.ZLevelsTracker[tile].ZLevels)
                         {
-                            Log.Message("Tile: " + tile + " - map index: " + mapData.Key + " - map: " + mapData.Value);
+                            ZLogger.Message("Tile: " + tile + " - map index: " + mapData.Key + " - map: " + mapData.Value);
                         }
                     }
                     else
@@ -301,7 +301,7 @@ namespace ZLevels
                 int index;
                 if (this.mapIndex != null && this.mapIndex.TryGetValue(map, out index))
                 {
-                    //Log.Message("1 return: " + index + " for " + map, true);
+                    //ZLogger.Message("1 return: " + index + " for " + map, true);
                     return index;
                 }
                 else
@@ -312,7 +312,7 @@ namespace ZLevels
                         this.mapIndex = new Dictionary<Map, int>();
                     }
                     this.mapIndex[map] = comp.Z_LevelIndex;
-                    //Log.Message("2 return: " + comp.Z_LevelIndex + " for " + map, true);
+                    //ZLogger.Message("2 return: " + comp.Z_LevelIndex + " for " + map, true);
                     return comp.Z_LevelIndex;
                 }
             }
@@ -335,33 +335,33 @@ namespace ZLevels
 
         public bool TryRegisterMap(Map map, int index)
         {
-            Log.Message(" - TryRegisterMap - if (this.ZLevelsTracker == null) - 1", true);
+            ZLogger.Message(" - TryRegisterMap - if (this.ZLevelsTracker == null) - 1", true);
             if (this.ZLevelsTracker == null) this.ZLevelsTracker = new Dictionary<int, ZLevelData>();
 
-            Log.Message(" - TryRegisterMap - if (this.mapIndex == null) - 4", true);
+            ZLogger.Message(" - TryRegisterMap - if (this.mapIndex == null) - 4", true);
             if (this.mapIndex == null)
             {
-                Log.Message(" - TryRegisterMap - this.mapIndex = new Dictionary<Map, int>(); - 5", true);
+                ZLogger.Message(" - TryRegisterMap - this.mapIndex = new Dictionary<Map, int>(); - 5", true);
                 this.mapIndex = new Dictionary<Map, int>();
             }
-            Log.Message(" - TryRegisterMap - if (this.ZLevelsTracker.ContainsKey(map.Tile)) - 6", true);
+            ZLogger.Message(" - TryRegisterMap - if (this.ZLevelsTracker.ContainsKey(map.Tile)) - 6", true);
             if (this.ZLevelsTracker.ContainsKey(map.Tile))
             {
-                Log.Message(" - TryRegisterMap - if (this.ZLevelsTracker[map.Tile].ZLevels == null) - 7", true);
+                ZLogger.Message(" - TryRegisterMap - if (this.ZLevelsTracker[map.Tile].ZLevels == null) - 7", true);
                 if (this.ZLevelsTracker[map.Tile].ZLevels == null) this.ZLevelsTracker[map.Tile].ZLevels = new Dictionary<int, Map>();
                     
-                Log.Message(" - TryRegisterMap - this.ZLevelsTracker[map.Tile].ZLevels[index] = map; - 9", true);
+                ZLogger.Message(" - TryRegisterMap - this.ZLevelsTracker[map.Tile].ZLevels[index] = map; - 9", true);
                 this.ZLevelsTracker[map.Tile].ZLevels[index] = map;
 
-                Log.Message(" - TryRegisterMap - if (!this.mapIndex.ContainsKey(map)) - 10", true);
+                ZLogger.Message(" - TryRegisterMap - if (!this.mapIndex.ContainsKey(map)) - 10", true);
                 if (!this.mapIndex.ContainsKey(map))
                 {
-                    Log.Message(" - TryRegisterMap - this.mapIndex[map] = index; - 11", true);
+                    ZLogger.Message(" - TryRegisterMap - this.mapIndex[map] = index; - 11", true);
                     this.mapIndex[map] = index;
                 }
 
                 ZLogger.Message("1 Registering " + this.GetMapInfo(map) + " for index: " + index);
-                Log.Message(" - TryRegisterMap - return true; - 13", true);
+                ZLogger.Message(" - TryRegisterMap - return true; - 13", true);
                 return true;
             }
             else
@@ -374,7 +374,7 @@ namespace ZLevels
                                                         }
                                                     };
 
-                Log.Message("this.ZLevelsTracker.ContainsKey(map.Tile): " + this.ZLevelsTracker.ContainsKey(map.Tile) + " - " + map.Tile + " - " + map, true);
+                ZLogger.Message("this.ZLevelsTracker.ContainsKey(map.Tile): " + this.ZLevelsTracker.ContainsKey(map.Tile) + " - " + map.Tile + " - " + map, true);
                 if (!this.mapIndex.ContainsKey(map))
                 {
                     this.mapIndex[map] = index;
@@ -709,7 +709,7 @@ namespace ZLevels
                 this.jobTracker[pawn].dest = null;
                 this.jobTracker[pawn].mainJob = null;
                 this.jobTracker[pawn].forceGoToDestMap = false;
-                Log.Message("Resetting forceGoToDestMap");
+                ZLogger.Message("Resetting forceGoToDestMap");
             }
             else
             {
@@ -1138,9 +1138,7 @@ namespace ZLevels
                 thingToTeleport.Map?.mapPawns.DeRegisterPawn((Pawn)thingToTeleport);
             }
 
-            Traverse.Create(thingToTeleport).Field("mapIndexOrState")
-                .SetValue((sbyte)Find.Maps.IndexOf(mapToTeleport));
-
+            thingToTeleport.mapIndexOrState = (sbyte)Find.Maps.IndexOf(mapToTeleport);
             RegionListersUpdater.RegisterInRegions(thingToTeleport, mapToTeleport);
             mapToTeleport.spawnedThings.TryAdd(thingToTeleport);
             mapToTeleport.listerThings.Add(thingToTeleport);
@@ -1228,8 +1226,7 @@ namespace ZLevels
                 catch { };
             }
             FloodFillerFog.FloodUnfog(thingToTeleport.Position, mapToTeleport);
-            AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
-            { thingToTeleport.PositionHeld });
+            mapToTeleport.fogGrid.FloodUnfogAdjacent(thingToTeleport.PositionHeld);
         }
         public void TeleportPawn(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, bool spawnStairsBelow = false, bool spawnStairsUpper = false)
         {
@@ -1279,8 +1276,7 @@ namespace ZLevels
             }
 
             FloodFillerFog.FloodUnfog(pawnToTeleport.Position, mapToTeleport);
-            AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
-            { pawnToTeleport.PositionHeld });
+            mapToTeleport.fogGrid.FloodUnfogAdjacent(pawnToTeleport.PositionHeld);
             this.ReCheckStairs();
         }
 

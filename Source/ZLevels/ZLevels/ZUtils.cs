@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -179,13 +180,17 @@ namespace ZLevels
         }
         public static void TeleportThing(Thing thing, Map map, IntVec3 position)
         {
+            //    var mth = new StackTrace().GetFrame(1).GetMethod();
+            //    var cls = mth.ReflectedType.Name;
+            //    ZLogger.Message(cls + " - " + mth.Name + " - teleport " + thing + " from " + thing.Map + " to " + map + " from " + thing.Position + " to " + position, true);
+            
             if (thing.Map != map)
             {
-                Traverse.Create(thing).Field("mapIndexOrState").SetValue((sbyte)Find.Maps.IndexOf(map));
+                thing.mapIndexOrState = (sbyte)Find.Maps.IndexOf(map);
             }
             if (thing.Position != position)
             {
-                Traverse.Create(thing).Field("positionInt").SetValue(position);
+                thing.positionInt = position;
             }
         }
 

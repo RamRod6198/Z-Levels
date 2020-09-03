@@ -6,12 +6,12 @@ namespace ZLevels
 {
 	public static class ZLogger
 	{
-		//[Conditional("Debug")]
+		[Conditional("Debug")]
 		public static void Message(string message, bool temp = true)
 		{
 			if (ZLogger.DebugEnabled)
 
-				Log.Message(ZLogger.Prefix + message, true);
+				ZLogger.Message(ZLogger.Prefix + message, true);
 		}
 
 		public static void Warning(string message)

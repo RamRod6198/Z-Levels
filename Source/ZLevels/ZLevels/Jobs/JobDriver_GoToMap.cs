@@ -13,7 +13,7 @@ namespace ZLevels
             return true;
         }
 
-        protected override IEnumerable<Toil> MakeNewToils()
+        public override IEnumerable<Toil> MakeNewToils()
         {
             ZLogger.Message(pawn + " 1 ZUtils.ZTracker.jobTracker[pawn].dest: " + ZUtils.ZTracker.jobTracker[pawn].dest);
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZUtils.ZTracker.jobTracker[pawn].dest, this))

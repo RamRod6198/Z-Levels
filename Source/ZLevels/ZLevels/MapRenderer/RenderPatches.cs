@@ -11,6 +11,8 @@ namespace ZLevels
 	[HarmonyPatch(typeof(DynamicDrawManager), "DrawDynamicThings")]
 	public static class GenerateGraphics
 	{
+		public static Dictionary<Pawn, PawnRendererScaled> cachedRenderers = new Dictionary<Pawn, PawnRendererScaled>();
+
 		[HarmonyPostfix]
 		public static void DynamicDrawManagerPostfix(DynamicDrawManager __instance, Map ___map, ref bool ___drawingNow)
 		{
@@ -31,9 +33,7 @@ namespace ZLevels
 					cellRect.ClipInsideMap(map2);
 					cellRect = cellRect.ExpandedBy(1);
 					CellIndices cellIndices = map2.cellIndices;
-					HashSet<Thing> drawThings = Traverse.Create(map2.dynamicDrawManager)
-						.Field("drawThings").GetValue<HashSet<Thing>>();
-					foreach (Thing thing in drawThings)
+					foreach (Thing thing in map2.dynamicDrawManager.drawThings)
 					{
 						IntVec3 position = thing.Position;
 						if (position.GetTerrain(___map) == ZLevelsDefOf.ZL_OutsideTerrain)
@@ -58,17 +58,25 @@ namespace ZLevels
 									}
 									else if (thing is Pawn pawn)
 									{
-										var newRenderer = new PawnRendererScaled(pawn);
-										pawn.Drawer.renderer.graphics.ResolveAllGraphics();
-										newRenderer.graphics.nakedGraphic = pawn.Drawer.renderer.graphics.nakedGraphic;
-										newRenderer.graphics.headGraphic = pawn.Drawer.renderer.graphics.headGraphic;
-										newRenderer.graphics.hairGraphic = pawn.Drawer.renderer.graphics.hairGraphic;
-										newRenderer.graphics.rottingGraphic = pawn.Drawer.renderer.graphics.rottingGraphic;
-										newRenderer.graphics.dessicatedGraphic = pawn.Drawer.renderer.graphics.dessicatedGraphic;
-										newRenderer.graphics.apparelGraphics = pawn.Drawer.renderer.graphics.apparelGraphics;
-										newRenderer.graphics.packGraphic = pawn.Drawer.renderer.graphics.packGraphic;
-										newRenderer.graphics.flasher = pawn.Drawer.renderer.graphics.flasher;
-										newRenderer.RenderPawnAt(thing.DrawPos, curLevel, baseLevel);
+										if (cachedRenderers.ContainsKey(pawn))
+                                        {
+											cachedRenderers[pawn].RenderPawnAt(thing.DrawPos, curLevel, baseLevel);
+										}
+										else
+                                        {
+											var newRenderer = new PawnRendererScaled(pawn);
+											pawn.Drawer.renderer.graphics.ResolveAllGraphics();
+											newRenderer.graphics.nakedGraphic = pawn.Drawer.renderer.graphics.nakedGraphic;
+											newRenderer.graphics.headGraphic = pawn.Drawer.renderer.graphics.headGraphic;
+											newRenderer.graphics.hairGraphic = pawn.Drawer.renderer.graphics.hairGraphic;
+											newRenderer.graphics.rottingGraphic = pawn.Drawer.renderer.graphics.rottingGraphic;
+											newRenderer.graphics.dessicatedGraphic = pawn.Drawer.renderer.graphics.dessicatedGraphic;
+											newRenderer.graphics.apparelGraphics = pawn.Drawer.renderer.graphics.apparelGraphics;
+											newRenderer.graphics.packGraphic = pawn.Drawer.renderer.graphics.packGraphic;
+											newRenderer.graphics.flasher = pawn.Drawer.renderer.graphics.flasher;
+											newRenderer.RenderPawnAt(thing.DrawPos, curLevel, baseLevel);
+											cachedRenderers[pawn] = newRenderer;
+										}
 									}
 									else if (thing.def.projectile == null)
 									{

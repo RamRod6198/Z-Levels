@@ -45,7 +45,7 @@ namespace ZLevels
             yield break;
         }
 
-        protected override bool UseGenericEnterMapFloatMenuOption
+        public override bool UseGenericEnterMapFloatMenuOption
         {
             get
             {

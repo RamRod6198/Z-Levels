@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<TerrainDef ParentName="NaturalTerrainBase">
+		<defName>ZL_OutsideTerrain</defName>
+		<label>Void</label>
+		<texturePath>Terrain/FogOfWar</texturePath>
+		<edgeType>FadeRough</edgeType>
+		<renderPrecedence>350</renderPrecedence>
+		<pathCost>100000</pathCost>
+		<altitudeLayer>MetaOverlays</altitudeLayer>
+		<statBases>
+			<Beauty>0</Beauty>
+		</statBases>
+		<passability>Impassable</passability>
+		<scatterType>SoftGray</scatterType>
+		<extinguishesFire>true</extinguishesFire>
+		<holdSnow>false</holdSnow>
+		<takeFootprints>false</takeFootprints>
+		<takeSplashes>false</takeSplashes>
+		<affordances>
+			<li>Light</li>
+			<li>Medium</li>
+			<li>Heavy</li>
+			<li>Diggable</li>
+		</affordances>
+		<generatedFilth>Filth_Dirt</generatedFilth>
+		<fertility>0.00</fertility>
+	</TerrainDef>
+
+	<TerrainDef ParentName="NaturalTerrainBase">
+		<defName>ZL_OutsideTerrainTwo</defName>
+		<label>Void</label>
+		<texturePath>Terrain/FogOfWar</texturePath>
+		<edgeType>FadeRough</edgeType>
+		<renderPrecedence>350</renderPrecedence>
+		<pathCost>1</pathCost>
+		<statBases>
+			<Beauty>0</Beauty>
+		</statBases>
+		<passability>Standable</passability>
+		<scatterType>SoftGray</scatterType>
+		<extinguishesFire>true</extinguishesFire>
+		<holdSnow>false</holdSnow>
+		<takeFootprints>false</takeFootprints>
+		<takeSplashes>false</takeSplashes>
+		<affordances>
+			<li>Light</li>
+			<li>Medium</li>
+			<li>Heavy</li>
+			<li>Diggable</li>
+		</affordances>
+		<generatedFilth>Filth_Dirt</generatedFilth>
+		<fertility>0.00</fertility>
+	</TerrainDef>
+</Defs>

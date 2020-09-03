@@ -254,7 +254,7 @@ namespace ZLevels
                             Job job = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
                             job.count = 1;
                             ZTracker.BuildJobListFor(pawn, pawn.Map, job);
-                            Log.Message(pawn + " taking first job 2");
+                            ZLogger.Message(pawn + " taking first job 2");
                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
                             PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
                         }
@@ -298,11 +298,11 @@ namespace ZLevels
         //                        var strOperand = codes[j].ToString();
         //                        if (strOperand != null)
         //                        {
-        //                            Log.Message(strOperand);
+        //                            ZLogger.Message(strOperand);
         //                        }
         //                        if (strOperand != null && strOperand.Contains("CurrentMap"))
         //                        {
-        //                            Log.Message(pawn + " - Found");
+        //                            ZLogger.Message(pawn + " - Found");
         //                            foundCurrentMapMethod = true;
         //                            break;
         //                        }
@@ -312,7 +312,7 @@ namespace ZLevels
         //        }
         //        if (startIndex > -1 && endIndex > -1)
         //        {
-        //            Log.Message(pawn + " - Remove");
+        //            ZLogger.Message(pawn + " - Remove");
         //            // we cannot remove the first code of our range since some jump actually jumps to
         //            // it, so we replace it with a no-op instead of fixing that jump (easier).
         //            codes[startIndex].opcode = OpCodes.Nop;
@@ -328,7 +328,7 @@ namespace ZLevels
         //{
         //    private static void Postfix()
         //    {
-        //        Log.Message(pawn + " - Run");
+        //        ZLogger.Message(pawn + " - Run");
         //    }
         //}
 

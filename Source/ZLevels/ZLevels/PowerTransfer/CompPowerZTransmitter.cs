@@ -9,8 +9,7 @@ namespace ZLevels
 {
     public class CompPowerZTransmitter : CompPowerPlant
     {
-
-        protected override float DesiredPowerOutput
+        public override float DesiredPowerOutput
         {
             get
             {

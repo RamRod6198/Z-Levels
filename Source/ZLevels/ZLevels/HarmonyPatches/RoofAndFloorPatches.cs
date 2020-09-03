@@ -55,10 +55,7 @@ namespace ZLevels
                         {
                             __instance.topGrid[num] = ___underGrid[num];
                             ___underGrid[num] = null;
-                            Traverse.Create(__instance).Method("DoTerrainChangedEffects", new object[]
-                            {
-                            c
-                            }).GetValue();
+                            __instance.DoTerrainChangedEffects(c);
                         }
                         if (c.GetTerrain(___map) == TerrainDefOf.Sand)
                         {
@@ -81,7 +78,7 @@ namespace ZLevels
                             {
                                 if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
                                 {
-                                    //Log.Message(thingList[i] + " going down 1");
+                                    //ZLogger.Message(thingList[i] + " going down 1");
                                     ZTracker.TeleportThing(thingList[i], c, lowerMap, firstTime, 10);
                                 }
                             }
@@ -123,7 +120,7 @@ namespace ZLevels
                             {
                                 if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
                                 {
-                                    //Log.Message(thingList[i] + " going down 2");
+                                    //ZLogger.Message(thingList[i] + " going down 2");
                                     ZTracker.TeleportThing(thingList[i], __instance.Position, lowerMap, firstTime, 10);
                                 }
                             }
@@ -167,7 +164,7 @@ namespace ZLevels
                                 {
                                     if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
                                     {
-                                        //Log.Message(thingList[i] + " going down 3");
+                                        //ZLogger.Message(thingList[i] + " going down 3");
                                         ZTracker.TeleportThing(thingList[i], c, ___map, false, 10);
                                     }
                                 }

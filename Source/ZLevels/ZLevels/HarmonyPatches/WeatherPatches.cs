@@ -261,7 +261,7 @@ namespace ZLevels
                     {
                         if (map.Key < 0 && RegisterConditionPatch.blackList.Contains(__instance.def))
                         {
-                            //Log.Message("Removing from maps: " + map.Value + " - " + __instance.def);
+                            //ZLogger.Message("Removing from maps: " + map.Value + " - " + __instance.def);
                             __result.Remove(map.Value);
                         }
                     }
@@ -275,7 +275,7 @@ namespace ZLevels
         //    [HarmonyPostfix]
         //    public static void Postfix(GameConditionManager __instance, ref bool __result)
         //    {
-        //        Log.Message("TEST: " + __instance.ownerMap + " - " + __result);
+        //        ZLogger.Message("TEST: " + __instance.ownerMap + " - " + __result);
         //    }
         //}
         //

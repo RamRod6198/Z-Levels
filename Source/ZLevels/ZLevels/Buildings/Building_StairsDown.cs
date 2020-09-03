@@ -58,8 +58,7 @@ namespace ZLevels
                         stairsToSpawn.SetFaction(this.Faction);
                     }
                     FloodFillerFog.FloodUnfog(this.Position, mapBelow);
-                    AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapBelow.fogGrid, new object[]
-                    { this.Position });
+                    mapBelow.fogGrid.FloodUnfogAdjacent(this.Position);
                 }
                 else if (mapBelow == this.Map)
                 {

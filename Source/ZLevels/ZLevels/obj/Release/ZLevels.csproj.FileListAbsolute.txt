@@ -6,3 +6,7 @@ D:\GAMES\RimWorld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.cspro
 D:\GAMES\RimWorld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.csproj.CopyComplete
 D:\GAMES\RimWorld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.dll
 D:\GAMES\RimWorld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.pdb
+c:\GAMES\Rimworld\Mods\Z-Levels\1.2\Assemblies\ZLevels.dll
+c:\GAMES\Rimworld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.csprojAssemblyReference.cache
+c:\GAMES\Rimworld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.csproj.CoreCompileInputs.cache
+c:\GAMES\Rimworld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.dll
