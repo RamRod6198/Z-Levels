@@ -8,10 +8,10 @@ using Verse;
 
 namespace ZLevels
 {
-    class ZLevels : Mod
+    class ZLevelsMod : Mod
     {
         public static ZLevelsSettings settings;
-        public ZLevels(ModContentPack pack) : base(pack)
+        public ZLevelsMod(ModContentPack pack) : base(pack)
         {
             settings = GetSettings<ZLevelsSettings>();
         }

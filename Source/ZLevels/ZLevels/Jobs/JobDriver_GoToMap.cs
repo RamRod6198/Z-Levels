@@ -15,6 +15,7 @@ namespace ZLevels
 
         public override IEnumerable<Toil> MakeNewToils()
         {
+            this.FailOn(() => ZUtils.ZTracker.jobTracker[pawn].failIfTargetMapIsNotDest && ZUtils.ZTracker.jobTracker[pawn].target.Map != ZUtils.ZTracker.jobTracker[pawn].dest);
             ZLogger.Message(pawn + " 1 ZUtils.ZTracker.jobTracker[pawn].dest: " + ZUtils.ZTracker.jobTracker[pawn].dest);
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZUtils.ZTracker.jobTracker[pawn].dest, this))
             {

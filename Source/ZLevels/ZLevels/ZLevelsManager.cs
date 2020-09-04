@@ -701,6 +701,8 @@ namespace ZLevels
                 this.jobTracker[pawn].dest = null;
                 this.jobTracker[pawn].mainJob = null;
                 this.jobTracker[pawn].forceGoToDestMap = false;
+                this.jobTracker[pawn].failIfTargetMapIsNotDest = false;
+                this.jobTracker[pawn].target = null;
                 ZLogger.Message("Resetting forceGoToDestMap");
             }
             else
@@ -1109,42 +1111,44 @@ namespace ZLevels
 
         public void MoveThingToAnotherMap(Thing thingToTeleport, Map mapToTeleport)
         {
-            ZLogger.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
-            if (thingToTeleport.Map == mapToTeleport) return;
-            if (mapToTeleport.spawnedThings.Contains(thingToTeleport)) return;
-            if (mapToTeleport.listerThings.Contains(thingToTeleport)) return;
-            if (thingToTeleport is Pawn pawn && mapToTeleport.mapPawns.AllPawns.Contains(pawn)) return;
-
-            RegionListersUpdater.DeregisterInRegions(thingToTeleport, thingToTeleport.Map);
-            thingToTeleport.Map?.spawnedThings.Remove(thingToTeleport);
-            thingToTeleport.Map?.listerThings.Remove(thingToTeleport);
-            thingToTeleport.Map?.thingGrid.Deregister(thingToTeleport);
-            thingToTeleport.Map?.coverGrid.DeRegister(thingToTeleport);
-            thingToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(thingToTeleport);
-            thingToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(thingToTeleport);
-            thingToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(thingToTeleport);
-            StealAIDebugDrawer.Notify_ThingChanged(thingToTeleport);
-            thingToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(thingToTeleport);
-            if (thingToTeleport is Pawn)
-            {
-                thingToTeleport.Map?.mapPawns.DeRegisterPawn((Pawn)thingToTeleport);
-            }
-
-            thingToTeleport.mapIndexOrState = (sbyte)Find.Maps.IndexOf(mapToTeleport);
-            RegionListersUpdater.RegisterInRegions(thingToTeleport, mapToTeleport);
-            mapToTeleport.spawnedThings.TryAdd(thingToTeleport);
-            mapToTeleport.listerThings.Add(thingToTeleport);
-            mapToTeleport.thingGrid.Register(thingToTeleport);
-            mapToTeleport.coverGrid.Register(thingToTeleport);
-            mapToTeleport.tooltipGiverList.Notify_ThingSpawned(thingToTeleport);
-            mapToTeleport.attackTargetsCache.Notify_ThingSpawned(thingToTeleport);
-            StealAIDebugDrawer.Notify_ThingChanged(thingToTeleport);
-            mapToTeleport.dynamicDrawManager.RegisterDrawable(thingToTeleport);
-            if (thingToTeleport is Pawn)
-            {
-                mapToTeleport.mapPawns.RegisterPawn((Pawn)thingToTeleport);
-            }
+            //Log.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
+            thingToTeleport.DeSpawn(DestroyMode.Vanish);
+            GenSpawn.Spawn(thingToTeleport, thingToTeleport.positionInt, mapToTeleport, WipeMode.Vanish);
         }
+
+        public void MovePawnToAnotherMap(Pawn pawnToTeleport, Map mapToTeleport)
+        {
+            Log.Message("CHECK: trying to teleport " + pawnToTeleport + " from " + pawnToTeleport.Map + " to " + mapToTeleport, true);
+            if (pawnToTeleport.Map == mapToTeleport) return;
+            if (mapToTeleport.spawnedThings.Contains(pawnToTeleport)) return;
+            if (mapToTeleport.listerThings.Contains(pawnToTeleport)) return;
+            if (pawnToTeleport is Pawn pawn && mapToTeleport.mapPawns.AllPawns.Contains(pawn)) return;
+            
+            RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
+            pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);
+            pawnToTeleport.Map?.listerThings.Remove(pawnToTeleport);
+            pawnToTeleport.Map?.thingGrid.Deregister(pawnToTeleport);
+            pawnToTeleport.Map?.coverGrid.DeRegister(pawnToTeleport);
+            pawnToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(pawnToTeleport);
+            pawnToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(pawnToTeleport);
+            pawnToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(pawnToTeleport);
+            StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
+            pawnToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(pawnToTeleport);
+            pawnToTeleport.Map?.mapPawns.DeRegisterPawn((Pawn)pawnToTeleport);
+            
+            pawnToTeleport.mapIndexOrState = (sbyte)Find.Maps.IndexOf(mapToTeleport);
+            RegionListersUpdater.RegisterInRegions(pawnToTeleport, mapToTeleport);
+            mapToTeleport.spawnedThings.TryAdd(pawnToTeleport);
+            mapToTeleport.listerThings.Add(pawnToTeleport);
+            mapToTeleport.thingGrid.Register(pawnToTeleport);
+            mapToTeleport.coverGrid.Register(pawnToTeleport);
+            mapToTeleport.tooltipGiverList.Notify_ThingSpawned(pawnToTeleport);
+            mapToTeleport.attackTargetsCache.Notify_ThingSpawned(pawnToTeleport);
+            StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
+            mapToTeleport.dynamicDrawManager.RegisterDrawable(pawnToTeleport);
+            mapToTeleport.mapPawns.RegisterPawn(pawnToTeleport);
+        }
+
 
         public bool ShouldCameraJump(Thing thing)
         {
@@ -1220,6 +1224,7 @@ namespace ZLevels
             FloodFillerFog.FloodUnfog(thingToTeleport.Position, mapToTeleport);
             mapToTeleport.fogGrid.FloodUnfogAdjacent(thingToTeleport.PositionHeld);
         }
+
         public void TeleportPawn(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, bool spawnStairsBelow = false, bool spawnStairsUpper = false)
         {
             bool jump = this.ShouldCameraJump(pawnToTeleport);
@@ -1238,7 +1243,7 @@ namespace ZLevels
 
             this.SaveArea(pawnToTeleport);
 
-            MoveThingToAnotherMap(pawnToTeleport, mapToTeleport);
+            this.MovePawnToAnotherMap(pawnToTeleport, mapToTeleport);
 
             this.LoadArea(pawnToTeleport);
 
@@ -1688,7 +1693,5 @@ namespace ZLevels
         public Dictionary<Map, int> mapIndex;
         private List<Map> mapKeys = new List<Map>();
         private List<int> mapValues = new List<int>();
-
-        public Dictionary<Map, sbyte> cachedMapIndex = new Dictionary<Map, sbyte>();
     }
 }

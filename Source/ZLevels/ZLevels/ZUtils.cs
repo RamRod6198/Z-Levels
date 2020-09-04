@@ -179,27 +179,26 @@ namespace ZLevels
             }
         }
 
+        static int GetIndex(List<Map> list, Map value)
+        {
+            for (int index = 0; index < list.Count; index++)
+            {
+                if (list[index] == value)
+                {
+                    return index;
+                }
+            }
+            return -1;
+        }
         public static void TeleportThing(Thing thing, Map map, IntVec3 position)
         {
             //    var mth = new StackTrace().GetFrame(1).GetMethod();
             //    var cls = mth.ReflectedType.Name;
             //    ZLogger.Message(cls + " - " + mth.Name + " - teleport " + thing + " from " + thing.Map + " to " + map + " from " + thing.Position + " to " + position, true);
-            if (zTracker.cachedMapIndex.TryGetValue(map, out sbyte value))
+            var value = (sbyte)Find.Maps.IndexOf(map);
+            if (thing.mapIndexOrState != value)
             {
-                if (thing.mapIndexOrState != value)
-                {
-                    thing.mapIndexOrState = value;
-                }
-            }
-            else
-            {
-                var value2 = (sbyte)Find.Maps.IndexOf(map);
-                ZTracker.cachedMapIndex[map] = value2;
-                if (thing.mapIndexOrState != value2)
-                {
-                    thing.mapIndexOrState = value2;
-                }
-                Log.Message("Caching: " + map);
+                thing.mapIndexOrState = value;
             }
 
             if (thing.positionInt != position)

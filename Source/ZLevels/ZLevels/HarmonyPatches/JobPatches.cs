@@ -188,7 +188,6 @@ namespace ZLevels
             private static void Postfix(ref IEnumerable<Toil> __result, JobDriver_Ingest __instance, Toil chewToil)
             {
                 var list = __result.ToList<Toil>();
-
                 Thing IngestibleSource = __instance.job.GetTarget(TargetIndex.A).Thing;
                 Pawn actor = __instance.pawn;
                 Thing thing = null;
@@ -198,7 +197,6 @@ namespace ZLevels
                 var oldPosition = actor.Position;
                 bool select = false;
                 if (Find.Selector.SelectedObjects.Contains(actor)) select = true;
-
                 Predicate<Thing> baseChairValidator = delegate (Thing t)
                 {
                     if (t.def.building == null || !t.def.building.isSittable)
@@ -237,60 +235,65 @@ namespace ZLevels
                     }
                     return flag ? true : false;
                 };
-
-                foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(actor, oldMap, oldPosition))
+                if (oldMap != null)
                 {
-                    if (IngestibleSource.def.ingestible.chairSearchRadius > 0f)
+                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(actor, oldMap, oldPosition))
                     {
-                        thing = GenClosest.ClosestThingReachable(actor.Position, actor.Map,
-                            ThingRequest.ForGroup(ThingRequestGroup.BuildingArtificial), PathEndMode.OnCell,
-                            TraverseParms.For(actor), IngestibleSource.def.ingestible.chairSearchRadius,
-                            (Thing t) => baseChairValidator(t) && t.Position.GetDangerFor(actor, t.Map) == Danger.None);
-                    }
-                    if (thing == null)
-                    {
-                        try
-                        {
-                            intVec = RCellFinder.SpotToChewStandingNear(actor, actor.CurJob.GetTarget(TargetIndex.A).Thing);
-                        }
-                        catch
-                        {
-                            intVec = actor.Position;
-                        }
-                        Danger chewSpotDanger = intVec.GetDangerFor(actor, actor.Map);
-                        if (chewSpotDanger != Danger.None)
+                        if (IngestibleSource.def.ingestible.chairSearchRadius > 0f)
                         {
                             thing = GenClosest.ClosestThingReachable(actor.Position, actor.Map,
                                 ThingRequest.ForGroup(ThingRequestGroup.BuildingArtificial), PathEndMode.OnCell,
-                                TraverseParms.For(actor), IngestibleSource.def.ingestible.chairSearchRadius, (Thing t) =>
-                                baseChairValidator(t) && (int)t.Position.GetDangerFor(actor, t.Map) <= (int)chewSpotDanger);
+                                TraverseParms.For(actor), IngestibleSource.def.ingestible.chairSearchRadius,
+                                (Thing t) => baseChairValidator(t) && t.Position.GetDangerFor(actor, t.Map) == Danger.None);
+                        }
+                        if (thing == null)
+                        {
+                            try
+                            {
+                                intVec = RCellFinder.SpotToChewStandingNear(actor, actor.CurJob.GetTarget(TargetIndex.A).Thing);
+                            }
+                            catch
+                            {
+                                intVec = actor.Position;
+                            }
+                            Danger chewSpotDanger = intVec.GetDangerFor(actor, actor.Map);
+                            if (chewSpotDanger != Danger.None)
+                            {
+                                thing = GenClosest.ClosestThingReachable(actor.Position, actor.Map,
+                                    ThingRequest.ForGroup(ThingRequestGroup.BuildingArtificial), PathEndMode.OnCell,
+                                    TraverseParms.For(actor), IngestibleSource.def.ingestible.chairSearchRadius, (Thing t) =>
+                                    baseChairValidator(t) && (int)t.Position.GetDangerFor(actor, t.Map) <= (int)chewSpotDanger);
+                            }
+                        }
+
+                        if (thing != null)
+                        {
+                            intVec = thing.Position;
+                            actor.Reserve(thing, actor.CurJob);
+                            ZLogger.Message(actor + " - Found: " + thing);
+                            break;
                         }
                     }
 
-                    if (thing != null)
-                    {
-                        intVec = thing.Position;
-                        actor.Reserve(thing, actor.CurJob);
-                        ZLogger.Message(actor + " - Found: " + thing);
-                        break;
-                    }
-                }
-                ZUtils.TeleportThing(actor, oldMap, oldPosition);
-                if (select) Find.Selector.Select(actor);
+                    ZUtils.TeleportThing(actor, oldMap, oldPosition);
+                    if (select) Find.Selector.Select(actor);
 
-                if (thing != null && thing.Map != null && thing.Map != actor.Map)
-                {
-                    if (!IngestibleSource.def.IsDrug)
+                    if (thing != null && thing.Map != null && thing.Map != actor.Map)
                     {
-                        list.InsertRange(list.Count - 2, Toils_ZLevels.GoToMap(__instance.GetActor()
-                            , thing.Map, __instance));
-                    }
-                    else
-                    {
-                        list.InsertRange(list.Count - 1, Toils_ZLevels.GoToMap(__instance.GetActor()
-                            , thing.Map, __instance));
+                        if (!IngestibleSource.def.IsDrug)
+                        {
+                            list.InsertRange(list.Count - 2, Toils_ZLevels.GoToMap(__instance.GetActor()
+                                , thing.Map, __instance));
+                        }
+                        else
+                        {
+                            list.InsertRange(list.Count - 1, Toils_ZLevels.GoToMap(__instance.GetActor()
+                                , thing.Map, __instance));
+                        }
                     }
                 }
+
+
                 __result = list;
             }
         }
