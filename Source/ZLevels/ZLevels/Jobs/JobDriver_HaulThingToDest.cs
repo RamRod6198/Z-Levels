@@ -14,6 +14,7 @@ namespace ZLevels
             return true;
         }
         public Thing savedThing = null;
+
         public override IEnumerable<Toil> MakeNewToils()
         {
             var ZTracker = ZUtils.ZTracker;

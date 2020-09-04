@@ -129,7 +129,7 @@ namespace ZLevels.Properties
             private bool IsMatchedStairSet(Node node, Node node2)
             {
                 if (node.Map == node2.Map) return false;
-                int nodeIndex = ZUtils.ZTracker.mapIndex[node.Map], node2Index = ZUtils.ZTracker.mapIndex[node2.Map];
+                int nodeIndex = ZUtils.ZTracker.GetZIndexFor(node.Map), node2Index = ZUtils.ZTracker.GetZIndexFor(node2.Map);
                 if (nodeIndex + 1 == node2Index && node.key is Building_StairsUp ||
                     nodeIndex - 1 == node2Index && node.key is Building_StairsDown)
                 {
@@ -436,7 +436,7 @@ namespace ZLevels.Properties
 
                 public bool IsMatchedStair()
                 {
-                    if (source != sink || sourceMap == sinkMap || Math.Abs(sourceMap.Index - sinkMap.Index) != 1)
+                    if (source != sink || sourceMap == sinkMap || Math.Abs(ZUtils.ZTracker.GetZIndexFor(sourceMap) - ZUtils.ZTracker.GetZIndexFor(sinkMap)) != 1)
                         return false;
                     cost = 1;
                     return true;

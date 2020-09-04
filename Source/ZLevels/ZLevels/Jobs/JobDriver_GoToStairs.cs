@@ -10,6 +10,7 @@ namespace ZLevels
         {
             return true;
         }
+
         public override IEnumerable<Toil> MakeNewToils()
         {
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);

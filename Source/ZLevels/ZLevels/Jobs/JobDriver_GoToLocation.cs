@@ -29,25 +29,32 @@ namespace ZLevels
 
             List<ZPathfinder.DijkstraGraph.Node> stairList =
                 ZPathfinder.Instance.FindRoute(pawn.Position, TargetLocA, pawn.Map, TargetB.Thing.Map);
-            yield return new Toil { initAction = delegate { ZLogger.Message($"Going to target c boss (number of stairs = {stairList.Count})"); } };
-            ZLogger.Message("yeah");
-            yield return Toils_Goto.GotoCell(TargetIndex.C, PathEndMode.OnCell);
+            yield return new Toil { initAction = delegate
+            {
+                ZLogger.Message(
+                    $"Target  a = {TargetA.Thing}, target B = {TargetB.Thing}, Target c = {TargetC.Thing}"); } };
+            yield return new Toil
+            { initAction = delegate () {
+                for (int j = 0; j < stairList.Count; ++j)
+                {
+                    ZLogger.Message($"Stairs {j} = {stairList[j]}");
+                } } };            
 
             for (int i = 0; i < stairList.Count - 1; ++i)
             {
                 int i1 = i;
                 yield return new Toil
                 { initAction = delegate () { ZLogger.Message($"Going to target {i1} boss"); } };
+            
                 Toil setStairs = Toils_ZLevels.GetSetStairs(pawn, stairList[i].Map, this);
                 Toil useStairs = Toils_General.Wait(60, 0);
-                useStairs.WithProgressBarToilDelay(TargetIndex.C);
+                useStairs.WithProgressBarToilDelay(TargetIndex.A);
 
                 yield return setStairs;
                 yield return Toils_Goto.GotoCell(stairList[i].Location, PathEndMode.OnCell);
                 yield return useStairs;
 
-                yield return new Toil
-                { initAction = delegate () { ZLogger.Message($"Moving to stairs {i1} to target c boss"); } };
+
                 yield return Toils_ZLevels.GetTeleport(pawn, stairList[i1+1].Map, this, Toils_ZLevels.GetSetStairs(pawn, stairList[i1+1].Map, this));
 
 
