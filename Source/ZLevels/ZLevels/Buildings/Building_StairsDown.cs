@@ -87,21 +87,21 @@ namespace ZLevels
             }
         }
 
-        public bool giveDamage = true;
-        //public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
-        //{
-        //    if (giveDamage)
-        //    {
-        //        var stairsUp = GetMatchingStair;
-        //        {
-        //            Log.Message(stairsUp + ".HitPoints -= " + (int)totalDamageDealt);
-        //            stairsUp.giveDamage = false;
-        //            stairsUp.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
-        //            stairsUp.giveDamage = true;
-        //        }
-        //    }
-        //    base.PostApplyDamage(dinfo, totalDamageDealt);
-        //}
+        public bool syncDamage = true;
+        public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+        {
+            if (syncDamage)
+            {
+                var stairsUp = GetMatchingStair;
+                {
+                    Log.Message(stairsUp + ".HitPoints -= " + (int)totalDamageDealt);
+                    stairsUp.syncDamage = false;
+                    stairsUp.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
+                    stairsUp.syncDamage = true;
+                }
+            }
+            base.PostApplyDamage(dinfo, totalDamageDealt);
+        }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
             var ZTracker = ZUtils.ZTracker;

@@ -6,12 +6,12 @@ namespace ZLevels
 {
 	public static class ZLogger
 	{
-		//[Conditional("Debug")]
+		[Conditional("Debug")]
 		public static void Message(string message, bool temp = true)
 		{
 			if (ZLogger.DebugEnabled)
 
-				ZLogger.Message(ZLogger.Prefix + message, true);
+				Log.Message(ZLogger.Prefix + message, true);
 		}
 
 		public static void Warning(string message)
@@ -48,6 +48,7 @@ namespace ZLevels
 			Log.Error(ZLogger.Prefix + message, true);
 		}
 
+		[Conditional("Debug")]
 		public static void Pause(string reason)
 		{
 			if (ZLogger.DebugEnabled)

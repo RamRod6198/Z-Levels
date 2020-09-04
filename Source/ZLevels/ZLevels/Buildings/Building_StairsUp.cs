@@ -106,23 +106,24 @@ namespace ZLevels
             base.Destroy(mode);
         }
 
-        public bool giveDamage = true;
-        //public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
-        //{
-        //    Map upperLevel = ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
-        //    if (giveDamage)
-        //    {
-        //        var stairsDown = this.GetMatchingStair;
-        //        if (stairsDown != null)
-        //        {
-        //            Log.Message(stairsDown + ".HitPoints -= " + (int)totalDamageDealt, true);
-        //            stairsDown.giveDamage = false;
-        //            stairsDown.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
-        //            stairsDown.giveDamage = true;
-        //        }
-        //    }
-        //    base.PostApplyDamage(dinfo, totalDamageDealt);
-        //}
+        public bool syncDamage = true;
+
+        public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+        {
+            Map upperLevel = ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
+            if (syncDamage)
+            {
+                var stairsDown = this.GetMatchingStair;
+                if (stairsDown != null)
+                {
+                    Log.Message(stairsDown + ".HitPoints -= " + (int)totalDamageDealt, true);
+                    stairsDown.syncDamage = false;
+                    stairsDown.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
+                    stairsDown.syncDamage = true;
+                }
+            }
+            base.PostApplyDamage(dinfo, totalDamageDealt);
+        }
 
         public void GiveJob(Pawn pawn, Thing stairs)
         {
