@@ -9,14 +9,7 @@ namespace ZLevels
 {
     public class CompPowerZTransmitter : CompPowerPlant
     {
-
-        protected override float DesiredPowerOutput
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public override float DesiredPowerOutput => 0;
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {

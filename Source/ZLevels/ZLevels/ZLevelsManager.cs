@@ -457,7 +457,7 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 1.1");
                 log += "Job method 1.1\n";
-                ZLogger.Message(pawn + " haul " + jobToDo.targetA.Thing + " to " + dest);
+                ZLogger.Message($"{pawn} haul {jobToDo.targetA.Thing} to {dest}");
                 this.jobTracker[pawn].dest = jobToDo.targetB.Thing.Map;
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = jobToDo.count;
@@ -490,7 +490,7 @@ namespace ZLevels
                 }
                 else
                 {
-                    var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
+                    var target = jobToDo.targetQueueA.FirstOrDefault(x => x.HasThing && x.Thing.Map != null);
                     if (target != null && target.Thing?.Map != null)
                     {
                         ZLogger.Message("Job method 1.76");
@@ -511,7 +511,7 @@ namespace ZLevels
                 }
                 else
                 {
-                    var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
+                    var target = jobToDo.targetQueueA.FirstOrDefault(x => x.HasThing && x.Thing.Map != null);
                     if (target != null && target.Thing?.Map != null)
                     {
                         ZLogger.Message("Job method 1.79");
@@ -521,8 +521,9 @@ namespace ZLevels
                     }
                 }
             }
-            else if (jobToDo?.targetQueueA?.Count > 0
-                && jobToDo?.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
+            //We know jobToDo is not null already
+            else if (jobToDo.targetQueueA?.Count > 0
+                && jobToDo.targetQueueA.Count(x => x.HasThing && x.Thing.Map != null) > 0)
             {
                 ZLogger.Message("Job method 1.8");
                 log += "Job method 1.8\n";
@@ -590,8 +591,8 @@ namespace ZLevels
                     }
                 }
             }
-            else if (jobToDo?.targetQueueB?.Count > 0
-                && jobToDo?.targetQueueB.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
+            else if (jobToDo.targetQueueB?.Count > 0
+                && (jobToDo.targetQueueB).Count(x => x.HasThing && x.Thing.Map != null) > 0)
             {
                 ZLogger.Message("Job method 2");
                 log += "Job method 2\n";

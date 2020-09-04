@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Verse;
 using Verse.AI;
 
@@ -30,7 +31,29 @@ namespace ZLevels
                 }
             };
 
-            Toil setStairs = new Toil
+            Toil setStairs = GetSetStairs(pawn, dest, instance);
+            var goToStairs = Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.OnCell);
+            if (pawn.HostileTo(Faction.OfPlayer))
+            {
+                pawn.CurJob.canBash = true;
+            }
+            Toil useStairs = Toils_General.Wait(60, 0);
+            ToilEffects.WithProgressBarToilDelay(useStairs, TargetIndex.C, false, -0.5f);
+            //ToilFailConditions.FailOnDespawnedNullOrForbidden<Toil>(useStairs, TargetIndex.C);
+            //ToilFailConditions.FailOnCannotTouch<Toil>(useStairs, TargetIndex.C, PathEndMode.OnCell);
+
+            Toil teleport = GetTeleport(pawn, dest, instance, setStairs);
+
+            yield return setStairs;
+            yield return goToStairs;
+            yield return useStairs;
+            yield return teleport;
+            yield return end;
+        }
+
+        internal static Toil GetSetStairs(Pawn pawn, Map dest, JobDriver instance)
+        {
+            return new Toil
             {
                 initAction = delegate ()
                 {
@@ -67,17 +90,11 @@ namespace ZLevels
 
                 }
             };
-            var goToStairs = Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.OnCell);
-            if (pawn.HostileTo(Faction.OfPlayer))
-            {
-                pawn.CurJob.canBash = true;
-            }
-            Toil useStairs = Toils_General.Wait(60, 0);
-            ToilEffects.WithProgressBarToilDelay(useStairs, TargetIndex.C, false, -0.5f);
-            //ToilFailConditions.FailOnDespawnedNullOrForbidden<Toil>(useStairs, TargetIndex.C);
-            //ToilFailConditions.FailOnCannotTouch<Toil>(useStairs, TargetIndex.C, PathEndMode.OnCell);
+        }
 
-            Toil teleport = new Toil
+        public static Toil GetTeleport(Pawn pawn, Map dest, JobDriver instance, Toil setStairs)
+        {
+            return new Toil
             {
                 initAction = delegate ()
                 {
@@ -88,7 +105,7 @@ namespace ZLevels
                         if (map == null)
                         {
                             map = ZTracker.CreateUpperLevel(pawn.Map, stairsUp.Position);
-                            if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
+                            if (!string.IsNullOrEmpty(stairsUp.pathToPreset))
                             {
                                 var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
@@ -98,7 +115,7 @@ namespace ZLevels
                         }
                         else
                         {
-                            if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
+                            if (!string.IsNullOrEmpty(stairsUp.pathToPreset))
                             {
                                 var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
@@ -113,7 +130,7 @@ namespace ZLevels
                         Map map = ZTracker.GetLowerLevel(pawn.Map.Tile, pawn.Map);
                         if (map != null)
                         {
-                            if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
+                            if (!string.IsNullOrEmpty(stairsDown.pathToPreset))
                             {
                                 var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
@@ -130,12 +147,15 @@ namespace ZLevels
                     }
                 }
             };
-
-            yield return setStairs;
-            yield return goToStairs;
-            yield return useStairs;
-            yield return teleport;
-            yield return end;
         }
+
+        public static IEnumerable<Toil> DoNothingThings(Pawn pawn, Map dest, JobDriver instance)
+        {
+            //ZPathfinder check for route
+            //If found, build a route with alternating toils of teleport and gotostairs
+            //
+            yield return null;
+        }
+
     }
 }

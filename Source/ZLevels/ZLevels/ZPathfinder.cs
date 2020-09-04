@@ -1,8 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
+using Multiplayer.API;
+using RimWorld;
+using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 
@@ -19,9 +25,476 @@ namespace ZLevels.Properties
     /// </summary>
     public class ZPathfinder
     {
+
+
+        public class DijkstraGraph
+        {
+            HashSet<Node> nodes = new HashSet<Node>();
+
+            public DijkstraGraph(int tile)
+            {
+                StringBuilder sb = new StringBuilder();
+                List<Map> maps = ZUtils.ZTracker.GetAllMaps(tile);
+
+                foreach (Map map in maps)
+                {
+
+                    foreach (Building_Stairs stairs in ZUtils.ZTracker.stairsUp[map])
+                    {
+                        nodes.Add(new Node(stairs));
+                    }
+
+                    //foreach (Map map2 in maps)
+                    //{
+                    //    foreach (Building_Stairs stairs2 in ZUtils.ZTracker.stairsUp[map2])
+                    //    {
+                    //        AddAndCalculateDistance(stairs, stairs2);
+                    //    }
+                    //    foreach (Building_Stairs stairs2 in ZUtils.ZTracker.stairsDown[map2])
+                    //    {
+                    //        AddAndCalculateDistance(stairs, stairs2);
+                    //    }
+                    //}
+
+                    foreach (Building_Stairs stairs in ZUtils.ZTracker.stairsDown[map])
+                    {
+                        nodes.Add(new Node(stairs));
+                    }
+
+                    //foreach (Map map2 in maps)
+                    //{
+                    //    foreach (Building_Stairs stairs2 in ZUtils.ZTracker.stairsUp[map2])
+                    //    {
+                    //        AddAndCalculateDistance(stairs, stairs2);
+                    //    }
+                    //    foreach (Building_Stairs stairs2 in ZUtils.ZTracker.stairsDown[map2])
+                    //    {
+                    //        AddAndCalculateDistance(stairs, stairs2);
+                    //    }
+                    //}
+
+
+                }
+
+                foreach (var node in nodes)
+                {
+                    foreach (var neighborNode in nodes)
+                    {
+                        if (node == neighborNode) continue;
+                        float cost = float.PositiveInfinity;
+                        bool neighbors = false;
+                        if (node.Map == neighborNode.Map)
+                        {
+                            PawnPath p = node.Map.pathFinder.FindPath(node.Location, neighborNode.Location, StairParms);
+                            cost = p.TotalCost;
+                            p.ReleaseToPool();
+                            p = null;
+
+                        }
+                        else if (IsMatchedStairSet(node, neighborNode))
+                        {
+                            cost = 3;
+                            neighbors = true;
+                        }
+                        if (cost < 0) cost = float.PositiveInfinity;
+                        neighbors = !float.IsPositiveInfinity(cost);
+
+                        if (neighbors && node.AddNeighbor(neighborNode, cost))
+                        {
+                            ZLogger.Message($"Made {node} and {neighborNode} neighbors.  Distance = {cost}");
+                        }
+
+                    }
+                }
+
+
+
+                //foreach (Tuple<Node, Node> key in graphDictionary.Keys)
+                //{
+                //    //Some of these will fail and that's good- we only need 1 of each node.
+                //    nodes.Add(key.Item1);
+                //    nodes.Add(key.Item2);
+
+                //    float cost = graphDictionary[key].cost;
+                //    if (!float.IsPositiveInfinity(graphDictionary[key].cost) && 
+                //        (Math.Abs(cost - PathSummary.MatchedStairCost) < .001 || (key.Item1.key.Map == key.Item2.key.Map)))
+                //    {
+                //        //If they are matched stairs or if they are accessible to each other on the same level, they are neighbors
+                //        key.Item1.AddNeighbor(key.Item2);
+                //        key.Item2.AddNeighbor(key.Item1);
+                //    }
+                //}
+            }
+
+            private bool IsMatchedStairSet(Node node, Node node2)
+            {
+                if (node.Map == node2.Map) return false;
+                int nodeIndex = ZUtils.ZTracker.mapIndex[node.Map], node2Index = ZUtils.ZTracker.mapIndex[node2.Map];
+                if (nodeIndex + 1 == node2Index && node.key is Building_StairsUp ||
+                    nodeIndex - 1 == node2Index && node.key is Building_StairsDown)
+                {
+                    return node.key.Position == node2.key.Position;
+                }
+
+                return false;
+            }
+
+            public List<Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo)
+            {
+                Building_Stairs sourceStairs = (Building_Stairs)GenClosest.ClosestThing_Global_Reachable(from
+                    , mapFrom, mapFrom.listerThings.AllThings
+                        .Where(x => x is Building_Stairs), PathEndMode.OnCell, StairParms);
+
+
+                Building_Stairs sinkStairs = (Building_Stairs)GenClosest.ClosestThing_Global_Reachable(to
+                    , mapFrom, mapTo.listerThings.AllThings
+                        .Where(x => x is Building_Stairs), PathEndMode.OnCell, StairParms);
+
+                Node source = nodes.First(x => x.key == sourceStairs), sink = nodes.First(x => x.key == sinkStairs);
+
+                FindNeighbors(source);
+           
+                FindNeighbors(sink);
+                StringBuilder sb = new StringBuilder("Source neighbors: \n");
+                foreach (var neighbor in source.neighbors)
+                {
+                    sb.AppendLine($"Source({source}) neighbor: {neighbor} distance: {source.neighborDistances[neighbor]}");
+                }
+
+                sb.AppendLine("Sink neighbors");
+                foreach (var neighbor in sink.neighbors)
+                {
+                    sb.AppendLine($"sink({sink}) neighbor: {neighbor} distance: {sink.neighborDistances[neighbor]}");
+                }
+                ZLogger.Message(sb.ToString());
+                return DijkstraConnect(source, sink);
+                //Clean up temp nodes
+            }
+
+            internal void FindNeighbors(Node node)
+            {
+                foreach (Node neighbor in nodes)
+                {
+                    if (neighbor.Map != node.Map) continue;
+                    PawnPath p = node.Map.pathFinder.FindPath(node.Location, neighbor.Location, StairParms);
+                    float cost = p.TotalCost;
+                    p.ReleaseToPool();
+                    p = null;
+                    if (cost > 0)
+                    {
+                        node.AddNeighbor(neighbor, cost);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="p"></param>
+            private List<Node> DijkstraConnect(Node source, Node sink)
+            {
+                string lastKey = "nokey";
+                StringBuilder sb = new StringBuilder();
+
+                try
+                {
+                    List<Node> ret = null;
+                    Dictionary<Node, float> distances = new Dictionary<Node, float>(nodes.Count);
+                    Dictionary<Node, Node> previousNodes = new Dictionary<Node, Node>(nodes.Count);
+                    HashSet<Node> Q = new HashSet<Node>(nodes);
+                    foreach (Node nd in nodes)
+                    {
+                        distances.SetOrAdd(nd, Single.PositiveInfinity);
+                        previousNodes.SetOrAdd(nd, null);
+                    }
+
+                    lastKey = "distances/source";
+                    distances[source] = 0;
+                    if (!Q.Remove(source))
+                    {
+                        lastKey = "source missing";
+                        throw new InvalidDataException("Source somehow not in set of nodes");
+                    }
+                    foreach (Node neighbor in source.neighbors)
+                    {
+                        distances[neighbor] = source.neighborDistances[neighbor];
+                    }
+
+                    bool found = false;
+                    Node u = source, next = null;
+                    float cost = 0f;
+                    while (Q.Count > 0)
+                    {
+                        sb.Clear();
+                        u = Q.MinBy((x) => distances[x]);
+                        foreach (Node nd in u.neighbors)
+                        {
+                            sb.Append($"nd = {nd}, distance = {distances[nd]}");
+                        }
+
+                        sb.Append($"Chose {u} as shortest with {distances[u]}");
+                        //ZLogger.Message(sb.ToString());
+                        Console.WriteLine(sb.ToString());
+                        Q.Remove(u);
+                        if (u == sink) break;
+                        foreach (Node v in u.neighbors)
+                        {
+                            float altDistance = distances[u] + u.neighborDistances[v];
+                            if (altDistance < distances[v])
+                            {
+                                distances[v] = altDistance;
+                                previousNodes[v] = u;
+                            }
+                        }
+                    }
+
+                    sb.Clear();
+                    foreach (Node node in previousNodes.Keys)
+                    {
+                        sb.Append($"Node:{node}, previous: {previousNodes[node]}, cumulative distance: {distances[node]}");
+                    }
+                    //ZLogger.Message(sb.ToString());
+                    //when this finishes, we have the shortest path from sink to source in the previousNode dictionary- now we just need to get it out
+                    ret = new List<Node>();
+                    sb.Clear();
+                    while (sink != null)
+                    {
+                        sb.AppendLine($"{sink.key}");
+                        ret.Add(sink);
+                        sink = previousNodes[sink];
+                    }
+
+                    ret.Add(source);
+                    sb.AppendLine($"{source.key}");
+                    ZLogger.Message(sb.ToString());
+                    ret.Reverse();
+                    return ret;
+                }
+                catch (Exception e)
+                {
+                    sb = new StringBuilder();
+                    foreach (object v in e.Data.Keys)
+                    {
+                        sb.Append($"{e.Data[v]}: {v}");
+                    }
+                    ZLogger.Message($"Couldn't find key!  Or key was null... {lastKey}  Exception data of type {e.GetType()} follows: {sb}");
+                    return new List<Node>();
+                }
+            }
+
+            //private void AddAndCalculateDistance(Building_Stairs stairs, Building_Stairs stairs2)
+            //{
+            //    try
+            //    {
+            //        PathSummary ps = new PathSummary(stairs, stairs2);
+            //        Node from = new Node(stairs), to = new Node(stairs2);
+            //        var key = new Tuple<Node, Node>(from, to);
+            //        if (graphDictionary.ContainsKey(key))
+            //        {
+            //            graphDictionary[key] = ps;
+            //        }
+            //        else
+            //        {
+            //            graphDictionary.Add(key, ps);
+            //        }
+            //        ps.CalculateInitialCost();
+            //        if (float.IsPositiveInfinity(ps.cost))
+            //        {
+            //            from.neighborDistances.Remove(to);
+            //            to.neighborDistances.Remove(from);
+            //        }
+            //        else
+            //        {
+            //            from.neighborDistances[to] = to.neighborDistances[from] = ps.cost;
+            //            ZLogger.Message($"Adding distance of {ps.cost} for nodes {from} to {to}");
+            //        }
+
+            //    }
+            //    catch (Exception)
+            //    {
+            //        ZLogger.Message($"Exception caught.  Something is null.  {stairs}  {stairs2} "); //{graphDictionary}");
+            //    }
+            //}
+
+            public DijkstraGraph(Map map) : this(map.Tile) { }
+
+            //private readonly Dictionary<Tuple<Node, Node>, PathSummary> graphDictionary = new Dictionary<Tuple<Node, Node>, PathSummary>();
+            public class Node
+            {
+                public override string ToString()
+                {
+                    return $"Node of stairs: {(key?.ToString()) ?? "unknownStairs"}";
+                }
+
+                public Node(Building_Stairs stairs)
+                {
+                    key = stairs;
+                    Location = stairs.Position;
+                }
+
+                public Dictionary<Node, float> neighborDistances = new Dictionary<Node, float>();
+                public IntVec3 Location;
+
+                /// <summary>
+                /// This is used for non-stair nodes (temporary nodes)
+                /// </summary>
+                /// <param name="location"></param>
+                public Node(IntVec3 location)
+                {
+                    this.Location = location;
+                    key = null;
+                }
+
+                public Building_Stairs key;
+                public readonly HashSet<Node> neighbors = new HashSet<Node>();
+
+                private Map _map = null;
+
+                public Map Map
+                {
+                    get => _map ?? key.Map;
+                    set => _map = value;
+                }
+
+                public bool AddNeighbor(Node neighbor, float cost = float.PositiveInfinity)
+                {
+                    try
+                    {
+                        if (neighbor.key == null) return false;
+                        if (!neighbors.Add(neighbor)) return false;
+
+                        neighbor.AddNeighbor(this, cost);
+                        neighborDistances.SetOrAdd(neighbor, cost);
+
+                    }
+                    catch (ArgumentException e)
+                    {
+                        ZLogger.Message(
+                            $"AddNeighbor: Key already exists: (I think... e.message = {e.Message}.  Would be key was node for {neighbor.key}");
+                    }
+
+                    return true;
+                }
+
+
+                public bool SetDistance(Node neighbor, float distance)
+                {
+                    try
+                    {
+                        if (!neighborDistances.ContainsKey(neighbor)) return false;
+                        neighborDistances[neighbor] = distance;
+                    }
+                    catch (ArgumentException e)
+                    {
+                        ZLogger.Message($"Set Distance: Key already exists: (I think... e.message = {e.Message}.  Would be key was node for {neighbor.key}");
+                    }
+                    return true;
+
+                }
+                //private bool removeTemporaryNeighbors()
+                //{
+                //    HashSet<Node> tempNeighborNodes = new HashSet<Node>(1);
+                //    foreach (Node node in neighbors)
+                //    {
+                //        if (node.key == null)
+                //        {
+                //            tempNeighborNodes.Add(node);
+                //        }
+
+                //    }
+                //    neighbors.ExceptWith(tempNeighborNodes);
+                //    return tempNeighborNodes.Count > 0;
+                //}
+
+                public void MakeTempNode(Map map)
+                {
+                    Map = map;
+
+                }
+            }
+
+            public class PathSummary : IEquatable<PathSummary>
+            {
+                public Map sinkMap, sourceMap;
+                public IntVec3 sink, source;
+                public float cost;
+
+                //public PathSummary(Node from, Node to, float cost = Single.PositiveInfinity) : this(from.key, to.key, cost) { }
+
+                public PathSummary(Thing from, Thing to, float cost = float.PositiveInfinity) : this(from.Map, to.Map, from.Position, to.Position, cost) { }
+
+                PathSummary(LocalTargetInfo from, LocalTargetInfo to, Map fromMap, Map toMap, float cost = float.PositiveInfinity) : this(fromMap, toMap, from.Cell, to.Cell) { }
+
+                public PathSummary(Map fromMap, Map toMap, IntVec3 fromPosition, IntVec3 toPosition, float pathCost = float.PositiveInfinity)
+                {
+                    sinkMap = toMap;
+                    sourceMap = fromMap;
+                    sink = toPosition;
+                    source = fromPosition;
+                    cost = pathCost;
+                }
+
+                public bool IsMatchedStair()
+                {
+                    if (source != sink || sourceMap == sinkMap || Math.Abs(sourceMap.Index - sinkMap.Index) != 1)
+                        return false;
+                    cost = 1;
+                    return true;
+
+                }
+
+                public void CalculateInitialCost()
+                {
+                    if (sourceMap == sinkMap)
+                    {
+                        PawnPath p = sourceMap.pathFinder.FindPath(source, sink, StairParms);
+                        cost = p.TotalCost;
+                        p.ReleaseToPool();
+                        if (cost < 0)//unreachable is -1
+                        {
+                            cost = float.PositiveInfinity;
+                        }
+                    }
+                    else if (IsMatchedStair())
+                    {
+                        cost = MatchedStairCost;
+                    }
+                    else
+                    {
+                        cost = float.PositiveInfinity;
+                    }
+                }
+
+
+
+                public const float MatchedStairCost = 3.0f;
+
+
+                public bool Equals(PathSummary other)
+                {
+                    return (other != null) && (other.sourceMap == this.sourceMap) && (other.sinkMap == sinkMap) && (source == other.source) && (sink == other.sink);
+                }
+
+                public Job MakeJob()
+                {
+                    return JobMaker.MakeJob(JobDefOf.Goto, new LocalTargetInfo(source), new LocalTargetInfo(sink));
+                }
+
+
+            }
+
+
+        }
+
+
+        private Dictionary<int, DijkstraGraph> stairGraphs;
+
         private static Lazy<ZPathfinder> _instance = new Lazy<ZPathfinder>();
         public static ZPathfinder Instance => _instance.Value;
         public static readonly TraverseParms StairParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
+
+        private static Dictionary<Tuple<Building_Stairs, Building_Stairs>, List<Job>> StairPaths =
+            new Dictionary<Tuple<Building_Stairs, Building_Stairs>, List<Job>>();
         public static void ResetPathfinder()
         {
 
@@ -29,24 +502,59 @@ namespace ZLevels.Properties
 
         }
 
-        public List<PawnPath> FindPath(Pawn pawn, Thing dest, bool checkLocalPathfinderForPath = false)
+        public ZPathfinder()
         {
-            bool goingUp = !(dest is Building_Stairs) || dest is Building_StairsUp;
-            return FindPath(pawn.Position, dest.Position,pawn.Map,checkLocalPathfinderForPath, goingUp);
+            stairGraphs = new Dictionary<int, DijkstraGraph>();
         }
 
-        public List<PawnPath> FindPath(IntVec3 source, IntVec3 sink, Map map, bool checkLocalPathfinderForPath = false, bool goingUp = true)
+
+
+        internal DijkstraGraph getDijkstraGraphForTile(int tile)
         {
-            Building_Stairs SourceStairs = GetClosestStair(source, goingUp, map, out PawnPath pathToSource);
-            Building_Stairs SinkStairs = GetClosestStair(sink, SourceStairs is Building_StairsUp, map, out PawnPath pathToSink);
-            List<PawnPath> paths = IterativeFindPath(SourceStairs, SinkStairs);
-            paths.Insert(0, pathToSource);
-            paths.Insert(paths.Count-1, pathToSink);
+            if (!HasDijkstraForTile(tile)) //Already initialized
+            {
+                throw new ArgumentNullException("Call SetOrCreateDijkstraGraph for the tile first");
+            }
 
-            return paths;
-
-
+            return stairGraphs[tile];
         }
+
+        internal bool HasDijkstraForTile(int tile)
+        {
+            return stairGraphs.ContainsKey(tile);
+        }
+
+
+        internal void SetOrCreateDijkstraGraph(int tile)
+        {
+            DijkstraGraph dg = new DijkstraGraph(tile);
+            if (!HasDijkstraForTile(tile)) //Already initialized
+            {
+                stairGraphs.Add(tile, dg);
+            }
+            else
+            {
+                stairGraphs[tile] = dg;
+            }
+        }
+        //public List<PawnPath> FindPath(Pawn pawn, Thing dest, bool checkLocalPathfinderForPath = false)
+        //{
+        //    bool goingUp = !(dest is Building_Stairs) || dest is Building_StairsUp;
+        //    return FindPath(pawn.Position, dest.Position, pawn.Map, checkLocalPathfinderForPath, goingUp);
+        //}
+
+        //public List<PawnPath> FindPath(IntVec3 source, IntVec3 sink, Map map, bool checkLocalPathfinderForPath = false, bool goingUp = true)
+        //{
+        //    Building_Stairs SourceStairs = GetClosestStair(source, goingUp, map, out PawnPath pathToSource);
+        //    Building_Stairs SinkStairs = GetClosestStair(sink, SourceStairs is Building_StairsUp, map, out PawnPath pathToSink);
+        //    List<PawnPath> paths = IterativeFindPath(SourceStairs, SinkStairs);
+        //    paths.Insert(0, pathToSource);
+        //    paths.Insert(paths.Count - 1, pathToSink);
+
+        //    return paths;
+
+
+        //}
 
 
 
@@ -57,11 +565,11 @@ namespace ZLevels.Properties
 
         //public void CalculateStairPaths()
         //{
-        //    //StairPaths = new Dictionary<Tuple<Building_Stairs, Building_Stairs>, List<PawnPath>>();
+        //    StairPaths = new Dictionary<Tuple<Building_Stairs, Building_Stairs>, List<Job>>();
 
         //    foreach (Map map in ZUtils.ZTracker.mapIndex.Keys)
         //    {
-        //        //ZLogger.Message($"Stair paths at start of map index {map.Index}: {StairPaths.Count}");
+        //        ZLogger.Message($"Stair paths at start of map index {map.Index}: {StairPaths.Count}");
 
         //        foreach (Building_Stairs stairsDown in ZUtils.ZTracker.stairsDown[map])
         //        {
@@ -83,7 +591,7 @@ namespace ZLevels.Properties
         //                JoinStairs(stairsUp, stairsUp2, map);
         //            }
         //        }
-        //       // ZLogger.Message($"Stair paths at end of map index {map.Index}: {StairPaths.Count}");
+        //        ZLogger.Message($"Stair paths at end of map index {map.Index}: {StairPaths.Count}");
 
         //    }
 
@@ -104,12 +612,12 @@ namespace ZLevels.Properties
         //    //}
         //}
 
-        private List<PawnPath> FindPath(Thing source, Thing sink)
-        {
-            List<PawnPath> ret = IterativeFindPath((Building_Stairs)source,
-                (Building_Stairs)sink);
-            return ret;
-        }
+        //private List<PawnPath> FindPath(Thing source, Thing sink)
+        //{
+        //    List<PawnPath> ret = IterativeFindPath((Building_Stairs)source,
+        //        (Building_Stairs)sink);
+        //    return ret;
+        //}
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static string GetCurrentMethod()
@@ -128,73 +636,73 @@ namespace ZLevels.Properties
             SameFloorDifferentDirections,
             DeadEnd
         };
-        private List<PawnPath> IterativeFindPath(Building_Stairs source, Building_Stairs sink)
-        {
-            HashSet<Building_Stairs> stairsChecked = null;
-            List<PawnPath> ret = new List<PawnPath>();
+        //private List<PawnPath> IterativeFindPath(Building_Stairs source, Building_Stairs sink)
+        //{
+        //    HashSet<Building_Stairs> stairsChecked = null;
+        //    List<PawnPath> ret = new List<PawnPath>();
 
-            Tuple<Building_Stairs, Building_Stairs, object>
-                nextSet = new Tuple<Building_Stairs, Building_Stairs, object>(source, sink, null);
-            for (int i = 0; i < itMax; ++i)
-            {
-                ZLogger.Message($"Iteration {i} of {itMax}, source->sink = {source}->{sink}");
-                nextSet = IterativeFindPath(source, sink, ret, stairsChecked);
-                source = nextSet.Item1;
-                sink = nextSet.Item2;
-                stairsChecked = (HashSet<Building_Stairs>)nextSet.Item3;
-                //If item1 and 2 are equal, it means we've found the path and can break out
-                if (nextSet.Item1 != nextSet.Item2) continue;
-                ret.Reverse();
-                ZLogger.Message("Path found. Path follows:");
-                foreach (PawnPath pawnPath in ret)
-                {
-                    ZLogger.Message($"{pawnPath}");
-                }
-                break;
-            }
+        //    Tuple<Building_Stairs, Building_Stairs, object>
+        //        nextSet = new Tuple<Building_Stairs, Building_Stairs, object>(source, sink, null);
+        //    for (int i = 0; i < itMax; ++i)
+        //    {
+        //        ZLogger.Message($"Iteration {i} of {itMax}, source->sink = {source}->{sink}");
+        //        nextSet = IterativeFindPath(source, sink, ret, stairsChecked);
+        //        source = nextSet.Item1;
+        //        sink = nextSet.Item2;
+        //        stairsChecked = (HashSet<Building_Stairs>)nextSet.Item3;
+        //        //If item1 and 2 are equal, it means we've found the path and can break out
+        //        if (nextSet.Item1 != nextSet.Item2) continue;
+        //        ret.Reverse();
+        //        ZLogger.Message("Path found. Path follows:");
+        //        foreach (PawnPath pawnPath in ret)
+        //        {
+        //            ZLogger.Message($"{pawnPath}");
+        //        }
+        //        break;
+        //    }
 
-            return ret;
-        }
+        //    return ret;
+        //}
 
-        private Tuple<Building_Stairs, Building_Stairs, object> IterativeFindPath(Building_Stairs source,
-            Building_Stairs sink, List<PawnPath> paths, HashSet<Building_Stairs> stairsChecked)
-        {
-            List<PawnPath> PreexistingPath = new List<PawnPath>();
-            Tuple<Building_Stairs, Building_Stairs, object> ret = null;
-            switch (GetCaseForPair(source, sink, PreexistingPath))
-            {
-                case StairCasesForPathfinding.PathKnown:
-                    paths.AddRange(PreexistingPath);
-                    ret = new Tuple<Building_Stairs, Building_Stairs, object>(source, source, null);
-                    break;
-                case StairCasesForPathfinding.SameFloorSameDirections:
-                    ret = new Tuple<Building_Stairs, Building_Stairs, object>(source.GetMatchingStair(),
-                        sink.GetMatchingStair(), null);
-                    break;
-                case StairCasesForPathfinding.SameFloorDifferentDirections:
-                    //In simpler case, we just follow the 1 chain, in this case the source:
-                    HashSet<Building_Stairs> stairsTaken = new HashSet<Building_Stairs>();
-                    ret = new Tuple<Building_Stairs, Building_Stairs, object>(sink.GetMatchingStair(),
-                        PickNextSource(sink.GetMatchingStair(), ref stairsTaken), stairsTaken);
+        //private Tuple<Building_Stairs, Building_Stairs, object> IterativeFindPath(Building_Stairs source,
+        //    Building_Stairs sink, List<PawnPath> paths, HashSet<Building_Stairs> stairsChecked)
+        //{
+        //    List<PawnPath> PreexistingPath = new List<PawnPath>();
+        //    Tuple<Building_Stairs, Building_Stairs, object> ret = null;
+        //    switch (GetCaseForPair(source, sink, PreexistingPath))
+        //    {
+        //        case StairCasesForPathfinding.PathKnown:
+        //            paths.AddRange(PreexistingPath);
+        //            ret = new Tuple<Building_Stairs, Building_Stairs, object>(source, source, null);
+        //            break;
+        //        case StairCasesForPathfinding.SameFloorSameDirections:
+        //            ret = new Tuple<Building_Stairs, Building_Stairs, object>(source.GetMatchingStair(),
+        //                sink.GetMatchingStair(), null);
+        //            break;
+        //        case StairCasesForPathfinding.SameFloorDifferentDirections:
+        //            //In simpler case, we just follow the 1 chain, in this case the source:
+        //            HashSet<Building_Stairs> stairsTaken = new HashSet<Building_Stairs>();
+        //            ret = new Tuple<Building_Stairs, Building_Stairs, object>(sink.GetMatchingStair(),
+        //                PickNextSource(sink.GetMatchingStair(), ref stairsTaken), stairsTaken);
 
-                    //HashSet<Building_Stairs> sourceStairs= new HashSet<Building_Stairs>(), sinkStairs= new HashSet<Building_Stairs>();
-                    //Building_Stairs nextSource = PickNextSource(source.GetMatchingStair(), ref sourceStairs);
-                    //Building_Stairs nextSink = PickNextSource(sink.GetMatchingStair(), ref sinkStairs);
-                    //var tups = new Tuple<HashSet<Building_Stairs>, Building_Stairs,
-                    //    Building_Stairs, HashSet<Building_Stairs>>
-                    //    (sourceStairs, sink.GetMatchingStair(), nextSink, sinkStairs);
+        //            //HashSet<Building_Stairs> sourceStairs= new HashSet<Building_Stairs>(), sinkStairs= new HashSet<Building_Stairs>();
+        //            //Building_Stairs nextSource = PickNextSource(source.GetMatchingStair(), ref sourceStairs);
+        //            //Building_Stairs nextSink = PickNextSource(sink.GetMatchingStair(), ref sinkStairs);
+        //            //var tups = new Tuple<HashSet<Building_Stairs>, Building_Stairs,
+        //            //    Building_Stairs, HashSet<Building_Stairs>>
+        //            //    (sourceStairs, sink.GetMatchingStair(), nextSink, sinkStairs);
 
-                    //ret = new Tuple<Building_Stairs, Building_Stairs, object>(source.GetMatchingStair(), nextSource, tups);
-                    break;
-                case StairCasesForPathfinding.DeadEnd:
-                    ret = null;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+        //            //ret = new Tuple<Building_Stairs, Building_Stairs, object>(source.GetMatchingStair(), nextSource, tups);
+        //            break;
+        //        case StairCasesForPathfinding.DeadEnd:
+        //            ret = null;
+        //            break;
+        //        default:
+        //            throw new ArgumentOutOfRangeException();
+        //    }
 
-            return ret;
-        }
+        //    return ret;
+        //}
 
         //private List<PawnPath> RecursiveFindPath(Building_Stairs source, Building_Stairs sink, List<PawnPath> paths)
         //{
@@ -289,10 +797,21 @@ namespace ZLevels.Properties
         //    return null;
         //}
 
-        
+        public List<DijkstraGraph.Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo)
+        {
+            if (!HasDijkstraForTile(mapFrom.Tile))
+            {
+                SetOrCreateDijkstraGraph(mapFrom.Tile);
+            }
+
+            return getDijkstraGraphForTile(mapFrom.Tile).FindRoute(from, to, mapFrom, mapTo);
 
 
-        private StairCasesForPathfinding GetCaseForPair(Building_Stairs source, Building_Stairs sink, List<PawnPath> newPath)
+        }
+
+
+
+        private StairCasesForPathfinding GetCaseForPair(Building_Stairs source, Building_Stairs sink, List<Tuple<IntVec3, IntVec3>> newPath)
         {
             StairCasesForPathfinding casesForPathfinding;
             if (source == null || sink == null)
@@ -303,22 +822,28 @@ namespace ZLevels.Properties
             {
                 //if (CheckStairPathsForKeyPair(sink, source,ref  newPath))
                 if (sink.Map == source.Map)
-
                 {
                     PawnPath path = source.Map.pathFinder.FindPath(source.Position, new LocalTargetInfo(sink), StairParms);
-                    if (path != PawnPath.NotFound)
+                    Job job = JobMaker.MakeJob(JobDefOf.Goto, source, sink);
+                    LocalTargetInfo t = new LocalTargetInfo();
+                    PawnPath f = source.Map.pathFinder.FindPath(source.Position, new LocalTargetInfo(sink), StairParms);
+
+                    if (f != PawnPath.NotFound)
                     {
-                        newPath.Add(path);
+                        newPath.Add(new Tuple<IntVec3, IntVec3>(f.FirstNode, f.LastNode));
+
                         casesForPathfinding = StairCasesForPathfinding.PathKnown;
                     }
                     else
                     {
-                        Building_Stairs newSink = GetClosestStair(source, out path);
+                        f.ReleaseToPool();
+
+                        Building_Stairs newSink = GetClosestStair(source, out f);
                         casesForPathfinding = StairCasesForPathfinding.PathKnown;
 
-                        if (path != null)
+                        if (f != null)
                         {
-                            newPath.Add(path);
+                            newPath.Add(new Tuple<IntVec3, IntVec3>(f.FirstNode, f.LastNode));
                             casesForPathfinding = StairCasesForPathfinding.DeadEnd;
                         }
                     }
@@ -336,7 +861,7 @@ namespace ZLevels.Properties
 
         public Building_Stairs GetClosestStair(Building_Stairs source, out PawnPath path)
         {
-            return GetClosestStair(source.Position, source is Building_StairsUp,source.Map , out path);
+            return GetClosestStair(source.Position, source is Building_StairsUp, source.Map, out path);
         }
 
 
@@ -366,7 +891,7 @@ namespace ZLevels.Properties
                     ret = stairs;
                 }
             }
-            return ret;  
+            return ret;
         }
 
         private static Building_Stairs PickNextSource(Building_Stairs sink, ref HashSet<Building_Stairs> previouslySelectedStairs)
@@ -411,56 +936,57 @@ namespace ZLevels.Properties
 
 
 
-        //private PawnPath JoinStairs(Building_Stairs startStairs, Building_Stairs endStairs, Map map)
-        //{
+        private PawnPath JoinStairs(Building_Stairs startStairs, Building_Stairs endStairs, Map map)
+        {
 
 
-        //    LocalTargetInfo ti = new LocalTargetInfo(endStairs);
-        //    //We'll add the path even if one isn't found because it will be the NotFound pawn path.
-        //    //Also, it's a list because on not-found paths we'll need a list to get to the proper stairs
-        //    //Most will be lists of one.  The idea will be if a path to an up stairway cannot be found,
-        //    //then we'll need to find a path to that stairway somewhere else (later).  So add all the paths,  
-        //    //Then come back and look at the no-paths and figure all those out.
-        //    PawnPath path = map.pathFinder.FindPath(startStairs.Position, ti, StairParms);
+            LocalTargetInfo ti = new LocalTargetInfo(endStairs);
+            //We'll add the path even if one isn't found because it will be the NotFound pawn path.
+            //Also, it's a list because on not-found paths we'll need a list to get to the proper stairs
+            //Most will be lists of one.  The idea will be if a path to an up stairway cannot be found,
+            //then we'll need to find a path to that stairway somewhere else (later).  So add all the paths,  
+            //Then come back and look at the no-paths and figure all those out.
+            PawnPath path = map.pathFinder.FindPath(startStairs.Position, ti, StairParms);
 
-        //    //ZLogger.Message(
-        //    //    $"Joining stairs- number of paths in stairPaths = {StairPaths.Count}, " +
-        //    //    $"startStairs = {startStairs}, endStairs = {endStairs}");
+            //ZLogger.Message(
+            //    $"Joining stairs- number of paths in stairPaths = {StairPaths.Count}, " +
+            //    $"startStairs = {startStairs}, endStairs = {endStairs}");
 
-        //    var tuple = new Tuple<Building_Stairs, Building_Stairs>(startStairs, endStairs);
-        //    if (!StairPaths.ContainsKey(tuple))
-        //    {
-        //        if (path == PawnPath.NotFound)
-        //        {
-        //            ZLogger.Message($"No path found for {startStairs} to {endStairs}");
-        //        }
-        //        else
-        //        {
-        //            ZLogger.Message($"Path found for {startStairs} to {endStairs}: {path}");
-        //        }
+            //var tuple = new Tuple<Building_Stairs, Building_Stairs>(startStairs, endStairs);
+            //if (!StairPaths.ContainsKey(tuple))
+            //{
+            //    if (path == PawnPath.NotFound)
+            //    {
+            //        ZLogger.Message($"No path found for {startStairs} to {endStairs}");
+            //    }
+            //    else
+            //    {
+            //        ZLogger.Message($"Path found for {startStairs} to {endStairs}: {path}");
+            //    }
 
-        //        StairPaths.Add(tuple, new List<PawnPath> { path });
-        //    }
-        //    else
-        //    {
-        //        if (path == PawnPath.NotFound)
-        //        {
-        //            ZLogger.Message($"No path found for {startStairs} to {endStairs}");
-        //        }
-        //        else
-        //        {
-        //            ZLogger.Message($"Path found for {startStairs} to {endStairs}: {path}");
-        //        }
+            //    StairPaths.Add(tuple, new List<PawnPath> { path });
+            //}
+            //else
+            //{
+            //    if (path == PawnPath.NotFound)
+            //    {
+            //        ZLogger.Message($"No path found for {startStairs} to {endStairs}");
+            //    }
+            //    else
+            //    {
+            //        ZLogger.Message($"Path found for {startStairs} to {endStairs}: {path}");
+            //    }
 
-        //        StairPaths[tuple] = new List<PawnPath> { path };
+            //    StairPaths[tuple] = new List<PawnPath> { path };
 
-        //    }
+            //}
 
-        //    return path;
+            return path;
 
 
 
-        //}
+        }
+
     }
 
 

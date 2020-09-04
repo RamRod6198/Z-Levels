@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -39,9 +41,9 @@
       <HintPath>..\..\..\Assemblies\0MultiplayerAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\SteamApps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Assembly-CSharp, Version=1.2.7528.19839, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Assemblies\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -246,6 +248,7 @@
     <Compile Include="HarmonyPatches\TradePatches.cs" />
     <Compile Include="HarmonyPatches\ResourceCounterPatch.cs" />
     <Compile Include="HarmonyPatches\SkyfallerPatches.cs" />
+    <Compile Include="Jobs\JobDriver_GoToLocation.cs" />
     <Compile Include="Jobs\JobDriver_HaulThingToDest.cs" />
     <Compile Include="Jobs\JobDriver_GoToMap.cs" />
     <Compile Include="Jobs\Toils_ZLevels.cs" />

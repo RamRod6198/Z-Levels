@@ -41,11 +41,13 @@ namespace ZLevels
 
 		public static JobDef ZL_GoToStairs;
 
-		public static JobDef ZL_GoToMap;
+        public static JobDef ZL_GoToMap;
 
 		public static JobDef ZL_HaulThingToDest;
 
 		public static JobDef ZL_HaulToCell;
-	}
+
+        public static JobDef ZL_GoToLocation;
+    }
 }
 

@@ -21,20 +21,79 @@ namespace ZLevels
     public static class FloatMenuPatches
     {
 
+        //public class JobDriver_GoToLocation : JobDriver
+        //{
+        //    public override bool TryMakePreToilReservations(bool errorOnFailed)
+        //    {
+        //        return true;
+        //    }
+
+        //    Toil toil = new Toil();
+        //    t.initAction = (Action) (() =>
+        //    {
+        //        Pawn actor = toil.actor;
+        //        actor.pather.StartPath(actor.jobs.curJob.GetTarget(ind), peMode);
+        //    });
+        //toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
+        //toil.FailOnDespawnedOrNull<Toil>(ind);
+        //return toil;
+        //    //A = destination, B = source stairs C = sink stairs
+
+        //    protected override IEnumerable<Toil> MakeNewToils()
+        //    {
+
+
+        //                List<ZPathfinder.DijkstraGraph.Node> nodes =
+        //                    ZPathfinder.Instance.FindRoute(pawn.Position, TargetLocA, pawn.Map, pawn.Map);
+        //                nodes.RemoveAt(0);
+        //                foreach (ZPathfinder.DijkstraGraph.Node node in nodes)
+        //                {
+
+        //                }
+        //            }
+        //            }
+
+        //        }
+        //}
+
         [HarmonyPatch(typeof(FloatMenuMakerMap), "GotoLocationOption")]
         public class GotoLocationOption_Patch
         {
             [HarmonyPostfix]
-            public static void Postfix(ref FloatMenuOption __result,ref  IntVec3 clickCell,ref  Pawn pawn)
+            public static void Postfix(ref FloatMenuOption __result, ref IntVec3 clickCell, ref Pawn pawn)
             {
-                List<PawnPath> paths = null;
+                List<ZPathfinder.DijkstraGraph.Node> nodes = null;
                 if (__result.Label == "CannotGoNoPath".Translate())
                 {
-                    paths = ZPathfinder.Instance.FindPath(pawn.Position, clickCell, pawn.Map, false);
-                   // pawn.pather.StartPath();
-                   
+                    //Building_Stairs sourceStairs =
+                    //        ZPathfinder.Instance.GetClosestStair(pawn.Position, false, pawn.Map, out PawnPath firstLeg),
+                    //    sinkStairs =
+                    //        ZPathfinder.Instance.GetClosestStair(clickCell, false, pawn.Map, out PawnPath lastLeg);
+                    //firstLeg.ReleaseToPool();
+                    //lastLeg.ReleaseToPool();
+
+                    //IEnumerable<Toil> yields = BuildEnumerableFromListAndLegs(pawn, nodes, clickCell);
+
+                    //pawn.pather.StartPath();
+                    int count = 0;
+                    var route = ZPathfinder.Instance.FindRoute(pawn.Position, clickCell, pawn.Map, pawn.Map);
+                    ZLogger.Message($"postfix goto location node count = {route.Count}");
+
+                    if(route.Count > 0)
+                    {
+                        __result.Label = "ZGoHere".Translate();
+                        __result.Disabled = false;
+                        IntVec3 a = clickCell;
+                        Pawn pawn1 = pawn;
+                        __result.action = delegate ()
+                        {
+                            Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToLocation, a, route[0].key, route[route.Count -1].key);
+                            pawn1.jobs.StartJob(job, JobCondition.InterruptForced);
+                        };
+                    }
                 }
             }
+
 
             [HarmonyPatch(typeof(FloatMenuOption), "Disabled", MethodType.Getter)]
             internal static class Patch_FloatDisabled
@@ -86,6 +145,27 @@ namespace ZLevels
                 }
             }
         }
+
+
+        //[HarmonyPatch(typeof(FloatMenuMakerMap), "AddDraftedOrders")]
+        //public class AddDraftedOrders_Patch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(Vector3 clickPos, Pawn pawn, List<FloatMenuOption> opts)
+        //    {
+        //        IntVec3 dest = clickPos.ToIntVec3();
+        //        var ti = new LocalTargetInfo(dest);
+        //        var lists = ZPathfinder.Instance.FindRoute(pawn.Position, dest, pawn.Map, pawn.Map);
+        //        foreach (var t in lists)
+        //        {
+        //            ZLogger.Message($"t has {t.neighbors.Count} neighbors.  It's at {t.Location}");
+        //        }
+
+        //        //ZPathfinder.Instance.CalculateStairPaths();
+        //        ZPathfinder.Instance.SetOrCreateDijkstraGraph(pawn.Tile);
+        //        //  ZPathfinder.Instance.FindPath(pawn.Position, dest, pawn.Map);
+        //    }
+        //}
 
         [HarmonyPatch(typeof(FloatMenuMakerMap), "AddHumanlikeOrders")]
         public class AddHumanlikeOrders_Patch
