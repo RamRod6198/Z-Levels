@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<ThingDef Abstract="True" ParentName="FurnitureWithQualityBase" Name="StairsBase">
+		<description>Stairs.</description>
+		<altitudeLayer>Building</altitudeLayer>
+		<passability>Standable</passability>
+		<fillPercent>0.15</fillPercent>
+		<building>
+			<isEdifice>false</isEdifice>
+			<ai_neverTrashThis>true</ai_neverTrashThis>
+		</building>	
+		<pathCost>60</pathCost>
+		<canOverlapZones>false</canOverlapZones>
+		<surfaceType>Eat</surfaceType>
+		<tickerType>Normal</tickerType>
+	</ThingDef>
+
+	<ThingDef ParentName="StairsBase">
+		<defName>ZL_StairsUp</defName>
+		<label>stairs up</label>
+		<altitudeLayer>BuildingOnTop</altitudeLayer>
+		<description>stairs.</description>
+		<thingClass>ZLevels.Building_StairsUp</thingClass>
+		<graphicData>
+			<texPath>Building/LadderUp</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(3, 3)</drawSize>
+		</graphicData>
+		<statBases>
+			<MaxHitPoints>375</MaxHitPoints>
+			<WorkToBuild>1000</WorkToBuild>
+			<Mass>5</Mass>
+			<Flammability>1.0</Flammability>
+			<Beauty>3</Beauty>
+		</statBases>
+		<stuffCategories>
+			<li>Metallic</li>
+			<li>Woody</li>
+		</stuffCategories>
+		<leaveResourcesWhenKilled>true</leaveResourcesWhenKilled>
+		<costStuffCount>10</costStuffCount>
+		<rotatable>true</rotatable>
+		<castEdgeShadows>true</castEdgeShadows>
+		<staticSunShadowHeight>0.20</staticSunShadowHeight>
+		<pathCost>60</pathCost>
+		<designationCategory>Structure</designationCategory>
+	</ThingDef>
+
+	<ThingDef ParentName="StairsBase">
+		<defName>ZL_StairsDown</defName>
+		<label>stairs down</label>
+		<description>stairs.</description>
+		<thingClass>ZLevels.Building_StairsDown</thingClass>
+		<surfaceType>Item</surfaceType>
+		<graphicData>
+			<texPath>Building/Ladder</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(3, 3)</drawSize>
+		</graphicData>
+		<statBases>
+			<MaxHitPoints>375</MaxHitPoints>
+			<WorkToBuild>1000</WorkToBuild>
+			<Mass>5</Mass>
+			<Flammability>1.0</Flammability>
+			<Beauty>3</Beauty>
+		</statBases>
+		<stuffCategories>
+			<li>Metallic</li>
+			<li>Woody</li>
+		</stuffCategories>
+		<leaveResourcesWhenKilled>true</leaveResourcesWhenKilled>
+		<costStuffCount>10</costStuffCount>
+		<rotatable>true</rotatable>
+		<castEdgeShadows>false</castEdgeShadows>
+		<fillPercent>0.0</fillPercent>
+		<staticSunShadowHeight>0.0</staticSunShadowHeight>
+		<pathCost>10</pathCost>
+		<designationCategory>Structure</designationCategory>
+	</ThingDef>
+
+	<ThingDef ParentName="StairsBase">
+		<defName>ZL_NaturalHole</defName>
+		<label>natural hole</label>
+		<description>natural hole.</description>
+		<thingClass>ZLevels.Building_StairsDown</thingClass>
+		<surfaceType>Item</surfaceType>
+		<graphicData>
+			<texPath>Building/Ladder</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(3, 3)</drawSize>
+		</graphicData>
+		<statBases>
+			<MaxHitPoints>375</MaxHitPoints>
+			<Mass>5</Mass>
+			<Flammability>1.0</Flammability>
+			<Beauty>3</Beauty>
+		</statBases>
+		<rotatable>false</rotatable>
+		<castEdgeShadows>false</castEdgeShadows>
+		<fillPercent>0.0</fillPercent>
+		<staticSunShadowHeight>0.0</staticSunShadowHeight>
+		<pathCost>10</pathCost>
+		<tradeability>None</tradeability>
+	</ThingDef>
+
+
+</Defs>

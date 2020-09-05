@@ -10,7 +10,6 @@ namespace ZLevels
         {
             return true;
         }
-
         public override IEnumerable<Toil> MakeNewToils()
         {
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
@@ -58,7 +57,7 @@ namespace ZLevels
                         Map map = ZTracker.GetLowerLevel(this.pawn.Map.Tile, this.pawn.Map);
                         if (map == null)
                         {
-                            //Log.Message("CREATING LOWER LEVEL AGAIG", true);
+                            //ZLogger.Message("CREATING LOWER LEVEL AGAIG", true);
                             map = ZTracker.CreateLowerLevel(this.pawn.Map, stairsDown.Position);
                             if (!string.IsNullOrEmpty(stairsDown.pathToPreset))
                             {

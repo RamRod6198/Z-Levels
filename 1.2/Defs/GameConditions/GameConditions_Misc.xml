@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <GameConditionDef>
+    <defName>ZL_UndergroundCondition</defName>
+    <conditionClass>GameCondition_NoSunlight</conditionClass>
+    <label>underground</label>
+    <description>You went down to the dungeon.</description>
+    <endMessage>The eclipse is ending.</endMessage>
+    <letterText>One of the moons of this planet has orbited in front of the sun. An eclipse has begun.</letterText>
+    <letterDef>NegativeEvent</letterDef>
+    <canBePermanent>true</canBePermanent>
+  </GameConditionDef>
+
+
+</Defs>

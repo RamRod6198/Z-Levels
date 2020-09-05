@@ -270,10 +270,8 @@ namespace ZLevels
                         ZLogger.Message(pawn + " 22 ZUtils.ZTracker.jobTracker[pawn].dest: " + ZTracker.jobTracker[pawn].dest);
                     }
                 };
-
                 yield return toil;
             }
-
             Toil carryToCell = Toils_Haul.CarryHauledThingToCell(TargetIndex.B);
             yield return carryToCell;
             yield return new Toil

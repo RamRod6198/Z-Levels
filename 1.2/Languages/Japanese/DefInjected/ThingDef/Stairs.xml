@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <!-- Stairs base -->
+
+  <ZL_StairsUp.label>階段(昇)</ZL_StairsUp.label>
+  <ZL_StairsUp.description>上の階に昇る階段です.</ZL_StairsUp.description>
+  <Blueprint_ZL_StairsUp.label>階段(昇) (設計)</Blueprint_ZL_StairsUp.label>
+  <Blueprint_Install_ZL_StairsUp.label>階段(昇) (移動先)</Blueprint_Install_ZL_StairsUp.label>
+  <Frame_ZL_StairsUp.label>階段(昇) (施工)</Frame_ZL_StairsUp.label>
+  <Frame_ZL_StairsUp.description>上の階に昇る階段です.</Frame_ZL_StairsUp.description>
+
+  <ZL_StairsDown.label>階段(降)</ZL_StairsDown.label>
+  <ZL_StairsDown.description>下の階に降りる階段です.</ZL_StairsDown.description>
+  <Blueprint_ZL_StairsDown.label>階段(降) (設計)</Blueprint_ZL_StairsDown.label>
+  <Blueprint_Install_ZL_StairsDown.label>階段(降) (移動先)</Blueprint_Install_ZL_StairsDown.label>
+  <Frame_ZL_StairsDown.label>階段(降) (施工)</Frame_ZL_StairsDown.label>
+  <Frame_ZL_StairsDown.description>下の階に降りる階段です.</Frame_ZL_StairsDown.description>
+
+  <ZL_NaturalHole.label>自然の穴</ZL_NaturalHole.label>
+  <ZL_NaturalHole.description>自然に開いている穴です.</ZL_NaturalHole.description>
+  <Blueprint_ZL_NaturalHole.label>自然の穴 (設計)</Blueprint_ZL_NaturalHole.label>
+  <Blueprint_Install_ZL_NaturalHole.label>自然の穴 (移動先)</Blueprint_Install_ZL_NaturalHole.label>
+  <Frame_ZL_NaturalHole.label>自然の穴 (施工)</Frame_ZL_NaturalHole.label>
+  <Frame_ZL_NaturalHole.description>自然に開いている穴です.</Frame_ZL_NaturalHole.description>
+
+</LanguageData>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<JobDef>
+		<defName>ZL_GoToStairs</defName>
+		<driverClass>ZLevels.JobDriver_GoToStairs</driverClass>
+		<reportString>traversing TargetA.</reportString>
+	</JobDef>
+
+	<JobDef>
+		<defName>ZL_GoToMap</defName>
+		<driverClass>ZLevels.JobDriver_GoToMap</driverClass>
+		<reportString>traversing TargetA.</reportString>
+	</JobDef>
+
+	<JobDef>
+		<defName>ZL_HaulThingToDest</defName>
+		<driverClass>ZLevels.JobDriver_HaulThingToDest</driverClass>
+		<reportString>traversing TargetA.</reportString>
+	</JobDef>
+
+	<JobDef>
+		<defName>ZL_HaulToCell</defName>
+		<driverClass>ZLevels.JobDriver_HaulThingToDestAndToCell</driverClass>
+		<reportString>hauling TargetA.</reportString>
+		<suspendable>false</suspendable>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+
+</Defs>

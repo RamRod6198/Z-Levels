@@ -18,6 +18,14 @@ namespace ZLevels
     [StaticConstructorOnStartup]
     public static class RoofAndFloorPatches
     {
+        public static bool IsAllowedToSpawnBelow(this Thing thing)
+        {
+            if (thing is Mineable || thing is Blueprint || thing is Frame || thing is Explosion)
+            {
+                return false;
+            }
+            return true;
+        }
 
         [HarmonyPatch(typeof(DamageWorker), "ExplosionDamageTerrain")]
         internal static class Patch_ExplosionDamageTerrain
@@ -55,10 +63,7 @@ namespace ZLevels
                         {
                             __instance.topGrid[num] = ___underGrid[num];
                             ___underGrid[num] = null;
-                            Traverse.Create(__instance).Method("DoTerrainChangedEffects", new object[]
-                            {
-                            c
-                            }).GetValue();
+                            __instance.DoTerrainChangedEffects(c);
                         }
                         if (c.GetTerrain(___map) == TerrainDefOf.Sand)
                         {
@@ -70,8 +75,6 @@ namespace ZLevels
                         if (lowerMap == null)
                         {
                             return false;
-                            //lowerMap = ZTracker.CreateLowerLevel(___map, c);
-                            firstTime = true;
                         }
 
                         var thingList = c.GetThingList(___map);
@@ -79,9 +82,8 @@ namespace ZLevels
                         {
                             for (int i = thingList.Count - 1; i >= 0; i--)
                             {
-                                if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
+                                if (thingList[i].IsAllowedToSpawnBelow())
                                 {
-                                    //Log.Message(thingList[i] + " going down 1");
                                     ZTracker.TeleportThing(thingList[i], c, lowerMap, firstTime, 10);
                                 }
                             }
@@ -101,11 +103,12 @@ namespace ZLevels
         [HarmonyPatch("SpawnSetup")]
         public static class Patch_SpawnSetup
         {
-            [HarmonyPostfix]
+            public static bool doTeleport = true;
             public static void Postfix(Thing __instance)
             {
                 try
                 {
+                    if (!doTeleport) return;
                     if (__instance.Position.GetTerrain(__instance.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
                     {
                         var ZTracker = ZUtils.ZTracker;
@@ -121,9 +124,8 @@ namespace ZLevels
                         {
                             for (int i = thingList.Count - 1; i >= 0; i--)
                             {
-                                if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
+                                if (thingList[i].IsAllowedToSpawnBelow())
                                 {
-                                    //Log.Message(thingList[i] + " going down 2");
                                     ZTracker.TeleportThing(thingList[i], __instance.Position, lowerMap, firstTime, 10);
                                 }
                             }
@@ -165,9 +167,8 @@ namespace ZLevels
                                 var thingList = c.GetThingList(upperMap);
                                 for (int i = thingList.Count - 1; i >= 0; i--)
                                 {
-                                    if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
+                                    if (thingList[i].IsAllowedToSpawnBelow())
                                     {
-                                        //Log.Message(thingList[i] + " going down 3");
                                         ZTracker.TeleportThing(thingList[i], c, ___map, false, 10);
                                     }
                                 }

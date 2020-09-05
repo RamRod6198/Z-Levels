@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <KeyBindingDef Name="ZLevelsKeyBinding" Abstract="true">
+    <category>ZLevels</category>
+  </KeyBindingDef>
+
+  <KeyBindingDef ParentName="ZLevelsKeyBinding">
+    <defName>ZL_switchToUpperMap</defName>
+    <label>Switch to upper map</label>
+  </KeyBindingDef>
+
+  <KeyBindingDef ParentName="ZLevelsKeyBinding">
+    <defName>ZL_switchToLowerMap</defName>
+    <label>Switch to lower map</label>
+  </KeyBindingDef>
+
+</Defs>
