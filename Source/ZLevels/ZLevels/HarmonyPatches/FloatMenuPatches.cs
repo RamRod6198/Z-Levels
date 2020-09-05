@@ -21,77 +21,52 @@ namespace ZLevels
     public static class FloatMenuPatches
     {
 
-        //public class JobDriver_GoToLocation : JobDriver
-        //{
-        //    public override bool TryMakePreToilReservations(bool errorOnFailed)
-        //    {
-        //        return true;
-        //    }
-
-        //    Toil toil = new Toil();
-        //    t.initAction = (Action) (() =>
-        //    {
-        //        Pawn actor = toil.actor;
-        //        actor.pather.StartPath(actor.jobs.curJob.GetTarget(ind), peMode);
-        //    });
-        //toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
-        //toil.FailOnDespawnedOrNull<Toil>(ind);
-        //return toil;
-        //    //A = destination, B = source stairs C = sink stairs
-
-        //    protected override IEnumerable<Toil> MakeNewToils()
-        //    {
-
-
-        //                List<ZPathfinder.DijkstraGraph.Node> nodes =
-        //                    ZPathfinder.Instance.FindRoute(pawn.Position, TargetLocA, pawn.Map, pawn.Map);
-        //                nodes.RemoveAt(0);
-        //                foreach (ZPathfinder.DijkstraGraph.Node node in nodes)
-        //                {
-
-        //                }
-        //            }
-        //            }
-
-        //        }
-        //}
 
         [HarmonyPatch(typeof(FloatMenuMakerMap), "GotoLocationOption")]
         public class GotoLocationOption_Patch
         {
+
             [HarmonyPostfix]
             public static void Postfix(ref FloatMenuOption __result, ref IntVec3 clickCell, ref Pawn pawn)
             {
+                var route = ZPathfinder.Instance.FindRoute(pawn.Position, clickCell, pawn.Map, pawn.Map, out float routeCost);
+
                 List<ZPathfinder.DijkstraGraph.Node> nodes = null;
                 if (__result.Label == "CannotGoNoPath".Translate())
                 {
-                    //Building_Stairs sourceStairs =
-                    //        ZPathfinder.Instance.GetClosestStair(pawn.Position, false, pawn.Map, out PawnPath firstLeg),
-                    //    sinkStairs =
-                    //        ZPathfinder.Instance.GetClosestStair(clickCell, false, pawn.Map, out PawnPath lastLeg);
-                    //firstLeg.ReleaseToPool();
-                    //lastLeg.ReleaseToPool();
-
-                    //IEnumerable<Toil> yields = BuildEnumerableFromListAndLegs(pawn, nodes, clickCell);
-
-                    //pawn.pather.StartPath();
-                    int count = 0;
-                    var route = ZPathfinder.Instance.FindRoute(pawn.Position, clickCell, pawn.Map, pawn.Map);
                     ZLogger.Message($"postfix goto location node count = {route.Count}");
-
-                    if(route.Count > 0)
+                    //This means we know that there is a path, it just isn't direct
+                    if (route.Count > 0)
                     {
                         __result.Label = "ZGoHere".Translate();
                         __result.Disabled = false;
-                        IntVec3 a = clickCell;
-                        Pawn pawn1 = pawn;
-                        __result.action = delegate ()
-                        {
-                            Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToLocation, a, route[0].key, route[route.Count -1].key);
-                            pawn1.jobs.StartJob(job, JobCondition.InterruptForced);
-                        };
+                        SetActionForDelegate(ref __result, clickCell, route, pawn);
+                        //These are the defaults for autotakeable in the original code
+                        __result.autoTakeable = true;
+                        __result.autoTakeablePriority = 10f;
                     }
                 }
+                else
+                {
+                    //On this branch, we recognize that the direct path might not be the fastest
+                    PawnPath path = pawn.Map.pathFinder.FindPath(pawn.Position, clickCell, ZPathfinder.StairParms);
+                    float pathCost = path.TotalCost;
+                    path.ReleaseToPool();
+                    if (pathCost > routeCost)
+                    {
+                        SetActionForDelegate(ref __result, clickCell, route, pawn);
+                    }
+                }
+            }
+
+            private static void SetActionForDelegate(ref FloatMenuOption result, IntVec3 clickCell, List<ZPathfinder.DijkstraGraph.Node> route, Pawn pawn)
+            {
+                result.action = delegate ()
+                {
+                    Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToLocation, clickCell, route[0].key, route[route.Count - 1].key);
+                    pawn.jobs.StartJob(job, JobCondition.InterruptForced);
+                };
+        
             }
 
 

@@ -28,7 +28,7 @@ namespace ZLevels
             //Otherwise, calculate toils to go, then toils to destination and return them one at a time.
 
             List<ZPathfinder.DijkstraGraph.Node> stairList =
-                ZPathfinder.Instance.FindRoute(pawn.Position, TargetLocA, pawn.Map, TargetB.Thing.Map);
+                ZPathfinder.Instance.FindRoute(pawn.Position, TargetLocA, pawn.Map, TargetB.Thing.Map, out float routeCost);
             yield return new Toil { initAction = delegate
             {
                 ZLogger.Message(
@@ -46,7 +46,7 @@ namespace ZLevels
                 yield return new Toil
                 { initAction = delegate () { ZLogger.Message($"Going to target {i1} boss"); } };
             
-                Toil setStairs = Toils_ZLevels.GetSetStairs(pawn, stairList[i].Map, this);
+                Toil setStairs = Toils_ZLevels.GetSetStairs(pawn, stairList[i+1].Map, this);
                 Toil useStairs = Toils_General.Wait(60, 0);
                 useStairs.WithProgressBarToilDelay(TargetIndex.A);
 
@@ -55,7 +55,7 @@ namespace ZLevels
                 yield return useStairs;
 
 
-                yield return Toils_ZLevels.GetTeleport(pawn, stairList[i1+1].Map, this, Toils_ZLevels.GetSetStairs(pawn, stairList[i1+1].Map, this));
+                yield return Toils_ZLevels.GetTeleport(pawn, stairList[i1+1].Map, this, setStairs);
 
 
                 //foreach (Toil t in Toils_ZLevels.GoToMap(pawn, stairList[i1 + 1].Map, this))
@@ -63,10 +63,7 @@ namespace ZLevels
                 //    yield return t;
                 //}
 
-                yield return new Toil
-                { initAction = delegate () { ZLogger.Message($"Should be done"); } };
             }
-            yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.OnCell);
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
         }
 
