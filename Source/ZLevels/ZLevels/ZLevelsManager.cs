@@ -1063,6 +1063,10 @@ namespace ZLevels
                             }
                         }
                         ZLogger.Message(pawn + " TryMakePreToilReservations job " + job + " in " + this.GetMapInfo(pawn.Map));
+                        if (pawn.CurJob != null)
+                        {
+                            pawn.ClearReservationsForJob(pawn.CurJob);
+                        }
                         if (job == this.jobTracker[pawn].mainJob && this.jobTracker[pawn].forceGoToDestMap && pawn.Map != this.jobTracker[pawn].dest)
                         {
                             ZLogger.Message(pawn + " force taking go to map " + job + " in " + this.GetMapInfo(pawn.Map));

@@ -64,16 +64,16 @@ namespace ZLevels
 
                 if (ZLogger.DebugEnabled)
                 {
-                    if (!text.Contains("VisiblePants")
-                        && !text.Contains("GiddyUpRideAndRoll")
-                        && !text.Contains("Unknown crown type"))
-                    {
-
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    //if (!text.Contains("VisiblePants")
+                    //    && !text.Contains("GiddyUpRideAndRoll")
+                    //    && !text.Contains("Unknown crown type"))
+                    //{
+                    //
+                    //}
+                    //else
+                    //{
+                    //    return false;
+                    //}
                 }
                 return true;
             }
