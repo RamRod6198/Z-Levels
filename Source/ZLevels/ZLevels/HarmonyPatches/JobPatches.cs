@@ -1168,11 +1168,8 @@ namespace ZLevels
         {
             private static bool Prefix(JobGiver_Work __instance, bool ___emergency, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
             {
-                ZLogger.Message(pawn + " emergency " + ___emergency);
-
                 var ZTracker = ZUtils.ZTracker;
                 ZTracker.ReCheckStairs();
-                ZLogger.Message(pawn + " start work search 1");
                 try
                 {
                     foreach (var d in ZTracker.jobTracker[pawn].activeJobs)
@@ -1185,7 +1182,6 @@ namespace ZLevels
                     }
                 }
                 catch { }
-                ZLogger.Message(pawn + " start work search 2");
                 ZLogger.Message("=============================");
                 try
                 {
@@ -2363,7 +2359,6 @@ namespace ZLevels
                                                 enumerable != null);
                                             try
                                             {
-                                                ZLogger.Message("Checking hauling list", true);
                                                 if (enumerable != null)
                                                 {
                                                     ZLogger.Message("Try get thing from enumerable: " + enumerable.Count(), true);

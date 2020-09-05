@@ -158,9 +158,9 @@ namespace ZLevels
                         if (this.activeAreas[pawn].activeAreas == null)
                         {
                             this.activeAreas[pawn].activeAreas = new Dictionary<Map, Area>()
-                    {
-                        {pawn.Map, pawn.playerSettings.AreaRestriction}
-                    };
+                            {
+                                {pawn.Map, pawn.playerSettings.AreaRestriction}
+                            };
                         }
                         else
                         {
@@ -190,7 +190,8 @@ namespace ZLevels
         {
             try
             {
-                if (this.activeAreas.ContainsKey(pawn) && this.activeAreas[pawn].activeAreas.ContainsKey(pawn.Map))
+                if (this.activeAreas == null) this.activeAreas = new Dictionary<Pawn, ActiveArea>();
+                if (this.activeAreas.ContainsKey(pawn) && this.activeAreas[pawn].activeAreas != null && this.activeAreas[pawn].activeAreas.ContainsKey(pawn.Map))
                 {
                     if (pawn.playerSettings == null) pawn.playerSettings = new Pawn_PlayerSettings(pawn);
                     pawn.playerSettings.AreaRestriction = this.activeAreas[pawn].activeAreas[pawn.Map];
@@ -529,7 +530,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetA.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 job.count = jobToDo.countQueue[i];
                                 tempJobs.Add(job);
                             }
@@ -543,7 +559,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetA.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 tempJobs.Add(job);
                             }
                         }
@@ -560,7 +591,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetA.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 job.count = jobToDo.countQueue[i];
                                 tempJobs.Add(job);
                             }
@@ -575,7 +621,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetA.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 tempJobs.Add(job);
                             }
                         }
@@ -598,7 +659,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetB.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 job.count = jobToDo.countQueue[i];
                                 tempJobs.Add(job);
                             }
@@ -612,7 +688,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetB.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 tempJobs.Add(job);
                             }
                         }
@@ -629,7 +720,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetB.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 job.count = jobToDo.countQueue[i];
                                 tempJobs.Add(job);
                             }
@@ -643,7 +749,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetB.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 tempJobs.Add(job);
                             }
                         }

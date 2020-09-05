@@ -54,18 +54,21 @@ namespace ZLevels
                     //ZLogger.Message("The error: " + text);
                     return false;
                 }
+
+                //try
+                //{
+                //    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+                //    ignoreStopLoggingLimit = true;
+                //}
+                //catch { };
+
                 if (ZLogger.DebugEnabled)
                 {
                     if (!text.Contains("VisiblePants")
                         && !text.Contains("GiddyUpRideAndRoll")
                         && !text.Contains("Unknown crown type"))
                     {
-                        //try
-                        //{
-                        //    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-                        //}
-                        //catch { };
-                        ignoreStopLoggingLimit = true;
+
                     }
                     else
                     {

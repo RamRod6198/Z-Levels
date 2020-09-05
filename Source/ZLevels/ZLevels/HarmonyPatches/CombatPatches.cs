@@ -87,12 +87,11 @@ namespace ZLevels
                 CanBeSeenOverFast_Patch.upperMap = null;
                 CanBeSeenOverFast_Patch.lowerMap = null;
                 CanBeSeenOverFast_Patch.caster = null;
-    
             }
-            else if (!multiMapSearch)
-            {
-                ZLogger.Message("BestAttackTarget: multiMapSearch: " + multiMapSearch, true);
-            }
+            //else if (!multiMapSearch)
+            //{
+            //    ZLogger.Message("BestAttackTarget: multiMapSearch: " + multiMapSearch, true);
+            //}
             return result;
         }
     }
