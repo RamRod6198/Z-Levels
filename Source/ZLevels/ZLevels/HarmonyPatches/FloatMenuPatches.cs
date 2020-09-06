@@ -35,17 +35,16 @@ namespace ZLevels
                 if (__result.Label == "CannotGoNoPath".Translate())
                 {
                     ZLogger.Message($"postfix goto location node count = {route.Count}");
-                    //If the count greater than 0 we know that there is a path, it just isn't direct
-                    if (route.Count <= 0)
-                    { //No path, do the no path display
-                        return;
+                    //This means we know that there is a path, it just isn't direct
+                    if (route.Count > 0)
+                    {
+                        __result.Label = "ZGoHere".Translate();
+                        __result.Disabled = false;
+                        SetActionForDelegate(ref __result, clickCell, route, pawn);
+                        //These are the defaults for autotakeable in the original code
+                        __result.autoTakeable = true;
+                        __result.autoTakeablePriority = 10f;
                     }
-                    __result.Label = "ZGoHere".Translate();
-                    __result.Disabled = false;
-                    SetActionForDelegate(ref __result, clickCell, route, pawn);
-                    //These are the defaults for auto-takeable in the original code
-                    __result.autoTakeable = true;
-                    __result.autoTakeablePriority = 10f;
                 }
                 else
                 {
@@ -62,10 +61,9 @@ namespace ZLevels
 
             private static void SetActionForDelegate(ref FloatMenuOption result, IntVec3 clickCell, List<ZPathfinder.DijkstraGraph.Node> route, Pawn pawn)
             {
-                if (route.Count < 1) return;
                 result.action = delegate ()
                 {
-                    Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToLocation, clickCell);
+                    Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToLocation, clickCell, route[0].key, route[route.Count - 1].key);
                     pawn.jobs.StartJob(job, JobCondition.InterruptForced);
                 };
         
@@ -123,6 +121,26 @@ namespace ZLevels
             }
         }
 
+
+        //[HarmonyPatch(typeof(FloatMenuMakerMap), "AddDraftedOrders")]
+        //public class AddDraftedOrders_Patch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(Vector3 clickPos, Pawn pawn, List<FloatMenuOption> opts)
+        //    {
+        //        IntVec3 dest = clickPos.ToIntVec3();
+        //        var ti = new LocalTargetInfo(dest);
+        //        var lists = ZPathfinder.Instance.FindRoute(pawn.Position, dest, pawn.Map, pawn.Map);
+        //        foreach (var t in lists)
+        //        {
+        //            ZLogger.Message($"t has {t.neighbors.Count} neighbors.  It's at {t.Location}");
+        //        }
+
+        //        //ZPathfinder.Instance.CalculateStairPaths();
+        //        ZPathfinder.Instance.SetOrCreateDijkstraGraph(pawn.Tile);
+        //        //  ZPathfinder.Instance.FindPath(pawn.Position, dest, pawn.Map);
+        //    }
+        //}
 
         [HarmonyPatch(typeof(FloatMenuMakerMap), "AddHumanlikeOrders")]
         public class AddHumanlikeOrders_Patch
