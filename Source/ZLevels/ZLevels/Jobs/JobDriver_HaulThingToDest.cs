@@ -27,43 +27,54 @@ namespace ZLevels
                 initAction = delegate ()
                 {
                     this.savedThing = this.job.targetA.Thing;
-                    ZLogger.Message("1111111111111: " + this.savedThing);
-                    ZLogger.Message("Saved thing: " + this.savedThing);
-                    ZLogger.Message("TargetA: " + this.job.targetA.Thing);
                 }
             };
 
             Toil reserveItem = Toils_Reserve.Reserve(TargetIndex.A);
-            ZLogger.Message(pawn + " 8 ZUtils.ZTracker.jobTracker[pawn].dest: " + TargetA.Thing.Map);
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), TargetA.Thing.Map, this))
             {
-                ZLogger.Message(pawn + " 9 ZUtils.ZTracker.jobTracker[pawn].dest: " + TargetA.Thing.Map);
                 yield return toil;
             }
             yield return new Toil
             {
                 initAction = delegate ()
                 {
-                    ZLogger.Message("Trying to reserve " + job.targetA + " for " + pawn + " - " + job);
+                    ZLogger.Message("JobDriver_HaulThingToDest 1: " + pawn + " trying to reserve: " + TargetA, true);
                 }
             };
+            Toil toilGoto = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
+
             yield return reserveItem.FailOnDespawnedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
-            yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
-            yield return Toils_Haul.StartCarryThing(TargetIndex.A, putRemainderInQueue: false, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.A);
-            if (job.haulOpportunisticDuplicates)
-            {
-                yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveItem, TargetIndex.A, TargetIndex.None, takeFromValidStorage: true);
-            }
+
             yield return new Toil
             {
                 initAction = delegate ()
                 {
-                    ZLogger.Message("22222222222222: " + this.savedThing);
-                    ZLogger.Message("Saved thing: " + this.savedThing);
-                    ZLogger.Message("TargetA: " + this.job.targetA.Thing);
+                    ZLogger.Message("JobDriver_HaulThingToDest 1: " + pawn + " reserved: " + TargetA, true);
                 }
             };
 
+            yield return toilGoto;
+            yield return Toils_Haul.StartCarryThing(TargetIndex.A, putRemainderInQueue: false, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.A);
+            if (job.haulOpportunisticDuplicates)
+            {
+                yield return new Toil
+                {
+                    initAction = delegate ()
+                    {
+                        ZLogger.Message("2: " + pawn + " trying to reserve other things: " + TargetA, true);
+                    }
+                };
+
+                yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveItem, TargetIndex.A, TargetIndex.None, takeFromValidStorage: true);
+                yield return new Toil
+                {
+                    initAction = delegate ()
+                    {
+                        ZLogger.Message("2: " + pawn + " reserved other things: " + TargetA, true);
+                    }
+                };
+            }
             yield return new Toil
             {
                 initAction = delegate ()
@@ -136,21 +147,8 @@ namespace ZLevels
                     }
                 }
             };
-            yield return new Toil
-            {
-                initAction = delegate ()
-                {
-                    ZLogger.Message("33333333333333: " + this.savedThing);
-                    ZLogger.Message("Saved thing: " + this.savedThing);
-                    ZLogger.Message("TargetA: " + this.job.targetA.Thing);
-                }
-            };
-            ZLogger.Message(pawn + " 6 ZUtils.ZTracker.jobTracker[pawn].dest: " + ZTracker.jobTracker[pawn].dest);
-
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].dest, this))
             {
-                ZLogger.Message(pawn + " 7 ZUtils.ZTracker.jobTracker[pawn].dest: " + ZTracker.jobTracker[pawn].dest);
-
                 yield return toil;
             }
         }

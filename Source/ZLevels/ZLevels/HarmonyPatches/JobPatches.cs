@@ -1182,7 +1182,7 @@ namespace ZLevels
                     }
                 }
                 catch { }
-                ZLogger.Message("=============================");
+                ZLogger.Message("=============================", debugLevel: DebugLevel.Jobs);
                 try
                 {
 
@@ -1322,7 +1322,7 @@ namespace ZLevels
                             ZUtils.TeleportThing(pawn, oldMap, oldPosition);
 
                             ZLogger.Message(pawn + " got job " + result + " - map: "
-                                + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
+                                + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position, debugLevel: DebugLevel.Jobs);
                             if (dest != null)
                             {
                                 ZTracker.BuildJobListFor(pawn, dest, result.Job);
@@ -1337,7 +1337,7 @@ namespace ZLevels
                         else
                         {
                             __result = ThinkResult.NoJob;
-                            ZLogger.Message(pawn + " failed to find job");
+                            ZLogger.Message(pawn + " failed to find job", debugLevel: DebugLevel.Jobs);
                         }
                     }
                     catch (Exception ex)
@@ -1757,12 +1757,11 @@ namespace ZLevels
                                     || mainJob.targetA.Thing != null && mainJob.targetA.Thing == job.targetB.Thing
                                     || mainJob.targetB.Thing != null && mainJob.targetB.Thing == job.targetA.Thing)
                                 {
-                                    ZLogger.Message("mainJob.targetA.Thing: " + mainJob.targetA.Thing);
-                                    ZLogger.Message("job.targetA.Thing: " + job.targetA.Thing);
-                                    ZLogger.Message("mainJob.targetB.Thing: " + mainJob.targetB.Thing);
-                                    ZLogger.Message("job.targetB.Thing: " + job.targetB.Thing);
-                                    ZLogger.Pause("JOBCHECK: 1: " + pawn + " - " + job + " someone has same job - "
-                                        + jobPawn + " - " + mainJob);
+                                    ZLogger.Message("mainJob.targetA.Thing: " + mainJob.targetA.Thing, debugLevel: DebugLevel.Jobs);
+                                    ZLogger.Message("job.targetA.Thing: " + job.targetA.Thing, debugLevel: DebugLevel.Jobs);
+                                    ZLogger.Message("mainJob.targetB.Thing: " + mainJob.targetB.Thing, debugLevel: DebugLevel.Jobs);
+                                    ZLogger.Message("job.targetB.Thing: " + job.targetB.Thing, debugLevel: DebugLevel.Jobs);
+                                    ZLogger.Message("JOBCHECK: 1: " + pawn + " - " + job + " someone has same job - " + jobPawn + " - " + mainJob, debugLevel: DebugLevel.Jobs);
                                     return false;
                                 }
                                 if (mainJob.targetQueueA != null)
@@ -1771,8 +1770,7 @@ namespace ZLevels
                                     {
                                         if (job.targetQueueA.Contains(thing))
                                         {
-                                            ZLogger.Pause("JOBCHECK: 2: " + pawn + " - " + job + " someone has same job - "
-                                        + jobPawn + " - " + mainJob);
+                                            ZLogger.Message("JOBCHECK: 2: " + pawn + " - " + job + " someone has same job - " + jobPawn + " - " + mainJob, debugLevel: DebugLevel.Jobs);
                                             return false;
                                         }
                                     }
@@ -1783,8 +1781,7 @@ namespace ZLevels
                                     {
                                         if (job.targetQueueB.Contains(thing))
                                         {
-                                            ZLogger.Pause("JOBCHECK: 3: " + pawn + " - " + job + " someone has same job - "
-                                                + jobPawn + " - " + mainJob);
+                                            ZLogger.Message("JOBCHECK: 3: " + pawn + " - " + job + " someone has same job - " + jobPawn + " - " + mainJob, debugLevel: DebugLevel.Jobs);
                                             return false;
                                         }
                                     }
@@ -1794,6 +1791,82 @@ namespace ZLevels
                     }
                 }
                 catch { };
+                foreach (var otherPawn in ZTracker.jobTracker.Keys)
+                {
+                    if (otherPawn.Spawned && !otherPawn.Dead)
+                    {
+                        if (ZTracker.jobTracker.ContainsKey(otherPawn) && ZTracker.jobTracker[otherPawn].reservedThings != null)
+                        {
+                            foreach (var reserve in ZTracker.jobTracker[otherPawn].reservedThings)
+                            {
+                                if (reserve.Thing != null)
+                                {
+                                    if (reserve.Thing == job.targetA.Thing || reserve.Thing == job.targetB.Thing || reserve.Thing == job.targetC.Thing)
+                                    {
+                                        ZLogger.Message("JOBCHECK 1.5: " + pawn + " someone has job on " + reserve + " - " + otherPawn, debugLevel: DebugLevel.Jobs);
+                                        return false;
+                                    }
+                                    try
+                                    {
+                                        foreach (var t in job.targetQueueA)
+                                        {
+                                            if (reserve.Thing == t.Thing)
+                                            {
+                                                ZLogger.Message("JOBCHECK 2.5: " + pawn + " someone has job on " + reserve + " - " + otherPawn, debugLevel: DebugLevel.Jobs);
+                                                return false;
+                                            }
+                                        }
+                                    }
+                                    catch { }
+                                    try
+                                    {
+                                        foreach (var t in job.targetQueueB)
+                                        {
+                                            if (reserve.Thing == t.Thing)
+                                            {
+                                                ZLogger.Message("JOBCHECK 3.5: " + pawn + " someone has job on " + reserve + " - " + otherPawn, debugLevel: DebugLevel.Jobs);
+                                                return false;
+                                            }
+                                        }
+                                    }
+                                    catch { }
+                                }
+                                else if (reserve.Cell.IsValid)
+                                {
+                                    if (reserve.Cell == job.targetA.cellInt || reserve.Cell == job.targetB.cellInt || reserve.Cell == job.targetC.cellInt)
+                                    {
+                                        ZLogger.Message("JOBCHECK 1: " + pawn + " someone has job on " + reserve + " - " + otherPawn, debugLevel: DebugLevel.Jobs);
+                                        return false;
+                                    }
+                                    try
+                                    {
+                                        foreach (var t in job.targetQueueA)
+                                        {
+                                            if (reserve.Cell == t.cellInt)
+                                            {
+                                                ZLogger.Message("JOBCHECK 2: " + pawn + " someone has job on " + reserve + " - " + otherPawn, debugLevel: DebugLevel.Jobs);
+                                                return false;
+                                            }
+                                        }
+                                    }
+                                    catch { }
+                                    try
+                                    {
+                                        foreach (var t in job.targetQueueB)
+                                        {
+                                            if (reserve.Cell == t.cellInt)
+                                            {
+                                                ZLogger.Message("JOBCHECK 3: " + pawn + " someone has job on " + reserve + " - " + otherPawn, debugLevel: DebugLevel.Jobs);
+                                                return false;
+                                            }
+                                        }
+                                    }
+                                    catch { }
+                                }
+                            }
+                        }
+                    }
+                }
                 ZLogger.Message("JOBCHECK: No one has same job " + job);
                 return true;
             }
@@ -1813,7 +1886,7 @@ namespace ZLevels
                             {
                                 if (mainJob.targetA.Thing == t || mainJob.targetB.Thing == t)
                                 {
-                                    ZLogger.Pause("JOBCHECK: 4: " + pawn + " someone has job on " + t + " - " + jobPawn);
+                                    ZLogger.Message("JOBCHECK 4: " + pawn + " someone has job on " + t + " - " + jobPawn + " - " + mainJob, debugLevel: DebugLevel.Jobs);
                                     return false;
                                 }
                                 if (mainJob.targetQueueA != null)
@@ -1822,7 +1895,7 @@ namespace ZLevels
                                     {
                                         if (thing == t)
                                         {
-                                            ZLogger.Pause("JOBCHECK: 5: " + pawn + " someone has job on " + t + " - " + jobPawn);
+                                            ZLogger.Message("JOBCHECK 5: " + pawn + " someone has job on " + t + " - " + jobPawn + " - " + mainJob, debugLevel: DebugLevel.Jobs);
                                             return false;
                                         }
                                     }
@@ -1833,7 +1906,7 @@ namespace ZLevels
                                     {
                                         if (thing == t)
                                         {
-                                            ZLogger.Pause("JOBCHECK: 6: " + pawn + " someone has job on " + t + " - " + jobPawn);
+                                            ZLogger.Message("JOBCHECK 6: " + pawn + " someone has job on " + t + " - " + jobPawn + " - " + mainJob, debugLevel: DebugLevel.Jobs);
                                             return false;
                                         }
                                     }
@@ -1843,7 +1916,26 @@ namespace ZLevels
                     }
                 }
                 catch { };
-                ZLogger.Message("JOBCHECK: No one has job on " + t);
+
+                foreach (var otherPawn in ZTracker.jobTracker.Keys)
+                {
+                    if (otherPawn.Spawned && !otherPawn.Dead)
+                    {
+                        if (ZTracker.jobTracker.ContainsKey(otherPawn) && ZTracker.jobTracker[otherPawn].reservedThings != null)
+                        {
+                            foreach (var reserve in ZTracker.jobTracker[otherPawn].reservedThings)
+                            {
+
+                                if (reserve.Thing != null && reserve.Thing == t)
+                                {
+                                    ZLogger.Message("JOBCHECK 7: " + pawn + " someone has job on " + t + " - " + otherPawn, debugLevel: DebugLevel.Jobs);
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+                ZLogger.Message(pawn + " - JOBCHECK: No one has job on " + t);
                 return true;
             }
 
@@ -2246,7 +2338,7 @@ namespace ZLevels
                     pawn.mindState.priorityWork.Clear();
                 }
                 List<WorkGiver> list = (!emergency) ? pawn.workSettings.WorkGiversInOrderNormal : pawn.workSettings.WorkGiversInOrderEmergency;
-                ZLogger.Message(pawn + " - " + emergency + " - workgiver count: " + list.Count);
+                ZLogger.Message(pawn + " - " + emergency + " - workgiver count: " + list.Count, debugLevel: DebugLevel.Jobs);
                 int num = -999;
                 TargetInfo bestTargetOfLastPriority = TargetInfo.Invalid;
                 WorkGiver_Scanner scannerWhoProvidedTarget = null;
@@ -2265,13 +2357,16 @@ namespace ZLevels
                     WorkGiver workGiver = list[j];
                     if (checkForIgnoredWorkgivers && ZTracker.jobTracker[pawn].ignoreGiversInFirstTime.Contains(workGiver.def))
                     {
-                        ZLogger.Message("Skipping ignored " + workGiver);
+                        ZLogger.Message("Skipping ignored " + workGiver, debugLevel: DebugLevel.Jobs);
                         continue;
                     }
+                    ZLogger.Message("Workgiver N" + (j + 1) + " from " + list.Count + " - " + pawn + " search job - " + workGiver, debugLevel: DebugLevel.Jobs);
+
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
                         if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                         {
+                            ZLogger.Message("Breaking the workgiver loop due to workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid", debugLevel: DebugLevel.Jobs);
                             break;
                         }
                         if (!PawnCanUseWorkGiver(pawn, workGiver))
@@ -2324,9 +2419,6 @@ namespace ZLevels
                                     && HasJobOnThing(scanner, pawn, t, false) != null 
                                     && NoOneHasJobOn(t, pawn, scanner.def)
                                     ;
-
-                                    ZLogger.Message(pawn + " search job in " + ZTracker.GetMapInfo(otherMap) + " - " + workGiver);
-
                                     IEnumerable<Thing> enumerable = scanner.PotentialWorkThingsGlobal(pawn);
 
                                     Thing thing = null;
@@ -2359,27 +2451,27 @@ namespace ZLevels
                                                 enumerable != null);
                                             try
                                             {
-                                                if (enumerable != null)
+                                                if (enumerable != null && enumerable.Count() > 0)
                                                 {
-                                                    ZLogger.Message("Try get thing from enumerable: " + enumerable.Count(), true);
-                                                    foreach (var t in enumerable)
-                                                    {
-                                                        ZLogger.Message(t + " in enumerable: " + ZTracker.GetMapInfo(pawn.Map) + " - " + t.Position);
-                                                    }
+                                                    ZLogger.Message("Try get thing from enumerable: " + enumerable.Count(), true, debugLevel: DebugLevel.Jobs);
+                                                    //foreach (var t in enumerable)
+                                                    //{
+                                                    //    ZLogger.Message(t + " in enumerable: " + ZTracker.GetMapInfo(pawn.Map) + " - " + t.Position, debugLevel: DebugLevel.Jobs);
+                                                    //}
                                                 }
 
                                                 if (thing != null)
                                                 {
-                                                    ZLogger.Message("Get thing: " + thing + " in " + thing.Map + " for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true);
+                                                    ZLogger.Message("Got thing: " + thing + " in " + thing.Map + " for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true, debugLevel: DebugLevel.Jobs);
                                                 }
                                                 else
                                                 {
-                                                    ZLogger.Message("Cant get thing for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true);
+                                                    ZLogger.Message("Cant get thing for " + pawn + " in " + ZTracker.GetMapInfo(pawn.Map), true, debugLevel: DebugLevel.Jobs);
                                                 }
                                             }
                                             catch (Exception ex)
                                             {
-                                                ZLogger.Message(ex.ToString());
+                                                ZLogger.Message(ex.ToString(), debugLevel: DebugLevel.Jobs);
                                             };
                                         }
 
@@ -2440,7 +2532,7 @@ namespace ZLevels
 
                                         if (thing != null)
                                         {
-                                            ZLogger.Message(pawn + " - " + ZTracker.GetMapInfo(pawn.Map) + " - " + scanner + " Selected thing: " + thing);
+                                            ZLogger.Message(pawn + " - " + ZTracker.GetMapInfo(pawn.Map) + " - " + scanner + " Selected thing: " + thing, debugLevel: DebugLevel.Jobs);
                                         }
                                     }
                                     if (thing != null)
@@ -2531,42 +2623,42 @@ namespace ZLevels
                                     job3 = (!bestTargetOfLastPriority.HasThing) ?
                                         scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                         : JobOnThing(pawn, bestTargetOfLastPriority.Thing, ref dest);
-                                    ZLogger.Message("1 - " + scannerWhoProvidedTarget + " - " + job3);
+                                    ZLogger.Message("1 - " + scannerWhoProvidedTarget + " - " + job3, debugLevel: DebugLevel.Jobs);
                                 }
                                 else if (scannerWhoProvidedTarget is WorkGiver_DoBill scanner1)
                                 {
                                     job3 = (!bestTargetOfLastPriority.HasThing) ?
                                         scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                         : JobOnThing(scanner1, pawn, bestTargetOfLastPriority.Thing);
-                                    ZLogger.Message("2 - " + scannerWhoProvidedTarget + " - " + job3);
+                                    ZLogger.Message("2 - " + scannerWhoProvidedTarget + " - " + job3, debugLevel: DebugLevel.Jobs);
                                 }
                                 else if (scannerWhoProvidedTarget is WorkGiver_ConstructDeliverResourcesToBlueprints scanner2)
                                 {
                                     job3 = (!bestTargetOfLastPriority.HasThing) ?
                                         scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                         : JobOnThing(scanner2, pawn, bestTargetOfLastPriority.Thing);
-                                    ZLogger.Message("3 - " + scannerWhoProvidedTarget + " - " + job3);
+                                    ZLogger.Message("3 - " + scannerWhoProvidedTarget + " - " + job3, debugLevel: DebugLevel.Jobs);
                                 }
                                 else if (scannerWhoProvidedTarget is WorkGiver_ConstructDeliverResourcesToFrames scanner3)
                                 {
                                     job3 = (!bestTargetOfLastPriority.HasThing) ?
                                         scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                         : JobOnThing(scanner3, pawn, bestTargetOfLastPriority.Thing);
-                                    ZLogger.Message("4 - " + scannerWhoProvidedTarget + " - " + job3);
+                                    ZLogger.Message("4 - " + scannerWhoProvidedTarget + " - " + job3, debugLevel: DebugLevel.Jobs);
                                 }
                                 else if (scannerWhoProvidedTarget is WorkGiver_Refuel scanner4)
                                 {
                                     job3 = (!bestTargetOfLastPriority.HasThing) ?
                                         scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                         : JobOnThing(scanner4, pawn, bestTargetOfLastPriority.Thing);
-                                    ZLogger.Message("5 - " + scannerWhoProvidedTarget + " - " + job3);
+                                    ZLogger.Message("5 - " + scannerWhoProvidedTarget + " - " + job3, debugLevel: DebugLevel.Jobs);
                                 }
                                 else
                                 {
                                     job3 = (!bestTargetOfLastPriority.HasThing) ?
                                         scannerWhoProvidedTarget.JobOnCell(pawn, bestTargetOfLastPriority.Cell)
                                         : scannerWhoProvidedTarget.JobOnThing(pawn, bestTargetOfLastPriority.Thing);
-                                    ZLogger.Message("6 - " + scannerWhoProvidedTarget + " - " + job3);
+                                    ZLogger.Message("6 - " + scannerWhoProvidedTarget + " - " + job3, debugLevel: DebugLevel.Jobs);
                                 }
                             }
                             catch (Exception ex)
@@ -2577,20 +2669,27 @@ namespace ZLevels
                             {
                                 if (!NoOneHasSameJob(job3, pawn, scannerWhoProvidedTarget.def))
                                 {
+                                    bestTargetOfLastPriority = null;
+                                    ZLogger.Message(pawn + " cant do the job " + job3 + " someone has reserved targets from this job", debugLevel: DebugLevel.Jobs);
                                     continue;
                                 }
-                                job3.workGiverDef = scannerWhoProvidedTarget.def;
-                                if (dest == null)
+                                else
                                 {
-                                    dest = otherMap;
+                                    job3.workGiverDef = scannerWhoProvidedTarget.def;
+                                    if (dest == null)
+                                    {
+                                        dest = otherMap;
+                                    }
+                                    return new ThinkResult(job3, instance, list[j].def.tagToGive);
                                 }
-                                return new ThinkResult(job3, instance, list[j].def.tagToGive);
+
                             }
                             //Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
                         }
                         num = workGiver.def.priorityInType;
                     }
                 }
+
                 return ThinkResult.NoJob;
             }
 

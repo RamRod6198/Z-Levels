@@ -190,6 +190,8 @@ namespace ZLevels
             }
             return -1;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void TeleportThing(Thing thing, Map map, IntVec3 position)
         {
             //    var mth = new StackTrace().GetFrame(1).GetMethod();

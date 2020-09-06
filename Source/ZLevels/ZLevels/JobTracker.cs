@@ -27,6 +27,7 @@ namespace ZLevels
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "forceGoToDestMap", false);
 			Scribe_References.Look<Thing>(ref target, "target");
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "failIfTargetMapIsNotDest", false);
+			Scribe_Collections.Look<LocalTargetInfo>(ref reservedThings, "reservedThings", LookMode.LocalTargetInfo);
 		}
 
 		public bool searchingJobsNow = false;
@@ -40,11 +41,14 @@ namespace ZLevels
 		public bool forceGoToDestMap;
 
 		public Thing target;
+
 		public bool failIfTargetMapIsNotDest;
 
 		public HashSet<WorkGiverDef> ignoreGiversInFirstTime;
 
 		public List<Job> activeJobs;
+
+		public List<LocalTargetInfo> reservedThings;
 	}
 }
 

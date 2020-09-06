@@ -12,7 +12,6 @@ namespace ZLevels
         {
             return true;
         }
-
         public override IEnumerable<Toil> MakeNewToils()
         {
             this.FailOn(() => ZUtils.ZTracker.jobTracker.ContainsKey(pawn) && ZUtils.ZTracker.jobTracker[pawn].failIfTargetMapIsNotDest && ZUtils.ZTracker.jobTracker[pawn].target.Map != ZUtils.ZTracker.jobTracker[pawn].dest);

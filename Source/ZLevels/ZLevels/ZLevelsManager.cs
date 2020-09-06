@@ -430,9 +430,50 @@ namespace ZLevels
             catch { };
             return str;
         }
+
+        public void ReserveTargets(Pawn pawn, Job job)
+        {
+            ZLogger.Message(pawn + " is starting reserving things for " + job, debugLevel: DebugLevel.Jobs);
+            if (!this.jobTracker.ContainsKey(pawn)) this.jobTracker[pawn] = new JobTracker();
+            if (this.jobTracker[pawn].reservedThings == null) this.jobTracker[pawn].reservedThings = new List<LocalTargetInfo>();
+            if (job.targetA != null)
+            {
+                ZLogger.Message(pawn + " reserving " + job.targetA, true, debugLevel: DebugLevel.Jobs);
+                this.jobTracker[pawn].reservedThings.Add(job.targetA);
+            }
+            if (job.targetB != null)
+            {
+                ZLogger.Message(pawn + " reserving " + job.targetB, true, debugLevel: DebugLevel.Jobs);
+                this.jobTracker[pawn].reservedThings.Add(job.targetB);
+            }
+            if (job.targetC != null)
+            {
+                ZLogger.Message(pawn + " reserving " + job.targetC, true, debugLevel: DebugLevel.Jobs);
+                this.jobTracker[pawn].reservedThings.Add(job.targetC);
+            }
+            try
+            {
+                foreach (var t in job.targetQueueA)
+                {
+                    ZLogger.Message(pawn + " reserving " + t, true, debugLevel: DebugLevel.Jobs);
+                    this.jobTracker[pawn].reservedThings.Add(t);
+                }
+            }
+            catch { }
+            try
+            {
+                foreach (var t in job.targetQueueB)
+                {
+                    ZLogger.Message(pawn + " reserving " + t, true, debugLevel: DebugLevel.Jobs);
+                    this.jobTracker[pawn].reservedThings.Add(t);
+                }
+            }
+            catch { }
+        }
         public void BuildJobListFor(Pawn pawn, Map dest, Job jobToDo)
         {
             this.ResetJobs(pawn);
+            this.ReserveTargets(pawn, jobToDo);
             List<Job> tempJobs = new List<Job>();
             string log = "";
             if (jobToDo.def == JobDefOf.HaulToCell)
@@ -824,7 +865,11 @@ namespace ZLevels
                 this.jobTracker[pawn].forceGoToDestMap = false;
                 this.jobTracker[pawn].failIfTargetMapIsNotDest = false;
                 this.jobTracker[pawn].target = null;
-                ZLogger.Message("Resetting forceGoToDestMap");
+                this.jobTracker[pawn].ignoreGiversInFirstTime = null;
+                this.jobTracker[pawn].oldMap = null;
+                this.jobTracker[pawn].reservedThings = null;
+                this.jobTracker[pawn].searchingJobsNow = false;
+                ZLogger.Message("Resetting job data");
             }
             else
             {
@@ -837,6 +882,80 @@ namespace ZLevels
             pawn.jobs.EndCurrentJob(JobCondition.Errored);
         }
 
+        public void CheckReservationsForThing(Pawn pawn, Thing thing)
+        {
+            List<Map> maps = Find.Maps;
+            for (int i = 0; i < maps.Count; i++)
+            {
+                var result = maps[i].reservationManager.FirstRespectedReserver(thing, pawn);
+                if (result != null)
+                {
+                    ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking reservation on thing: " + thing + " - result: " + true);
+                }
+                result = maps[i].physicalInteractionReservationManager.FirstReserverOf(thing);
+                if (result != null)
+                {
+                    ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking physical reservation on thing: " + thing + " - result: " + result, true);
+                }
+            }
+
+            foreach (var pawnData in this.jobTracker)
+            {
+                if (pawnData.Value.reservedThings != null)
+                {
+                    foreach (var t in pawnData.Value.reservedThings)
+                    {
+                        ZLogger.Message(pawnData.Key + " is holding " + t, true);
+                    }
+                }
+            }
+        }
+        public void CheckReservationsFor(Pawn pawn, Job job)
+        {
+            List<Map> maps = Find.Maps;
+            for (int i = 0; i < maps.Count; i++)
+            {
+                ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking reservation on targetA: " + job.targetA + " - result: " + maps[i].reservationManager.FirstRespectedReserver(job.targetA, pawn), true);
+                ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking reservation on targetB: " + job.targetB + " - result: " + maps[i].reservationManager.FirstRespectedReserver(job.targetB, pawn), true);
+                ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking reservation on targetC: " + job.targetC + " - result: " + maps[i].reservationManager.FirstRespectedReserver(job.targetC, pawn), true);
+                try
+                {
+                    foreach (var target in job.targetQueueA)
+                    {
+                        ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking reservation on targetQueueA: " + target + " - result: " + maps[i].reservationManager.FirstRespectedReserver(target, pawn), true);
+                    }
+                }
+                catch {  }
+                try
+                {
+                    foreach (var target in job.targetQueueB)
+                    {
+                        ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking reservation on targetQueueB: " + target + " - result: " + maps[i].reservationManager.FirstRespectedReserver(target, pawn), true);
+                    }
+                }
+                catch { }
+
+                ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking physical reservation on targetA: " + job.targetA + " - result: " + maps[i].physicalInteractionReservationManager.FirstReserverOf(job.targetA), true);
+                ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking physical reservation on targetB: " + job.targetB + " - result: " + maps[i].physicalInteractionReservationManager.FirstReserverOf(job.targetB), true);
+                ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking physical reservation on targetC: " + job.targetC + " - result: " + maps[i].physicalInteractionReservationManager.FirstReserverOf(job.targetC), true);
+                try
+                {
+                    foreach (var target in job.targetQueueA)
+                    {
+                        ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking physical reservation on targetQueueA: " + target + " - result: " + maps[i].physicalInteractionReservationManager.FirstReserverOf(target), true);
+                    }
+                }
+                catch { }
+                try
+                {
+                    foreach (var target in job.targetQueueB)
+                    {
+                        ZLogger.Message(this.GetMapInfo(maps[i]) + " - " + pawn + " checking physical reservation on targetQueueB: " + target + " - result: " + maps[i].physicalInteractionReservationManager.FirstReserverOf(target), true);
+                    }
+                }
+                catch { }
+            }
+        }
         public bool TryTakeFirstJob(Pawn pawn, bool forced = false)
         {
             Job job = null;
@@ -1063,6 +1182,7 @@ namespace ZLevels
                             }
                         }
                         ZLogger.Message(pawn + " TryMakePreToilReservations job " + job + " in " + this.GetMapInfo(pawn.Map));
+                        CheckReservationsFor(pawn, job);
                         if (pawn.CurJob != null)
                         {
                             pawn.ClearReservationsForJob(pawn.CurJob);
@@ -1236,14 +1356,14 @@ namespace ZLevels
 
         public void MoveThingToAnotherMap(Thing thingToTeleport, Map mapToTeleport)
         {
-            //Log.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
+            //ZLogger.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
             thingToTeleport.DeSpawn(DestroyMode.Vanish);
             GenSpawn.Spawn(thingToTeleport, thingToTeleport.positionInt, mapToTeleport, WipeMode.Vanish);
         }
 
         public void MovePawnToAnotherMap(Pawn pawnToTeleport, Map mapToTeleport)
         {
-            Log.Message("CHECK: trying to teleport " + pawnToTeleport + " from " + pawnToTeleport.Map + " to " + mapToTeleport, true);
+            ZLogger.Message("CHECK: trying to teleport " + pawnToTeleport + " from " + pawnToTeleport.Map + " to " + mapToTeleport, true);
             if (pawnToTeleport.Map == mapToTeleport) return;
             if (mapToTeleport.spawnedThings.Contains(pawnToTeleport)) return;
             if (mapToTeleport.listerThings.Contains(pawnToTeleport)) return;

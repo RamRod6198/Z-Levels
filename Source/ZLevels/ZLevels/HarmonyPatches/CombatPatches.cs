@@ -210,14 +210,14 @@ namespace ZLevels
     //    {
     //        if (TryCastShot_Patch.targetOldMap != null && launcher.Map != TryCastShot_Patch.targetOldMap)
     //        {
-    //            Log.Message("TryCastShot_Patch.targetOldMap: " + TryCastShot_Patch.targetOldMap, true);
+    //            ZLogger.Message("TryCastShot_Patch.targetOldMap: " + TryCastShot_Patch.targetOldMap, true);
     //            RoofAndFloorPatches.Patch_SpawnSetup.doTeleport = false;
     //            ZUtils.ZTracker.TeleportThing(__instance, __instance.Position, TryCastShot_Patch.targetOldMap);
     //            RoofAndFloorPatches.Patch_SpawnSetup.doTeleport = true;
     //        }
     //        else if (TryCastShot_Patch.casterOldMap != null && intendedTarget.Thing.Map != TryCastShot_Patch.casterOldMap)
     //        {
-    //            Log.Message("intendedTarget.Thing.Map: " + intendedTarget.Thing.Map, true);
+    //            ZLogger.Message("intendedTarget.Thing.Map: " + intendedTarget.Thing.Map, true);
     //            RoofAndFloorPatches.Patch_SpawnSetup.doTeleport = false;
     //            ZUtils.ZTracker.TeleportThing(__instance, __instance.Position, intendedTarget.Thing.Map);
     //            RoofAndFloorPatches.Patch_SpawnSetup.doTeleport = true;

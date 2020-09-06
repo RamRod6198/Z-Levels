@@ -94,7 +94,7 @@ namespace ZLevels
             {
                 var stairsUp = GetMatchingStair;
                 {
-                    Log.Message(stairsUp + ".HitPoints -= " + (int)totalDamageDealt);
+                    ZLogger.Message(stairsUp + ".HitPoints -= " + (int)totalDamageDealt);
                     stairsUp.syncDamage = false;
                     stairsUp.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
                     stairsUp.syncDamage = true;

@@ -116,7 +116,7 @@ namespace ZLevels
                 var stairsDown = this.GetMatchingStair;
                 if (stairsDown != null)
                 {
-                    Log.Message(stairsDown + ".HitPoints -= " + (int)totalDamageDealt, true);
+                    ZLogger.Message(stairsDown + ".HitPoints -= " + (int)totalDamageDealt, true);
                     stairsDown.syncDamage = false;
                     stairsDown.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
                     stairsDown.syncDamage = true;

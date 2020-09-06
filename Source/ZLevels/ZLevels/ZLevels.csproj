@@ -349,6 +349,7 @@
     <Compile Include="Map\MapParent_ZLevel.cs" />
     <Compile Include="ZLevelsMod.cs" />
     <Compile Include="ZLevelsSettings.cs" />
+    <Compile Include="DebugLevel.cs" />
     <Compile Include="ZUtils.cs" />
     <Compile Include="PowerTransfer\CompPowerZTransmitter.cs" />
     <Compile Include="PowerTransfer\CompProperties_PowerZTransmitter.cs" />
