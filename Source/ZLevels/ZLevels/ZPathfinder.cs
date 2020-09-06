@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using JetBrains.Annotations;
 using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
@@ -112,24 +113,19 @@ namespace ZLevels.Properties
                     , mapFrom, mapTo.listerThings.AllThings
                         .Where(x => x is Building_Stairs), PathEndMode.OnCell, StairParms);
                 Node source = null, sink = null;
-                foreach (Node x in nodes)
-                {
-                    Building_Stairs stairs = x.key;
-                    if (stairs == sourceStairs)
-                    {
-                        source = x;
-                    }
-                    else if (stairs == sinkStairs)
-                    {
-                        sink = x;
-                    }
-                }
+                AssignSourceAndSinkNodes(sourceStairs, sinkStairs, ref source, ref sink);
 
                 if (sink == null || source == null)
                 {
                     this.Rebuild();
+                    AssignSourceAndSinkNodes(sourceStairs, sinkStairs, ref source, ref sink);
                 }
 
+                if (sink == null || source == null)
+                {
+                    ZLogger.Message($"Nodes.count = {nodes.Count}, sink {sink}, source {source}");
+                    throw new InvalidDataException("Something is seriously wrong with the stair data");
+                }
                 FindNeighbors(source);
 
                 FindNeighbors(sink);
@@ -149,17 +145,39 @@ namespace ZLevels.Properties
                 //Clean up temp nodes
             }
 
+            private void AssignSourceAndSinkNodes(Building_Stairs sourceStairs, Building_Stairs sinkStairs, ref Node source,
+                ref Node sink)
+            {
+                foreach (Node x in nodes)
+                {
+                    Building_Stairs stairs = x.key;
+                    if (stairs == sourceStairs)
+                    {
+                        source = x;
+                    }
+                    //No else here- they could be the same stairs in some cases.
+                    if (stairs == sinkStairs)
+                    {
+                        sink = x;
+                    }
+                }
+            }
+
             private void Rebuild()
             {
                 nodes = new HashSet<Node>();
                 Build();
             }
 
-            internal void FindNeighbors(Node node)
+            internal void FindNeighbors([NotNull] Node node)
             {
                 foreach (Node neighbor in nodes)
                 {
-                    if (neighbor.Map != node.Map) continue;
+                    if (neighbor?.Map != node.Map) continue;
+                    if (node?.Map == null)
+                    {
+                        throw new NullReferenceException("Node or Map was null");
+                    }
                     PawnPath p = node.Map.pathFinder.FindPath(node.Location, neighbor.Location, StairParms);
                     float cost = p.TotalCost;
                     p.ReleaseToPool();
