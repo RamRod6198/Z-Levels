@@ -199,18 +199,18 @@ namespace ZLevels
         {
             public static bool AddCondition = false;
         
-            public static List<string> blackList = new List<string>
+            public static List<GameConditionDef> blackList = new List<GameConditionDef>
             {
-                "Aurora",
-                "Eclipse",
-                "SolarFlare",
-                "ToxicFallout",
-                "VolcanicWinter",
-                "Flashstorm",
-                "ToxicSpewer",
-                "WeatherController",
-                "SunBlocker",
-                "GiantSmokeCloud",
+                GameConditionDefOf.Aurora,
+                GameConditionDefOf.Eclipse,
+                GameConditionDefOf.SolarFlare,
+                GameConditionDefOf.ToxicFallout,
+                GameConditionDefOf.VolcanicWinter,
+                GameConditionDefOf.Flashstorm,
+                GameConditionDefOf.ToxicSpewer,
+                GameConditionDefOf.WeatherController,
+                GameConditionDef.Named("SunBlocker"),
+                GameConditionDef.Named("GiantSmokeCloud"),
             };
             private static bool Prefix(GameConditionManager __instance, GameCondition cond)
             {
@@ -223,7 +223,7 @@ namespace ZLevels
                         foreach (var map in ZUtils.ZTracker.GetAllMaps(__instance.ownerMap.Tile))
                         {
                             if (map != __instance.ownerMap && (ZUtils.ZTracker.GetZIndexFor(map) < 0
-                                && !blackList.Contains(cond.def?.defName) || ZUtils.ZTracker.GetZIndexFor(map) > 0))
+                                && !blackList.Contains(cond.def) || ZUtils.ZTracker.GetZIndexFor(map) > 0))
                             {
                                 var newCond = GameConditionMaker.MakeCondition(cond.def, cond.Duration);
                                 newCond.conditionCauser = cond.conditionCauser;
@@ -236,7 +236,7 @@ namespace ZLevels
                         }
                         AddCondition = false;
                     }
-                    else if (ind < 0 && ind != -99999 && blackList.Contains(cond.def?.defName))
+                    else if (ind < 0 && ind != -99999 && blackList.Contains(cond.def))
                     {
                         return false;
                     }
@@ -259,9 +259,9 @@ namespace ZLevels
                 {
                     foreach (var map in tile.ZLevels)
                     {
-                        if (map.Key < 0 && RegisterConditionPatch.blackList.Contains(__instance?.def?.defName))
+                        if (map.Key < 0 && RegisterConditionPatch.blackList.Contains(__instance.def))
                         {
-                            //ZLogger.Message("Removing from maps: " + map.Value + " - " + __instance.def);
+                            //Log.Message("Removing from maps: " + map.Value + " - " + __instance.def);
                             __result.Remove(map.Value);
                         }
                     }
@@ -275,7 +275,7 @@ namespace ZLevels
         //    [HarmonyPostfix]
         //    public static void Postfix(GameConditionManager __instance, ref bool __result)
         //    {
-        //        ZLogger.Message("TEST: " + __instance.ownerMap + " - " + __result);
+        //        Log.Message("TEST: " + __instance.ownerMap + " - " + __result);
         //    }
         //}
         //

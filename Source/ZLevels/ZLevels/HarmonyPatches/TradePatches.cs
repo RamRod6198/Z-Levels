@@ -53,7 +53,13 @@ namespace ZLevels
                         }
                     }
                 }
-                ZUtils.TeleportThing(___pawn, oldMap, oldPosition);
+                if (___pawn.Map != oldMap)
+                {
+                    Traverse.Create(___pawn).Field("mapIndexOrState")
+                        .SetValue((sbyte)Find.Maps.IndexOf(oldMap));
+                    Traverse.Create(___pawn).Field("positionInt")
+                        .SetValue(oldPosition);
+                }
                 if (select) Find.Selector.Select(___pawn);
                 __result = result;
             }

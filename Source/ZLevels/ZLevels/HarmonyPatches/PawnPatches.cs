@@ -18,58 +18,58 @@ namespace ZLevels
     [StaticConstructorOnStartup]
     public static class PawnPatches
     {
-        //[HarmonyPatch(typeof(Pawn), "VerifyReservations")]
-        //internal static class Patch_VerifyReservations
-        //{
-        //    private static bool Prefix(Pawn __instance)
-        //    {
-        //        try
-        //        {
-        //            if (__instance.jobs == null)
-        //            {
-        //                return false;
-        //            }
-        //            if (__instance.CurJob != null || __instance.jobs.jobQueue.Count > 0 || __instance.jobs.startingNewJob)
-        //            {
-        //                return false;
-        //            }
-        //            bool flag = false;
-        //            List<Map> maps = Find.Maps;
-        //            for (int i = 0; i < maps.Count; i++)
-        //            {
-        //                LocalTargetInfo obj = maps[i].reservationManager.FirstReservationFor(__instance);
-        //                if (obj.IsValid)
-        //                {
-        //                    flag = true;
-        //                }
-        //                LocalTargetInfo obj2 = maps[i].physicalInteractionReservationManager.FirstReservationFor(__instance);
-        //                if (obj2.IsValid)
-        //                {
-        //                    flag = true;
-        //                }
-        //                IAttackTarget attackTarget = maps[i].attackTargetReservationManager.FirstReservationFor(__instance);
-        //                if (attackTarget != null)
-        //                {
-        //                    flag = true;
-        //                }
-        //                IntVec3 obj3 = maps[i].pawnDestinationReservationManager.FirstObsoleteReservationFor(__instance);
-        //                if (obj3.IsValid)
-        //                {
-        //                    flag = true;
-        //                }
-        //            }
-        //            if (flag)
-        //            {
-        //                __instance.ClearAllReservations(true);
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Log.Error("[Z-Levels] Patch_VerifyReservations patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
-        //        }
-        //        return false;
-        //    }
-        //}
+        [HarmonyPatch(typeof(Pawn), "VerifyReservations")]
+        internal static class Patch_VerifyReservations
+        {
+            private static bool Prefix(Pawn __instance)
+            {
+                try
+                {
+                    if (__instance.jobs == null)
+                    {
+                        return false;
+                    }
+                    if (__instance.CurJob != null || __instance.jobs.jobQueue.Count > 0 || __instance.jobs.startingNewJob)
+                    {
+                        return false;
+                    }
+                    bool flag = false;
+                    List<Map> maps = Find.Maps;
+                    for (int i = 0; i < maps.Count; i++)
+                    {
+                        LocalTargetInfo obj = maps[i].reservationManager.FirstReservationFor(__instance);
+                        if (obj.IsValid)
+                        {
+                            flag = true;
+                        }
+                        LocalTargetInfo obj2 = maps[i].physicalInteractionReservationManager.FirstReservationFor(__instance);
+                        if (obj2.IsValid)
+                        {
+                            flag = true;
+                        }
+                        IAttackTarget attackTarget = maps[i].attackTargetReservationManager.FirstReservationFor(__instance);
+                        if (attackTarget != null)
+                        {
+                            flag = true;
+                        }
+                        IntVec3 obj3 = maps[i].pawnDestinationReservationManager.FirstObsoleteReservationFor(__instance);
+                        if (obj3.IsValid)
+                        {
+                            flag = true;
+                        }
+                    }
+                    if (flag)
+                    {
+                        __instance.ClearAllReservations(true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("[Z-Levels] Patch_VerifyReservations patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                }
+                return false;
+            }
+        }
 
         //[HarmonyPatch(typeof(Pawn_PathFollower), "CostToMoveIntoCell", new Type[]
         //{

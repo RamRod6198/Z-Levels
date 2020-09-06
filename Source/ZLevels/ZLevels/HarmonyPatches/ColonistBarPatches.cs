@@ -18,7 +18,9 @@ namespace ZLevels
         [HarmonyPrefix]
         public static void Prefix()
         {
-            Find.ColonistBar.cachedEntries = Find.ColonistBar.cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
+            var cachedEntries = Traverse.Create(Find.ColonistBar).Field("cachedEntries").GetValue<List<Entry>>();
+            cachedEntries = cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
+            Traverse.Create(Find.ColonistBar).Field("cachedEntries").SetValue(cachedEntries);
         }
     }
 

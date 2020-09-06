@@ -110,7 +110,7 @@ namespace ZLevels
                 {
                     return true;
                 }
-                BuildableDef entDef = instance.entDef;
+                BuildableDef entDef = Traverse.Create(instance).Field("entDef").GetValue<BuildableDef>();
                 ThingDef thingDef = entDef as ThingDef;
                 if (thingDef2.IsStuff && thingDef2.stuffProps.CanMake(thingDef))
                 {

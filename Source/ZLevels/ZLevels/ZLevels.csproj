@@ -17,14 +17,14 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\1.2\Assemblies\</OutputPath>
+    <OutputPath>..\..\..\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\..\Assemblies\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -288,7 +288,6 @@
     <Compile Include="Map\MapParent_ZLevel.cs" />
     <Compile Include="ZPathfinder.cs" />
     <Compile Include="ZLevels.cs" />
-    <Compile Include="ZLevelsMod.cs" />
     <Compile Include="ZLevelsSettings.cs" />
     <Compile Include="ZUtils.cs" />
     <Compile Include="PowerTransfer\CompPowerZTransmitter.cs" />

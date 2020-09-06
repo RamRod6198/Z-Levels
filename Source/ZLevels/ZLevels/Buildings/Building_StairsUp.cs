@@ -124,8 +124,7 @@ namespace ZLevels
             base.Destroy(mode);
         }
 
-        public bool syncDamage = true;
-
+        public bool giveDamage = true;
         public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
             base.PostApplyDamage(dinfo, totalDamageDealt);
@@ -133,16 +132,11 @@ namespace ZLevels
             if (giveDamage && upperLevel != null && upperLevel.listerThings.ThingsOfDef(ZLevelsDefOf.ZL_StairsDown)
                 .Where(x => x.Position == Position).FirstOrDefault() is Building_StairsDown stairsDown)
             {
-                var stairsDown = this.GetMatchingStair;
-                if (stairsDown != null)
-                {
-                    Log.Message(stairsDown + ".HitPoints -= " + (int)totalDamageDealt, true);
-                    stairsDown.syncDamage = false;
-                    stairsDown.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
-                    stairsDown.syncDamage = true;
-                }
+                ZLogger.Message(stairsDown + ".HitPoints -= " + (int)totalDamageDealt);
+                stairsDown.giveDamage = false;
+                stairsDown.TakeDamage(dinfo);
+                stairsDown.giveDamage = true;
             }
-            base.PostApplyDamage(dinfo, totalDamageDealt);
         }
 
         public void GiveJob(Pawn pawn, Thing stairs)
