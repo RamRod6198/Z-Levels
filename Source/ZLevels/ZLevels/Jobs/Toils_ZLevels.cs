@@ -5,6 +5,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using Verse;
 using Verse.AI;
+using ZLevels.Properties;
 
 namespace ZLevels
 {
@@ -155,6 +156,55 @@ namespace ZLevels
             //If found, build a route with alternating toils of teleport and gotostairs
             //
             yield return null;
+        }
+
+        public static IEnumerable<Toil> FindRouteWithStairs(Pawn pawn, LocalTargetInfo targetInfo, JobDriver instance)
+        {
+
+            yield return new Toil
+            {
+                initAction = delegate ()
+                {
+                    ZLogger.Message($"Find Route with Stairs called, calling FindRoute");
+                }
+            };
+            var stairList =
+                ZPathfinder.Instance.FindRoute(pawn.Position, targetInfo.Cell, pawn.Map,  targetInfo.HasThing? targetInfo.Thing.Map : pawn.Map,
+                    out float routeCost);
+            yield return new Toil
+            {
+                initAction = delegate ()
+                {
+                    for (int j = 0; j < stairList.Count; ++j)
+                    {
+                        ZLogger.Message($"Stairs {j} = {stairList[j]}");
+                    }
+                }
+            };
+
+            for (int i = 0; i < stairList.Count - 1; ++i)
+            {
+                int i1 = i;
+
+                Toil setStairs = Toils_ZLevels.GetSetStairs(pawn, stairList[i + 1].Map, instance);
+                Toil useStairs = Toils_General.Wait(60, 0);
+                useStairs.WithProgressBarToilDelay(TargetIndex.A);
+
+                yield return setStairs;
+                yield return Toils_Goto.GotoCell(stairList[i].Location, PathEndMode.OnCell);
+                yield return useStairs;
+
+
+                yield return Toils_ZLevels.GetTeleport(pawn, stairList[i1 + 1].Map, instance, setStairs);
+
+
+                //foreach (Toil t in Toils_ZLevels.GoToMap(pawn, stairList[i1 + 1].Map, this))
+                //{
+                //    yield return t;
+                //}
+
+            }
+            yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
         }
 
     }

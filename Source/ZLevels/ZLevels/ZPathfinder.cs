@@ -21,11 +21,11 @@ namespace ZLevels.Properties
     /// we'll know all the pathfinders needed to go from a to b.
     /// Second, going to go through the pathfinders in order and get the pawn paths for each.
     /// Finally, we'll return a list of pawn paths for the pawn to use, unless I can stitch them together somehow
-    /// 
+    /// //TODO: create temp nodes to eliminate tendency to walk to stairs first
     /// </summary>
     public class ZPathfinder
     {
-        public const float MatchedStairCost = 3.0f;
+        public const float MatchedStairCost = 20.0f;
 
         public class DijkstraGraph
         {
@@ -119,7 +119,7 @@ namespace ZLevels.Properties
                     {
                         source = x;
                     }
-                    else if (stairs == sinkStairs)
+                    if (stairs == sinkStairs)
                     {
                         sink = x;
                     }
@@ -133,6 +133,11 @@ namespace ZLevels.Properties
                 FindNeighbors(source);
 
                 FindNeighbors(sink);
+                if (source == null || sink == null)
+                {
+                    routeCost = float.PositiveInfinity;
+                    return null;
+                }
                 StringBuilder sb = new StringBuilder("Source neighbors: \n");
                 foreach (var neighbor in source.neighbors)
                 {
@@ -146,10 +151,10 @@ namespace ZLevels.Properties
                 }
                 ZLogger.Message(sb.ToString());
                 return DijkstraConnect(source, sink, out routeCost);
-                //Clean up temp nodes
+
             }
 
-            private void Rebuild()
+            internal void Rebuild()
             {
                 nodes = new HashSet<Node>();
                 Build();
@@ -203,8 +208,7 @@ namespace ZLevels.Properties
                     }
 
                     bool found = false;
-                    Node u = source, next = null;
-                    float cost = 0f;
+                    Node u = source;
                     while (Q.Count > 0)
                     {
                         sb.Clear();
@@ -466,26 +470,25 @@ namespace ZLevels.Properties
             }
         }
 
-
         public List<DijkstraGraph.Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost)
         {
+
             if (!HasDijkstraForTile(mapFrom.Tile))
             {
                 SetOrCreateDijkstraGraph(mapFrom.Tile);
             }
-
+            else
+            {
+                DijkstraGraph graph = getDijkstraGraphForTile(mapFrom.Tile);
+                graph?.Rebuild();
+            }
             return getDijkstraGraphForTile(mapFrom.Tile).FindRoute(from, to, mapFrom, mapTo, out routeCost);
 
-
         }
-
-
         public Building_Stairs GetClosestStair(Building_Stairs source, out PawnPath path)
         {
             return GetClosestStair(source.Position, source is Building_StairsUp, source.Map, out path);
         }
-
-
         public Building_Stairs GetClosestStair(IntVec3 source, bool goingUp, Map sourceMap, out PawnPath path)
         {
             path = null;

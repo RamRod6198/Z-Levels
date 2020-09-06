@@ -29,9 +29,9 @@ namespace ZLevels
             [HarmonyPostfix]
             public static void Postfix(ref FloatMenuOption __result, ref IntVec3 clickCell, ref Pawn pawn)
             {
-                var route = ZPathfinder.Instance.FindRoute(pawn.Position, clickCell, pawn.Map, pawn.Map, out float routeCost);
+                var route = ZPathfinder.Instance.FindRoute(pawn.Position, clickCell, pawn.Map, pawn.Map,
+                    out float routeCost);
 
-                List<ZPathfinder.DijkstraGraph.Node> nodes = null;
                 if (__result.Label == "CannotGoNoPath".Translate())
                 {
                     ZLogger.Message($"postfix goto location node count = {route.Count}");
@@ -59,29 +59,31 @@ namespace ZLevels
                 }
             }
 
-            private static void SetActionForDelegate(ref FloatMenuOption result, IntVec3 clickCell, List<ZPathfinder.DijkstraGraph.Node> route, Pawn pawn)
+            private static void SetActionForDelegate(ref FloatMenuOption result, IntVec3 clickCell,
+                List<ZPathfinder.DijkstraGraph.Node> route, Pawn pawn)
             {
                 result.action = delegate ()
                 {
-                    Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToLocation, clickCell, route[0].key, route[route.Count - 1].key);
+                    Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToLocation, clickCell);
                     pawn.jobs.StartJob(job, JobCondition.InterruptForced);
                 };
-        
+
             }
 
+        }
 
-            [HarmonyPatch(typeof(FloatMenuOption), "Disabled", MethodType.Getter)]
-            internal static class Patch_FloatDisabled
+        [HarmonyPatch(typeof(FloatMenuOption), "Disabled", MethodType.Getter)]
+        internal static class Patch_FloatDisabled
+        {
+            private static bool Prefix(FloatMenuOption __instance, ref bool __result)
             {
-                private static bool Prefix(FloatMenuOption __instance, ref bool __result)
-                {
-                    if (__instance.Label != "GoDown".Translate() && __instance.Label != "GoUP".Translate()) return true;
-                    __result = false;
-                    return false;
+                if (__instance.Label != "GoDown".Translate() && __instance.Label != "GoUP".Translate()) return true;
+                __result = false;
+                return false;
 
-                }
             }
         }
+
 
         [HarmonyPatch(typeof(FloatMenuOption), "Chosen")]
         internal static class Patch_FloatMenuOption
@@ -905,5 +907,6 @@ namespace ZLevels
             //    }
             //}
         }
+
     }
 }
