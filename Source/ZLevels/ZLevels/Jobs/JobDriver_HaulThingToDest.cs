@@ -31,7 +31,7 @@ namespace ZLevels
             };
 
             Toil reserveItem = Toils_Reserve.Reserve(TargetIndex.A);
-            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), new TargetInfo(TargetA.Thing.Position, TargetA.Thing.Map), this))
+            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), new TargetInfo(TargetA.Thing), this))
             {
                 yield return toil;
             }

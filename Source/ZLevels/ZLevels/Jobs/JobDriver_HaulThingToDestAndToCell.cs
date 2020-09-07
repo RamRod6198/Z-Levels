@@ -72,7 +72,7 @@ namespace ZLevels
                 ZLogger.Message("pawn map and thing map and dest map are same, yield breaking in JobDriver_HaulThingToDest");
                 yield break;
             }
-            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), TargetA.ToTargetInfo(TargetA.Thing.Map), this))
+            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), new TargetInfo(TargetA.Thing), this))
             {
                 yield return toil;
             }

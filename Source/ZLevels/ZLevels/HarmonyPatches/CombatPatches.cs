@@ -543,7 +543,7 @@ namespace ZLevels
                 {
                     activeJobs = new List<Job>()
                 };
-                ZUtils.ZTracker.jobTracker[pawn].targetDest = pawn.mindState.enemyTarget;
+                ZUtils.ZTracker.jobTracker[pawn].targetDest = new TargetInfo(pawn.mindState.enemyTarget);
                 ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
                 __result = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                 ZUtils.ZTracker.jobTracker[pawn].mainJob = __result;

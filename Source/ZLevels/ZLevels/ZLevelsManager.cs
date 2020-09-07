@@ -563,7 +563,7 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -594,7 +594,7 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -626,7 +626,7 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -656,7 +656,7 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -694,7 +694,7 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -723,7 +723,7 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -755,7 +755,7 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -784,7 +784,7 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
