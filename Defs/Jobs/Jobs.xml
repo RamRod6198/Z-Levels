@@ -4,25 +4,30 @@
 	<JobDef>
 		<defName>ZL_GoToStairs</defName>
 		<driverClass>ZLevels.JobDriver_GoToStairs</driverClass>
-		<reportString>traversing TargetA.</reportString>
+		<reportString>ZL traversing TargetA.</reportString>
+	</JobDef>
+	<JobDef>
+		<defName>ZL_GoToLocation</defName>
+		<driverClass>ZLevels.JobDriver_GoToLocation</driverClass>
+		<reportString>ZL moseying toward TargetA.</reportString>
 	</JobDef>
 
 	<JobDef>
 		<defName>ZL_GoToMap</defName>
 		<driverClass>ZLevels.JobDriver_GoToMap</driverClass>
-		<reportString>traversing TargetA.</reportString>
+		<reportString>ZL going to TargetA.</reportString>
 	</JobDef>
 
 	<JobDef>
 		<defName>ZL_HaulThingToDest</defName>
 		<driverClass>ZLevels.JobDriver_HaulThingToDest</driverClass>
-		<reportString>traversing TargetA.</reportString>
+		<reportString>ZL carrying TargetA to TargetB.</reportString>
 	</JobDef>
 
 	<JobDef>
 		<defName>ZL_HaulToCell</defName>
 		<driverClass>ZLevels.JobDriver_HaulThingToDestAndToCell</driverClass>
-		<reportString>hauling TargetA.</reportString>
+		<reportString>ZL hauling TargetA.</reportString>
 		<suspendable>false</suspendable>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 	</JobDef>
