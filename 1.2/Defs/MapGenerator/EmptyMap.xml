@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+	<MapGeneratorDef>
+		<defName>ZL_EmptyMap</defName>
+		<genSteps>
+			<li>ElevationFertility</li>
+			<li>TerrainUpper</li>
+			<li>FindLocationUnderground</li>
+			<li>Fog</li>
+		</genSteps>
+	</MapGeneratorDef>
+
+</Defs>

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+
+	<TerrainDef ParentName="FloorBase">
+		<defName>ZL_RoofTerrain</defName>
+		<label>roof</label>
+		<color>(108,78,55)</color>
+		<renderPrecedence>220</renderPrecedence>
+		<description>Wood plank roofing. While it is quick to lay, not very sturdy.</description>
+		<texturePath>Terrain/Surfaces/WoodFloor</texturePath>
+		<statBases>
+			<Beauty>-1</Beauty>
+		</statBases>
+		<destroyOnBombDamageThreshold>1</destroyOnBombDamageThreshold>
+		<destroyBuildingsOnDestroyed>true</destroyBuildingsOnDestroyed>
+		<destroyEffect>Bridge_Collapse</destroyEffect>
+		<destroyEffectWater>Bridge_CollapseWater</destroyEffectWater>
+	</TerrainDef>
+
+	<!--
+	<TerrainDef ParentName="NaturalTerrainBase">
+
+		<edgeType>FadeRough</edgeType>
+
+		<scatterType>SoftGray</scatterType>
+		<extinguishesFire>true</extinguishesFire>
+		<holdSnow>false</holdSnow>
+		<takeFootprints>false</takeFootprints>
+		<takeSplashes>false</takeSplashes>
+		<affordances>
+			<li>Light</li>
+			<li>Medium</li>
+			<li>Heavy</li>
+			<li>Diggable</li>
+		</affordances>
+		<generatedFilth>Filth_Dirt</generatedFilth>
+		<fertility>0.00</fertility>
+		<destroyOnBombDamageThreshold>5</destroyOnBombDamageThreshold>
+		<destroyBuildingsOnDestroyed>true</destroyBuildingsOnDestroyed>
+		<destroyEffect>Bridge_Collapse</destroyEffect>
+		<destroyEffectWater>Bridge_CollapseWater</destroyEffectWater>
+	</TerrainDef>
+	-->
+</Defs>

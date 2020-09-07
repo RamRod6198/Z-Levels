@@ -58,8 +58,7 @@ namespace ZLevels
                         stairsToSpawn.SetFaction(this.Faction);
                     }
                     FloodFillerFog.FloodUnfog(this.Position, mapBelow);
-                    AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapBelow.fogGrid, new object[]
-                    { this.Position });
+                    mapBelow.fogGrid.FloodUnfogAdjacent(this.Position);
                 }
                 else if (mapBelow == this.Map)
                 {
@@ -72,7 +71,7 @@ namespace ZLevels
             }
         }
 
-        new public Building_StairsUp GetMatchingStair
+        public Building_StairsUp GetMatchingStair
         {
             get
             {
@@ -88,19 +87,20 @@ namespace ZLevels
             }
         }
 
-        public bool giveDamage = true;
+        public bool syncDamage = true;
         public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
-            base.PostApplyDamage(dinfo, totalDamageDealt);
-            Map lowerLevel = ZUtils.ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
-            if (giveDamage && lowerLevel != null && lowerLevel.listerThings.ThingsOfDef(ZLevelsDefOf.ZL_StairsUp)
-                .Where(x => x.Position == this.Position).FirstOrDefault() is Building_StairsUp stairsUp)
+            if (syncDamage)
             {
-                ZLogger.Message(stairsUp + ".HitPoints -= " + (int)totalDamageDealt);
-                stairsUp.giveDamage = false;
-                stairsUp.TakeDamage(dinfo);
-                stairsUp.giveDamage = true;
+                var stairsUp = GetMatchingStair;
+                {
+                    ZLogger.Message(stairsUp + ".HitPoints -= " + (int)totalDamageDealt);
+                    stairsUp.syncDamage = false;
+                    stairsUp.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
+                    stairsUp.syncDamage = true;
+                }
             }
+            base.PostApplyDamage(dinfo, totalDamageDealt);
         }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {

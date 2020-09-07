@@ -54,25 +54,34 @@ namespace ZLevels
                     //ZLogger.Message("The error: " + text);
                     return false;
                 }
+
+
+
                 if (ZLogger.DebugEnabled)
                 {
-                    if (!text.Contains("VisiblePants")
-                        && !text.Contains("GiddyUpRideAndRoll")
-                        && !text.Contains("Unknown crown type"))
+                    try
                     {
-                        //try
-                        //{
-                        //    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-                        //}
-                        //catch { };
+                        Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
                         ignoreStopLoggingLimit = true;
+                        ZLogger.Message("Error: " + text);
                     }
-                    else
-                    {
-                        return false;
-                    }
+                    catch { };
                 }
                 return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Log))]
+        [HarmonyPatch(nameof(Log.Notify_MessageReceivedThreadedInternal))]
+        static class Notify_MessageReceivedThreadedInternal_Patch
+        {
+            public static void Postfix()
+            {
+                if (ZLogger.DebugEnabled)
+                {
+                    Log.reachedMaxMessagesLimit = false;
+                    Debug.unityLogger.logEnabled = true;
+                }
             }
         }
 

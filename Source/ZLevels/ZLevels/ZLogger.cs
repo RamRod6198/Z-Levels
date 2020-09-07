@@ -1,64 +1,70 @@
 ﻿using System;
+using System.Diagnostics;
 using Verse;
 
 namespace ZLevels
 {
 	public static class ZLogger
 	{
-		//[Conditional("Debug")]
-		public static void Message(string message, bool temp = true)
-		{
-			if (DebugEnabled)
+		public static DebugLevel curDebugLevel = DebugLevel.All;
 
-				Log.Message(Prefix + message, true);
+		//[Conditional("Debug")]
+		public static void Message(string message, bool temp = true, DebugLevel debugLevel = DebugLevel.All)
+		{
+			if (ZLogger.DebugEnabled && curDebugLevel != DebugLevel.None)
+            {
+				if (debugLevel == curDebugLevel || curDebugLevel == DebugLevel.All)
+                {
+					Log.Message(ZLogger.Prefix + message, true);
+                }
+            }
 		}
 
 		public static void Warning(string message)
 		{
-//			if (DebugEnabled)
+			if (ZLogger.DebugEnabled)
 
-				Log.Warning(Prefix + message, true);
+				Log.Warning(ZLogger.Prefix + message, true);
 		}
 
 		public static void Warning(string message, Exception e)
 		{
-			if (DebugEnabled)
+			if (ZLogger.DebugEnabled)
 
-				Log.Warning(Prefix + message + "\n" + (e), true);
+				Log.Warning(ZLogger.Prefix + message + "\n" + (e?.ToString()), true);
 		}
 
 		public static void Error(string message)
 		{
-			if (DebugEnabled)
+			if (ZLogger.DebugEnabled)
 
-				Log.Error(Prefix + message, true);
+				Log.Error(ZLogger.Prefix + message, true);
 		}
 
 		public static void Error(string message, Exception e)
 		{
-			if (DebugEnabled)
+			if (ZLogger.DebugEnabled)
 
-				Log.Error(Prefix + message + "\n" + (e), true);
+				Log.Error(ZLogger.Prefix + message + "\n" + (e?.ToString()), true);
 		}
 
 		public static void ErrorOnce(string message, bool test)
 		{
-			if (DebugEnabled)
-			Log.Error(Prefix + message, true);
+			if (ZLogger.DebugEnabled)
+			Log.Error(ZLogger.Prefix + message, true);
 		}
 
+		//[Conditional("Debug")]
 		public static void Pause(string reason)
 		{
-			if (DebugEnabled)
+			if (ZLogger.DebugEnabled)
 			{
 				Log.Error("Pausing, reason: " + reason, true);
-				//Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
 			}
 		}
 
-		public static bool DebugEnabled => ZLevels.settings.DebugEnabled;
+		public static bool DebugEnabled => ZLevelsMod.settings.DebugEnabled;
 
 		private static readonly string Prefix = "[Z-Levels] ";
 	}
 }
-

@@ -247,3 +247,4 @@ SourceDLLs/
 # Not sure what the purpose of this file is but lets ignore it
 Source/ZLevels/ZLevels/obj/Debug/ZLevels.csproj.FileListAbsolute.txt
 /Assemblies/ZLevels.dll
+Source/ZLevels/ZLevels/ZLevels.csproj

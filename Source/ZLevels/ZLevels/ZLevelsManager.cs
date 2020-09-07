@@ -33,7 +33,7 @@ namespace ZLevels
                 {
                     //foreach (var map in this.GetAllMaps(tile.Key))
                     //{
-                    //    Log.Message(this.GetMapInfo(map) + " - " + map.Biome);
+                    //    ZLogger.Message(this.GetMapInfo(map) + " - " + map.Biome);
                     //}
                     this.ZLevelsFixer(tile.Key);
                 }
@@ -83,7 +83,7 @@ namespace ZLevels
             }
             Map map = (thing != null) ? thing.Map : ((Zone)obj).Map;
 
-            List<object> selected = Traverse.Create(Find.Selector).Field("selected").GetValue<List<object>>();
+            List<object> selected = Find.Selector.selected;
 
             for (int i = selected.Count - 1; i >= 0; i--)
             {
@@ -102,7 +102,7 @@ namespace ZLevels
                 selected.Add(obj);
                 SelectionDrawer.Notify_Selected(obj);
             }
-            Traverse.Create(Find.Selector).Field("selected").SetValue(selected);
+            Find.Selector.selected = selected;
         }
         public void CheckHotkeys()
         {
@@ -158,9 +158,9 @@ namespace ZLevels
                         if (this.activeAreas[pawn].activeAreas == null)
                         {
                             this.activeAreas[pawn].activeAreas = new Dictionary<Map, Area>()
-                    {
-                        {pawn.Map, pawn.playerSettings.AreaRestriction}
-                    };
+                            {
+                                {pawn.Map, pawn.playerSettings.AreaRestriction}
+                            };
                         }
                         else
                         {
@@ -190,7 +190,8 @@ namespace ZLevels
         {
             try
             {
-                if (this.activeAreas.ContainsKey(pawn) && this.activeAreas[pawn].activeAreas.ContainsKey(pawn.Map))
+                if (this.activeAreas == null) this.activeAreas = new Dictionary<Pawn, ActiveArea>();
+                if (this.activeAreas.ContainsKey(pawn) && this.activeAreas[pawn].activeAreas != null && this.activeAreas[pawn].activeAreas.ContainsKey(pawn.Map))
                 {
                     if (pawn.playerSettings == null) pawn.playerSettings = new Pawn_PlayerSettings(pawn);
                     pawn.playerSettings.AreaRestriction = this.activeAreas[pawn].activeAreas[pawn.Map];
@@ -251,7 +252,7 @@ namespace ZLevels
                         Log.Error("ZLevels contains null map, this should never happen");
                         foreach (var mapData in this.ZLevelsTracker[tile].ZLevels)
                         {
-                            Log.Message("Tile: " + tile + " - map index: " + mapData.Key + " - map: " + mapData.Value);
+                            ZLogger.Message("Tile: " + tile + " - map index: " + mapData.Key + " - map: " + mapData.Value);
                         }
                     }
                     else
@@ -296,30 +297,22 @@ namespace ZLevels
 
         public int GetZIndexFor(Map map)
         {
-            try
+            int index;
+            if (this.mapIndex != null && this.mapIndex.TryGetValue(map, out index))
             {
-                int index;
-                if (this.mapIndex != null && this.mapIndex.TryGetValue(map, out index))
-                {
-                    //Log.Message("1 return: " + index + " for " + map, true);
-                    return index;
-                }
-                else
-                {
-                    var comp = ZUtils.GetMapComponentZLevel(map);
-                    if (this.mapIndex == null)
-                    {
-                        this.mapIndex = new Dictionary<Map, int>();
-                    }
-                    this.mapIndex[map] = comp.Z_LevelIndex;
-                    //Log.Message("2 return: " + comp.Z_LevelIndex + " for " + map, true);
-                    return comp.Z_LevelIndex;
-                }
+                //ZLogger.Message("1 return: " + index + " for " + map, true);
+                return index;
             }
-            catch (Exception ex)
+            else
             {
-                ZLogger.Error("[Z-Levels] GetZIndexFor produced an error: " + ex);
-                return -99999;
+                var comp = ZUtils.GetMapComponentZLevel(map);
+                if (this.mapIndex == null)
+                {
+                    this.mapIndex = new Dictionary<Map, int>();
+                }
+                this.mapIndex[map] = comp.Z_LevelIndex;
+                //ZLogger.Message("2 return: " + comp.Z_LevelIndex + " for " + map, true);
+                return comp.Z_LevelIndex;
             }
         }
 
@@ -335,37 +328,36 @@ namespace ZLevels
 
         public bool TryRegisterMap(Map map, int index)
         {
-            Log.Message(" - TryRegisterMap - if (this.ZLevelsTracker == null) - 1", true);
+            ZLogger.Message(" - TryRegisterMap - if (this.ZLevelsTracker == null) - 1", true);
             if (this.ZLevelsTracker == null) this.ZLevelsTracker = new Dictionary<int, ZLevelData>();
 
-            Log.Message(" - TryRegisterMap - if (this.mapIndex == null) - 4", true);
+            ZLogger.Message(" - TryRegisterMap - if (this.mapIndex == null) - 4", true);
             if (this.mapIndex == null)
             {
-                Log.Message(" - TryRegisterMap - this.mapIndex = new Dictionary<Map, int>(); - 5", true);
+                ZLogger.Message(" - TryRegisterMap - this.mapIndex = new Dictionary<Map, int>(); - 5", true);
                 this.mapIndex = new Dictionary<Map, int>();
             }
-            Log.Message(" - TryRegisterMap - if (this.ZLevelsTracker.ContainsKey(map.Tile)) - 6", true);
+            ZLogger.Message(" - TryRegisterMap - if (this.ZLevelsTracker.ContainsKey(map.Tile)) - 6", true);
             if (this.ZLevelsTracker.ContainsKey(map.Tile))
             {
-                Log.Message(" - TryRegisterMap - if (this.ZLevelsTracker[map.Tile].ZLevels == null) - 7", true);
+                ZLogger.Message(" - TryRegisterMap - if (this.ZLevelsTracker[map.Tile].ZLevels == null) - 7", true);
                 if (this.ZLevelsTracker[map.Tile].ZLevels == null) this.ZLevelsTracker[map.Tile].ZLevels = new Dictionary<int, Map>();
                     
-                Log.Message(" - TryRegisterMap - this.ZLevelsTracker[map.Tile].ZLevels[index] = map; - 9", true);
+                ZLogger.Message(" - TryRegisterMap - this.ZLevelsTracker[map.Tile].ZLevels[index] = map; - 9", true);
                 this.ZLevelsTracker[map.Tile].ZLevels[index] = map;
 
-                Log.Message(" - TryRegisterMap - if (!this.mapIndex.ContainsKey(map)) - 10", true);
+                ZLogger.Message(" - TryRegisterMap - if (!this.mapIndex.ContainsKey(map)) - 10", true);
                 if (!this.mapIndex.ContainsKey(map))
                 {
-                    Log.Message(" - TryRegisterMap - this.mapIndex[map] = index; - 11", true);
+                    ZLogger.Message(" - TryRegisterMap - this.mapIndex[map] = index; - 11", true);
                     this.mapIndex[map] = index;
                 }
 
                 ZLogger.Message("1 Registering " + this.GetMapInfo(map) + " for index: " + index);
-                Log.Message(" - TryRegisterMap - return true; - 13", true);
+                ZLogger.Message(" - TryRegisterMap - return true; - 13", true);
                 return true;
             }
-
-            ZLevelsTracker[map.Tile] = new ZLevelData
+            else
             {
                 this.ZLevelsTracker[map.Tile] = new ZLevelData
                                                     {
@@ -375,7 +367,7 @@ namespace ZLevels
                                                         }
                                                     };
 
-                Log.Message("this.ZLevelsTracker.ContainsKey(map.Tile): " + this.ZLevelsTracker.ContainsKey(map.Tile) + " - " + map.Tile + " - " + map, true);
+                ZLogger.Message("this.ZLevelsTracker.ContainsKey(map.Tile): " + this.ZLevelsTracker.ContainsKey(map.Tile) + " - " + map.Tile + " - " + map, true);
                 if (!this.mapIndex.ContainsKey(map))
                 {
                     this.mapIndex[map] = index;
@@ -438,9 +430,50 @@ namespace ZLevels
             catch { };
             return str;
         }
+
+        public void ReserveTargets(Pawn pawn, Job job)
+        {
+            ZLogger.Message(pawn + " is starting reserving things for " + job, debugLevel: DebugLevel.Jobs);
+            if (!this.jobTracker.ContainsKey(pawn)) this.jobTracker[pawn] = new JobTracker();
+            if (this.jobTracker[pawn].reservedThings == null) this.jobTracker[pawn].reservedThings = new List<LocalTargetInfo>();
+            if (job.targetA != null)
+            {
+                ZLogger.Message(pawn + " reserving " + job.targetA, true, debugLevel: DebugLevel.Jobs);
+                this.jobTracker[pawn].reservedThings.Add(job.targetA);
+            }
+            if (job.targetB != null)
+            {
+                ZLogger.Message(pawn + " reserving " + job.targetB, true, debugLevel: DebugLevel.Jobs);
+                this.jobTracker[pawn].reservedThings.Add(job.targetB);
+            }
+            if (job.targetC != null)
+            {
+                ZLogger.Message(pawn + " reserving " + job.targetC, true, debugLevel: DebugLevel.Jobs);
+                this.jobTracker[pawn].reservedThings.Add(job.targetC);
+            }
+            try
+            {
+                foreach (var t in job.targetQueueA)
+                {
+                    ZLogger.Message(pawn + " reserving " + t, true, debugLevel: DebugLevel.Jobs);
+                    this.jobTracker[pawn].reservedThings.Add(t);
+                }
+            }
+            catch { }
+            try
+            {
+                foreach (var t in job.targetQueueB)
+                {
+                    ZLogger.Message(pawn + " reserving " + t, true, debugLevel: DebugLevel.Jobs);
+                    this.jobTracker[pawn].reservedThings.Add(t);
+                }
+            }
+            catch { }
+        }
         public void BuildJobListFor(Pawn pawn, Map dest, Job jobToDo)
         {
             this.ResetJobs(pawn);
+            this.ReserveTargets(pawn, jobToDo);
             List<Job> tempJobs = new List<Job>();
             string log = "";
             if (jobToDo.def == JobDefOf.HaulToCell)
@@ -458,7 +491,7 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 1.1");
                 log += "Job method 1.1\n";
-                ZLogger.Message($"{pawn} haul {jobToDo.targetA.Thing} to {dest}");
+                ZLogger.Message(pawn + " haul " + jobToDo.targetA.Thing + " to " + dest);
                 this.jobTracker[pawn].dest = jobToDo.targetB.Thing.Map;
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = jobToDo.count;
@@ -491,7 +524,7 @@ namespace ZLevels
                 }
                 else
                 {
-                    var target = jobToDo.targetQueueA.FirstOrDefault(x => x.HasThing && x.Thing.Map != null);
+                    var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
                     if (target != null && target.Thing?.Map != null)
                     {
                         ZLogger.Message("Job method 1.76");
@@ -512,7 +545,7 @@ namespace ZLevels
                 }
                 else
                 {
-                    var target = jobToDo.targetQueueA.FirstOrDefault(x => x.HasThing && x.Thing.Map != null);
+                    var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
                     if (target != null && target.Thing?.Map != null)
                     {
                         ZLogger.Message("Job method 1.79");
@@ -522,9 +555,8 @@ namespace ZLevels
                     }
                 }
             }
-            //We know jobToDo is not null already
-            else if (jobToDo.targetQueueA?.Count > 0
-                && jobToDo.targetQueueA.Count(x => x.HasThing && x.Thing.Map != null) > 0)
+            else if (jobToDo?.targetQueueA?.Count > 0
+                && jobToDo?.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
             {
                 ZLogger.Message("Job method 1.8");
                 log += "Job method 1.8\n";
@@ -539,7 +571,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetA.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 job.count = jobToDo.countQueue[i];
                                 tempJobs.Add(job);
                             }
@@ -553,7 +600,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetA.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 tempJobs.Add(job);
                             }
                         }
@@ -570,7 +632,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetA.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 job.count = jobToDo.countQueue[i];
                                 tempJobs.Add(job);
                             }
@@ -585,15 +662,30 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetA.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 tempJobs.Add(job);
                             }
                         }
                     }
                 }
             }
-            else if (jobToDo.targetQueueB?.Count > 0
-                && (jobToDo.targetQueueB).Count(x => x.HasThing && x.Thing.Map != null) > 0)
+            else if (jobToDo?.targetQueueB?.Count > 0
+                && jobToDo?.targetQueueB.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
             {
                 ZLogger.Message("Job method 2");
                 log += "Job method 2\n";
@@ -608,7 +700,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetB.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 job.count = jobToDo.countQueue[i];
                                 tempJobs.Add(job);
                             }
@@ -622,7 +729,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetB.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 tempJobs.Add(job);
                             }
                         }
@@ -639,7 +761,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetB.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 job.count = jobToDo.countQueue[i];
                                 tempJobs.Add(job);
                             }
@@ -653,7 +790,22 @@ namespace ZLevels
                             {
                                 this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
-                                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
+                                Job job;
+                                if (t.Thing is Filth)
+                                {
+                                    job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
+                                }
+                                else
+                                {
+                                    if (jobToDo.targetB.Cell.IsValid)
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
+                                    }
+                                    else
+                                    {
+                                        job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
+                                    }
+                                }
                                 tempJobs.Add(job);
                             }
                         }
@@ -711,7 +863,13 @@ namespace ZLevels
                 this.jobTracker[pawn].dest = null;
                 this.jobTracker[pawn].mainJob = null;
                 this.jobTracker[pawn].forceGoToDestMap = false;
-                Log.Message("Resetting forceGoToDestMap");
+                this.jobTracker[pawn].failIfTargetMapIsNotDest = false;
+                this.jobTracker[pawn].target = null;
+                this.jobTracker[pawn].ignoreGiversInFirstTime = null;
+                this.jobTracker[pawn].oldMap = null;
+                this.jobTracker[pawn].reservedThings = null;
+                this.jobTracker[pawn].searchingJobsNow = false;
+                ZLogger.Message("Resetting job data");
             }
             else
             {
@@ -950,6 +1108,10 @@ namespace ZLevels
                             }
                         }
                         ZLogger.Message(pawn + " TryMakePreToilReservations job " + job + " in " + this.GetMapInfo(pawn.Map));
+                        if (pawn.CurJob != null)
+                        {
+                            pawn.ClearReservationsForJob(pawn.CurJob);
+                        }
                         if (job == this.jobTracker[pawn].mainJob && this.jobTracker[pawn].forceGoToDestMap && pawn.Map != this.jobTracker[pawn].dest)
                         {
                             ZLogger.Message(pawn + " force taking go to map " + job + " in " + this.GetMapInfo(pawn.Map));
@@ -1119,44 +1281,44 @@ namespace ZLevels
 
         public void MoveThingToAnotherMap(Thing thingToTeleport, Map mapToTeleport)
         {
-            ZLogger.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
-            if (thingToTeleport.Map == mapToTeleport) return;
-            if (mapToTeleport.spawnedThings.Contains(thingToTeleport)) return;
-            if (mapToTeleport.listerThings.Contains(thingToTeleport)) return;
-            if (thingToTeleport is Pawn pawn && mapToTeleport.mapPawns.AllPawns.Contains(pawn)) return;
-
-            RegionListersUpdater.DeregisterInRegions(thingToTeleport, thingToTeleport.Map);
-            thingToTeleport.Map?.spawnedThings.Remove(thingToTeleport);
-            thingToTeleport.Map?.listerThings.Remove(thingToTeleport);
-            thingToTeleport.Map?.thingGrid.Deregister(thingToTeleport);
-            thingToTeleport.Map?.coverGrid.DeRegister(thingToTeleport);
-            thingToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(thingToTeleport);
-            thingToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(thingToTeleport);
-            thingToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(thingToTeleport);
-            StealAIDebugDrawer.Notify_ThingChanged(thingToTeleport);
-            thingToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(thingToTeleport);
-            if (thingToTeleport is Pawn)
-            {
-                thingToTeleport.Map?.mapPawns.DeRegisterPawn((Pawn)thingToTeleport);
-            }
-
-            Traverse.Create(thingToTeleport).Field("mapIndexOrState")
-                .SetValue((sbyte)Find.Maps.IndexOf(mapToTeleport));
-
-            RegionListersUpdater.RegisterInRegions(thingToTeleport, mapToTeleport);
-            mapToTeleport.spawnedThings.TryAdd(thingToTeleport);
-            mapToTeleport.listerThings.Add(thingToTeleport);
-            mapToTeleport.thingGrid.Register(thingToTeleport);
-            mapToTeleport.coverGrid.Register(thingToTeleport);
-            mapToTeleport.tooltipGiverList.Notify_ThingSpawned(thingToTeleport);
-            mapToTeleport.attackTargetsCache.Notify_ThingSpawned(thingToTeleport);
-            StealAIDebugDrawer.Notify_ThingChanged(thingToTeleport);
-            mapToTeleport.dynamicDrawManager.RegisterDrawable(thingToTeleport);
-            if (thingToTeleport is Pawn)
-            {
-                mapToTeleport.mapPawns.RegisterPawn((Pawn)thingToTeleport);
-            }
+            //ZLogger.Message("CHECK: trying to teleport " + thingToTeleport + " from " + thingToTeleport.Map + " to " + mapToTeleport, true);
+            thingToTeleport.DeSpawn(DestroyMode.Vanish);
+            GenSpawn.Spawn(thingToTeleport, thingToTeleport.positionInt, mapToTeleport, WipeMode.Vanish);
         }
+
+        public void MovePawnToAnotherMap(Pawn pawnToTeleport, Map mapToTeleport)
+        {
+            ZLogger.Message("CHECK: trying to teleport " + pawnToTeleport + " from " + pawnToTeleport.Map + " to " + mapToTeleport, true);
+            if (pawnToTeleport.Map == mapToTeleport) return;
+            if (mapToTeleport.spawnedThings.Contains(pawnToTeleport)) return;
+            if (mapToTeleport.listerThings.Contains(pawnToTeleport)) return;
+            if (pawnToTeleport is Pawn pawn && mapToTeleport.mapPawns.AllPawns.Contains(pawn)) return;
+            
+            RegionListersUpdater.DeregisterInRegions(pawnToTeleport, pawnToTeleport.Map);
+            pawnToTeleport.Map?.spawnedThings.Remove(pawnToTeleport);
+            pawnToTeleport.Map?.listerThings.Remove(pawnToTeleport);
+            pawnToTeleport.Map?.thingGrid.Deregister(pawnToTeleport);
+            pawnToTeleport.Map?.coverGrid.DeRegister(pawnToTeleport);
+            pawnToTeleport.Map?.tooltipGiverList.Notify_ThingDespawned(pawnToTeleport);
+            pawnToTeleport.Map?.attackTargetsCache.Notify_ThingDespawned(pawnToTeleport);
+            pawnToTeleport.Map?.physicalInteractionReservationManager.ReleaseAllForTarget(pawnToTeleport);
+            StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
+            pawnToTeleport.Map?.dynamicDrawManager.DeRegisterDrawable(pawnToTeleport);
+            pawnToTeleport.Map?.mapPawns.DeRegisterPawn((Pawn)pawnToTeleport);
+            
+            pawnToTeleport.mapIndexOrState = (sbyte)Find.Maps.IndexOf(mapToTeleport);
+            RegionListersUpdater.RegisterInRegions(pawnToTeleport, mapToTeleport);
+            mapToTeleport.spawnedThings.TryAdd(pawnToTeleport);
+            mapToTeleport.listerThings.Add(pawnToTeleport);
+            mapToTeleport.thingGrid.Register(pawnToTeleport);
+            mapToTeleport.coverGrid.Register(pawnToTeleport);
+            mapToTeleport.tooltipGiverList.Notify_ThingSpawned(pawnToTeleport);
+            mapToTeleport.attackTargetsCache.Notify_ThingSpawned(pawnToTeleport);
+            StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
+            mapToTeleport.dynamicDrawManager.RegisterDrawable(pawnToTeleport);
+            mapToTeleport.mapPawns.RegisterPawn(pawnToTeleport);
+        }
+
 
         public bool ShouldCameraJump(Thing thing)
         {
@@ -1230,9 +1392,9 @@ namespace ZLevels
                 catch { };
             }
             FloodFillerFog.FloodUnfog(thingToTeleport.Position, mapToTeleport);
-            AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
-            { thingToTeleport.PositionHeld });
+            mapToTeleport.fogGrid.FloodUnfogAdjacent(thingToTeleport.PositionHeld);
         }
+
         public void TeleportPawn(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport, bool firstTime = false, bool spawnStairsBelow = false, bool spawnStairsUpper = false)
         {
             bool jump = this.ShouldCameraJump(pawnToTeleport);
@@ -1251,7 +1413,7 @@ namespace ZLevels
 
             this.SaveArea(pawnToTeleport);
 
-            MoveThingToAnotherMap(pawnToTeleport, mapToTeleport);
+            this.MovePawnToAnotherMap(pawnToTeleport, mapToTeleport);
 
             this.LoadArea(pawnToTeleport);
 
@@ -1281,8 +1443,7 @@ namespace ZLevels
             }
 
             FloodFillerFog.FloodUnfog(pawnToTeleport.Position, mapToTeleport);
-            AccessTools.Method(typeof(FogGrid), "FloodUnfogAdjacent").Invoke(mapToTeleport.fogGrid, new object[]
-            { pawnToTeleport.PositionHeld });
+            mapToTeleport.fogGrid.FloodUnfogAdjacent(pawnToTeleport.PositionHeld);
             this.ReCheckStairs();
         }
 
@@ -1565,45 +1726,43 @@ namespace ZLevels
                             for (int i = this.stairsUp[map].Count - 1; i >= 0; i--)
                             {
 
-                                if (!stairsUp[map][i].Position.Walkable(map))
+                                if (!this.stairsUp[map][i].Position.Walkable(map))
                                 {
-                                    ZLogger.Message(stairsUp[map][i] + " not walkable, removing it");
-                                    stairsUp[map].RemoveAt(i);
+                                    ZLogger.Message(this.stairsUp[map][i] + " not walkable, removing it");
+                                    this.stairsUp[map].RemoveAt(i);
                                 }
                             }
                         }
                     }
-                
-
-                foreach (var map in GetAllMaps(tile.Key))
-                {
-                    if (stairsDown.ContainsKey(map))
+                    foreach (var map in this.GetAllMaps(tile.Key))
                     {
-                        for (int i = stairsDown[map].Count - 1; i >= 0; i--)
+                        if (this.stairsDown.ContainsKey(map))
                         {
-                            Map lowerMap = GetLowerLevel(tile.Key, map);
-                            if (lowerMap != null && stairsUp?[lowerMap]?.Where(x => x.Position
-                                == stairsDown[map][i].Position).Count() == 0)
+                            for (int i = this.stairsDown[map].Count - 1; i >= 0; i--)
                             {
-                                ZLogger.Message(stairsDown[map][i] + " - has no stairs upper, removing it");
-                                stairsDown[map].RemoveAt(i);
+                                Map lowerMap = this.GetLowerLevel(tile.Key, map);
+                                if (lowerMap != null && this.stairsUp?[lowerMap]?.Where(x => x.Position
+                                    == this.stairsDown[map][i].Position).Count() == 0)
+                                {
+                                    ZLogger.Message(this.stairsDown[map][i] + " - has no stairs upper, removing it");
+                                    this.stairsDown[map].RemoveAt(i);
+                                }
+                            }
+                        }
+                        if (this.stairsUp.ContainsKey(map))
+                        {
+                            for (int i = this.stairsUp[map].Count - 1; i >= 0; i--)
+                            {
+                                Map upperMap = this.GetUpperLevel(tile.Key, map);
+                                if (upperMap != null && this.stairsDown?[upperMap]?.Where(x => x.Position
+                                    == this.stairsUp[map][i].Position).Count() == 0)
+                                {
+                                    ZLogger.Message(this.stairsUp[map][i] + " - has no stairs below, removing it");
+                                    this.stairsUp[map].RemoveAt(i);
+                                }
                             }
                         }
                     }
-                    if (stairsUp.ContainsKey(map))
-                    {
-                        for (int i = stairsUp[map].Count - 1; i >= 0; i--)
-                        {
-                            Map upperMap = GetUpperLevel(tile.Key, map);
-                            if (upperMap != null && stairsDown?[upperMap]?.Where(x => x.Position
-                                == stairsUp[map][i].Position).Count() == 0)
-                            {
-                                ZLogger.Message(stairsUp[map][i] + " - has no stairs below, removing it");
-                                stairsUp[map].RemoveAt(i);
-                            }
-                        }
-                    }
-                }
                 }
             }
             catch (Exception ex)
@@ -1670,6 +1829,7 @@ namespace ZLevels
                                     ZLogger.Message("2 Registering map: " + d.Key + " - " + d.Value);
                                     this.TryRegisterMap(d.Key, d.Value);
                                 }
+
                             }
                         }
                     }
@@ -1703,6 +1863,5 @@ namespace ZLevels
         public Dictionary<Map, int> mapIndex;
         private List<Map> mapKeys = new List<Map>();
         private List<int> mapValues = new List<int>();
-
     }
 }

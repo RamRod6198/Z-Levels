@@ -27,18 +27,17 @@ namespace ZLevels
 			public static bool WealthItems(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
-				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthItems").GetValue<float>());
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
 					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
 					{
 						map.wealthWatcher.ForceRecount();
 					}
-					var value = Traverse.Create(map.wealthWatcher).Field("wealthItems").GetValue<float>();
+					var value = map.wealthWatcher.wealthItems;
 					result += value;
-					//Log.Message("Analyzing wealthItems: " + map + " - value: " + value);
+					//ZLogger.Message("Analyzing wealthItems: " + map + " - value: " + value);
 				}
-				//Log.Message("New result: " + result);
+				//ZLogger.Message("New result: " + result);
 				__result = result;
 				return false;
 			}
@@ -51,18 +50,17 @@ namespace ZLevels
 			public static bool WealthBuildings(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
-				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthBuildings").GetValue<float>());
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
 					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
 					{
 						map.wealthWatcher.ForceRecount();
 					}
-					var value = Traverse.Create(map.wealthWatcher).Field("wealthBuildings").GetValue<float>();
+					var value = map.wealthWatcher.wealthBuildings;
 					result += value;
-					//Log.Message("Analyzing wealthBuildings: " + map + " - value: " + value);
+					//ZLogger.Message("Analyzing wealthBuildings: " + map + " - value: " + value);
 				}
-				//Log.Message("New result: " + result);
+				//ZLogger.Message("New result: " + result);
 				__result = result;
 				return false;
 			}
@@ -75,18 +73,17 @@ namespace ZLevels
 			public static bool WealthFloorsOnly(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
-				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthFloorsOnly").GetValue<float>());
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
 					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
 					{
 						map.wealthWatcher.ForceRecount();
 					}
-					var value = Traverse.Create(map.wealthWatcher).Field("wealthFloorsOnly").GetValue<float>();
+					var value = map.wealthWatcher.wealthFloorsOnly;
 					result += value;
-					//Log.Message("Analyzing wealthFloorsOnly: " + map + " - value: " + value);
+					//ZLogger.Message("Analyzing wealthFloorsOnly: " + map + " - value: " + value);
 				}
-				//Log.Message("New result: " + result);
+				//ZLogger.Message("New result: " + result);
 				__result = result;
 				return false;
 			}
@@ -99,18 +96,17 @@ namespace ZLevels
 			public static bool WealthPawns(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
-				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthPawns").GetValue<float>());
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
 					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
 					{
 						map.wealthWatcher.ForceRecount();
 					}
-					var value = Traverse.Create(map.wealthWatcher).Field("wealthPawns").GetValue<float>();
+					var value = map.wealthWatcher.wealthPawns;
 					result += value;
-					//Log.Message("Analyzing wealthPawns: " + map + " - value: " + value);
+					//ZLogger.Message("Analyzing wealthPawns: " + map + " - value: " + value);
 				}
-				//Log.Message("New result: " + result);
+				//ZLogger.Message("New result: " + result);
 				__result = result;
 				return false;
 			}
@@ -123,23 +119,17 @@ namespace ZLevels
 			public static bool WealthTotal(WealthWatcher __instance, Map ___map, ref float __result, float ___lastCountTick)
 			{
 				float result = 0;
-				//Log.Message("Old result: " + Traverse.Create(__instance).Field("wealthItems").GetValue<float>()
-				//				+ Traverse.Create(__instance).Field("wealthBuildings").GetValue<float>()
-				//				+ Traverse.Create(__instance).Field("wealthPawns").GetValue<float>());
-
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
 					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
 					{
 						map.wealthWatcher.ForceRecount();
 					}
-					var value = Traverse.Create(map.wealthWatcher).Field("wealthItems").GetValue<float>()
-								+ Traverse.Create(map.wealthWatcher).Field("wealthBuildings").GetValue<float>()
-								+ Traverse.Create(map.wealthWatcher).Field("wealthPawns").GetValue<float>();
+					var value = map.wealthWatcher.wealthItems + map.wealthWatcher.wealthBuildings + map.wealthWatcher.wealthPawns;
 					result += value;
-					//Log.Message("Analyzing WealthTotal: " + map + " - value: " + value);
+					//ZLogger.Message("Analyzing WealthTotal: " + map + " - value: " + value);
 				}
-				//Log.Message("New result: " + result);
+				//ZLogger.Message("New result: " + result);
 				__result = result;
 				return false;
 			}

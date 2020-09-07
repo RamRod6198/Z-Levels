@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+	<WorldObjectDef>
+		<defName>ZL_Underground</defName>
+		<label>Underground</label>
+		<description>Underground layer.</description>
+		<worldObjectClass>ZLevels.MapParent_ZLevel</worldObjectClass>
+		<texture>World/WorldObjects/JourneyDestination</texture>
+		<expandingIcon>true</expandingIcon>
+		<expandingIconTexture>World/WorldObjects/Expanding/JourneyDestination</expandingIconTexture>
+		<expandingIconPriority>50</expandingIconPriority>
+		<expandMore>true</expandMore>
+		<mapGenerator>ZL_Underground</mapGenerator>
+		<canBePlayerHome>false</canBePlayerHome>
+	</WorldObjectDef>
+
+	<MapGeneratorDef>
+		<defName>ZL_Underground</defName>
+		<genSteps>
+			<li>ElevationFertilityUnderground</li>
+			<li>CavesUnderground</li>
+			<li>TerrainUnderground</li>
+			<li>CavesTerrainUnderground</li>
+			<li>RockChunksUnderground</li>
+			<li>PlantsUnderground</li>
+			<li>AnimalsUnderground</li>
+			<li>CaveHives</li>
+			<li>RocksFromGridUnderground</li>
+			<li>FindLocationUnderground</li>
+			<li>Fog</li>
+		</genSteps>
+	</MapGeneratorDef>
+
+	<GenStepDef>
+		<defName>ElevationFertilityUnderground</defName>
+		<order>10</order>
+		<genStep Class="ZLevels.GenStep_ElevationFertilityUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>CavesUnderground</defName>
+		<order>11</order>
+		<genStep Class="ZLevels.GenStep_CavesUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>RocksFromGridUnderground</defName>
+		<order>200</order>
+		<genStep Class="ZLevels.GenStep_RocksFromGridUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>TerrainUnderground</defName>
+		<order>210</order>
+		<genStep Class="ZLevels.GenStep_TerrainUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>CavesTerrainUnderground</defName>
+		<order>211</order>
+		<genStep Class="ZLevels.GenStep_CavesTerrainUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>RockChunksUnderground</defName>
+		<order>270</order>
+		<genStep Class="ZLevels.GenStep_RockChunksUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>AnimalsUnderground</defName>
+		<order>1000</order>
+		<genStep Class="ZLevels.GenStep_AnimalsUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>CaveHivesUnderground</defName>
+		<order>1100</order>
+		<genStep Class="ZLevels.GenStep_CaveHivesUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>PlantsUnderground</defName>
+		<order>800</order>
+		<genStep Class="ZLevels.GenStep_PlantsUnderground"/>
+	</GenStepDef> 
+
+	<GenStepDef>
+		<defName>FindLocationUnderground</defName>
+		<order>600</order>
+		<genStep Class="ZLevels.GenStep_FindLocationUnderground"/>
+	</GenStepDef>
+
+</Defs>

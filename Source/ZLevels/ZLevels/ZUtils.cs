@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Multiplayer.API;
 using Verse;
-using ZLevels.Properties;
 
 namespace ZLevels
 {
@@ -43,9 +43,7 @@ namespace ZLevels
         public static void ResetZTracker()
 		{
 			zTracker = null;
-            ZPathfinder.ResetPathfinder();
-            
-        }
+		}
 
         public static IEnumerable<Map> GetAllMapsInClosestOrder(Thing thing, Map oldMap, IntVec3 oldPosition, bool skipOldMap = false, bool dontCheckForStairs = false)
         {
@@ -180,15 +178,34 @@ namespace ZLevels
                 }
             }
         }
+
+        static int GetIndex(List<Map> list, Map value)
+        {
+            for (int index = 0; index < list.Count; index++)
+            {
+                if (list[index] == value)
+                {
+                    return index;
+                }
+            }
+            return -1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void TeleportThing(Thing thing, Map map, IntVec3 position)
         {
-            if (thing.Map != map)
+            //    var mth = new StackTrace().GetFrame(1).GetMethod();
+            //    var cls = mth.ReflectedType.Name;
+            //    ZLogger.Message(cls + " - " + mth.Name + " - teleport " + thing + " from " + thing.Map + " to " + map + " from " + thing.Position + " to " + position, true);
+            var value = (sbyte)Find.Maps.IndexOf(map);
+            if (thing.mapIndexOrState != value)
             {
-                Traverse.Create(thing).Field("mapIndexOrState").SetValue((sbyte)Find.Maps.IndexOf(map));
+                thing.mapIndexOrState = value;
             }
-            if (thing.Position != position)
+
+            if (thing.positionInt != position)
             {
-                Traverse.Create(thing).Field("positionInt").SetValue(position);
+                thing.positionInt = position;
             }
         }
 

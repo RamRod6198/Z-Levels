@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <ZL_UndergroundCondition.label>Подземелье</ZL_UndergroundCondition.label>
+  <ZL_UndergroundCondition.description>Вы спустились в подземелье.</ZL_UndergroundCondition.description>
+  <ZL_UndergroundCondition.endMessage>Затмение прошло.</ZL_UndergroundCondition.endMessage>
+  <ZL_UndergroundCondition.letterText>Одна из лун оказалась в точке между планетой и солнцем. Началось солнечное затмение.</ZL_UndergroundCondition.letterText>
+
+
+</LanguageData>

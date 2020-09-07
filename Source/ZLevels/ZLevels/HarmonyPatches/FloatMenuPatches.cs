@@ -21,11 +21,9 @@ namespace ZLevels
     public static class FloatMenuPatches
     {
 
-
         [HarmonyPatch(typeof(FloatMenuMakerMap), "GotoLocationOption")]
         public class GotoLocationOption_Patch
         {
-
             [HarmonyPostfix]
             public static void Postfix(ref FloatMenuOption __result, ref IntVec3 clickCell, ref Pawn pawn)
             {
