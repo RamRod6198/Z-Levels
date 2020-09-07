@@ -50,7 +50,7 @@ namespace ZLevels
 			});
 		}
 
-		public override bool CanScatterAt(IntVec3 c, Map map)
+		protected override bool CanScatterAt(IntVec3 c, Map map)
 		{
 			if (NearUsedSpot(c, minSpacing))
 			{
@@ -64,7 +64,7 @@ namespace ZLevels
 			return true;
 		}
 
-		public override void ScatterAt(IntVec3 c, Map map, GenStepParams parms, int stackCount = 1)
+		protected override void ScatterAt(IntVec3 c, Map map, GenStepParams parms, int stackCount = 1)
 		{
 			ThingDef thingDef = ChooseThingDef();
 			if (thingDef != null)

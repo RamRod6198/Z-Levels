@@ -72,7 +72,7 @@ namespace ZLevels
             }
         }
 
-        new public Building_StairsUp GetMatchingStair
+        public Building_StairsUp GetMatchingStair
         {
             get
             {

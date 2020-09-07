@@ -364,8 +364,7 @@ namespace ZLevels
                 Log.Message(" - TryRegisterMap - return true; - 13", true);
                 return true;
             }
-
-            ZLevelsTracker[map.Tile] = new ZLevelData
+            else
             {
                 this.ZLevelsTracker[map.Tile] = new ZLevelData
                                                     {
@@ -458,7 +457,7 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 1.1");
                 log += "Job method 1.1\n";
-                ZLogger.Message($"{pawn} haul {jobToDo.targetA.Thing} to {dest}");
+                ZLogger.Message(pawn + " haul " + jobToDo.targetA.Thing + " to " + dest);
                 this.jobTracker[pawn].dest = jobToDo.targetB.Thing.Map;
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = jobToDo.count;
@@ -491,7 +490,7 @@ namespace ZLevels
                 }
                 else
                 {
-                    var target = jobToDo.targetQueueA.FirstOrDefault(x => x.HasThing && x.Thing.Map != null);
+                    var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
                     if (target != null && target.Thing?.Map != null)
                     {
                         ZLogger.Message("Job method 1.76");
@@ -512,7 +511,7 @@ namespace ZLevels
                 }
                 else
                 {
-                    var target = jobToDo.targetQueueA.FirstOrDefault(x => x.HasThing && x.Thing.Map != null);
+                    var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
                     if (target != null && target.Thing?.Map != null)
                     {
                         ZLogger.Message("Job method 1.79");
@@ -522,9 +521,8 @@ namespace ZLevels
                     }
                 }
             }
-            //We know jobToDo is not null already
-            else if (jobToDo.targetQueueA?.Count > 0
-                && jobToDo.targetQueueA.Count(x => x.HasThing && x.Thing.Map != null) > 0)
+            else if (jobToDo?.targetQueueA?.Count > 0
+                && jobToDo?.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
             {
                 ZLogger.Message("Job method 1.8");
                 log += "Job method 1.8\n";
@@ -592,8 +590,8 @@ namespace ZLevels
                     }
                 }
             }
-            else if (jobToDo.targetQueueB?.Count > 0
-                && (jobToDo.targetQueueB).Count(x => x.HasThing && x.Thing.Map != null) > 0)
+            else if (jobToDo?.targetQueueB?.Count > 0
+                && jobToDo?.targetQueueB.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
             {
                 ZLogger.Message("Job method 2");
                 log += "Job method 2\n";
@@ -1565,45 +1563,43 @@ namespace ZLevels
                             for (int i = this.stairsUp[map].Count - 1; i >= 0; i--)
                             {
 
-                                if (!stairsUp[map][i].Position.Walkable(map))
+                                if (!this.stairsUp[map][i].Position.Walkable(map))
                                 {
-                                    ZLogger.Message(stairsUp[map][i] + " not walkable, removing it");
-                                    stairsUp[map].RemoveAt(i);
+                                    ZLogger.Message(this.stairsUp[map][i] + " not walkable, removing it");
+                                    this.stairsUp[map].RemoveAt(i);
                                 }
                             }
                         }
                     }
-                
-
-                foreach (var map in GetAllMaps(tile.Key))
-                {
-                    if (stairsDown.ContainsKey(map))
+                    foreach (var map in this.GetAllMaps(tile.Key))
                     {
-                        for (int i = stairsDown[map].Count - 1; i >= 0; i--)
+                        if (this.stairsDown.ContainsKey(map))
                         {
-                            Map lowerMap = GetLowerLevel(tile.Key, map);
-                            if (lowerMap != null && stairsUp?[lowerMap]?.Where(x => x.Position
-                                == stairsDown[map][i].Position).Count() == 0)
+                            for (int i = this.stairsDown[map].Count - 1; i >= 0; i--)
                             {
-                                ZLogger.Message(stairsDown[map][i] + " - has no stairs upper, removing it");
-                                stairsDown[map].RemoveAt(i);
+                                Map lowerMap = this.GetLowerLevel(tile.Key, map);
+                                if (lowerMap != null && this.stairsUp?[lowerMap]?.Where(x => x.Position
+                                    == this.stairsDown[map][i].Position).Count() == 0)
+                                {
+                                    ZLogger.Message(this.stairsDown[map][i] + " - has no stairs upper, removing it");
+                                    this.stairsDown[map].RemoveAt(i);
+                                }
+                            }
+                        }
+                        if (this.stairsUp.ContainsKey(map))
+                        {
+                            for (int i = this.stairsUp[map].Count - 1; i >= 0; i--)
+                            {
+                                Map upperMap = this.GetUpperLevel(tile.Key, map);
+                                if (upperMap != null && this.stairsDown?[upperMap]?.Where(x => x.Position
+                                    == this.stairsUp[map][i].Position).Count() == 0)
+                                {
+                                    ZLogger.Message(this.stairsUp[map][i] + " - has no stairs below, removing it");
+                                    this.stairsUp[map].RemoveAt(i);
+                                }
                             }
                         }
                     }
-                    if (stairsUp.ContainsKey(map))
-                    {
-                        for (int i = stairsUp[map].Count - 1; i >= 0; i--)
-                        {
-                            Map upperMap = GetUpperLevel(tile.Key, map);
-                            if (upperMap != null && stairsDown?[upperMap]?.Where(x => x.Position
-                                == stairsUp[map][i].Position).Count() == 0)
-                            {
-                                ZLogger.Message(stairsUp[map][i] + " - has no stairs below, removing it");
-                                stairsUp[map].RemoveAt(i);
-                            }
-                        }
-                    }
-                }
                 }
             }
             catch (Exception ex)
@@ -1670,6 +1666,7 @@ namespace ZLevels
                                     ZLogger.Message("2 Registering map: " + d.Key + " - " + d.Value);
                                     this.TryRegisterMap(d.Key, d.Value);
                                 }
+
                             }
                         }
                     }

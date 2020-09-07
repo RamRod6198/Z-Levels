@@ -1,13 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 
 namespace ZLevels
 {
 	public class ZLevelData : IExposable
 	{
-        public void ExposeData()
+		public ZLevelData()
 		{
-			Scribe_Collections.Look(ref ZLevels, "ZLevels", LookMode.Value, LookMode.Reference,
+		}
+
+		public void ExposeData()
+		{
+			Scribe_Collections.Look<int, Map>(ref this.ZLevels, "ZLevels", LookMode.Value, LookMode.Reference,
 				ref ZLevelsKeys, ref ZLevelsValues);
 		}
 
