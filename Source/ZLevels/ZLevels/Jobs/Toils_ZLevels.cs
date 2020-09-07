@@ -65,7 +65,7 @@ namespace ZLevels
                         var stairs = ZTracker.stairsDown[pawn.Map];
                         if (stairs?.Count() > 0)
                         {
-                            pawn.CurJob.targetC = new LocalTargetInfo(stairs.MinBy(x => IntVec3Utility.DistanceTo(pawn.Position, x.Position)));
+                            pawn.CurJob.targetC = new LocalTargetInfo(stairs.MinBy(x => pawn.Position.DistanceTo(x.Position)));
                         }
                         else
                         {
@@ -77,7 +77,7 @@ namespace ZLevels
                         var stairs = ZTracker.stairsUp[pawn.Map];
                         if (stairs?.Count() > 0)
                         {
-                            pawn.CurJob.targetC = new LocalTargetInfo(stairs.MinBy(y => IntVec3Utility.DistanceTo(pawn.Position, y.Position)));
+                            pawn.CurJob.targetC = new LocalTargetInfo(stairs.MinBy(y => pawn.Position.DistanceTo(y.Position)));
                         }
                         else
                         {

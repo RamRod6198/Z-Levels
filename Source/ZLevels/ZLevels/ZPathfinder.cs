@@ -471,7 +471,7 @@ namespace ZLevels.Properties
 
         public List<DijkstraGraph.Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost)
         {
-
+            ZLogger.Message($"Find route from {from}to {to}  mapFrom {mapFrom} mapTo {mapTo}");
             if (!HasDijkstraForTile(mapFrom.Tile))
             {
                 SetOrCreateDijkstraGraph(mapFrom.Tile);
