@@ -13,12 +13,13 @@ namespace ZLevels
             return true;
         }
 
-        protected override IEnumerable<Toil> MakeNewToils()
+        public override IEnumerable<Toil> MakeNewToils()
         {
-            ZLogger.Message(pawn + " 1 ZUtils.ZTracker.jobTracker[pawn].dest: " + ZUtils.ZTracker.jobTracker[pawn].dest);
+            ZLogger.Message($"{pawn.jobs} 1 ZUtils.ZTracker.jobTracker[pawn].dest: {ZUtils.ZTracker.jobTracker[pawn].dest}");
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZUtils.ZTracker.jobTracker[pawn].dest, this))
             {
-                ZLogger.Message(pawn + " 2 ZUtils.ZTracker.jobTracker[pawn].dest: " + ZUtils.ZTracker.jobTracker[pawn].dest);
+                ZLogger.Message(
+                    $"{pawn} 2 ZUtils.ZTracker.jobTracker[pawn].dest: {ZUtils.ZTracker.jobTracker[pawn].dest}");
                 yield return toil;
             }
         }

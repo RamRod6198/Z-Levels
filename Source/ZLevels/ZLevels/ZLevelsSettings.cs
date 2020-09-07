@@ -10,7 +10,7 @@ namespace ZLevels
 {
     class ZLevelsSettings : ModSettings
     {
-        public bool DebugEnabled = false;
+        public bool DebugEnabled = true;
 
         public override void ExposeData()
         {
