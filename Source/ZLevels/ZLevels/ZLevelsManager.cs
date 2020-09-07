@@ -364,7 +364,8 @@ namespace ZLevels
                 Log.Message(" - TryRegisterMap - return true; - 13", true);
                 return true;
             }
-            else
+
+            ZLevelsTracker[map.Tile] = new ZLevelData
             {
                 this.ZLevelsTracker[map.Tile] = new ZLevelData
                                                     {
