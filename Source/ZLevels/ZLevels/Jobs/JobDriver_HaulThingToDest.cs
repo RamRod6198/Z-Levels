@@ -17,7 +17,7 @@ namespace ZLevels
         public override IEnumerable<Toil> MakeNewToils()
         {
             var ZTracker = ZUtils.ZTracker;
-            if (pawn.Map == this.job.targetA.Thing.Map && pawn.Map == ZTracker.jobTracker[pawn].dest)
+            if (pawn.Map == this.job.targetA.Thing.Map && pawn.Map == ZTracker.jobTracker[pawn].targetDest.Map)
             {
                 ZLogger.Message("pawn map and thing map and dest map are same, yield breaking in JobDriver_HaulThingToDest");
                 yield break;
@@ -31,7 +31,7 @@ namespace ZLevels
             };
 
             Toil reserveItem = Toils_Reserve.Reserve(TargetIndex.A);
-            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), TargetA.Thing.Map, this))
+            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), new TargetInfo(TargetA.Thing.Position, TargetA.Thing.Map), this))
             {
                 yield return toil;
             }
@@ -147,7 +147,7 @@ namespace ZLevels
                     }
                 }
             };
-            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].dest, this))
+            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), ZTracker.jobTracker[pawn].targetDest, this))
             {
                 yield return toil;
             }

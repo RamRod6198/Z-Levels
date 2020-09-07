@@ -383,7 +383,7 @@ namespace ZLevels
             {
                 str += pawn + " - " + job + "\n";
                 str += "Pawn map: " + pawn.Map + "\n";
-                str += "ZTracker dest map: " + this.jobTracker[pawn].dest + "\n";
+                str += "ZTracker dest map: " + this.jobTracker[pawn].targetDest + "\n";
                 str += "Dest map: " + dest + "\n";
                 str += "Job.workGiverDef: " + job.workGiverDef + "\n";
                 str += "Job.jobGiver: " + job.jobGiver + "\n";
@@ -481,7 +481,7 @@ namespace ZLevels
                 ZLogger.Message("Job method 1");
                 log += "Job method 1\n";
                 ZLogger.Message(pawn + " haul " + jobToDo.targetA.Thing + " to " + dest);
-                this.jobTracker[pawn].dest = dest;
+                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.haulOpportunisticDuplicates = false;
                 job.count = jobToDo.count;
@@ -492,7 +492,7 @@ namespace ZLevels
                 ZLogger.Message("Job method 1.1");
                 log += "Job method 1.1\n";
                 ZLogger.Message(pawn + " haul " + jobToDo.targetA.Thing + " to " + dest);
-                this.jobTracker[pawn].dest = jobToDo.targetB.Thing.Map;
+                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Thing);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = jobToDo.count;
                 tempJobs.Add(job);
@@ -501,25 +501,25 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 1.5: " + jobToDo.targetA.Thing);
                 log += "Job method 1.5: " + jobToDo.targetA.Thing + "\n";
-                this.jobTracker[pawn].dest = jobToDo.targetB.Thing.Map;
+                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Thing);
                 tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing));
             }
             else if (jobToDo.def == JobDefOf.Refuel)
             {
                 ZLogger.Message("Job method 1.7: " + jobToDo.count);
                 log += "Job method 1.7: " + jobToDo.count + "\n";
-                this.jobTracker[pawn].dest = jobToDo.targetA.Thing.Map;
+                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Thing);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetB.Thing);
                 job.count = jobToDo.count;
                 tempJobs.Add(job);
             }
             else if (jobToDo.def == JobDefOf.Harvest)
             {
-                if (dest != null)
+                if (jobToDo.targetA.Thing != null)
                 {
                     ZLogger.Message("Job method 1.75");
                     log += "Job method 1.75\n";
-                    this.jobTracker[pawn].dest = dest;
+                    this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Thing);
                     tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
                 }
                 else
@@ -529,30 +529,20 @@ namespace ZLevels
                     {
                         ZLogger.Message("Job method 1.76");
                         log += "Job method 1.76\n";
-                        this.jobTracker[pawn].dest = target.Thing?.Map;
+                        this.jobTracker[pawn].targetDest = new TargetInfo(target.Thing);
                         tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
                     }
                 }
             }
             else if (jobToDo.def == JobDefOf.Clean)
             {
-                if (dest != null)
+                var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
+                if (target != null && target.Thing?.Map != null)
                 {
-                    ZLogger.Message("Job method 1.78");
-                    log += "Job method 1.78\n";
-                    this.jobTracker[pawn].dest = dest;
+                    ZLogger.Message("Job method 1.79");
+                    log += "Job method 1.79\n";
+                    this.jobTracker[pawn].targetDest = new TargetInfo(target.Thing);
                     tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
-                }
-                else
-                {
-                    var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
-                    if (target != null && target.Thing?.Map != null)
-                    {
-                        ZLogger.Message("Job method 1.79");
-                        log += "Job method 1.79\n";
-                        this.jobTracker[pawn].dest = target.Thing?.Map;
-                        tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
-                    }
                 }
             }
             else if (jobToDo?.targetQueueA?.Count > 0
@@ -569,21 +559,23 @@ namespace ZLevels
                             var t = jobToDo.targetQueueA[i];
                             if (t.HasThing && t.Thing.Map != null)
                             {
-                                this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
                                 {
                                     if (jobToDo.targetA.Cell.IsValid)
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
                                     }
                                     else
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
@@ -598,11 +590,11 @@ namespace ZLevels
                         {
                             if (t.HasThing && t.Thing.Map != null)
                             {
-                                this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -630,11 +622,11 @@ namespace ZLevels
                             var t = jobToDo.targetQueueA[i];
                             if (t.HasThing && t.Thing.Map != null)
                             {
-                                this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -660,11 +652,11 @@ namespace ZLevels
                         {
                             if (t.HasThing && t.Thing.Map != null)
                             {
-                                this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -698,11 +690,11 @@ namespace ZLevels
                             var t = jobToDo.targetQueueB[i];
                             if (t.HasThing && t.Thing.Map != null)
                             {
-                                this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -727,11 +719,11 @@ namespace ZLevels
                         {
                             if (t.HasThing && t.Thing.Map != null)
                             {
-                                this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -759,11 +751,11 @@ namespace ZLevels
                             var t = jobToDo.targetQueueB[i];
                             if (t.HasThing && t.Thing.Map != null)
                             {
-                                this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST: " + this.GetMapInfo(dest));
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -788,11 +780,11 @@ namespace ZLevels
                         {
                             if (t.HasThing && t.Thing.Map != null)
                             {
-                                this.jobTracker[pawn].dest = dest;
                                 ZLogger.Message("DEST:2 " + this.GetMapInfo(dest));
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
+                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing.Position, dest);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
@@ -816,21 +808,21 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 3: " + jobToDo.targetA.Thing);
                 log += "Job method 3: " + jobToDo.targetA.Thing + "\n";
-                this.jobTracker[pawn].dest = jobToDo.targetA.Thing.Map;
+                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Thing);
                 tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
             }
             else if (jobToDo.targetB != null && jobToDo.targetB.Thing?.Map != null)
             {
                 ZLogger.Message("Job method 4: " + jobToDo.targetB.Thing);
                 log += "Job method 4: " + jobToDo.targetB.Thing + "\n";
-                this.jobTracker[pawn].dest = jobToDo.targetB.Thing.Map;
+                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Thing);
                 tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
             }
             else if (dest != null)
             {
                 ZLogger.Message("Job method 5");
                 log += "Job method 5\n";
-                this.jobTracker[pawn].dest = dest;
+                this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
                 tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
             }
             tempJobs.Add(jobToDo);
@@ -860,7 +852,7 @@ namespace ZLevels
                 {
                     this.jobTracker[pawn].activeJobs = new List<Job>();
                 }
-                this.jobTracker[pawn].dest = null;
+                this.jobTracker[pawn].targetDest = null;
                 this.jobTracker[pawn].mainJob = null;
                 this.jobTracker[pawn].forceGoToDestMap = false;
                 this.jobTracker[pawn].failIfTargetMapIsNotDest = false;
@@ -1112,7 +1104,7 @@ namespace ZLevels
                         {
                             pawn.ClearReservationsForJob(pawn.CurJob);
                         }
-                        if (job == this.jobTracker[pawn].mainJob && this.jobTracker[pawn].forceGoToDestMap && pawn.Map != this.jobTracker[pawn].dest)
+                        if (job == this.jobTracker[pawn].mainJob && this.jobTracker[pawn].forceGoToDestMap && pawn.Map != this.jobTracker[pawn].targetDest.Map)
                         {
                             ZLogger.Message(pawn + " force taking go to map " + job + " in " + this.GetMapInfo(pawn.Map));
                             pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));

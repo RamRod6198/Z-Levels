@@ -24,7 +24,7 @@ namespace ZLevels
             //Check that pawn can reach  destination with Dijkstra.
             //yield break if not.
             //Otherwise, calculate toils to go, then toils to destination and return them one at a time.
-            foreach (var v in Toils_ZLevels.FindRouteWithStairs(pawn, TargetA, this))
+            foreach (var v in Toils_ZLevels.FindRouteWithStairs(pawn, TargetA.ToTargetInfo(pawn.Map), this))
             {
                 yield return v;
             }

@@ -67,12 +67,12 @@ namespace ZLevels
                 this.FailOnForbidden(TargetIndex.A);
             }
             var ZTracker = ZUtils.ZTracker;
-            if (pawn.Map == this.job.targetA.Thing.Map && pawn.Map == ZTracker.jobTracker[pawn].dest)
+            if (pawn.Map == this.job.targetA.Thing.Map && pawn.Map == ZTracker.jobTracker[pawn].targetDest.Map)
             {
                 ZLogger.Message("pawn map and thing map and dest map are same, yield breaking in JobDriver_HaulThingToDest");
                 yield break;
             }
-            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), TargetA.Thing.Map, this))
+            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), TargetA.ToTargetInfo(TargetA.Thing.Map), this))
             {
                 yield return toil;
             }
@@ -121,7 +121,7 @@ namespace ZLevels
                 };
                 yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveTargetA, TargetIndex.A, TargetIndex.B);
             }
-            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].dest, this))
+            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), ZTracker.jobTracker[pawn].targetDest, this))
             {
                 yield return toil;
             }

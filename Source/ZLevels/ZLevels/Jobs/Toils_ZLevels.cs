@@ -158,7 +158,7 @@ namespace ZLevels
             yield return null;
         }
 
-        public static IEnumerable<Toil> FindRouteWithStairs(Pawn pawn, LocalTargetInfo targetInfo, JobDriver instance)
+        public static IEnumerable<Toil> FindRouteWithStairs(Pawn pawn, TargetInfo targetInfo, JobDriver instance)
         {
 
             yield return new Toil
@@ -169,7 +169,7 @@ namespace ZLevels
                 }
             };
             var stairList =
-                ZPathfinder.Instance.FindRoute(pawn.Position, targetInfo.Cell, pawn.Map,  targetInfo.HasThing? targetInfo.Thing.Map : pawn.Map,
+                ZPathfinder.Instance.FindRoute(pawn.Position, targetInfo.Cell, pawn.Map, targetInfo.HasThing? targetInfo.Thing.Map : targetInfo.Map,
                     out float routeCost);
             yield return new Toil
             {

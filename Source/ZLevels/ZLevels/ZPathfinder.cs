@@ -176,7 +176,6 @@ namespace ZLevels.Properties
                 }
             }
 
-
             private List<Node> DijkstraConnect(Node source, Node sink, out float routeCost)
             {
                 string lastKey = "nokey";

@@ -409,7 +409,7 @@ namespace ZLevels
                     if (job.targetA.Thing?.Map != null && job.targetA.Thing.Map != pawn.Map)
                     {
                         ZUtils.ZTracker.BuildJobListFor(pawn, job.targetA.Thing.Map, __result);
-                        ZUtils.ZTracker.jobTracker[pawn].dest = job.targetA.Thing.Map;
+                        ZUtils.ZTracker.jobTracker[pawn].targetDest = new TargetInfo(job.targetA.Thing);
                         ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
                         __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
                         ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -426,7 +426,7 @@ namespace ZLevels
             {
                 ZLogger.Message("Second block: " + __result, true);
                 ZUtils.ZTracker.BuildJobListFor(pawn, __result.targetA.Thing.Map, __result);
-                ZUtils.ZTracker.jobTracker[pawn].dest = __result.targetA.Thing.Map;
+                ZUtils.ZTracker.jobTracker[pawn].targetDest = new TargetInfo(__result.targetA.Thing);
                 ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
                 __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
                 ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -454,7 +454,7 @@ namespace ZLevels
                     if (job.targetA.Thing?.Map != null && job.targetA.Thing.Map != pawn.Map)
                     {
                         ZUtils.ZTracker.BuildJobListFor(pawn, job.targetA.Thing.Map, __result);
-                        ZUtils.ZTracker.jobTracker[pawn].dest = job.targetA.Thing.Map;
+                        ZUtils.ZTracker.jobTracker[pawn].targetDest = new TargetInfo(job.targetA.Thing);
                         ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
                         __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
                         ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -471,7 +471,7 @@ namespace ZLevels
             {
                 ZLogger.Message("Second block: " + __result, true);
                 ZUtils.ZTracker.BuildJobListFor(pawn, __result.targetA.Thing.Map, __result);
-                ZUtils.ZTracker.jobTracker[pawn].dest = __result.targetA.Thing.Map;
+                ZUtils.ZTracker.jobTracker[pawn].targetDest = new TargetInfo(__result.targetA.Thing);
                 ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
                 __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
                 ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -510,7 +510,7 @@ namespace ZLevels
                             activeJobs = new List<Job>()
                         };
                         ZUtils.ZTracker.BuildJobListFor(pawn, job.targetA.Thing.Map, __result);
-                        ZUtils.ZTracker.jobTracker[pawn].dest = job.targetA.Thing.Map;
+                        ZUtils.ZTracker.jobTracker[pawn].targetDest = new TargetInfo(job.targetA.Thing);
                         ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
                         __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
                         ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -531,7 +531,7 @@ namespace ZLevels
                     activeJobs = new List<Job>()
                 };
                 ZUtils.ZTracker.BuildJobListFor(pawn, __result.targetA.Thing.Map, __result);
-                ZUtils.ZTracker.jobTracker[pawn].dest = __result.targetA.Thing.Map;
+                ZUtils.ZTracker.jobTracker[pawn].targetDest = new TargetInfo(__result.targetA.Thing);
                 ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
                 __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
                 ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
@@ -543,7 +543,7 @@ namespace ZLevels
                 {
                     activeJobs = new List<Job>()
                 };
-                ZUtils.ZTracker.jobTracker[pawn].dest = pawn.mindState.enemyTarget.Map;
+                ZUtils.ZTracker.jobTracker[pawn].targetDest = pawn.mindState.enemyTarget;
                 ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
                 __result = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                 ZUtils.ZTracker.jobTracker[pawn].mainJob = __result;
