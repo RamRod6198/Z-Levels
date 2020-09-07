@@ -205,7 +205,7 @@ namespace ZLevels
                         var oldPosition2 = victim.Position;
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                        
+
                         Building building_Bed3 = null;
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap,
                             oldPosition1, victim, oldMap, oldPosition2))
