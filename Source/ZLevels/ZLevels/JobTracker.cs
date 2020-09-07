@@ -18,6 +18,7 @@ namespace ZLevels
 			{
 				this.activeJobs.RemoveAll(x => x == null);
 			}
+			Scribe_TargetInfo.Look(ref targetDest, "targetDest");
 			Scribe_Collections.Look<Job>(ref this.activeJobs, "activeJobs", LookMode.Deep);
 			Scribe_Collections.Look<WorkGiverDef>(ref this.ignoreGiversInFirstTime, "ignoreGiversInFirstTime", LookMode.Def);
 			Scribe_References.Look<Job>(ref this.mainJob, "mainJob");
