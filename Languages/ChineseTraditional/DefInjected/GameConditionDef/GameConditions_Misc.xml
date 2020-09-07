@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <ZL_UndergroundCondition.label>地下</ZL_UndergroundCondition.label>
+  <ZL_UndergroundCondition.description>你進入了地下城。</ZL_UndergroundCondition.description>
+  <ZL_UndergroundCondition.endMessage>日蝕即將結束。</ZL_UndergroundCondition.endMessage>
+  <ZL_UndergroundCondition.letterText>一顆運行中的衛星阻擋了太陽光，日蝕開始了。</ZL_UndergroundCondition.letterText>
+
+
+</LanguageData>

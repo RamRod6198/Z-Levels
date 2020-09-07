@@ -69,31 +69,90 @@ namespace ZLevels
             }
         }
 
+        [HarmonyPatch(typeof(Map))]
+        [HarmonyPatch("ParentFaction", MethodType.Getter)]
+        public class ParentFaction_Patch
+        {
+            [HarmonyPrefix]
+            private static bool Prefix(Map __instance, ref Faction __result)
+            {
+                try
+                {
+                    if (__instance != null && __instance.ParentHolder is MapParent_ZLevel)
+                    {
+                        __result = ZUtils.ZTracker.GetMapByIndex(__instance.Tile, 0).ParentFaction; ;
+                        return false;
+                    }
+                }
+                catch { };
+                return true;
+            }
+        }
+
         [HarmonyPatch(typeof(ExitMapGrid))]
         [HarmonyPatch("MapUsesExitGrid", MethodType.Getter)]
         public class ExitCells_Patch
         {
             [HarmonyPrefix]
-            private static bool Prefix(ExitMapGrid __instance, ref bool __result)
+            private static bool Prefix(ExitMapGrid __instance, Map ___map, ref bool __result)
+            {
+                if (___map != null && ___map.ParentHolder is MapParent_ZLevel)
+                {
+                    __result = false;
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(GenTemperature), "PushHeat")]
+        [HarmonyPatch(new Type[]
+        {
+            typeof(Thing),
+            typeof(float)
+        }, new ArgumentType[]
+        {
+            0,
+            0
+        })]
+        public class HeatPush_Patch
+        {
+            [HarmonyPrefix]
+            private static bool Prefix(Thing t, float energy)
             {
                 try
                 {
-                    Map map = (Map)typeof(ExitMapGrid).GetField("map", BindingFlags.Instance | BindingFlags.Static
-                            | BindingFlags.Public | BindingFlags.NonPublic).GetValue(__instance);
-                    if (map != null)
+                    if (t is Building_SteamGeyser 
+                        && ZUtils.ZTracker.GetZIndexFor(t.Map) < 0 && ZUtils.ZTracker.GetUpperLevel(t.Map.Tile,
+                        t.Map).listerThings.AllThings.Where(x => x is Building_SteamGeyser 
+                        && x.Position == t.Position).Count() > 0)
                     {
-                        if (map.ParentHolder is MapParent_ZLevel)
-                        {
-                            __result = false;
-                            return false;
-                        }
+                        return false;
                     }
                 }
-                catch (Exception ex)
-                {
-                    Log.Error("[Z-Levels] ExitCells_Patch patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
-                };
+                catch { };
                 return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(CompAssignableToPawn))]
+        [HarmonyPatch("get_AssigningCandidates")]
+        internal static class Patch_CandidatesFromAllLevels
+        {
+            private static void Postfix(ref IEnumerable<Pawn> __result, CompAssignableToPawn __instance)
+            {
+                if (__instance.parent.Spawned)
+                {
+                    var list = __result.ToList();
+                    foreach (var map in ZUtils.ZTracker.GetAllMaps(__instance.parent.Map.Tile))
+                    {
+                        if (map != __instance.parent.Map)
+                        {
+                            list.AddRange(map.mapPawns.FreeColonists);
+                        }
+                    }
+                    __result = list;
+                }
             }
         }
     }

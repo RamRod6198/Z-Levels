@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RimWorld;
 using Verse;
 using Verse.AI;
 
@@ -19,13 +20,20 @@ namespace ZLevels
 			}
 			Scribe_Collections.Look<Job>(ref this.activeJobs, "activeJobs", LookMode.Deep);
 			Scribe_References.Look<Job>(ref this.mainJob, "mainJob");
+			Scribe_References.Look<Map>(ref this.dest, "dest");
 		}
+
+		public bool searchingJobsNow = false;
+
+		public Map oldMap;
 
 		public Map dest;
 
-		//public Thing selectedStairs;
-
 		public Job mainJob;
+
+		public bool forceGoToDestMap;
+
+		public HashSet<WorkGiverDef> ignoreGiversInFirstTime;
 
 		public List<Job> activeJobs;
 	}

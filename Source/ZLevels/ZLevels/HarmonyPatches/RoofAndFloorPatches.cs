@@ -69,7 +69,8 @@ namespace ZLevels
                         bool firstTime = false;
                         if (lowerMap == null)
                         {
-                            lowerMap = ZTracker.CreateLowerLevel(___map, c);
+                            return false;
+                            //lowerMap = ZTracker.CreateLowerLevel(___map, c);
                             firstTime = true;
                         }
 
@@ -81,7 +82,7 @@ namespace ZLevels
                                 if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
                                 {
                                     //Log.Message(thingList[i] + " going down 1");
-                                    ZTracker.SimpleTeleportThing(thingList[i], c, lowerMap, firstTime, 10);
+                                    ZTracker.TeleportThing(thingList[i], c, lowerMap, firstTime, 10);
                                 }
                             }
                         }
@@ -112,8 +113,8 @@ namespace ZLevels
                         bool firstTime = false;
                         if (lowerMap == null)
                         {
-                            lowerMap = ZTracker.CreateLowerLevel(__instance.Map, __instance.Position);
-                            firstTime = true;
+                            return;
+                            //lowerMap = ZTracker.CreateLowerLevel(__instance.Map, __instance.Position);
                         }
                         var thingList = __instance.Position.GetThingList(__instance.Map);
                         if (thingList.Where(x => x is Blueprint || x is Frame).Count() == 0)
@@ -123,7 +124,7 @@ namespace ZLevels
                                 if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
                                 {
                                     //Log.Message(thingList[i] + " going down 2");
-                                    ZTracker.SimpleTeleportThing(thingList[i], __instance.Position, lowerMap, firstTime, 10);
+                                    ZTracker.TeleportThing(thingList[i], __instance.Position, lowerMap, firstTime, 10);
                                 }
                             }
                         }
@@ -167,7 +168,7 @@ namespace ZLevels
                                     if (!(thingList[i] is Mineable || thingList[i] is Blueprint || thingList[i] is Frame))
                                     {
                                         //Log.Message(thingList[i] + " going down 3");
-                                        ZTracker.SimpleTeleportThing(thingList[i], c, ___map, false, 10);
+                                        ZTracker.TeleportThing(thingList[i], c, ___map, false, 10);
                                     }
                                 }
                                 ZLogger.Message("Removing roof " + c.GetRoof(___map), true);

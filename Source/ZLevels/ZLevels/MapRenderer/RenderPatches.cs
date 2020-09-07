@@ -46,12 +46,13 @@ namespace ZLevels
 							{
 								try
 								{
-									if (thing.Graphic is Graphic_Mote || thing.Graphic is Graphic_Linked)
+									if (thing.Graphic is Graphic_Mote)
 									{
 
 									}
 									else if (thing.Graphic is Graphic_LinkedCornerFiller
-										|| thing.Graphic is Graphic_RandomRotated)
+										|| thing.Graphic is Graphic_RandomRotated
+										 || thing.Graphic is Graphic_Linked)
 									{
 										thing.Draw();
 									}
@@ -69,13 +70,17 @@ namespace ZLevels
 										newRenderer.graphics.flasher = pawn.Drawer.renderer.graphics.flasher;
 										newRenderer.RenderPawnAt(thing.DrawPos, curLevel, baseLevel);
 									}
-									else
+									else if (thing.def.projectile == null)
 									{
 										Vector2 drawSize = thing.Graphic.drawSize;
 										drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 										drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 										var newGraphic = thing.Graphic.GetCopy(drawSize);
 										newGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
+									}
+									else
+                                    {
+										thing.Draw();
 									}
 								}
 								catch (Exception ex)

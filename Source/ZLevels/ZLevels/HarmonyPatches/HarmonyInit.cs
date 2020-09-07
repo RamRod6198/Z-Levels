@@ -19,6 +19,21 @@ namespace ZLevels
         }
 
         [HarmonyPatch(typeof(Log))]
+        [HarmonyPatch(nameof(Log.Warning))]
+        static class Log_Warning_Patch
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(string text, ref bool ignoreStopLoggingLimit)
+            {
+                if (text.Contains("without a specific job end condition"))
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Log))]
         [HarmonyPatch(nameof(Log.Error))]
         static class Log_Error_Patch
         {
@@ -33,30 +48,33 @@ namespace ZLevels
                     || text.Contains("clearing group grid square") // same
                     || text.Contains("threw exception while executing toil's finish action (0), jobDriver=RimWorld.JobDriver_LayDown")
                     || text.Contains("threw exception while executing toil's finish action (1), jobDriver=RimWorld.JobDriver_LayDown")
+                    || text.Contains("Haul designation has no target! Deleting.")
                     )
                 {
                     //ZLogger.Message("The error: " + text);
                     return false;
                 }
-
-                //try
-                //{
-                //    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-                //}
-                //catch { };
-                //ignoreStopLoggingLimit = true;
+                if (ZLogger.DebugEnabled)
+                {
+                    if (!text.Contains("VisiblePants")
+                        && !text.Contains("GiddyUpRideAndRoll")
+                        && !text.Contains("Unknown crown type"))
+                    {
+                        //try
+                        //{
+                        //    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+                        //}
+                        //catch { };
+                        ignoreStopLoggingLimit = true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
                 return true;
             }
         }
-
-        //[HarmonyPatch(typeof(PawnRenderer), "DrawEquipment")]
-        //public static class AvP_PawnRenderer_DrawEquipment_Cloak_Patch
-        //{
-        //    public static bool Prefix(PawnRenderer __instance)
-        //    {
-        //        return false;
-        //    }
-        //}
 
         [HarmonyPatch(typeof(ColonistBarColonistDrawer), "DrawIcons")]
         public static class DrawIcons_Patch
@@ -72,26 +90,9 @@ namespace ZLevels
                 }
                 catch
                 {
+                    ZLogger.Pause("Error in JobDriver of " + colonist);
                     colonist.jobs.EndCurrentJob(JobCondition.Errored);
                 }
-
-                //Log.Message("colonist.CurJob != null && colonist.jobs.curDriver.asleep: "
-                //    + (colonist.CurJob != null && colonist.jobs.curDriver != null).ToString());
-                //
-                //Log.Message("colonist.CurJob != null && colonist.jobs.curDriver.asleep: " 
-                //    + (colonist.CurJob != null && colonist.jobs.curDriver.asleep).ToString());
-                //
-                //
-                //Log.Message("colonist.InAggroMentalState: " + colonist.InAggroMentalState);
-                //Log.Message("colonist.InMentalState: " + colonist.InMentalState);
-                //Log.Message("colonist.InBed() &&  && colonist.CurrentBed().Medical: " 
-                //    + (colonist.InBed() && colonist.CurrentBed().Medical).ToString());
-                //
-                //
-                //Log.Message("colonist.mindState.IsIdle: " + colonist.mindState.IsIdle);
-                //Log.Message("colonist.IsBurning(): " + colonist.IsBurning());
-                //Log.Message("colonist.Inspired: " + colonist.Inspired);
-
                 return true;
             }
         }

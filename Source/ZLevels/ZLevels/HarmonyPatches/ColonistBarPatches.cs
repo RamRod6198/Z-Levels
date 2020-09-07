@@ -7,21 +7,20 @@ using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
+using static RimWorld.ColonistBar;
 
 namespace ZLevels
 {
-    [HarmonyPatch(typeof(ColonistBar), "CheckRecacheEntries")]
-    public static class ColonistBarPatches
-    {
-        public static bool entriesDirty = false;
 
+    [HarmonyPatch(typeof(ColonistBarDrawLocsFinder), "CalculateColonistsInGroup")]
+    public static class CalculateColonistsInGroupPatches
+    {
         [HarmonyPrefix]
-        public static void Prefix(ColonistBar __instance, bool ___entriesDirty)
+        public static void Prefix()
         {
-            if (___entriesDirty) 
-            {
-                entriesDirty = true;
-            }
+            var cachedEntries = Traverse.Create(Find.ColonistBar).Field("cachedEntries").GetValue<List<Entry>>();
+            cachedEntries = cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
+            Traverse.Create(Find.ColonistBar).Field("cachedEntries").SetValue(cachedEntries);
         }
     }
 
@@ -29,16 +28,12 @@ namespace ZLevels
     public static class ColonistBarOnGUIPatch
     {
         public static Texture2D AbandonButtonTex = ContentFinder<Texture2D>.Get("UI/Buttons/Abandon", true);
-        [HarmonyPostfix]
-        public static void Postfix(ColonistBar __instance, ref List<ColonistBar.Entry> ___cachedEntries, ref ColonistBarDrawLocsFinder ___drawLocsFinder, ref List<Vector2> ___cachedDrawLocs, ref float ___cachedScale)
+        [HarmonyPrefix]
+        public static void Prefix(ColonistBar __instance, ref List<ColonistBar.Entry> ___cachedEntries, 
+            ref List<Vector2> ___cachedDrawLocs)
         {
             try
             {
-                if (ColonistBarPatches.entriesDirty)
-                {
-                    ColonistBarPatches.entriesDirty = false;
-                    ___cachedEntries = ___cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
-                }
                 if (___cachedDrawLocs.Count == ___cachedEntries.Count)
                 {
                     for (int i = 0; i < ___cachedDrawLocs.Count; i++)
@@ -58,7 +53,7 @@ namespace ZLevels
                                     Map map = ___cachedEntries[i].map;
                                     Find.WindowStack.Add(new Dialog_MessageBox("ZAbandonConfirmation".Translate(), "Yes".Translate(), delegate ()
                                     {
-                                        var comp = map.GetComponent<MapComponentZLevel>();
+                                        var comp = ZUtils.GetMapComponentZLevel(map);
                                         var pathToWrite = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
                                                 "SavedMaps"), map.Tile + " - " + comp.Z_LevelIndex + ".xml");
                                         if (map.listerThings.AllThings.Count > 0)
@@ -73,7 +68,7 @@ namespace ZLevels
 
                                         foreach (var map2 in Find.Maps)
                                         {
-                                            var comp2 = map2.GetComponent<MapComponentZLevel>();
+                                            var comp2 = ZUtils.GetMapComponentZLevel(map2);
                                             if (ZTracker.ZLevelsTracker[map2.Tile] != null)
                                             {
                                                 foreach (var d in ZTracker.ZLevelsTracker[map2.Tile].ZLevels)
@@ -89,7 +84,7 @@ namespace ZLevels
                                     Map map = ___cachedEntries[i].map;
                                     Find.WindowStack.Add(new Dialog_MessageBox("ZAbandonPermanentlyConfirmation".Translate(), "Yes".Translate(), delegate ()
                                     {
-                                        var comp = map.GetComponent<MapComponentZLevel>();
+                                        var comp = ZUtils.GetMapComponentZLevel(map);
                                         try
                                         {
                                             var pathToDelete = Path.Combine(Path.Combine(GenFilePaths.ConfigFolderPath,
@@ -109,7 +104,7 @@ namespace ZLevels
 
                                         foreach (var map2 in Find.Maps)
                                         {
-                                            var comp2 = map2.GetComponent<MapComponentZLevel>();
+                                            var comp2 = ZUtils.GetMapComponentZLevel(map2);
                                             if (ZTracker.ZLevelsTracker[map2.Tile] != null)
                                             {
                                                 foreach (var d in ZTracker.ZLevelsTracker[map2.Tile].ZLevels)
@@ -126,6 +121,16 @@ namespace ZLevels
                 }
             }
             catch { };
+        }
+
+        private static bool ShowGroupFrames(List<Entry> entries)
+        {
+            int num = -1;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                num = Mathf.Max(num, entries[i].group);
+            }
+            return num >= 1;
         }
     }
 }

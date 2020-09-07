@@ -1,704 +1,471 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Configuration;
-//using System.Linq;
-//using System.Linq.Expressions;
-//using System.Reflection;
-//using HarmonyLib;
-//using RimWorld;
-//using RimWorld.Planet;
-//using RimWorld.QuestGen;
-//using UnityEngine;
-//using Verse;
-//using Verse.AI;
-//using Verse.AI.Group;
-//
-//namespace ZLevels
-//{
-//    [StaticConstructorOnStartup]
-//    public static class CombatPatches
-//    {
-//		//  things to look for patching: 
-//		//  \.BestAttackTarget
-//		//	BestShootTargetFromCurrentPosition
-//		//	FindAttackTarget
-//		//	TryFindNewTarget
-//		//	\.enemyTarget
-//		//	FindPawnTarget
-//		//	CheckForAutoAttack
-//		//	TryStartAttack
-//		//	TryGetAttackVerb
-//		//	TryStartCastOn
-//
-//		[HarmonyPatch(typeof(CombatPatches), "BestAttackTarget")]
-//		public class CombatPatches_BestAttackTarget_Patch
-//		{
-//			public static bool Prefix(IAttackTargetSearcher searcher, ref Predicate<Thing> validator)
-//			{
-//				return true;
-//			}
-//		}
-//
-//		public static IAttackTarget BestAttackTarget(IAttackTargetSearcher searcher, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.40282347E+38f, bool canBash = false, bool canTakeTargetsCloserThanEffectiveMinRange = true)
-//		{
-//			Thing searcherThing = searcher.Thing;
-//			Pawn searcherPawn = searcher as Pawn;
-//			Verb verb = searcher.CurrentEffectiveVerb;
-//			if (verb == null)
-//			{
-//				Log.Error("BestAttackTarget with " + searcher.ToStringSafe<IAttackTargetSearcher>() + " who has no attack verb.", false);
-//				return null;
-//			}
-//			bool onlyTargetMachines = verb.IsEMP();
-//			float minDistSquared = minDist * minDist;
-//			float num = maxTravelRadiusFromLocus + verb.verbProps.range;
-//			float maxLocusDistSquared = num * num;
-//			Func<IntVec3, bool> losValidator = null;
-//			if ((flags & TargetScanFlags.LOSBlockableByGas) != TargetScanFlags.None)
-//			{
-//				losValidator = delegate (IntVec3 vec3)
-//				{
-//					Gas gas = vec3.GetGas(searcherThing.Map);
-//					return gas == null || !gas.def.gas.blockTurretTracking;
-//				};
-//			}
-//			Predicate<IAttackTarget> innerValidator = delegate (IAttackTarget t)
-//			{
-//				Thing thing = t.Thing;
-//				if (t == searcher)
-//				{
-//					return false;
-//				}
-//				if (minDistSquared > 0f && (float)(searcherThing.Position - thing.Position).LengthHorizontalSquared < minDistSquared)
-//				{
-//					return false;
-//				}
-//				if (!canTakeTargetsCloserThanEffectiveMinRange)
-//				{
-//					float num2 = verb.verbProps.EffectiveMinRange(thing, searcherThing);
-//					if (num2 > 0f && (float)(searcherThing.Position - thing.Position).LengthHorizontalSquared < num2 * num2)
-//					{
-//						return false;
-//					}
-//				}
-//				if (maxTravelRadiusFromLocus < 9999f && (float)(thing.Position - locus).LengthHorizontalSquared > maxLocusDistSquared)
-//				{
-//					return false;
-//				}
-//				if (!searcherThing.HostileTo(thing))
-//				{
-//					return false;
-//				}
-//				if (validator != null && !validator(thing))
-//				{
-//					return false;
-//				}
-//				if (searcherPawn != null)
-//				{
-//					Lord lord = searcherPawn.GetLord();
-//					if (lord != null && !lord.LordJob.ValidateAttackTarget(searcherPawn, thing))
-//					{
-//						return false;
-//					}
-//				}
-//				if ((flags & TargetScanFlags.NeedLOSToAll) != TargetScanFlags.None)
-//				{
-//					if (losValidator != null && (!losValidator(searcherThing.Position) || !losValidator(thing.Position)))
-//					{
-//						return false;
-//					}
-//					if (!searcherThing.CanSee(thing, losValidator))
-//					{
-//						if (t is Pawn)
-//						{
-//							if ((flags & TargetScanFlags.NeedLOSToPawns) != TargetScanFlags.None)
-//							{
-//								return false;
-//							}
-//						}
-//						else if ((flags & TargetScanFlags.NeedLOSToNonPawns) != TargetScanFlags.None)
-//						{
-//							return false;
-//						}
-//					}
-//				}
-//				if (((flags & TargetScanFlags.NeedThreat) != TargetScanFlags.None || (flags & TargetScanFlags.NeedAutoTargetable) != TargetScanFlags.None) && t.ThreatDisabled(searcher))
-//				{
-//					return false;
-//				}
-//				if ((flags & TargetScanFlags.NeedAutoTargetable) != TargetScanFlags.None && !CombatPatches.IsAutoTargetable(t))
-//				{
-//					return false;
-//				}
-//				if ((flags & TargetScanFlags.NeedActiveThreat) != TargetScanFlags.None && !GenHostility.IsActiveThreatTo(t, searcher.Thing.Faction))
-//				{
-//					return false;
-//				}
-//				Pawn pawn = t as Pawn;
-//				if (onlyTargetMachines && pawn != null && pawn.RaceProps.IsFlesh)
-//				{
-//					return false;
-//				}
-//				if ((flags & TargetScanFlags.NeedNonBurning) != TargetScanFlags.None && thing.IsBurning())
-//				{
-//					return false;
-//				}
-//				if (searcherThing.def.race != null && searcherThing.def.race.intelligence >= Intelligence.Humanlike)
-//				{
-//					CompExplosive compExplosive = thing.TryGetComp<CompExplosive>();
-//					if (compExplosive != null && compExplosive.wickStarted)
-//					{
-//						return false;
-//					}
-//				}
-//				if (thing.def.size.x == 1 && thing.def.size.z == 1)
-//				{
-//					if (thing.Position.Fogged(thing.Map))
-//					{
-//						return false;
-//					}
-//				}
-//				else
-//				{
-//					bool flag2 = false;
-//					using (CellRect.Enumerator enumerator = thing.OccupiedRect().GetEnumerator())
-//					{
-//						while (enumerator.MoveNext())
-//						{
-//							if (!enumerator.Current.Fogged(thing.Map))
-//							{
-//								flag2 = true;
-//								break;
-//							}
-//						}
-//					}
-//					if (!flag2)
-//					{
-//						return false;
-//					}
-//				}
-//				return true;
-//			};
-//			if (CombatPatches.HasRangedAttack(searcher) && (searcherPawn == null || !searcherPawn.InAggroMentalState))
-//			{
-//				CombatPatches.tmpTargets.Clear();
-//				CombatPatches.tmpTargets.AddRange(searcherThing.Map.attackTargetsCache.GetPotentialTargetsFor(searcher));
-//				if ((flags & TargetScanFlags.NeedReachable) != TargetScanFlags.None)
-//				{
-//					Predicate<IAttackTarget> oldValidator = innerValidator;
-//					innerValidator = ((IAttackTarget t) => oldValidator(t) && CombatPatches.CanReach(searcherThing, t.Thing, canBash));
-//				}
-//				bool flag = false;
-//				for (int i = 0; i < CombatPatches.tmpTargets.Count; i++)
-//				{
-//					IAttackTarget attackTarget = CombatPatches.tmpTargets[i];
-//					if (attackTarget.Thing.Position.InHorDistOf(searcherThing.Position, maxDist) && innerValidator(attackTarget) && CombatPatches.CanShootAtFromCurrentPosition(attackTarget, searcher, verb))
-//					{
-//						flag = true;
-//						break;
-//					}
-//				}
-//				IAttackTarget result;
-//				if (flag)
-//				{
-//					CombatPatches.tmpTargets.RemoveAll((IAttackTarget x) => !x.Thing.Position.InHorDistOf(searcherThing.Position, maxDist) || !innerValidator(x));
-//					result = CombatPatches.GetRandomShootingTargetByScore(CombatPatches.tmpTargets, searcher, verb);
-//				}
-//				else
-//				{
-//					Predicate<Thing> validator2;
-//					if ((flags & TargetScanFlags.NeedReachableIfCantHitFromMyPos) != TargetScanFlags.None && (flags & TargetScanFlags.NeedReachable) == TargetScanFlags.None)
-//					{
-//						validator2 = ((Thing t) => innerValidator((IAttackTarget)t) && (CombatPatches.CanReach(searcherThing, t, canBash) || CombatPatches.CanShootAtFromCurrentPosition((IAttackTarget)t, searcher, verb)));
-//					}
-//					else
-//					{
-//						validator2 = ((Thing t) => innerValidator((IAttackTarget)t));
-//					}
-//					result = (IAttackTarget)GenClosest.ClosestThing_Global(searcherThing.Position, CombatPatches.tmpTargets, maxDist, validator2, null);
-//				}
-//				CombatPatches.tmpTargets.Clear();
-//				return result;
-//			}
-//			if (searcherPawn != null && searcherPawn.mindState.duty != null && searcherPawn.mindState.duty.radius > 0f && !searcherPawn.InMentalState)
-//			{
-//				Predicate<IAttackTarget> oldValidator = innerValidator;
-//				innerValidator = ((IAttackTarget t) => oldValidator(t) && t.Thing.Position.InHorDistOf(searcherPawn.mindState.duty.focus.Cell, searcherPawn.mindState.duty.radius));
-//			}
-//			IAttackTarget attackTarget2 = (IAttackTarget)GenClosest.ClosestThingReachable(searcherThing.Position, searcherThing.Map, ThingRequest.ForGroup(ThingRequestGroup.AttackTarget), PathEndMode.Touch, TraverseParms.For(searcherPawn, Danger.Deadly, TraverseMode.ByPawn, canBash), maxDist, (Thing x) => innerValidator((IAttackTarget)x), null, 0, (maxDist > 800f) ? -1 : 40, false, RegionType.Set_Passable, false);
-//			if (attackTarget2 != null && PawnUtility.ShouldCollideWithPawns(searcherPawn))
-//			{
-//				IAttackTarget attackTarget3 = CombatPatches.FindBestReachableMeleeTarget(innerValidator, searcherPawn, maxDist, canBash);
-//				if (attackTarget3 != null)
-//				{
-//					float lengthHorizontal = (searcherPawn.Position - attackTarget2.Thing.Position).LengthHorizontal;
-//					float lengthHorizontal2 = (searcherPawn.Position - attackTarget3.Thing.Position).LengthHorizontal;
-//					if (Mathf.Abs(lengthHorizontal - lengthHorizontal2) < 50f)
-//					{
-//						attackTarget2 = attackTarget3;
-//					}
-//				}
-//			}
-//			return attackTarget2;
-//		}
-//
-//		private static bool CanReach(Thing searcher, Thing target, bool canBash)
-//		{
-//			Pawn pawn = searcher as Pawn;
-//			if (pawn != null)
-//			{
-//				if (!pawn.CanReach(target, PathEndMode.Touch, Danger.Some, canBash, TraverseMode.ByPawn))
-//				{
-//					return false;
-//				}
-//			}
-//			else
-//			{
-//				TraverseMode mode = canBash ? TraverseMode.PassDoors : TraverseMode.NoPassClosedDoors;
-//				if (!searcher.Map.reachability.CanReach(searcher.Position, target, PathEndMode.Touch, TraverseParms.For(mode, Danger.Deadly, false)))
-//				{
-//					return false;
-//				}
-//			}
-//			return true;
-//		}
-//
-//		private static IAttackTarget FindBestReachableMeleeTarget(Predicate<IAttackTarget> validator, Pawn searcherPawn, float maxTargDist, bool canBash)
-//		{
-//			maxTargDist = Mathf.Min(maxTargDist, 30f);
-//			IAttackTarget reachableTarget = null;
-//			Func<IntVec3, IAttackTarget> bestTargetOnCell = delegate (IntVec3 x)
-//			{
-//				List<Thing> thingList = x.GetThingList(searcherPawn.Map);
-//				for (int i = 0; i < thingList.Count; i++)
-//				{
-//					Thing thing = thingList[i];
-//					IAttackTarget attackTarget = thing as IAttackTarget;
-//					if (attackTarget != null && validator(attackTarget) && ReachabilityImmediate.CanReachImmediate(x, thing, searcherPawn.Map, PathEndMode.Touch, searcherPawn) && (searcherPawn.CanReachImmediate(thing, PathEndMode.Touch) || searcherPawn.Map.attackTargetReservationManager.CanReserve(searcherPawn, attackTarget)))
-//					{
-//						return attackTarget;
-//					}
-//				}
-//				return null;
-//			};
-//			searcherPawn.Map.floodFiller.FloodFill(searcherPawn.Position, delegate (IntVec3 x)
-//			{
-//				if (!x.Walkable(searcherPawn.Map))
-//				{
-//					return false;
-//				}
-//				if ((float)x.DistanceToSquared(searcherPawn.Position) > maxTargDist * maxTargDist)
-//				{
-//					return false;
-//				}
-//				if (!canBash)
-//				{
-//					Building_Door building_Door = x.GetEdifice(searcherPawn.Map) as Building_Door;
-//					if (building_Door != null && !building_Door.CanPhysicallyPass(searcherPawn))
-//					{
-//						return false;
-//					}
-//				}
-//				return !PawnUtility.AnyPawnBlockingPathAt(x, searcherPawn, true, false, false);
-//			}, delegate (IntVec3 x)
-//			{
-//				for (int i = 0; i < 8; i++)
-//				{
-//					IntVec3 intVec = x + GenAdj.AdjacentCells[i];
-//					if (intVec.InBounds(searcherPawn.Map))
-//					{
-//						IAttackTarget attackTarget = bestTargetOnCell(intVec);
-//						if (attackTarget != null)
-//						{
-//							reachableTarget = attackTarget;
-//							break;
-//						}
-//					}
-//				}
-//				return reachableTarget != null;
-//			}, int.MaxValue, false, null);
-//			return reachableTarget;
-//		}
-//
-//		private static bool HasRangedAttack(IAttackTargetSearcher t)
-//		{
-//			Verb currentEffectiveVerb = t.CurrentEffectiveVerb;
-//			return currentEffectiveVerb != null && !currentEffectiveVerb.verbProps.IsMeleeAttack;
-//		}
-//
-//		private static bool CanShootAtFromCurrentPosition(IAttackTarget target, IAttackTargetSearcher searcher, Verb verb)
-//		{
-//			return verb != null && verb.CanHitTargetFrom(searcher.Thing.Position, target.Thing);
-//		}
-//
-//		private static IAttackTarget GetRandomShootingTargetByScore(List<IAttackTarget> targets, IAttackTargetSearcher searcher, Verb verb)
-//		{
-//			Pair<IAttackTarget, float> pair;
-//			if (CombatPatches.GetAvailableShootingTargetsByScore(targets, searcher, verb).TryRandomElementByWeight((Pair<IAttackTarget, float> x) => x.Second, out pair))
-//			{
-//				return pair.First;
-//			}
-//			return null;
-//		}
-//
-//		private static List<Pair<IAttackTarget, float>> GetAvailableShootingTargetsByScore(List<IAttackTarget> rawTargets, IAttackTargetSearcher searcher, Verb verb)
-//		{
-//			CombatPatches.availableShootingTargets.Clear();
-//			if (rawTargets.Count == 0)
-//			{
-//				return CombatPatches.availableShootingTargets;
-//			}
-//			CombatPatches.tmpTargetScores.Clear();
-//			CombatPatches.tmpCanShootAtTarget.Clear();
-//			float num = 0f;
-//			IAttackTarget attackTarget = null;
-//			for (int i = 0; i < rawTargets.Count; i++)
-//			{
-//				CombatPatches.tmpTargetScores.Add(float.MinValue);
-//				CombatPatches.tmpCanShootAtTarget.Add(false);
-//				if (rawTargets[i] != searcher)
-//				{
-//					bool flag = CombatPatches.CanShootAtFromCurrentPosition(rawTargets[i], searcher, verb);
-//					CombatPatches.tmpCanShootAtTarget[i] = flag;
-//					if (flag)
-//					{
-//						float shootingTargetScore = CombatPatches.GetShootingTargetScore(rawTargets[i], searcher, verb);
-//						CombatPatches.tmpTargetScores[i] = shootingTargetScore;
-//						if (attackTarget == null || shootingTargetScore > num)
-//						{
-//							attackTarget = rawTargets[i];
-//							num = shootingTargetScore;
-//						}
-//					}
-//				}
-//			}
-//			if (num < 1f)
-//			{
-//				if (attackTarget != null)
-//				{
-//					CombatPatches.availableShootingTargets.Add(new Pair<IAttackTarget, float>(attackTarget, 1f));
-//				}
-//			}
-//			else
-//			{
-//				float num2 = num - 30f;
-//				for (int j = 0; j < rawTargets.Count; j++)
-//				{
-//					if (rawTargets[j] != searcher && CombatPatches.tmpCanShootAtTarget[j])
-//					{
-//						float num3 = CombatPatches.tmpTargetScores[j];
-//						if (num3 >= num2)
-//						{
-//							float second = Mathf.InverseLerp(num - 30f, num, num3);
-//							CombatPatches.availableShootingTargets.Add(new Pair<IAttackTarget, float>(rawTargets[j], second));
-//						}
-//					}
-//				}
-//			}
-//			return CombatPatches.availableShootingTargets;
-//		}
-//
-//		private static float GetShootingTargetScore(IAttackTarget target, IAttackTargetSearcher searcher, Verb verb)
-//		{
-//			float num = 60f;
-//			num -= Mathf.Min((target.Thing.Position - searcher.Thing.Position).LengthHorizontal, 40f);
-//			if (target.TargetCurrentlyAimingAt == searcher.Thing)
-//			{
-//				num += 10f;
-//			}
-//			if (searcher.LastAttackedTarget == target.Thing && Find.TickManager.TicksGame - searcher.LastAttackTargetTick <= 300)
-//			{
-//				num += 40f;
-//			}
-//			num -= CoverUtility.CalculateOverallBlockChance(target.Thing.Position, searcher.Thing.Position, searcher.Thing.Map) * 10f;
-//			Pawn pawn = target as Pawn;
-//			if (pawn != null && pawn.RaceProps.Animal && pawn.Faction != null && !pawn.IsFighting())
-//			{
-//				num -= 50f;
-//			}
-//			num += CombatPatches.FriendlyFireBlastRadiusTargetScoreOffset(target, searcher, verb);
-//			num += CombatPatches.FriendlyFireConeTargetScoreOffset(target, searcher, verb);
-//			return num * target.TargetPriorityFactor;
-//		}
-//
-//		private static float FriendlyFireBlastRadiusTargetScoreOffset(IAttackTarget target, IAttackTargetSearcher searcher, Verb verb)
-//		{
-//			if (verb.verbProps.ai_AvoidFriendlyFireRadius <= 0f)
-//			{
-//				return 0f;
-//			}
-//			Map map = target.Thing.Map;
-//			IntVec3 position = target.Thing.Position;
-//			int num = GenRadial.NumCellsInRadius(verb.verbProps.ai_AvoidFriendlyFireRadius);
-//			float num2 = 0f;
-//			for (int i = 0; i < num; i++)
-//			{
-//				IntVec3 intVec = position + GenRadial.RadialPattern[i];
-//				if (intVec.InBounds(map))
-//				{
-//					bool flag = true;
-//					List<Thing> thingList = intVec.GetThingList(map);
-//					for (int j = 0; j < thingList.Count; j++)
-//					{
-//						if (thingList[j] is IAttackTarget && thingList[j] != target)
-//						{
-//							if (flag)
-//							{
-//								if (!GenSight.LineOfSight(position, intVec, map, true, null, 0, 0))
-//								{
-//									break;
-//								}
-//								flag = false;
-//							}
-//							float num3;
-//							if (thingList[j] == searcher)
-//							{
-//								num3 = 40f;
-//							}
-//							else if (thingList[j] is Pawn)
-//							{
-//								num3 = (thingList[j].def.race.Animal ? 7f : 18f);
-//							}
-//							else
-//							{
-//								num3 = 10f;
-//							}
-//							if (searcher.Thing.HostileTo(thingList[j]))
-//							{
-//								num2 += num3 * 0.6f;
-//							}
-//							else
-//							{
-//								num2 -= num3;
-//							}
-//						}
-//					}
-//				}
-//			}
-//			return num2;
-//		}
-//
-//		private static float FriendlyFireConeTargetScoreOffset(IAttackTarget target, IAttackTargetSearcher searcher, Verb verb)
-//		{
-//			Pawn pawn = searcher.Thing as Pawn;
-//			if (pawn == null)
-//			{
-//				return 0f;
-//			}
-//			if (pawn.RaceProps.intelligence < Intelligence.ToolUser)
-//			{
-//				return 0f;
-//			}
-//			if (pawn.RaceProps.IsMechanoid)
-//			{
-//				return 0f;
-//			}
-//			Verb_Shoot verb_Shoot = verb as Verb_Shoot;
-//			if (verb_Shoot == null)
-//			{
-//				return 0f;
-//			}
-//			ThingDef defaultProjectile = verb_Shoot.verbProps.defaultProjectile;
-//			if (defaultProjectile == null)
-//			{
-//				return 0f;
-//			}
-//			if (defaultProjectile.projectile.flyOverhead)
-//			{
-//				return 0f;
-//			}
-//			Map map = pawn.Map;
-//			ShotReport report = ShotReport.HitReportFor(pawn, verb, (Thing)target);
-//			float radius = Mathf.Max(VerbUtility.CalculateAdjustedForcedMiss(verb.verbProps.forcedMissRadius, report.ShootLine.Dest - report.ShootLine.Source), 1.5f);
-//
-//			IntVec3 dest2 = report.ShootLine.Dest;
-//			IEnumerable<IntVec3> source = from dest in GenRadial.RadialCellsAround(dest2, radius, true)
-//										  where dest.InBounds(map)
-//										  select dest;
-//			IEnumerable<ShootLine> source2 = from dest in source
-//											 select new ShootLine(report.ShootLine.Source, dest);
-//			IEnumerable<IntVec3> source3 = source2.SelectMany((ShootLine line) => line.Points().Concat(line.Dest).TakeWhile((IntVec3 pos) => pos.CanBeSeenOverFast(map)));
-//			IEnumerable<IntVec3> enumerable = source3.Distinct<IntVec3>();
-//
-//			float num = 0f;
-//			foreach (IntVec3 c in enumerable)
-//			{
-//				float num2 = VerbUtility.InterceptChanceFactorFromDistance(report.ShootLine.Source.ToVector3Shifted(), c);
-//				if (num2 > 0f)
-//				{
-//					List<Thing> thingList = c.GetThingList(map);
-//					for (int i = 0; i < thingList.Count; i++)
-//					{
-//						Thing thing = thingList[i];
-//						if (thing is IAttackTarget && thing != target)
-//						{
-//							float num3;
-//							if (thing == searcher)
-//							{
-//								num3 = 40f;
-//							}
-//							else if (thing is Pawn)
-//							{
-//								num3 = (thing.def.race.Animal ? 7f : 18f);
-//							}
-//							else
-//							{
-//								num3 = 10f;
-//							}
-//							num3 *= num2;
-//							if (searcher.Thing.HostileTo(thing))
-//							{
-//								num3 *= 0.6f;
-//							}
-//							else
-//							{
-//								num3 *= -1f;
-//							}
-//							num += num3;
-//						}
-//					}
-//				}
-//			}
-//			return num;
-//		}
-//
-//		public static IAttackTarget BestShootTargetFromCurrentPosition(IAttackTargetSearcher searcher, TargetScanFlags flags, Predicate<Thing> validator = null, float minDistance = 0f, float maxDistance = 9999f)
-//		{
-//			Verb currentEffectiveVerb = searcher.CurrentEffectiveVerb;
-//			if (currentEffectiveVerb == null)
-//			{
-//				Log.Error("BestShootTargetFromCurrentPosition with " + searcher.ToStringSafe<IAttackTargetSearcher>() + " who has no attack verb.", false);
-//				return null;
-//			}
-//			return CombatPatches.BestAttackTarget(searcher, flags, validator, Mathf.Max(minDistance, currentEffectiveVerb.verbProps.minRange), Mathf.Min(maxDistance, currentEffectiveVerb.verbProps.range), default(IntVec3), float.MaxValue, false, false);
-//		}
-//
-//		public static bool CanSee(this Thing seer, Thing target, Func<IntVec3, bool> validator = null)
-//		{
-//			ShootLeanUtility.CalcShootableCellsOf(CombatPatches.tempDestList, target);
-//			for (int i = 0; i < CombatPatches.tempDestList.Count; i++)
-//			{
-//				if (GenSight.LineOfSight(seer.Position, CombatPatches.tempDestList[i], seer.Map, true, validator, 0, 0))
-//				{
-//					return true;
-//				}
-//			}
-//			ShootLeanUtility.LeanShootingSourcesFromTo(seer.Position, target.Position, seer.Map, CombatPatches.tempSourceList);
-//			for (int j = 0; j < CombatPatches.tempSourceList.Count; j++)
-//			{
-//				for (int k = 0; k < CombatPatches.tempDestList.Count; k++)
-//				{
-//					if (GenSight.LineOfSight(CombatPatches.tempSourceList[j], CombatPatches.tempDestList[k], seer.Map, true, validator, 0, 0))
-//					{
-//						return true;
-//					}
-//				}
-//			}
-//			return false;
-//		}
-//
-//		public static void DebugDrawAttackTargetScores_Update()
-//		{
-//			IAttackTargetSearcher attackTargetSearcher = Find.Selector.SingleSelectedThing as IAttackTargetSearcher;
-//			if (attackTargetSearcher == null)
-//			{
-//				return;
-//			}
-//			if (attackTargetSearcher.Thing.Map != Find.CurrentMap)
-//			{
-//				return;
-//			}
-//			Verb currentEffectiveVerb = attackTargetSearcher.CurrentEffectiveVerb;
-//			if (currentEffectiveVerb == null)
-//			{
-//				return;
-//			}
-//			CombatPatches.tmpTargets.Clear();
-//			List<Thing> list = attackTargetSearcher.Thing.Map.listerThings.ThingsInGroup(ThingRequestGroup.AttackTarget);
-//			for (int i = 0; i < list.Count; i++)
-//			{
-//				CombatPatches.tmpTargets.Add((IAttackTarget)list[i]);
-//			}
-//			List<Pair<IAttackTarget, float>> availableShootingTargetsByScore = CombatPatches.GetAvailableShootingTargetsByScore(CombatPatches.tmpTargets, attackTargetSearcher, currentEffectiveVerb);
-//			for (int j = 0; j < availableShootingTargetsByScore.Count; j++)
-//			{
-//				GenDraw.DrawLineBetween(attackTargetSearcher.Thing.DrawPos, availableShootingTargetsByScore[j].First.Thing.DrawPos);
-//			}
-//		}
-//
-//		public static void DebugDrawAttackTargetScores_OnGUI()
-//		{
-//			IAttackTargetSearcher attackTargetSearcher = Find.Selector.SingleSelectedThing as IAttackTargetSearcher;
-//			if (attackTargetSearcher == null)
-//			{
-//				return;
-//			}
-//			if (attackTargetSearcher.Thing.Map != Find.CurrentMap)
-//			{
-//				return;
-//			}
-//			Verb currentEffectiveVerb = attackTargetSearcher.CurrentEffectiveVerb;
-//			if (currentEffectiveVerb == null)
-//			{
-//				return;
-//			}
-//			List<Thing> list = attackTargetSearcher.Thing.Map.listerThings.ThingsInGroup(ThingRequestGroup.AttackTarget);
-//			Text.Anchor = TextAnchor.MiddleCenter;
-//			Text.Font = GameFont.Tiny;
-//			for (int i = 0; i < list.Count; i++)
-//			{
-//				Thing thing = list[i];
-//				if (thing != attackTargetSearcher)
-//				{
-//					string text;
-//					Color red;
-//					if (!CombatPatches.CanShootAtFromCurrentPosition((IAttackTarget)thing, attackTargetSearcher, currentEffectiveVerb))
-//					{
-//						text = "out of range";
-//						red = Color.red;
-//					}
-//					else
-//					{
-//						text = CombatPatches.GetShootingTargetScore((IAttackTarget)thing, attackTargetSearcher, currentEffectiveVerb).ToString("F0");
-//						red = new Color(0.25f, 1f, 0.25f);
-//					}
-//					GenMapUI.DrawThingLabel(thing.DrawPos.MapToUIPosition(), text, red);
-//				}
-//			}
-//			Text.Anchor = TextAnchor.UpperLeft;
-//			Text.Font = GameFont.Small;
-//		}
-//
-//		public static bool IsAutoTargetable(IAttackTarget target)
-//		{
-//			CompCanBeDormant compCanBeDormant = target.Thing.TryGetComp<CompCanBeDormant>();
-//			if (compCanBeDormant != null && !compCanBeDormant.Awake)
-//			{
-//				return false;
-//			}
-//			CompInitiatable compInitiatable = target.Thing.TryGetComp<CompInitiatable>();
-//			return compInitiatable == null || compInitiatable.Initiated;
-//		}
-//
-//		private const float FriendlyFireScoreOffsetPerHumanlikeOrMechanoid = 18f;
-//
-//		private const float FriendlyFireScoreOffsetPerAnimal = 7f;
-//
-//		private const float FriendlyFireScoreOffsetPerNonPawn = 10f;
-//
-//		private const float FriendlyFireScoreOffsetSelf = 40f;
-//
-//		private static List<IAttackTarget> tmpTargets = new List<IAttackTarget>();
-//
-//		private static List<Pair<IAttackTarget, float>> availableShootingTargets = new List<Pair<IAttackTarget, float>>();
-//
-//		private static List<float> tmpTargetScores = new List<float>();
-//
-//		private static List<bool> tmpCanShootAtTarget = new List<bool>();
-//
-//		private static List<IntVec3> tempDestList = new List<IntVec3>();
-//
-//		private static List<IntVec3> tempSourceList = new List<IntVec3>();
-//	}
-//}
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.Remoting.Messaging;
+using HarmonyLib;
+using RimWorld;
+using RimWorld.Planet;
+using RimWorld.QuestGen;
+using UnityEngine;
+using Verse;
+using Verse.AI;
+using Verse.AI.Group;
 
+namespace ZLevels
+{
+    [HarmonyPatch(typeof(AttackTargetFinder), "BestShootTargetFromCurrentPosition")]
+    public static class BestShootTargetFromCurrentPosition_Patch
+    {
+        private static void Prefix()
+        {
+            CombatPatches_BestAttackTarget_Patch.multiMapSearch = true;
+        }
+        private static void Postfix()
+        {
+            CombatPatches_BestAttackTarget_Patch.multiMapSearch = false;
+        }
+    }
+
+    [HarmonyPatch(typeof(AttackTargetFinder), "BestAttackTarget")]
+    public static class CombatPatches_BestAttackTarget_Patch
+    {
+        public static bool recursiveTrap = false;
+
+        public static bool multiMapSearch = false;
+        public static bool Prefix(ref IAttackTarget __result, List<IAttackTarget> ___tmpTargets, List<Pair<IAttackTarget, float>> ___availableShootingTargets,
+                List<float> ___tmpTargetScores, List<bool> ___tmpCanShootAtTarget, List<IntVec3> ___tempDestList, List<IntVec3> ___tempSourceList,
+                IAttackTargetSearcher searcher, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f,
+                float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.40282347E+38f, bool canBash = false,
+                bool canTakeTargetsCloserThanEffectiveMinRange = true)
+        {
+            bool result = true;
+            if (!recursiveTrap && multiMapSearch)
+            {
+                recursiveTrap = true;
+                Map oldMap = searcher.Thing.Map;
+                IntVec3 oldPosition = searcher.Thing.Position;
+                bool dontCheckForStairs = searcher.Thing is Building;
+                foreach (var map in ZUtils.GetAllMapsInClosestOrder(searcher.Thing, oldMap, oldPosition, dontCheckForStairs: dontCheckForStairs))
+                {
+                    if (ZUtils.ZTracker.GetZIndexFor(map) < ZUtils.ZTracker.GetZIndexFor(oldMap))
+                    {
+                        CanBeSeenOverFast_Patch.returnTrue = true;
+                    }
+                    var target = AttackTargetFinder.BestAttackTarget(searcher, flags, validator, minDist,
+                            maxDist, locus, maxTravelRadiusFromLocus, canBash, canTakeTargetsCloserThanEffectiveMinRange);
+                    //Log.Message(searcher.Thing + " - 1: " + ZUtils.ZTracker.GetMapInfo(searcher.Thing.Map) + " - result: " + target);
+                    if (target != null)
+                    {
+                        __result = target;
+                        result = false;
+                        break;
+                    }
+                }
+                ZUtils.TeleportThing(searcher.Thing, oldMap, oldPosition);
+                recursiveTrap = false;
+                CanBeSeenOverFast_Patch.returnTrue = false;
+            }
+            else if (!multiMapSearch)
+            {
+                Log.Message("BestAttackTarget: multiMapSearch: " + multiMapSearch, true);
+            }
+            return result;
+        }
+    }
+
+    [HarmonyPatch(typeof(GenGrid), "CanBeSeenOverFast")]
+    public static class CanBeSeenOverFast_Patch
+    {
+        public static bool returnTrue = false;
+        public static bool Prefix(IntVec3 c, Map map, ref bool __result)
+        {
+            if (returnTrue)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Verb_LaunchProjectile), "TryCastShot")]
+    public static class TryCastShot_Patch
+    {
+        public static Map casterOldMap;
+        public static Map targetOldMap;
+
+        public static bool teleportBack;
+        public static void Prefix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
+        {
+            //Log.Message("__instance.caster: " + __instance.caster, true);
+            //Log.Message("__instance.caster.Map: " + __instance.caster.Map, true);
+            //Log.Message("__instance.caster.Map.Tile: " + __instance.caster.Map.Tile, true);
+            //
+            //Log.Message("___currentTarget.Thing: " + ___currentTarget.Thing, true);
+            //Log.Message("___currentTarget.Thing?.Map: " + ___currentTarget.Thing?.Map, true);
+            //Log.Message("___currentTarget.Thing?.Map.Tile: " + ___currentTarget.Thing?.Map.Tile, true);
+
+            if (__instance.caster.Map != ___currentTarget.Thing?.Map && __instance.caster.Map.Tile == ___currentTarget.Thing?.Map?.Tile)
+            {
+                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
+                var ind2 = ZUtils.ZTracker.GetZIndexFor(___currentTarget.Thing.Map);
+                if (ind1 > ind2)
+                {
+                    teleportBack = true;
+                    targetOldMap = ___currentTarget.Thing.Map;
+                    ZUtils.TeleportThing(___currentTarget.Thing, __instance.caster.Map, ___currentTarget.Thing.Position);
+                }
+                else if (ind1 < ind2)
+                {
+                    teleportBack = true;
+                    casterOldMap = __instance.caster.Map;
+                    ZUtils.TeleportThing(__instance.caster, ___currentTarget.Thing.Map, __instance.caster.Position);
+                }
+            }
+        }
+
+        public static void Postfix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
+        {
+            if (teleportBack)
+            {
+                if (targetOldMap != null)
+                {
+                    ZUtils.TeleportThing(___currentTarget.Thing, targetOldMap, ___currentTarget.Thing.Position);
+                    targetOldMap = null;
+                }
+                else if (casterOldMap != null)
+                {
+                    ZUtils.TeleportThing(__instance.caster, casterOldMap, __instance.caster.Position);
+                    casterOldMap = null;
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Projectile), "Launch", new Type[]
+    {
+        typeof(Thing),
+        typeof(Vector3),
+        typeof(LocalTargetInfo),
+        typeof(LocalTargetInfo),
+        typeof(ProjectileHitFlags),
+        typeof(Thing),
+        typeof(ThingDef)
+    })]
+    internal class PatchProjectileLaunch
+    {
+        private static void Postfix(Projectile __instance, Vector3 ___destination, Thing launcher, ref Vector3 ___origin, LocalTargetInfo intendedTarget, Thing equipment, ref int ___ticksToImpact)
+        {
+            if (TryCastShot_Patch.targetOldMap != null && launcher.Map != TryCastShot_Patch.targetOldMap)
+            {
+                ZUtils.ZTracker.TeleportThing(__instance, __instance.Position, TryCastShot_Patch.targetOldMap);
+            }
+            else if (TryCastShot_Patch.casterOldMap != null && intendedTarget.Thing.Map != TryCastShot_Patch.casterOldMap)
+            {
+                ZUtils.ZTracker.TeleportThing(__instance, __instance.Position, intendedTarget.Thing.Map);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Building_TurretGun), "TryFindNewTarget")]
+    public class TryFindNewTarget_Patch
+    {
+        public static void Postfix(ref Building_TurretGun __instance, ref LocalTargetInfo __result)
+        {
+            Log.Message(__instance + " got target " + __result, true);
+        }
+    }
+
+
+    [HarmonyPatch(typeof(Verb), "TryFindShootLineFromTo")]
+    public static class TryFindShootLineFromTo_Patch
+    {
+        public static Map oldMap1;
+        public static Map oldMap2;
+
+        public static bool teleportBack;
+        public static void Prefix(Verb __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, IntVec3 root, LocalTargetInfo targ, ref ShootLine resultingLine, ref bool __result)
+        {
+            if (__instance.caster?.Map != targ.Thing?.Map && __instance.caster?.Map?.Tile == targ.Thing?.Map?.Tile)
+            {
+                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
+                var ind2 = ZUtils.ZTracker.GetZIndexFor(targ.Thing.Map);
+                if (ind1 > ind2)
+                {
+                    teleportBack = true;
+                    oldMap1 = targ.Thing.Map;
+                    ZUtils.TeleportThing(targ.Thing, __instance.caster.Map, targ.Thing.Position);
+                }
+                else if (ind1 < ind2)
+                {
+                    teleportBack = true;
+                    oldMap2 = __instance.caster.Map;
+                    ZUtils.TeleportThing(__instance.caster, targ.Thing.Map, __instance.caster.Position);
+                }
+            }
+        }
+        public static void Postfix(Verb __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, IntVec3 root, LocalTargetInfo targ, ref ShootLine resultingLine, ref bool __result)
+        {
+            if (teleportBack)
+            {
+                if (oldMap1 != null)
+                {
+                    ZUtils.TeleportThing(targ.Thing, oldMap1, targ.Thing.Position);
+                    oldMap1 = null;
+                }
+                else if (oldMap2 != null)
+                {
+                    ZUtils.TeleportThing(__instance.caster, oldMap2, __instance.caster.Position);
+                    oldMap2 = null;
+                }
+                teleportBack = false;
+                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
+                var ind2 = ZUtils.ZTracker.GetZIndexFor(targ.Thing.Map);
+                if (ind1 > ind2 && !IsVoidsEverywhereInShootingLine(resultingLine, __instance.caster.Map))
+                {
+                    //Log.Message(__instance.caster + " shouldnt shoot 1", true);
+                    __result = false;
+                }
+                else if (ind1 < ind2 && !IsVoidsEverywhereInShootingLineInBackWard(resultingLine, targ.Thing.Map))
+                {
+                    //Log.Message(__instance.caster + " shouldnt shoot 2", true);
+                    __result = false;
+                }
+            }
+        }
+
+        public static bool IsVoidsEverywhereInShootingLine(ShootLine resultingLine, Map map)
+        {
+            var points = resultingLine.Points().ToList();
+            for (int i = 0; i < points.Count; i++)
+            {
+                if (points[i] != resultingLine.Source)
+                {
+                    if (i > 1 && points[i].GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain)
+                    {
+                        //Log.Message(i + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map, true);
+                        return false;
+                    }
+                    else if (i == 1 && points[i].GetCover(map)?.def?.Fillage == FillCategory.Full)
+                    {
+                        //Log.Message(i + " - " + points[i] + " - " + points[i].GetCover(map) + " - " + map, true);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public static bool IsVoidsEverywhereInShootingLineInBackWard(ShootLine resultingLine, Map map)
+        {
+            var points = resultingLine.Points().ToList();
+            for (int i = points.Count - 1; i >= 0; i--)
+            {
+                if (points[i] != resultingLine.Dest)
+                {
+                    //Log.Message("points[i].GetTerrain(map): " + points[i] + " - " + points[i].GetTerrain(map), true);
+                    if (i < points.Count - 1 && points[i].GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain)
+                    {
+                        //Log.Message(i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map, true);
+                        return false;
+                    }
+                    else if (i == points.Count - 1 && points[i].GetCover(map)?.def?.Fillage == FillCategory.Full)
+                    {
+                        //Log.Message(i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetCover(map) + " - " + map, true);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(JobGiver_ConfigurableHostilityResponse), "TryGiveJob")]
+    public class JobGiver_ConfigurableHostilityResponsePatch
+    {
+        public static bool recursiveTrap = false;
+
+        [HarmonyPostfix]
+        private static void JobGiver_ConfigurableHostilityResponsePostfix(JobGiver_ConfigurableHostilityResponse __instance, ref Job __result, Pawn pawn)
+        {
+            try
+            {
+                var ZTracker = ZUtils.ZTracker;
+                if (!recursiveTrap && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
+                {
+                    if (ZTracker.jobTracker == null)
+                    {
+                        ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+                    }
+                    if (!ZTracker.jobTracker.ContainsKey(pawn))
+                    {
+                        ZTracker.jobTracker[pawn] = new JobTracker();
+                    }
+                    recursiveTrap = true;
+                    Job result = null;
+                    var oldMap = pawn.Map;
+                    var oldPosition = pawn.Position;
+                    bool select = false;
+                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+                    {
+                        if (otherMap != oldMap)
+                        {
+                            result = Traverse.Create(__instance).Method("TryGiveJob", new object[] { pawn }).GetValue<Job>();
+                            //ZLogger.Message("Searching combat job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap) + " - result: " + result, true);
+                            if (result != null)
+                            {
+                                //ZLogger.Message(pawn + " got combat job " + result + " - map: "
+                                //    + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
+                                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                                ZTracker.BuildJobListFor(pawn, otherMap, result);
+                                ZUtils.ZTracker.jobTracker[pawn].dest = otherMap;
+                                ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
+                                __result = ZTracker.jobTracker[pawn].activeJobs[0];
+                                ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                                break;
+                            }
+                        }
+                    }
+                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                    if (select) Find.Selector.Select(pawn);
+                    recursiveTrap = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(JobGiver_AIGotoNearestHostile), "TryGiveJob")]
+    public class JobGiver_AIGotoNearestHostilePatch
+    {
+        public static bool recursiveTrap = false;
+
+        [HarmonyPostfix]
+        private static void JobGiver_AIGotoNearestHostilePostfix(JobGiver_AIGotoNearestHostile __instance, ref Job __result, Pawn pawn)
+        {
+            try
+            {
+                var ZTracker = ZUtils.ZTracker;
+                Log.Message(pawn + " - JobGiver_AIGotoNearestHostile: " + __result, true);
+                if (!recursiveTrap && __result == null && ZTracker?.ZLevelsTracker[pawn.Map.Tile]?.ZLevels?.Count > 1)
+                {
+                    recursiveTrap = true;
+                    if (ZTracker.jobTracker == null)
+                    {
+                        ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+                    }
+                    if (!ZTracker.jobTracker.ContainsKey(pawn))
+                    {
+                        ZTracker.jobTracker[pawn] = new JobTracker();
+                    }
+
+                    Job result = null;
+                    var oldMap = pawn.Map;
+                    var oldPosition = pawn.Position;
+                    bool select = false;
+                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+                    {
+                        if (otherMap != oldMap)
+                        {
+                            ZLogger.Message("Searching combat job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                + " for " + ZTracker.GetMapInfo(oldMap));
+                            result = Traverse.Create(__instance).Method("TryGiveJob", new object[] { pawn }).GetValue<Job>();
+                            if (result != null)
+                            {
+                                ZLogger.Message(pawn + " got combat job " + result + " - map: "
+                                    + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
+                                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                                ZTracker.BuildJobListFor(pawn, otherMap, result);
+                                ZUtils.ZTracker.jobTracker[pawn].dest = otherMap;
+                                ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
+                                __result = ZTracker.jobTracker[pawn].activeJobs[0];
+                                ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                                break;
+                            }
+                        }
+                    }
+                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                    if (select) Find.Selector.Select(pawn);
+                    recursiveTrap = false;
+                }
+            }
+            catch { }
+        }
+    }
+
+    [HarmonyPatch(typeof(JobGiver_AIDefendPawn), "TryGiveJob")]
+    public class JobGiver_AIDefendPawn_Patch
+    {
+        private static void Postfix(ref JobGiver_AIDefendPawn __instance, ref Job __result, ref Pawn pawn)
+        {
+            Log.Message(pawn + " got response 4: " + __result);
+        }
+    }
+
+    [HarmonyPatch(typeof(JobGiver_AIFightEnemy), "TryGiveJob")]
+    public class JobGiver_AIFightEnemy_Patch
+    {
+        public static bool recursiveTrap = false;
+        private static void Postfix(ref JobGiver_AIFightEnemy __instance, ref Job __result, ref Pawn pawn)
+        {
+            Log.Message(pawn + " got response 5: " + __result, true);
+            if (__result == null && !recursiveTrap)
+            {
+                recursiveTrap = true;
+                CombatPatches_BestAttackTarget_Patch.multiMapSearch = true;
+                Map oldMap = pawn.Map;
+                IntVec3 oldPosition = pawn.Position;
+                foreach (var map in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition, skipOldMap: true))
+                {
+                    var job = Traverse.Create(__instance).Method("TryGiveJob", new object[] { pawn }).GetValue<Job>();
+                    Log.Message(pawn + " got job 5: " + job + " in " + map, true);
+                    if (job != null)
+                    {
+                        __result = job;
+                        //ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                        //ZUtils.ZTracker.BuildJobListFor(pawn, map, job);
+                        //ZUtils.ZTracker.jobTracker[pawn].dest = map;
+                        //ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
+                        //__result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
+                        //ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                        break;
+                    }
+                }
+                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                recursiveTrap = false;
+                CombatPatches_BestAttackTarget_Patch.multiMapSearch = false;
+            }
+            else if (__result != null && __result.targetA.Thing?.Map != null && __result.targetA.Thing.Map != pawn.Map)
+            {
+                Log.Message("Second block: " + __result, true);
+                ZUtils.ZTracker.BuildJobListFor(pawn, __result.targetA.Thing.Map, __result);
+                ZUtils.ZTracker.jobTracker[pawn].dest = __result.targetA.Thing.Map;
+                ZUtils.ZTracker.jobTracker[pawn].forceGoToDestMap = true;
+                __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
+                ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+            }
+            Log.Message(pawn + " got result 5: " + __result + " in " + pawn.Map, true);
+        }
+    }
+
+    [HarmonyPatch(typeof(JobGiver_AIFightEnemy), "FindAttackTarget")]
+    public class FindAttackTarget_Patch
+    {
+        private static void Prefix()
+        {
+            CombatPatches_BestAttackTarget_Patch.multiMapSearch = true;
+        }
+        private static void Postfix()
+        {
+            CombatPatches_BestAttackTarget_Patch.multiMapSearch = false;
+        }
+    }
+}

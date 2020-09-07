@@ -12,15 +12,18 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class Building_StairsDown : Building, IAttackTarget
+    public class Building_StairsDown : Building_Stairs, IAttackTarget
     {
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
             base.SpawnSetup(map, respawningAfterLoad);
             var ZTracker = ZUtils.ZTracker;
+            if (ZTracker.totalStairsDown == null) ZTracker.totalStairsDown = new HashSet<Building_Stairs>();
+            ZTracker.totalStairsDown.Add(this);
+
             if (!ZTracker.stairsDown.ContainsKey(this.Map))
             {
-                ZTracker.stairsDown[this.Map] = new List<Thing>();
+                ZTracker.stairsDown[this.Map] = new List<Building_Stairs>();
             }
             if (!ZTracker.stairsDown[this.Map].Contains(this))
             {
@@ -67,7 +70,22 @@ namespace ZLevels
                     }
                 }
             }
-            ZTracker.totalStairsDown.Add(this);
+        }
+
+        new public Building_StairsUp GetMatchingStair
+        {
+            get
+            {
+                Map upperMap = ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
+                if (upperMap != null)
+                {
+                    return (Building_StairsUp)this.Position.GetThingList(upperMap).FirstOrDefault(x => x is Building_StairsUp);
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
 
         public bool giveDamage = true;
@@ -119,44 +137,6 @@ namespace ZLevels
                 GiveJob(selPawn, this);
             }, MenuOptionPriority.Default, null, this);
             yield return opt2;
-        }
-
-        public override void Tick()
-        {
-            base.Tick();
-            if (Find.TickManager.TicksGame % 60 == 0)
-            {
-                foreach (var dir in GenRadial.RadialCellsAround(this.Position, 20, true))
-                {
-                    foreach (var t in dir.GetThingList(this.Map))
-                    {
-                        if (t is Pawn pawn &&
-                            pawn.HostileTo(this.Faction) && !pawn.mindState.MeleeThreatStillThreat
-                            && GenSight.LineOfSight(this.Position, pawn.Position, this.Map))
-                        {
-                            if (this.visitedPawns == null) this.visitedPawns = new HashSet<string>();
-                            var ZTracker = ZUtils.ZTracker;
-
-                            if (!this.visitedPawns.Contains(pawn.ThingID))
-                            {
-                                Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
-                                pawn.jobs.jobQueue.EnqueueFirst(goToStairs);
-                                this.visitedPawns.Add(pawn.ThingID);
-                            }
-                            else if (ZTracker.GetLowerLevel(this.Map.Tile, this.Map) != null && ZTracker.GetLowerLevel(this.Map.Tile, this.Map).mapPawns.AllPawnsSpawned.Where(x => pawn.HostileTo(x)).Any())
-                            {
-                                Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
-                                pawn.jobs.jobQueue.EnqueueFirst(goToStairs);
-                            }
-                            else if (ZTracker.GetZIndexFor(this.Map) != 0)
-                            {
-                                Job goToStairs = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, this);
-                                pawn.jobs.jobQueue.EnqueueFirst(goToStairs);
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         public override void ExposeData()

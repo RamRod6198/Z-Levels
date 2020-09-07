@@ -14,7 +14,6 @@
 		<canOverlapZones>false</canOverlapZones>
 		<surfaceType>Eat</surfaceType>
 		<tickerType>Normal</tickerType>
-		<designationCategory>Structure</designationCategory>
 	</ThingDef>
 
 	<ThingDef ParentName="StairsBase">
@@ -45,6 +44,7 @@
 		<castEdgeShadows>true</castEdgeShadows>
 		<staticSunShadowHeight>0.20</staticSunShadowHeight>
 		<pathCost>60</pathCost>
+		<designationCategory>Structure</designationCategory>
 	</ThingDef>
 
 	<ThingDef ParentName="StairsBase">
@@ -76,6 +76,7 @@
 		<fillPercent>0.0</fillPercent>
 		<staticSunShadowHeight>0.0</staticSunShadowHeight>
 		<pathCost>10</pathCost>
+		<designationCategory>Structure</designationCategory>
 	</ThingDef>
 
 	<ThingDef ParentName="StairsBase">
@@ -100,6 +101,7 @@
 		<fillPercent>0.0</fillPercent>
 		<staticSunShadowHeight>0.0</staticSunShadowHeight>
 		<pathCost>10</pathCost>
+		<tradeability>None</tradeability>
 	</ThingDef>
 
 

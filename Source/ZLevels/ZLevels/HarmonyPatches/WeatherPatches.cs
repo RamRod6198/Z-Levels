@@ -22,7 +22,7 @@ namespace ZLevels
         [HarmonyPatch(typeof(WeatherDecider), "ChooseNextWeather")]
         internal static class Patch_ChooseNextWeather
         {
-            private static void Postfix(WeatherDecider __instance, WeatherDef __result, Map ___map)
+            private static void Postfix(WeatherDecider __instance, ref WeatherDef __result, Map ___map)
             {
                 try
                 {
@@ -166,11 +166,39 @@ namespace ZLevels
             }
         }
 
+        [HarmonyPatch(typeof(GameCondition), "End")]
+        internal static class End_Patch
+        {
+            private static void Postfix(GameCondition __instance)
+            {
+                foreach (var map in __instance.AffectedMaps)
+                {
+                    if (ZUtils.ZTracker.GetZIndexFor(map) == 0)
+                    {
+                        foreach (var otherMap in ZUtils.ZTracker.GetAllMaps(map.Tile))
+                        {
+                            if (ZUtils.ZTracker.GetZIndexFor(otherMap) != 0)
+                            {
+                                for (int num = otherMap.gameConditionManager.ActiveConditions.Count - 1; num >= 0; num--)
+                                {
+                                    if (otherMap.gameConditionManager.ActiveConditions[num].def == __instance.def)
+                                    {
+                                        otherMap.gameConditionManager.ActiveConditions[num].End();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(GameConditionManager), "RegisterCondition")]
         internal static class RegisterConditionPatch
         {
             public static bool AddCondition = false;
-
+        
             public static List<GameConditionDef> blackList = new List<GameConditionDef>
             {
                 GameConditionDefOf.Aurora,
@@ -186,30 +214,128 @@ namespace ZLevels
             };
             private static bool Prefix(GameConditionManager __instance, GameCondition cond)
             {
-                var ind = ZUtils.ZTracker.GetZIndexFor(__instance.ownerMap);
-                if (ind == 0 && !(__instance.ownerMap.Parent is MapParent_ZLevel))
+                if (__instance.ownerMap != null && !AddCondition)
                 {
-                    AddCondition = true;
-                    foreach (var map in ZUtils.ZTracker.GetAllMaps(__instance.ownerMap.Tile))
+                    var ind = ZUtils.ZTracker.GetZIndexFor(__instance.ownerMap);
+                    if (ind == 0 && !(__instance.ownerMap.Parent is MapParent_ZLevel))
                     {
-                        if (map != __instance.ownerMap)
+                        AddCondition = true;
+                        foreach (var map in ZUtils.ZTracker.GetAllMaps(__instance.ownerMap.Tile))
                         {
-                            ZLogger.Message("Register: " + cond + " in the " + map, true);
-                            map.gameConditionManager.RegisterCondition(cond);
+                            if (map != __instance.ownerMap && (ZUtils.ZTracker.GetZIndexFor(map) < 0
+                                && !blackList.Contains(cond.def) || ZUtils.ZTracker.GetZIndexFor(map) > 0))
+                            {
+                                var newCond = GameConditionMaker.MakeCondition(cond.def, cond.Duration);
+                                newCond.conditionCauser = cond.conditionCauser;
+                                newCond.Permanent = cond.Permanent;
+                                newCond.startTick = cond.startTick;
+                                newCond.quest = cond.quest;
+                                ZLogger.Message("Register: " + newCond + " in the " + ZUtils.ZTracker.GetMapInfo(map), true);
+                                map.gameConditionManager.RegisterCondition(newCond);
+                            }
                         }
+                        AddCondition = false;
                     }
-                    AddCondition = false;
-                }
-                else if (ind < 0 && (!AddCondition || blackList.Contains(cond.def)))
-                {
-                    return false;
-                }
-                else if (ind > 0 && !AddCondition)
-                {
-                    return false;
+                    else if (ind < 0 && ind != -99999 && blackList.Contains(cond.def))
+                    {
+                        return false;
+                    }
+                    else if (ind > 0)
+                    {
+                        return false;
+                    }
                 }
                 return true;
             }
         }
+
+        [HarmonyPatch(typeof(GameCondition), "AffectedMaps", MethodType.Getter)]
+        internal static class AffectedMapsPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(GameCondition __instance, ref List<Map> __result)
+            {
+                foreach (var tile in ZUtils.ZTracker.ZLevelsTracker.Values)
+                {
+                    foreach (var map in tile.ZLevels)
+                    {
+                        if (map.Key < 0 && RegisterConditionPatch.blackList.Contains(__instance.def))
+                        {
+                            //Log.Message("Removing from maps: " + map.Value + " - " + __instance.def);
+                            __result.Remove(map.Value);
+                        }
+                    }
+                }
+            }
+        }
+
+        //[HarmonyPatch(typeof(GameConditionManager), "ElectricityDisabled", MethodType.Getter)]
+        //internal static class ElectricityDisabledPatch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(GameConditionManager __instance, ref bool __result)
+        //    {
+        //        Log.Message("TEST: " + __instance.ownerMap + " - " + __result);
+        //    }
+        //}
+        //
+        //
+        //[HarmonyPatch(typeof(GameConditionManager), "DoConditionsUI")]
+        //internal static class DoConditionsUIPatch
+        //{
+        //    [HarmonyPrefix]
+        //    public static bool Prefix(GameConditionManager __instance, Rect rect)
+        //    {
+        //        if (__instance.ownerMap == null && ZUtils.ZTracker.GetZIndexFor(Find.CurrentMap) < 0)
+        //        {
+        //            DoConditionsUI(rect, __instance);
+        //            return false;
+        //        }
+        //        return true;
+        //    }
+        //
+        //    public static void DoConditionsUI(Rect rect, GameConditionManager __instance)
+        //    {
+        //        GUI.BeginGroup(rect);
+        //        float num = 0f;
+        //        var activeConditions = __instance.ActiveConditions;
+        //        for (int i = 0; i < activeConditions.Count; i++)
+        //        {
+        //            if (RegisterConditionPatch.blackList.Contains(activeConditions[i].def)) continue;
+        //            string labelCap = activeConditions[i].LabelCap;
+        //            Rect rect2 = new Rect(0f, num, rect.width, Text.CalcHeight(labelCap, rect.width - 6f));
+        //            Text.Font = GameFont.Small;
+        //            Text.Anchor = TextAnchor.MiddleRight;
+        //            Widgets.DrawHighlightIfMouseover(rect2);
+        //            Rect rect3 = rect2;
+        //            rect3.width -= 6f;
+        //            Widgets.Label(rect3, labelCap);
+        //            if (Mouse.IsOver(rect2))
+        //            {
+        //                TooltipHandler.TipRegion(rect2, new TipSignal(activeConditions[i].TooltipString, 0x3A2DF42A ^ i));
+        //            }
+        //            if (Widgets.ButtonInvisible(rect2))
+        //            {
+        //                if (activeConditions[i].conditionCauser != null && CameraJumper.CanJump(activeConditions[i].conditionCauser))
+        //                {
+        //                    CameraJumper.TryJumpAndSelect(activeConditions[i].conditionCauser);
+        //                }
+        //                else if (activeConditions[i].quest != null)
+        //                {
+        //                    Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Quests);
+        //                    ((MainTabWindow_Quests)MainButtonDefOf.Quests.TabWindow).Select(activeConditions[i].quest);
+        //                }
+        //            }
+        //            num += rect2.height;
+        //        }
+        //        rect.yMin += num;
+        //        GUI.EndGroup();
+        //        Text.Anchor = TextAnchor.UpperLeft;
+        //        if (__instance.Parent != null)
+        //        {
+        //            __instance.Parent.DoConditionsUI(rect);
+        //        }
+        //    }
+        //}
     }
 }

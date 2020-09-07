@@ -1,0 +1,1 @@
+- Added arrest float option to take effect across all level
