@@ -39,7 +39,10 @@ namespace ZLevels
 					{
 						foreach (IntVec3 intVec in this.section.CellRect)
 						{
-							if (base.Map.terrainGrid.TerrainAt(intVec) == ZLevelsDefOf.ZL_OutsideTerrain)
+							IntVec3 position2 = intVec + new IntVec3(0, 0, -1);
+							if (intVec.GetTerrain(base.Map) == ZLevelsDefOf.ZL_OutsideTerrain ||
+								position2.InBounds(base.Map) && intVec.GetTerrain(base.Map) != ZLevelsDefOf.ZL_OutsideTerrain
+								&& position2.GetTerrain(base.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
 							{
 								List<Thing> list = map.thingGrid.ThingsListAt(intVec);
 								int count = list.Count;
@@ -87,36 +90,45 @@ namespace ZLevels
 
 		protected void TakePrintFrom(Thing t, int curLevel, int baseLevel)
 		{
+			DrawPos_Patch.ChangeDrawPos = true;
+			TrueCenter_Patch.ChangeDrawPos = true;
+			//DrawPos_Patch.levelOffset = (curLevel - baseLevel) / 2f;
+			//TrueCenter_Patch.levelOffset = (curLevel - baseLevel) / 2f;
+
 			try
 			{
-				if (t is Mineable || t.def.defName.ToLower().Contains("wall"))
-				{
-					t.Graphic.Print(this, t);
-				}
-				else if (t.Graphic is Graphic_Mote)
-				{
+				t.Graphic.Print(this, t);
 
-				}
-				else if (t.Graphic is Graphic_LinkedCornerFiller
-					|| t.Graphic is Graphic_RandomRotated
-					 || t.Graphic is Graphic_Linked)
-				{
-					t.Graphic.Print(this, t);
-				}
-				else
-				{
-					Vector2 drawSize = t.Graphic.drawSize;
-					drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-					drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-					var newGraphic = t.Graphic.GetCopy(drawSize);
-					newGraphic.Print(this, t);
-				}
+				//if (t is Mineable || t.def.defName.ToLower().Contains("wall"))
+				//{
+				//}
+				//else if (t.Graphic is Graphic_Mote)
+				//{
+				//
+				//}
+				//else if (t.Graphic is Graphic_LinkedCornerFiller
+				//	|| t.Graphic is Graphic_RandomRotated
+				//	 || t.Graphic is Graphic_Linked)
+				//{
+				//	t.Graphic.Print(this, t);
+				//}
+				//else
+				//{
+				//	Vector2 drawSize = t.Graphic.drawSize;
+				//	drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+				//	drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+				//	var newGraphic = t.Graphic.GetCopy(drawSize);
+				//	newGraphic.Print(this, t);
+				//}
 			}
 			catch (Exception ex)
 			{
 
 			}
+			DrawPos_Patch.ChangeDrawPos = false;
+			TrueCenter_Patch.ChangeDrawPos = false;
 		}
+
 		protected bool requireAddToMapMesh;
 	}
 }
