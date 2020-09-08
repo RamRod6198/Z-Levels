@@ -38,6 +38,29 @@ namespace ZLevels.Properties
                 Build();
             }
 
+            internal void RouteComplete(int routeId)
+            {
+                if (routeLookup.ContainsKey(routeId))
+                {
+                    routeLookup.Remove(routeId);
+                }
+                if (tempNodeLookup.ContainsKey(routeId))
+                {
+                    foreach (Node v in tempNodeLookup[routeId])
+                    {
+                        v.RemoveAsNeighbor();
+                        nodes.Remove(v);
+                    }
+                    tempNodeLookup.Remove(routeId);
+                }
+            }
+
+            public void DestroyedStairHandler(object sender, Building_Stairs.DestroyedEventArgs args)
+            {
+                Node node = nodes.FirstOrFallback((x) => x.Location == args.Location && sender == x.key);
+                node.RemoveAsNeighbor();
+            }
+
             private void Build()
             {
                 List<Map> maps = ZUtils.ZTracker.GetAllMaps(_tile);
@@ -45,6 +68,8 @@ namespace ZLevels.Properties
                 {
                     foreach (Building_Stairs stairs in ZUtils.ZTracker.stairsUp[map])
                     {
+                        Node node = new Node(stairs);
+
                         nodes.Add(new Node(stairs));
                     }
 
@@ -54,13 +79,12 @@ namespace ZLevels.Properties
                     }
                 }
 
-                foreach (var node in nodes)
+                foreach (Node node in nodes)
                 {
-                    foreach (var neighborNode in nodes)
+                    foreach (Node neighborNode in nodes)
                     {
                         if (node == neighborNode) continue;
                         float cost = Single.PositiveInfinity;
-                        bool neighbors = false;
                         if (node.Map == neighborNode.Map)
                         {
                             PawnPath p = node.Map.pathFinder.FindPath(node.Location, neighborNode.Location, StairParms);
@@ -74,8 +98,7 @@ namespace ZLevels.Properties
                         }
 
                         if (cost < 0) cost = Single.PositiveInfinity;
-                        neighbors = !Single.IsPositiveInfinity(cost);
-                        if (neighbors)
+                        if (!Single.IsPositiveInfinity(cost))//There's a connecting path- that makes them neighbors.
                         {
                             node.AddNeighbor(neighborNode, cost);
                         }
@@ -101,57 +124,45 @@ namespace ZLevels.Properties
                 return false;
             }
 
-            public List<Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost)
+            private Dictionary<int, List<Node>> tempNodeLookup = new Dictionary<int, List<Node>>();
+            private Dictionary<int, List<Node>> routeLookup = new Dictionary<int, List<Node>>();
+
+            public List<Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost,
+                out int routeID)
             {
-                Building_Stairs sourceStairs = (Building_Stairs)GenClosest.ClosestThing_Global_Reachable(from
-                    , mapFrom, mapFrom.listerThings.AllThings
-                        .Where(x => x is Building_Stairs), PathEndMode.OnCell, StairParms);
+                routeID = GetNextRouteId();
 
+                ZLogger.Message($"Entering findRoute from {from} on map {mapFrom} to {to} on map {mapTo}");
 
-                Building_Stairs sinkStairs = (Building_Stairs)GenClosest.ClosestThing_Global_Reachable(to
-                    , mapFrom, mapTo.listerThings.AllThings
-                        .Where(x => x is Building_Stairs), PathEndMode.OnCell, StairParms);
-                Node source = null, sink = null;
-                foreach (Node x in nodes)
-                {
-                    Building_Stairs stairs = x.key;
-                    if (stairs == sourceStairs)
-                    {
-                        source = x;
-                    }
-                    if (stairs == sinkStairs)
-                    {
-                        sink = x;
-                    }
-                }
-
-                if (sink == null || source == null)
-                {
-                    this.Rebuild();
-                }
-
-                FindNeighbors(source);
-
+                Node source = new Node(from, mapFrom), sink = new Node(to, mapTo);
+                tempNodeLookup.Add(routeID, new List<Node> { source, sink });
+                nodes.Add(sink);
+                nodes.Add(source);
                 FindNeighbors(sink);
-                if (source == null || sink == null)
-                {
-                    routeCost = float.PositiveInfinity;
-                    return null;
-                }
+                FindNeighbors(source);
                 StringBuilder sb = new StringBuilder("Source neighbors: \n");
-                foreach (var neighbor in source.neighbors)
+                foreach (Node neighbor in source.neighbors)
                 {
-                    sb.AppendLine($"Source({source}) neighbor: {neighbor} distance: {source.neighborDistances[neighbor]}");
+                    sb.AppendLine(
+                        $"Source({source}) neighbor: {neighbor} distance: {source.neighborDistances[neighbor]}");
                 }
 
                 sb.AppendLine("Sink neighbors");
-                foreach (var neighbor in sink.neighbors)
+                foreach (Node neighbor in sink.neighbors)
                 {
                     sb.AppendLine($"sink({sink}) neighbor: {neighbor} distance: {sink.neighborDistances[neighbor]}");
                 }
-                ZLogger.Message(sb.ToString());
-                return DijkstraConnect(source, sink, out routeCost);
 
+                ZLogger.Message(sb.ToString());
+                List<Node> route = DijkstraConnect(source, sink, out routeCost);
+                routeLookup.SetOrAdd(routeID, route);
+                return route;
+            }
+
+            private int _currentRouteID = 0;
+            private int GetNextRouteId()
+            {
+                return _currentRouteID++;
             }
 
             internal void Rebuild()
@@ -162,17 +173,27 @@ namespace ZLevels.Properties
 
             internal void FindNeighbors(Node node)
             {
-                foreach (Node neighbor in nodes)
+                if (node == null) return;
+                try
                 {
-                    if (neighbor.Map != node.Map) continue;
-                    PawnPath p = node.Map.pathFinder.FindPath(node.Location, neighbor.Location, StairParms);
-                    float cost = p.TotalCost;
-                    p.ReleaseToPool();
-                    p = null;
-                    if (cost > 0)
+                    foreach (Node neighbor in nodes)
                     {
-                        node.AddNeighbor(neighbor, cost);
+                        if (neighbor == node|| neighbor?.Map != node?.Map) continue;
+                        PawnPath p = node.Map?.pathFinder.FindPath(node.Location, neighbor.Location, StairParms);
+                        if (p == null) continue;
+                        float cost = p.TotalCost;
+                        p.ReleaseToPool();
+                        if (cost > 0)
+                        {
+                            node.AddNeighbor(neighbor, cost);
+                        }
+                        if(node.key == null){ZLogger.Message($"Node is {node} and calculating distance to {neighbor} as {cost}");}
+
                     }
+                }
+                catch (NullReferenceException e)
+                {
+
                 }
             }
 
@@ -194,6 +215,7 @@ namespace ZLevels.Properties
                         previousNodes.SetOrAdd(nd, null);
                     }
 
+                    ZLogger.Message("DijkstraConnect");
                     lastKey = "distances/source";
                     distances[source] = 0;
                     if (!Q.Remove(source))
@@ -212,14 +234,14 @@ namespace ZLevels.Properties
                     {
                         sb.Clear();
                         u = Q.MinBy((x) => distances[x]);
-                        foreach (Node nd in u.neighbors)
-                        {
-                            sb.Append($"nd = {nd}, distance = {distances[nd]}");
-                        }
+                        //foreach (Node nd in u.neighbors)
+                        //{
+                        //    sb.Append($"nd = {nd}, distance = {distances[nd]}");
+                        //}
 
-                        sb.Append($"Chose {u} as shortest with {distances[u]}");
-                        //ZLogger.Message(sb.ToString());
-                        Console.WriteLine(sb.ToString());
+                        sb.Append($"Chose {u} as shortest with {distances[u]}- looking for sink {sink}");
+                        ZLogger.Message(sb.ToString());
+                        //Console.WriteLine(sb.ToString());
                         Q.Remove(u);
                         if (u == sink) break;
                         foreach (Node v in u.neighbors)
@@ -234,6 +256,7 @@ namespace ZLevels.Properties
                     }
 
                     sb.Clear();
+
                     foreach (Node node in previousNodes.Keys)
                     {
                         sb.Append($"Node:{node}, previous: {previousNodes[node]}, cumulative distance: {distances[node]}");
@@ -243,13 +266,13 @@ namespace ZLevels.Properties
                     sb.Clear();
                     while (sink != null)
                     {
-                        sb.AppendLine($"{sink.key}");
+                        sb.AppendLine($"{sink}");
                         ret.Add(sink);
                         sink = previousNodes[sink];
                     }
 
                     ret.Add(source);
-                    sb.AppendLine($"{source.key}");
+                    sb.AppendLine($"Source Key = {source}");
                     ZLogger.Message(sb.ToString());
                     ret.Reverse();
                     return ret;
@@ -268,7 +291,9 @@ namespace ZLevels.Properties
 
             public DijkstraGraph(Map map) : this(map.Tile) { }
 
-            public class Node
+            private List<Node> temporaryNodes = new List<Node>();
+
+            public class Node : IEquatable<Node>
             {
                 public override string ToString()
                 {
@@ -279,6 +304,14 @@ namespace ZLevels.Properties
                 {
                     key = stairs;
                     Location = stairs.Position;
+                    Map = stairs.Map;
+                }
+
+                public Node(IntVec3 location, Map map)
+                {
+                    key = null;
+                    Location = location;
+                    Map = map;
                 }
 
                 public Dictionary<Node, float> neighborDistances = new Dictionary<Node, float>();
@@ -309,7 +342,6 @@ namespace ZLevels.Properties
                 {
                     try
                     {
-                        if (neighbor.key == null) return false;
                         if (!neighbors.Add(neighbor)) return false;
 
                         neighbor.AddNeighbor(this, cost);
@@ -347,74 +379,30 @@ namespace ZLevels.Properties
                     Map = map;
 
                 }
+
+                internal void RemoveAsNeighbor()
+                {
+                    foreach (Node neighbor in neighbors)
+                    {
+                        neighbor.neighbors.Remove(this);
+                        neighbor.neighborDistances.Remove(this);
+                    }
+                    neighbors.Clear();
+                    neighborDistances.Clear();
+
+                }
+
+                bool IEquatable<Node>.Equals(Node other)
+                {
+                    if (other == null) return false;
+                    if (key != null)
+                    {
+                        return key == other.key;
+                    }
+
+                    return Location == other.Location && Map == other.Map;
+                }
             }
-
-            public class PathSummary : IEquatable<PathSummary>
-            {
-                public Map sinkMap, sourceMap;
-                public IntVec3 sink, source;
-                public float cost;
-
-                //public PathSummary(Node from, Node to, float cost = Single.PositiveInfinity) : this(from.key, to.key, cost) { }
-
-                public PathSummary(Thing from, Thing to, float cost = Single.PositiveInfinity) : this(@from.Map, to.Map, @from.Position, to.Position, cost) { }
-
-                PathSummary(LocalTargetInfo from, LocalTargetInfo to, Map fromMap, Map toMap, float cost = Single.PositiveInfinity) : this(fromMap, toMap, @from.Cell, to.Cell) { }
-
-                public PathSummary(Map fromMap, Map toMap, IntVec3 fromPosition, IntVec3 toPosition, float pathCost = Single.PositiveInfinity)
-                {
-                    sinkMap = toMap;
-                    sourceMap = fromMap;
-                    sink = toPosition;
-                    source = fromPosition;
-                    cost = pathCost;
-                }
-
-                public bool IsMatchedStair()
-                {
-                    if (source != sink || sourceMap == sinkMap || Math.Abs(ZUtils.ZTracker.GetZIndexFor(sourceMap) - ZUtils.ZTracker.GetZIndexFor(sinkMap)) != 1)
-                        return false;
-                    cost = 1;
-                    return true;
-
-                }
-
-                public void CalculateInitialCost()
-                {
-                    if (sourceMap == sinkMap)
-                    {
-                        PawnPath p = sourceMap.pathFinder.FindPath(source, sink, StairParms);
-                        cost = p.TotalCost;
-                        p.ReleaseToPool();
-                        if (cost < 0)//unreachable is -1
-                        {
-                            cost = Single.PositiveInfinity;
-                        }
-                    }
-                    else if (IsMatchedStair())
-                    {
-                        cost = MatchedStairCost;
-                    }
-                    else
-                    {
-                        cost = Single.PositiveInfinity;
-                    }
-                }
-
-                public bool Equals(PathSummary other)
-                {
-                    return (other != null) && (other.sourceMap == this.sourceMap) && (other.sinkMap == sinkMap) && (source == other.source) && (sink == other.sink);
-                }
-
-                public Job MakeJob()
-                {
-                    return JobMaker.MakeJob(JobDefOf.Goto, new LocalTargetInfo(source), new LocalTargetInfo(sink));
-                }
-
-
-            }
-
-
         }
 
 
@@ -469,7 +457,7 @@ namespace ZLevels.Properties
             }
         }
 
-        public List<DijkstraGraph.Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost)
+        public List<DijkstraGraph.Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost, out int routeId)
         {
             ZLogger.Message($"Find route from {from}to {to}  mapFrom {mapFrom} mapTo {mapTo}");
             if (!HasDijkstraForTile(mapFrom.Tile))
@@ -481,7 +469,7 @@ namespace ZLevels.Properties
                 DijkstraGraph graph = getDijkstraGraphForTile(mapFrom.Tile);
                 graph?.Rebuild();
             }
-            return getDijkstraGraphForTile(mapFrom.Tile).FindRoute(from, to, mapFrom, mapTo, out routeCost);
+            return getDijkstraGraphForTile(mapFrom.Tile).FindRoute(from, to, mapFrom, mapTo, out routeCost, out routeId);
 
         }
         public Building_Stairs GetClosestStair(Building_Stairs source, out PawnPath path)

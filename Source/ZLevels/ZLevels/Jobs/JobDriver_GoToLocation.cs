@@ -20,10 +20,12 @@ namespace ZLevels
 
         public override IEnumerable<Toil> MakeNewToils()
         {
-            //have pawn, source stairs, sink stairs, and  destination.
+            //have pawn, and  destination.
             //Check that pawn can reach  destination with Dijkstra.
             //yield break if not.
             //Otherwise, calculate toils to go, then toils to destination and return them one at a time.
+            ZLogger.Message($"JobDriver GoToLocation About to call findRouteWithStairs, with pawn {pawn}, dest { TargetA.ToTargetInfo(pawn.Map)}, instance {this}");
+
             foreach (var v in Toils_ZLevels.FindRouteWithStairs(pawn, TargetA.ToTargetInfo(pawn.Map), this))
             {
                 yield return v;

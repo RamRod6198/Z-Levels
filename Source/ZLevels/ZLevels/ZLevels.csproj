@@ -37,14 +37,11 @@
       <HintPath>..\..\..\RimWorld64_Data\Managed\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="0MultiplayerAPI">
-      <HintPath>..\..\..\1.2\Assemblies\0MultiplayerAPI.dll</HintPath>
+      <HintPath>..\..\..\RimWorld64_Data\Managed\0MultiplayerAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\RimWorld64_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\RimWorld64_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="ISharpZipLib">
       <HintPath>..\..\..\RimWorld64_Data\Managed\ISharpZipLib.dll</HintPath>
@@ -324,7 +321,7 @@
   <PropertyGroup>
     <RimworldModsZlevels>C:\Program Files (x86)\Steam\SteamApps\common\RimWorld\Mods\ZLevels\</RimworldModsZlevels>
     <PostBuildEvent>xcopy "Zlevels*"  "$(RimworldModsZlevels)\Assemblies\" /Y /E /d	
-      xcopy "..\../1.2\About\*"  "$(RimworldModsZlevels)About\" /Y /E /d
+      xcopy "..\..\About\*"  "$(RimworldModsZlevels)About\" /Y /E /d
       xcopy "..\../1.2\Defs\*"  "$(RimworldModsZlevels)Defs\" /Y /E /d	           
       xcopy "..\../1.2\Languages\*"   "$(RimworldModsZlevels)\Languages\" /Y /E /d	  
       xcopy "..\../1.2\Textures\*"    "$(RimworldModsZlevels)\Textures\" /Y /E /d

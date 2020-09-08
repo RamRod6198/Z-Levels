@@ -71,9 +71,7 @@ namespace ZLevels
             }
         }
 
-        public Building_StairsUp GetMatchingStair
-        {
-            get
+        public override Building_Stairs GetMatchingStair()
             {
                 Map upperMap = ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
                 if (upperMap != null)
@@ -85,14 +83,14 @@ namespace ZLevels
                     return null;
                 }
             }
-        }
+        
 
         public bool syncDamage = true;
         public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
             if (syncDamage)
             {
-                var stairsUp = GetMatchingStair;
+                Building_StairsUp stairsUp = (Building_StairsUp)GetMatchingStair();
                 {
                     ZLogger.Message(stairsUp + ".HitPoints -= " + (int)totalDamageDealt);
                     stairsUp.syncDamage = false;
