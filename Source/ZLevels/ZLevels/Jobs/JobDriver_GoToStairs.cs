@@ -33,7 +33,7 @@ namespace ZLevels
                         if (map == null)
                         {
                             map = ZTracker.CreateUpperLevel(this.pawn.Map, stairsUp.Position);
-                            if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
+                            if (!string.IsNullOrEmpty(stairsUp.pathToPreset))
                             {
                                 var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
@@ -43,7 +43,7 @@ namespace ZLevels
                         }
                         else
                         {
-                            if (stairsUp.pathToPreset != null && stairsUp.pathToPreset.Length > 0)
+                            if (!string.IsNullOrEmpty(stairsUp.pathToPreset))
                             {
                                 var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
@@ -61,7 +61,7 @@ namespace ZLevels
                         {
                             //ZLogger.Message("CREATING LOWER LEVEL AGAIG", true);
                             map = ZTracker.CreateLowerLevel(this.pawn.Map, stairsDown.Position);
-                            if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
+                            if (!string.IsNullOrEmpty(stairsDown.pathToPreset))
                             {
                                 var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;
@@ -71,7 +71,7 @@ namespace ZLevels
                         }
                         else
                         {
-                            if (stairsDown.pathToPreset != null && stairsDown.pathToPreset.Length > 0)
+                            if (!string.IsNullOrEmpty(stairsDown.pathToPreset))
                             {
                                 var comp = ZUtils.GetMapComponentZLevel(map);
                                 comp.DoGeneration = true;

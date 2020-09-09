@@ -38,28 +38,18 @@ namespace ZLevels.Properties
                 Build();
             }
 
-            internal void RouteComplete(int routeId)
-            {
-                if (routeLookup.ContainsKey(routeId))
-                {
-                    routeLookup.Remove(routeId);
-                }
-                if (tempNodeLookup.ContainsKey(routeId))
-                {
-                    foreach (Node v in tempNodeLookup[routeId])
-                    {
-                        v.RemoveAsNeighbor();
-                        nodes.Remove(v);
-                    }
-                    tempNodeLookup.Remove(routeId);
-                }
-            }
 
-            public void DestroyedStairHandler(object sender, Building_Stairs.DestroyedEventArgs args)
-            {
-                Node node = nodes.FirstOrFallback((x) => x.Location == args.Location && sender == x.key);
-                node.RemoveAsNeighbor();
-            }
+
+            //public void DestroyedStairHandler(object sender, Building_Stairs.DestroyedEventArgs args)
+            //{
+            //    ZLogger.Message($"Stairs at {args.Location} on map {args.Map} destroyed, updating nodes");
+            //    Node node = nodes.FirstOrFallback((x) => x.Map == args.Map &&x.Location == args.Location  );
+            //    //if (node != null)
+            //    //{
+            //    //    node.RemoveAsNeighbor();
+            //    //    nodes.Remove(node);
+            //    //}
+            //}
 
             private void Build()
             {
@@ -127,17 +117,13 @@ namespace ZLevels.Properties
             private Dictionary<int, List<Node>> tempNodeLookup = new Dictionary<int, List<Node>>();
             private Dictionary<int, List<Node>> routeLookup = new Dictionary<int, List<Node>>();
 
-            public List<Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost,
-                out int routeID)
+            public List<Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost)
             {
-                routeID = GetNextRouteId();
-
                 ZLogger.Message($"Entering findRoute from {from} on map {mapFrom} to {to} on map {mapTo}");
 
                 Node source = new Node(from, mapFrom), sink = new Node(to, mapTo);
-                tempNodeLookup.Add(routeID, new List<Node> { source, sink });
-                nodes.Add(sink);
-                nodes.Add(source);
+                List<Node> tempNodes = new List<Node> { source, sink };
+
                 FindNeighbors(sink);
                 FindNeighbors(source);
                 StringBuilder sb = new StringBuilder("Source neighbors: \n");
@@ -155,7 +141,6 @@ namespace ZLevels.Properties
 
                 ZLogger.Message(sb.ToString());
                 List<Node> route = DijkstraConnect(source, sink, out routeCost);
-                routeLookup.SetOrAdd(routeID, route);
                 return route;
             }
 
@@ -178,7 +163,7 @@ namespace ZLevels.Properties
                 {
                     foreach (Node neighbor in nodes)
                     {
-                        if (neighbor == node|| neighbor?.Map != node?.Map) continue;
+                        if (neighbor == node || neighbor?.Map != node?.Map) continue;
                         PawnPath p = node.Map?.pathFinder.FindPath(node.Location, neighbor.Location, StairParms);
                         if (p == null) continue;
                         float cost = p.TotalCost;
@@ -187,7 +172,7 @@ namespace ZLevels.Properties
                         {
                             node.AddNeighbor(neighbor, cost);
                         }
-                        if(node.key == null){ZLogger.Message($"Node is {node} and calculating distance to {neighbor} as {cost}");}
+                        if (node.key == null) { ZLogger.Message($"Node is {node} and calculating distance to {neighbor} as {cost}"); }
 
                     }
                 }
@@ -209,20 +194,21 @@ namespace ZLevels.Properties
                     Dictionary<Node, float> distances = new Dictionary<Node, float>(nodes.Count);
                     Dictionary<Node, Node> previousNodes = new Dictionary<Node, Node>(nodes.Count);
                     HashSet<Node> Q = new HashSet<Node>(nodes);
+                    Q.Add(sink);
                     foreach (Node nd in nodes)
                     {
                         distances.SetOrAdd(nd, Single.PositiveInfinity);
                         previousNodes.SetOrAdd(nd, null);
                     }
 
+                    distances.SetOrAdd(sink, float.PositiveInfinity);
+                    previousNodes.SetOrAdd(sink, null);
+                    previousNodes.SetOrAdd(source, null);
+
                     ZLogger.Message("DijkstraConnect");
                     lastKey = "distances/source";
-                    distances[source] = 0;
-                    if (!Q.Remove(source))
-                    {
-                        lastKey = "source missing";
-                        throw new InvalidDataException("Source somehow not in set of nodes");
-                    }
+                    distances.SetOrAdd(source, 0);
+
                     foreach (Node neighbor in source.neighbors)
                     {
                         distances[neighbor] = source.neighborDistances[neighbor];
@@ -286,6 +272,24 @@ namespace ZLevels.Properties
                     }
                     ZLogger.Message($"Couldn't find key!  Or key was null... {lastKey}  Exception data of type {e.GetType()} follows: {sb}");
                     return new List<Node>();
+                }
+            }
+
+            internal void RemoveNodeAt(Map map, IntVec3 position)
+            {
+                Node remove = nodes.FirstOrFallback((x) => x.Map == map && x.Location == position);
+
+                if (remove == null)
+                {
+                    List<Node> removeList = nodes.Where((x) => x.key.Destroyed).ToList();
+                    foreach (Node n in removeList)
+                    {
+                        nodes.Remove(n);
+                    }
+                }
+                else
+                {
+                    remove.RemoveAsNeighbor();
                 }
             }
 
@@ -457,7 +461,7 @@ namespace ZLevels.Properties
             }
         }
 
-        public List<DijkstraGraph.Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost, out int routeId)
+        public List<DijkstraGraph.Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost)
         {
             ZLogger.Message($"Find route from {from}to {to}  mapFrom {mapFrom} mapTo {mapTo}");
             if (!HasDijkstraForTile(mapFrom.Tile))
@@ -469,7 +473,7 @@ namespace ZLevels.Properties
                 DijkstraGraph graph = getDijkstraGraphForTile(mapFrom.Tile);
                 graph?.Rebuild();
             }
-            return getDijkstraGraphForTile(mapFrom.Tile).FindRoute(from, to, mapFrom, mapTo, out routeCost, out routeId);
+            return getDijkstraGraphForTile(mapFrom.Tile).FindRoute(from, to, mapFrom, mapTo, out routeCost);
 
         }
         public Building_Stairs GetClosestStair(Building_Stairs source, out PawnPath path)

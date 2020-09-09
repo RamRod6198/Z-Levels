@@ -50,7 +50,7 @@ namespace ZLevels
                             }
                         }
                     }
-                    if (this.Position.GetThingList(mapBelow).Where(x => x.def == ZLevelsDefOf.ZL_StairsUp).Count() == 0)
+                    if (!this.Position.GetThingList(mapBelow).Any(x => x.def == ZLevelsDefOf.ZL_StairsUp))
                     {
                         var stairsToSpawn = ThingMaker.MakeThing(ZLevelsDefOf.ZL_StairsUp, this.Stuff);
                         mapBelow.terrainGrid.SetTerrain(this.Position, ZLevelsDefOf.ZL_OutsideTerrainTwo);
@@ -72,34 +72,15 @@ namespace ZLevels
         }
 
         public override Building_Stairs GetMatchingStair()
-            {
-                Map upperMap = ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
-                if (upperMap != null)
-                {
-                    return (Building_StairsUp)this.Position.GetThingList(upperMap).FirstOrDefault(x => x is Building_StairsUp);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        
-
-        public bool syncDamage = true;
-        public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
-            if (syncDamage)
+            Map upperMap = ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
+            if (upperMap != null)
             {
-                Building_StairsUp stairsUp = (Building_StairsUp)GetMatchingStair();
-                {
-                    ZLogger.Message(stairsUp + ".HitPoints -= " + (int)totalDamageDealt);
-                    stairsUp.syncDamage = false;
-                    stairsUp.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
-                    stairsUp.syncDamage = true;
-                }
+                return (Building_StairsUp)this.Position.GetThingList(upperMap).FirstOrFallback(x => x is Building_StairsUp);
             }
-            base.PostApplyDamage(dinfo, totalDamageDealt);
+            return null;
         }
+        
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
             var ZTracker = ZUtils.ZTracker;

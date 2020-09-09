@@ -18,6 +18,8 @@ namespace ZLevels
             return true;
         }
 
+        public List<ZPathfinder.DijkstraGraph.Node> ActiveStairs;
+
         public override IEnumerable<Toil> MakeNewToils()
         {
             //have pawn, and  destination.

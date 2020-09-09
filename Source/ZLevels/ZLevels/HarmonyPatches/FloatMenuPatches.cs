@@ -28,7 +28,7 @@ namespace ZLevels
             public static void Postfix(ref FloatMenuOption __result, ref IntVec3 clickCell, ref Pawn pawn)
             {
                 var route = ZPathfinder.Instance.FindRoute(pawn.Position, clickCell, pawn.Map, pawn.Map,
-                    out float routeCost, out int routeId);
+                    out float routeCost);
 
                 if (__result.Label == "CannotGoNoPath".Translate())
                 {

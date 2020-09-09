@@ -9,17 +9,18 @@ using RimWorld;
 using RimWorld.Planet;
 using Verse;
 using Verse.AI;
+using ZLevels.Properties;
 
 namespace ZLevels
 {
     public class Building_Stairs : Building
     {
 
-        public class DestroyedEventArgs : EventArgs
-        {
-            public IntVec3 Location;
-            public Map Map;
-        }
+        //public class DestroyedEventArgs : EventArgs
+        //{
+        //    public IntVec3 Location;
+        //    public Map Map;
+        //}
 
 
         public virtual Building_Stairs GetMatchingStair()
@@ -27,14 +28,35 @@ namespace ZLevels
             return null;
         }
 
-        public delegate void DestroyedEvent(object sender, DestroyedEventArgs args);
+        //public delegate void DestroyedEvent(object sender, DestroyedEventArgs args);
 
-        public event DestroyedEvent OnDestroyed;
+        //public event DestroyedEvent OnDestroyed;
 
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
-            OnDestroyed?.Invoke(this, new DestroyedEventArgs() { Map = this.Map, Location = this.Position });
+            //ZLogger.Message($"{this.GetType()} is being destroyed, invoking handler {OnDestroyed != null} ");
+            //OnDestroyed?.Invoke(this, new DestroyedEventArgs() { Map = Map, Location = Position });
+            ZPathfinder.Instance.getDijkstraGraphForTile(Map.Tile).RemoveNodeAt(Map, Position);
             base.Destroy(mode);
+        }
+
+        public bool syncDamage = true;
+
+
+        public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+        {
+            if (syncDamage)
+            {
+                Building_Stairs matchingStair = GetMatchingStair();
+                if (matchingStair != null)
+                {
+                    ZLogger.Message(matchingStair + ".HitPoints -= " + (int)totalDamageDealt, true);
+                    matchingStair.syncDamage = false;
+                    matchingStair.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
+                    matchingStair.syncDamage = true;
+                }
+            }
+            base.PostApplyDamage(dinfo, totalDamageDealt);
         }
 
         //public override void SpawnSetup(Map map, bool respawningAfterLoad)
@@ -107,12 +129,9 @@ namespace ZLevels
             Map lowerMap = ZUtils.ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
             if (lowerMap != null)
             {
-                return (Building_StairsDown)this.Position.GetThingList(lowerMap).FirstOrDefault(x => x is Building_StairsDown);
+                return (Building_StairsDown)Position.GetThingList(lowerMap).FirstOrFallback(x => x is Building_StairsDown);
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
@@ -128,24 +147,8 @@ namespace ZLevels
             base.Destroy(mode);
         }
 
-        public bool syncDamage = true;
 
-        public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
-        {
-            Map upperLevel = ZUtils.ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
-            if (syncDamage)
-            {
-                Building_StairsDown stairsDown = (Building_StairsDown)this.GetMatchingStair();
-                if (stairsDown != null)
-                {
-                    ZLogger.Message(stairsDown + ".HitPoints -= " + (int)totalDamageDealt, true);
-                    stairsDown.syncDamage = false;
-                    stairsDown.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
-                    stairsDown.syncDamage = true;
-                }
-            }
-            base.PostApplyDamage(dinfo, totalDamageDealt);
-        }
+
 
         public void GiveJob(Pawn pawn, Thing stairs)
         {
