@@ -31,6 +31,8 @@ namespace ZLevels
             };
 
             Toil reserveItem = Toils_Reserve.Reserve(TargetIndex.A);
+            ZLogger.Message($"JobDriver HaulThingToDest1 About to call findRouteWithStairs, with pawn {GetActor()}, dest { TargetA.Thing}, instance {this}");
+
             foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), new TargetInfo(TargetA.Thing), this))
             {
                 yield return toil;
@@ -147,6 +149,8 @@ namespace ZLevels
                     }
                 }
             };
+            ZLogger.Message($"JobDriver HaulThingToDest 2About to call findRouteWithStairs, with pawn {GetActor()}, dest {ZTracker.jobTracker[pawn].targetDest}, instance {this}");
+
             foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), ZTracker.jobTracker[pawn].targetDest, this))
             {
                 yield return toil;
