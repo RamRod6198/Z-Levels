@@ -15,3 +15,7 @@ C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.
 C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.dll
 C:\Users\Isaac\Source\Repos\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.csprojAssemblyReference.cache
 C:\Users\Isaac\Source\Repos\Z-Levels\1.2\Assemblies\ZLevels.dll
+C:\GAMES\Rimworld\Mods\Z-Levels\1.2\Assemblies\ZLevels.dll
+C:\GAMES\Rimworld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.csprojAssemblyReference.cache
+C:\GAMES\Rimworld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.csproj.CoreCompileInputs.cache
+C:\GAMES\Rimworld\Mods\Z-Levels\Source\ZLevels\ZLevels\obj\Release\ZLevels.dll

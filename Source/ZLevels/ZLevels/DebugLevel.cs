@@ -9,7 +9,8 @@ namespace ZLevels
 		None,
 		All,
 		Jobs,
-		Combat
+		Combat,
+		Pathfinding
 	}
 }
 

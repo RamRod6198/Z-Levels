@@ -166,7 +166,7 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    ZLogger.Message($"Find Route with Stairs called, calling FindRoute");
+                    ZLogger.Message($"Find Route with Stairs called, calling FindRoute", debugLevel: DebugLevel.Pathfinding);
                 }
             };
             var nodeList =
@@ -182,7 +182,7 @@ namespace ZLevels
                 {
                     for (int j = 0; j < nodeList.Count; ++j)
                     {
-                        ZLogger.Message($"node {j} = {nodeList[j]}");
+                        ZLogger.Message($"node {j} = {nodeList[j]}", debugLevel: DebugLevel.Pathfinding);
                     }
                 }
             };

@@ -119,7 +119,7 @@ namespace ZLevels.Properties
 
             public List<Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost)
             {
-                ZLogger.Message($"Entering findRoute from {from} on map {mapFrom} to {to} on map {mapTo}");
+                ZLogger.Message($"Entering findRoute from {from} on map {mapFrom} to {to} on map {mapTo}", debugLevel: DebugLevel.Pathfinding);
 
                 Node source = new Node(from, mapFrom), sink = new Node(to, mapTo);
                 List<Node> tempNodes = new List<Node> { source, sink };
@@ -139,7 +139,7 @@ namespace ZLevels.Properties
                     sb.AppendLine($"sink({sink}) neighbor: {neighbor} distance: {sink.neighborDistances[neighbor]}");
                 }
 
-                ZLogger.Message(sb.ToString());
+                ZLogger.Message(sb.ToString(), debugLevel: DebugLevel.Pathfinding);
                 List<Node> route = DijkstraConnect(source, sink, out routeCost);
                 return route;
             }
@@ -172,7 +172,7 @@ namespace ZLevels.Properties
                         {
                             node.AddNeighbor(neighbor, cost);
                         }
-                        if (node.key == null) { ZLogger.Message($"Node is {node} and calculating distance to {neighbor} as {cost}"); }
+                        if (node.key == null) { ZLogger.Message($"Node is {node} and calculating distance to {neighbor} as {cost}", debugLevel: DebugLevel.Pathfinding); }
 
                     }
                 }
@@ -205,7 +205,7 @@ namespace ZLevels.Properties
                     previousNodes.SetOrAdd(sink, null);
                     previousNodes.SetOrAdd(source, null);
 
-                    ZLogger.Message("DijkstraConnect");
+                    ZLogger.Message("DijkstraConnect", debugLevel: DebugLevel.Pathfinding);
                     lastKey = "distances/source";
                     distances.SetOrAdd(source, 0);
 
@@ -226,7 +226,7 @@ namespace ZLevels.Properties
                         //}
 
                         sb.Append($"Chose {u} as shortest with {distances[u]}- looking for sink {sink}");
-                        ZLogger.Message(sb.ToString());
+                        ZLogger.Message(sb.ToString(), debugLevel: DebugLevel.Pathfinding);
                         //Console.WriteLine(sb.ToString());
                         Q.Remove(u);
                         if (u == sink) break;
@@ -259,7 +259,7 @@ namespace ZLevels.Properties
 
                     ret.Add(source);
                     sb.AppendLine($"Source Key = {source}");
-                    ZLogger.Message(sb.ToString());
+                    ZLogger.Message(sb.ToString(), debugLevel: DebugLevel.Pathfinding);
                     ret.Reverse();
                     return ret;
                 }
@@ -270,7 +270,7 @@ namespace ZLevels.Properties
                     {
                         sb.Append($"{e.Data[v]}: {v}");
                     }
-                    ZLogger.Message($"Couldn't find key!  Or key was null... {lastKey}  Exception data of type {e.GetType()} follows: {sb}");
+                    ZLogger.Message($"Couldn't find key!  Or key was null... {lastKey}  Exception data of type {e.GetType()} follows: {sb}", debugLevel: DebugLevel.Pathfinding);
                     return new List<Node>();
                 }
             }
@@ -355,7 +355,7 @@ namespace ZLevels.Properties
                     catch (ArgumentException e)
                     {
                         ZLogger.Message(
-                            $"AddNeighbor: Key already exists: (I think... e.message = {e.Message}.  Would be key was node for {neighbor.key}");
+                            $"AddNeighbor: Key already exists: (I think... e.message = {e.Message}.  Would be key was node for {neighbor.key}", debugLevel: DebugLevel.Pathfinding);
                     }
 
                     return true;
@@ -371,7 +371,7 @@ namespace ZLevels.Properties
                     }
                     catch (ArgumentException e)
                     {
-                        ZLogger.Message($"Set Distance: Key already exists: (I think... e.message = {e.Message}.  Would be key was node for {neighbor.key}");
+                        ZLogger.Message($"Set Distance: Key already exists: (I think... e.message = {e.Message}.  Would be key was node for {neighbor.key}", debugLevel: DebugLevel.Pathfinding);
                     }
                     return true;
 
@@ -463,7 +463,7 @@ namespace ZLevels.Properties
 
         public List<DijkstraGraph.Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost)
         {
-            ZLogger.Message($"Find route from {from}to {to}  mapFrom {mapFrom} mapTo {mapTo}");
+            ZLogger.Message($"Find route from {from}to {to}  mapFrom {mapFrom} mapTo {mapTo}", debugLevel: DebugLevel.Pathfinding);
             if (!HasDijkstraForTile(mapFrom.Tile))
             {
                 SetOrCreateDijkstraGraph(mapFrom.Tile);
