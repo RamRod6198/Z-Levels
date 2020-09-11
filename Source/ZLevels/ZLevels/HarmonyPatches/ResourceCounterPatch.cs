@@ -101,8 +101,6 @@ namespace ZLevels
                     }
                 }
                 IEnumerator<CodeInstruction> enumerator = null;
-                yield break;
-                yield break;
             }
 
             public static bool IfInResourceCounter(bool __result, Event ev, Designator_Build instance, ThingDef thingDef2)
