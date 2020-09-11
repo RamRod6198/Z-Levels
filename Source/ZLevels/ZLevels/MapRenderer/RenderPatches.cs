@@ -3,16 +3,65 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace ZLevels
 {
+	[HarmonyPatch(typeof(Thing), "DrawPos", MethodType.Getter)]
+	public static class DrawPos_Patch
+	{
+		public static bool ChangeDrawPos = false;
+
+		public static float levelOffset = 0f;
+		public static void Postfix(ref Vector3 __result)
+		{
+			if (ChangeDrawPos)
+			{
+				__result.z += levelOffset;
+				__result.y += levelOffset;
+			}
+		}
+	}
+
+	[HarmonyPatch(typeof(GenThing), "TrueCenter")]
+	[HarmonyPatch(new Type[]
+		{
+			typeof(IntVec3),
+			typeof(Rot4),
+			typeof(IntVec2),
+			typeof(float)
+		}, new ArgumentType[]
+		{
+			ArgumentType.Normal,
+			ArgumentType.Normal,
+			ArgumentType.Normal,
+			ArgumentType.Normal
+		})]
+	public static class TrueCenter_Patch
+    {
+		public static bool ChangeDrawPos = false;
+
+		public static float levelOffset = 0f;
+		public static void Postfix(ref Vector3 __result)
+        {
+			if (ChangeDrawPos)
+			{
+				__result.z += levelOffset;
+				__result.y += levelOffset;
+			}
+		}
+    }
+
+
 	[HarmonyPatch(typeof(DynamicDrawManager), "DrawDynamicThings")]
 	public static class GenerateGraphics
 	{
-		public static Dictionary<Pawn, PawnRendererScaled> cachedRenderers = new Dictionary<Pawn, PawnRendererScaled>();
-
+		public static Dictionary<Pawn, PawnRendererScaled> cachedPawnRenderers = new Dictionary<Pawn, PawnRendererScaled>();
+		public static Dictionary<Pawn, PawnRendererScaled> cachedCorpseRenderers = new Dictionary<Pawn, PawnRendererScaled>();
+	
+	
 		[HarmonyPostfix]
 		public static void DynamicDrawManagerPostfix(DynamicDrawManager __instance, Map ___map, ref bool ___drawingNow)
 		{
@@ -38,7 +87,10 @@ namespace ZLevels
 						foreach (Thing thing in map2.dynamicDrawManager.drawThings)
 						{
 							IntVec3 position = thing.Position;
-							if (position.GetTerrain(___map) == ZLevelsDefOf.ZL_OutsideTerrain)
+							IntVec3 position2 = position + new IntVec3(0, 0, -1);
+							if (position.GetTerrain(___map) == ZLevelsDefOf.ZL_OutsideTerrain ||
+								position2.InBounds(___map) && position.GetTerrain(___map) != ZLevelsDefOf.ZL_OutsideTerrain 
+								&& position2.GetTerrain(___map) == ZLevelsDefOf.ZL_OutsideTerrain)
 							{
 								if ((cellRect.Contains(position) || thing.def.drawOffscreen)
 									//&& (!fogGrid[cellIndices.CellToIndex(position)]
@@ -46,27 +98,38 @@ namespace ZLevels
 									&& (thing.def.hideAtSnowDepth >= 1f
 									|| map2.snowGrid.GetDepth(position) <= thing.def.hideAtSnowDepth))
 								{
+									DrawPos_Patch.ChangeDrawPos = true;
+									TrueCenter_Patch.ChangeDrawPos = true;
+									DrawPos_Patch.levelOffset = -(baseLevel - curLevel) / 2f;
+									TrueCenter_Patch.levelOffset = -(baseLevel - curLevel) / 2f;
 									try
 									{
 										if (thing.Graphic is Graphic_Mote)
 										{
-
+									
 										}
 										else if (thing.Graphic is Graphic_LinkedCornerFiller
 											|| thing.Graphic is Graphic_RandomRotated
 											 || thing.Graphic is Graphic_Linked)
 										{
+											DrawPos_Patch.levelOffset = (baseLevel - curLevel) / 3.9f;
+											TrueCenter_Patch.levelOffset = (baseLevel - curLevel) / 3.9f;
 											thing.Draw();
 										}
 										else if (thing is Pawn pawn)
 										{
-											if (cachedRenderers.ContainsKey(pawn))
+											DrawPos_Patch.ChangeDrawPos = false;
+											TrueCenter_Patch.ChangeDrawPos = false;
+											var newDrawPos = thing.DrawPos;
+											newDrawPos.z += (baseLevel - curLevel) / 2f;
+											newDrawPos.y -= (baseLevel - curLevel) / 2f;
+											if (cachedPawnRenderers.ContainsKey(pawn))
 											{
-												cachedRenderers[pawn].RenderPawnAt(thing.DrawPos, curLevel, baseLevel);
+												cachedPawnRenderers[pawn].RenderPawnAt(newDrawPos, curLevel, baseLevel);
 											}
 											else
 											{
-												var newRenderer = new PawnRendererScaled(pawn);
+												var newRenderer = new PawnRendererScaled(pawn, pawn.Drawer.renderer.wiggler);
 												pawn.Drawer.renderer.graphics.ResolveAllGraphics();
 												newRenderer.graphics.nakedGraphic = pawn.Drawer.renderer.graphics.nakedGraphic;
 												newRenderer.graphics.headGraphic = pawn.Drawer.renderer.graphics.headGraphic;
@@ -76,12 +139,41 @@ namespace ZLevels
 												newRenderer.graphics.apparelGraphics = pawn.Drawer.renderer.graphics.apparelGraphics;
 												newRenderer.graphics.packGraphic = pawn.Drawer.renderer.graphics.packGraphic;
 												newRenderer.graphics.flasher = pawn.Drawer.renderer.graphics.flasher;
-												newRenderer.RenderPawnAt(thing.DrawPos, curLevel, baseLevel);
-												cachedRenderers[pawn] = newRenderer;
+												newRenderer.RenderPawnAt(newDrawPos, curLevel, baseLevel);
+												cachedPawnRenderers[pawn] = newRenderer;
 											}
 										}
-										else if (thing.def.projectile == null)
+										else if (thing is Corpse corpse)
 										{
+											DrawPos_Patch.ChangeDrawPos = false;
+											TrueCenter_Patch.ChangeDrawPos = false;
+											var newDrawPos = thing.DrawPos;
+											newDrawPos.z += (baseLevel - curLevel) / 2f;
+											newDrawPos.y -= (baseLevel - curLevel) / 2f;
+											if (cachedCorpseRenderers.ContainsKey(corpse.InnerPawn))
+											{
+												cachedCorpseRenderers[corpse.InnerPawn].RenderPawnAt(newDrawPos, curLevel, baseLevel);
+											}
+											else
+											{
+												var newRenderer = new PawnRendererScaled(corpse.InnerPawn, corpse.InnerPawn.Drawer.renderer.wiggler);
+												corpse.InnerPawn.Drawer.renderer.graphics.ResolveAllGraphics();
+												newRenderer.graphics.nakedGraphic = corpse.InnerPawn.Drawer.renderer.graphics.nakedGraphic;
+												newRenderer.graphics.headGraphic = corpse.InnerPawn.Drawer.renderer.graphics.headGraphic;
+												newRenderer.graphics.hairGraphic = corpse.InnerPawn.Drawer.renderer.graphics.hairGraphic;
+												newRenderer.graphics.rottingGraphic = corpse.InnerPawn.Drawer.renderer.graphics.rottingGraphic;
+												newRenderer.graphics.dessicatedGraphic = corpse.InnerPawn.Drawer.renderer.graphics.dessicatedGraphic;
+												newRenderer.graphics.apparelGraphics = corpse.InnerPawn.Drawer.renderer.graphics.apparelGraphics;
+												newRenderer.graphics.packGraphic = corpse.InnerPawn.Drawer.renderer.graphics.packGraphic;
+												newRenderer.graphics.flasher = corpse.InnerPawn.Drawer.renderer.graphics.flasher;
+												newRenderer.RenderPawnAt(newDrawPos, curLevel, baseLevel);
+												cachedCorpseRenderers[corpse.InnerPawn] = newRenderer;
+											}
+										}
+										else if (thing.def.projectile == null && !thing.def.IsDoor)
+										{
+											DrawPos_Patch.levelOffset = (baseLevel - curLevel) / 3.9f;
+											TrueCenter_Patch.levelOffset = (baseLevel - curLevel) / 3.9f;
 											Vector2 drawSize = thing.Graphic.drawSize;
 											drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 											drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
@@ -90,7 +182,16 @@ namespace ZLevels
 										}
 										else
 										{
-											thing.Draw();
+											if (thing is Building_Door door)
+                                            {
+												DrawPos_Patch.ChangeDrawPos = false;
+												TrueCenter_Patch.ChangeDrawPos = false;
+												DrawDoor(door, baseLevel, curLevel);
+											}
+											else
+                                            {
+												thing.Draw();
+                                            }
 										}
 									}
 									catch (Exception ex)
@@ -103,6 +204,8 @@ namespace ZLevels
 											ex.ToString()
 										}), false);
 									}
+									DrawPos_Patch.ChangeDrawPos = false;
+									TrueCenter_Patch.ChangeDrawPos = false;
 								}
 							}
 						}
@@ -110,6 +213,38 @@ namespace ZLevels
 					}
 				}
 			}
+		}
+
+		public static void DrawDoor(Building_Door door, int baseLevel, int curLevel)
+		{
+			door.Rotation = Building_Door.DoorRotationAt(door.Position, door.Map);
+			float num = Mathf.Clamp01((float)door.ticksSinceOpen / (float)door.TicksToOpenNow);
+			float d = 0f + 0.45f * num;
+			for (int i = 0; i < 2; i++)
+			{
+				Vector3 vector = default(Vector3);
+				Mesh mesh;
+				if (i == 0)
+				{
+					vector = new Vector3(0f, 0f, -1f);
+					mesh = MeshPool.plane10;
+				}
+				else
+				{
+					vector = new Vector3(0f, 0f, 1f);
+					mesh = MeshPool.plane10Flip;
+				}
+				Rot4 rotation = door.Rotation;
+				rotation.Rotate(RotationDirection.Clockwise);
+				vector = rotation.AsQuat * vector;
+				Vector3 drawPos = door.DrawPos;
+				drawPos.y = AltitudeLayer.DoorMoveable.AltitudeFor();
+				drawPos += vector * d;
+				drawPos.z += (baseLevel - curLevel) / 2f;
+				drawPos.y -= (baseLevel - curLevel) / 2f + 10f;
+				Graphics.DrawMesh(mesh, drawPos, door.Rotation.AsQuat, door.Graphic.MatAt(door.Rotation), 0);
+			}
+			door.Comps_PostDraw();
 		}
 	}
 }
