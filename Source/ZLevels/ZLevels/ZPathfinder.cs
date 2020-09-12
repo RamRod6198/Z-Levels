@@ -426,7 +426,6 @@ namespace ZLevels.Properties
         {
 
             _instance = new Lazy<ZPathfinder>();
-
         }
 
         public ZPathfinder()
