@@ -6,7 +6,7 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class JobDriver_GoToMap : JobDriver
+    public class JobDriver_GoToMap : JobDriver_ZLevels
     {
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {

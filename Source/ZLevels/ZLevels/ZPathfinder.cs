@@ -301,7 +301,11 @@ namespace ZLevels.Properties
             {
                 public override string ToString()
                 {
-                    return $"Node of stairs: {(key?.ToString()) ?? "unknownStairs"}";
+                    if (key?.Map != null)
+                    {
+                        return $"Node of stairs: {key?.ToString()} - {ZUtils.ZTracker.GetMapInfo(key.Map)}";
+                    }
+                    return $"Node of stairs: unknownStairs";
                 }
 
                 public Node(Building_Stairs stairs)
@@ -463,7 +467,7 @@ namespace ZLevels.Properties
 
         public List<DijkstraGraph.Node> FindRoute(IntVec3 from, IntVec3 to, Map mapFrom, Map mapTo, out float routeCost)
         {
-            ZLogger.Message($"Find route from {from}to {to}  mapFrom {mapFrom} mapTo {mapTo}", debugLevel: DebugLevel.Pathfinding);
+            ZLogger.Message($"Find route from {from} to {to} mapFrom {mapFrom} mapTo {mapTo}", debugLevel: DebugLevel.Pathfinding);
             if (!HasDijkstraForTile(mapFrom.Tile))
             {
                 SetOrCreateDijkstraGraph(mapFrom.Tile);

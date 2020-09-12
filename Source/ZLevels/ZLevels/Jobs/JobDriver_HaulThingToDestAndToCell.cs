@@ -7,7 +7,7 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class JobDriver_HaulThingToDestAndToCell : JobDriver
+    public class JobDriver_HaulThingToDestAndToCell : JobDriver_ZLevels
     {
         private bool forbiddenInitially;
 

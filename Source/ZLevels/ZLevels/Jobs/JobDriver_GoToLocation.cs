@@ -10,7 +10,7 @@ using ZLevels.Properties;
 
 namespace ZLevels
 {
-    public class JobDriver_GoToLocation : JobDriver
+    public class JobDriver_GoToLocation : JobDriver_ZLevels
     {
         //Target A = destination
         public override bool TryMakePreToilReservations(bool errorOnFailed)

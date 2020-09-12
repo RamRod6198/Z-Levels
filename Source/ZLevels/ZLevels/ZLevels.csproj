@@ -311,6 +311,7 @@
     <Compile Include="HarmonyPatches\ResourceCounterPatch.cs" />
     <Compile Include="HarmonyPatches\SkyfallerPatches.cs" />
     <Compile Include="Jobs\JobDriver_GoToLocation.cs" />
+    <Compile Include="Jobs\JobDriver_ZLevels.cs" />
     <Compile Include="Jobs\JobDriver_HaulThingToDest.cs" />
     <Compile Include="Jobs\JobDriver_GoToMap.cs" />
     <Compile Include="Jobs\Toils_ZLevels.cs" />

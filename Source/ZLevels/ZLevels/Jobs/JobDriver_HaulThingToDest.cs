@@ -7,7 +7,7 @@ using Verse.AI;
 
 namespace ZLevels
 {
-    public class JobDriver_HaulThingToDest : JobDriver
+    public class JobDriver_HaulThingToDest : JobDriver_ZLevels
     {
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {

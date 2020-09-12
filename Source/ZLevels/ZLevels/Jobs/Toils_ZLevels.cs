@@ -11,7 +11,6 @@ namespace ZLevels
 {
     public static class Toils_ZLevels
     {
-
         public static IEnumerable<Toil> GoToMap(Pawn pawn, Map dest, JobDriver instance)
         {
             Toil end = new Toil
@@ -31,7 +30,7 @@ namespace ZLevels
                     }
                 }
             };
-            Toil setStairs = GetSetStairs(pawn, dest, instance);
+            Toil setStairs = GetSetStairs(pawn, dest);
             var goToStairs = Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.OnCell);
             if (pawn.HostileTo(Faction.OfPlayer))
             {
@@ -51,7 +50,25 @@ namespace ZLevels
             yield return end;
         }
 
-        internal static Toil GetSetStairs(Pawn pawn, Map dest, JobDriver instance)
+        internal static Toil GetSetStairs(Pawn pawn, Map dest, Building_Stairs stairs)
+        {
+            return new Toil
+            {
+                initAction = delegate ()
+                {
+                    if (stairs != null)
+                    {
+                        pawn.CurJob.targetC = new LocalTargetInfo(stairs);
+                    }
+                    else
+                    {
+                        pawn.CurJob.targetC = null;
+                    }
+
+                }
+            };
+        }
+        internal static Toil GetSetStairs(Pawn pawn, Map dest)
         {
             return new Toil
             {
@@ -99,6 +116,7 @@ namespace ZLevels
                 initAction = delegate ()
                 {
                     var ZTracker = ZUtils.ZTracker;
+                    ZLogger.Message($"{pawn} teleporting to {pawn.CurJob.targetC.Thing.Map}", debugLevel: DebugLevel.Pathfinding);
                     if (pawn.CurJob.targetC.Thing is Building_StairsUp stairsUp)
                     {
                         Map map = ZTracker.GetUpperLevel(pawn.Map.Tile, pawn.Map);
@@ -149,30 +167,15 @@ namespace ZLevels
             };
         }
 
-        public static IEnumerable<Toil> DoNothingThings(Pawn pawn, Map dest, JobDriver instance)
+        public static IEnumerable<Toil> FindRouteWithStairs(Pawn pawn, TargetInfo targetInfo, JobDriver_ZLevels instance)
         {
-            //ZPathfinder check for route
-            //If found, build a route with alternating toils of teleport and gotostairs
-            //
-            yield return null;
-        }
-
-
-
-        public static IEnumerable<Toil> FindRouteWithStairs(Pawn pawn, TargetInfo targetInfo, JobDriver instance)
-        {
-
             yield return new Toil
             {
                 initAction = delegate ()
                 {
-                    ZLogger.Message($"Find Route with Stairs called, calling FindRoute", debugLevel: DebugLevel.Pathfinding);
+                    ZLogger.Message($"==============================================\n{pawn} - {pawn.Map} - Find Route with Stairs called, calling FindRoute", debugLevel: DebugLevel.Pathfinding);
                 }
             };
-            var nodeList =
-                ZPathfinder.Instance.FindRoute(pawn.Position, targetInfo.Cell, pawn.Map, targetInfo.Map,
-                    out float routeCost);
-
 
             //Register event here
             yield return new Toil
@@ -180,35 +183,28 @@ namespace ZLevels
 
                 initAction = delegate ()
                 {
-                    for (int j = 0; j < nodeList.Count; ++j)
+                    for (int j = 0; j < instance.GetRoute(targetInfo).Count; ++j)
                     {
-                        ZLogger.Message($"node {j} = {nodeList[j]}", debugLevel: DebugLevel.Pathfinding);
+                        ZLogger.Message($"node {j} = {instance.GetRoute(targetInfo)[j]}", debugLevel: DebugLevel.Pathfinding);
                     }
                 }
             };
 
-            for (int i = 1; i < nodeList.Count - 1; ++i)
+            for (int i = 1; i < instance.GetRoute(targetInfo).Count - 1; ++i)
             {
-
-                Toil setStairs = Toils_ZLevels.GetSetStairs(pawn, nodeList[i].Map, instance);
-
+                Toil setStairs = Toils_ZLevels.GetSetStairs(pawn, instance.GetRoute(targetInfo)[i].Map, instance.GetRoute(targetInfo)[i].key);
                 Toil useStairs = Toils_General.Wait(60, 0);
                 useStairs.WithProgressBarToilDelay(TargetIndex.A);
-                useStairs.FailOnStairAccess(pawn, nodeList[i].key);
-                setStairs.FailOnStairAccess(pawn, nodeList[i].key);
+                useStairs.FailOnStairAccess(pawn, instance.GetRoute(targetInfo)[i].key);
+                setStairs.FailOnStairAccess(pawn, instance.GetRoute(targetInfo)[i].key);
                 yield return setStairs;
-                yield return Toils_Goto.GotoCell(nodeList[i].Location, PathEndMode.OnCell).FailOnStairAccess(pawn, nodeList[i].key);
+                yield return Toils_Goto.GotoCell(instance.GetRoute(targetInfo)[i].Location, PathEndMode.OnCell).FailOnStairAccess(pawn, instance.GetRoute(targetInfo)[i].key);
                 yield return useStairs;
-
-
-                yield return Toils_ZLevels.GetTeleport(pawn, nodeList[i].Map, instance, setStairs).FailOnStairAccess(pawn, nodeList[i].key);
-
-
+                yield return Toils_ZLevels.GetTeleport(pawn, instance.GetRoute(targetInfo)[i].Map, instance, setStairs).FailOnStairAccess(pawn, instance.GetRoute(targetInfo)[i].key);
                 //foreach (Toil t in Toils_ZLevels.GoToMap(pawn, stairList[i1 + 1].Map, this))
                 //{
                 //    yield return t;
                 //}
-
             }
 
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell).FailOnForbidden(TargetIndex.A);
