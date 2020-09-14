@@ -575,7 +575,7 @@ namespace ZLevels
                                     }
                                     else
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
@@ -601,10 +601,12 @@ namespace ZLevels
                                 {
                                     if (jobToDo.targetA.Cell.IsValid)
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
                                     }
                                     else
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
@@ -633,10 +635,12 @@ namespace ZLevels
                                 {
                                     if (jobToDo.targetA.Cell.IsValid)
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
                                     }
                                     else
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
@@ -663,10 +667,12 @@ namespace ZLevels
                                 {
                                     if (jobToDo.targetA.Cell.IsValid)
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
                                     }
                                     else
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
@@ -701,10 +707,12 @@ namespace ZLevels
                                 {
                                     if (jobToDo.targetB.Cell.IsValid)
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
                                     }
                                     else
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
@@ -730,10 +738,12 @@ namespace ZLevels
                                 {
                                     if (jobToDo.targetB.Cell.IsValid)
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
                                     }
                                     else
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
@@ -762,10 +772,12 @@ namespace ZLevels
                                 {
                                     if (jobToDo.targetB.Cell.IsValid)
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
                                     }
                                     else
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
@@ -791,10 +803,12 @@ namespace ZLevels
                                 {
                                     if (jobToDo.targetB.Cell.IsValid)
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
                                     }
                                     else
                                     {
+                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }

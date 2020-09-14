@@ -18,6 +18,11 @@ namespace ZLevels
             return true;
         }
 
+        public override void ExposeData()
+        {
+            base.ExposeData();
+        }
+
         public List<ZPathfinder.DijkstraGraph.Node> ActiveStairs;
 
         public override IEnumerable<Toil> MakeNewToils()

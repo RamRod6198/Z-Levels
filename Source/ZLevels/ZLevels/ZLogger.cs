@@ -6,7 +6,7 @@ namespace ZLevels
 {
 	public static class ZLogger
 	{
-		public static DebugLevel curDebugLevel = DebugLevel.Pathfinding;
+		public static DebugLevel curDebugLevel = DebugLevel.All;
 
 		//[Conditional("Debug")]
 		public static void Message(string message, bool temp = true, DebugLevel debugLevel = DebugLevel.All)

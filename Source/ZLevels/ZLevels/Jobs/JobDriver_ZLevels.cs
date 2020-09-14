@@ -22,6 +22,8 @@ namespace ZLevels
                 ZLogger.Message($"pawn map: {pawn.Map}", debugLevel: DebugLevel.Pathfinding);
                 nodeList = ZPathfinder.Instance.FindRoute(pawn.Position, targetInfo.Cell, pawn.Map, targetInfo.Map,
                 out float routeCost);
+                curIndex = 1;
+                curMap = pawn.Map;
             }
             return nodeList;
         }

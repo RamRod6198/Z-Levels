@@ -14,6 +14,12 @@ namespace ZLevels
             return true;
         }
         public Thing savedThing = null;
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_References.Look(ref savedThing, "savedThing");
+        }
         public override IEnumerable<Toil> MakeNewToils()
         {
             var ZTracker = ZUtils.ZTracker;
@@ -32,8 +38,9 @@ namespace ZLevels
 
             Toil reserveItem = Toils_Reserve.Reserve(TargetIndex.A);
             ZLogger.Message($"JobDriver HaulThingToDest1 About to call findRouteWithStairs, with pawn {GetActor()}, dest { TargetA.Thing}, instance {this}");
+            Log.Message("3 - pawn.Map: " + pawn.Map + " - dest: " + new TargetInfo(TargetA.Thing).Map, true);
 
-            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), new TargetInfo(TargetA.Thing), this))
+            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), new TargetInfo(TargetA.Thing).Map, this))
             {
                 yield return toil;
             }
@@ -150,8 +157,9 @@ namespace ZLevels
                 }
             };
             ZLogger.Message($"JobDriver HaulThingToDest 2About to call findRouteWithStairs, with pawn {GetActor()}, dest {ZTracker.jobTracker[pawn].targetDest}, instance {this}");
+            Log.Message("4 - pawn.Map: " + pawn.Map + " - dest: " + ZTracker.jobTracker[pawn].targetDest.Map, true);
 
-            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), ZTracker.jobTracker[pawn].targetDest, this))
+            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].targetDest.Map, this))
             {
                 yield return toil;
             }

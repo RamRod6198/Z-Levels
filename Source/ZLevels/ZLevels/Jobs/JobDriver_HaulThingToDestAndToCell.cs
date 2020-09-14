@@ -73,8 +73,8 @@ namespace ZLevels
                 yield break;
             }
             ZLogger.Message($"JobDriver HaulThingToDestAndCell1 About to call findRouteWithStairs, with pawn {GetActor()}, dest {new TargetInfo(TargetA.Thing)}, instance {this}");
-
-            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), new TargetInfo(TargetA.Thing), this))
+            Log.Message("1 - pawn.Map: " + pawn.Map + " - dest: " + new TargetInfo(TargetA.Thing).Map, true);
+            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), new TargetInfo(TargetA.Thing).Map, this))
             {
                 yield return toil;
             }
@@ -124,8 +124,8 @@ namespace ZLevels
                 yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveTargetA, TargetIndex.A, TargetIndex.B);
             }
             ZLogger.Message($"JobDriver HaulThingToDestAndCell2 About to call findRouteWithStairs, with pawn {GetActor()}, dest {ZTracker.jobTracker[pawn].targetDest}, instance {this}");
-
-            foreach (var toil in Toils_ZLevels.FindRouteWithStairs(GetActor(), ZTracker.jobTracker[pawn].targetDest, this))
+            Log.Message("2 - pawn.Map: " + pawn.Map + " - dest: " + ZTracker.jobTracker[pawn].targetDest.Map, true);
+            foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].targetDest.Map, this))
             {
                 yield return toil;
             }
