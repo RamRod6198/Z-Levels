@@ -18,11 +18,16 @@ namespace ZLevels
         [HarmonyPrefix]
         public static void Prefix()
         {
+            List<Entry> list = new List<Entry>();
             try
             {
-                Find.ColonistBar.cachedEntries = Find.ColonistBar.cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
+                list = Find.ColonistBar.cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
             }
-            catch { };
+            catch { }
+            finally 
+            {
+                Find.ColonistBar.cachedEntries = list;
+            }
         }
     }
 
