@@ -21,7 +21,7 @@ namespace ZLevels
             List<Entry> list = new List<Entry>();
             try
             {
-                list = Find.ColonistBar.cachedEntries.OrderBy(x => ZUtils.ZTracker.GetZIndexFor(x.map)).ToList();
+                list = Find.ColonistBar.cachedEntries.OrderBy(x => x.map != null ? ZUtils.ZTracker.GetZIndexFor(x.map) : 9999).ToList();
             }
             catch { }
             finally 

@@ -7,4 +7,5 @@
 	<GoDown>Go Down</GoDown>
 	<debugEnabledExplanation>Enable debug logging</debugEnabledExplanation>
 	<ZGoHere>Go here usingLabel stairs</ZGoHere>
+	<allowZLevelsInfestation>Allow Z-Levels Infestation</allowZLevelsInfestation>
 </LanguageData>
