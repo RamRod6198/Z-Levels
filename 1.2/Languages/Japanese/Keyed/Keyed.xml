@@ -5,5 +5,8 @@
   <ZAbandonPermanentlyConfirmation>マップを完全に破棄しますか?プリセットも削除され,後で復元することは不可能です.</ZAbandonPermanentlyConfirmation>
   <GoUP>階段を昇る</GoUP>
   <GoDown>階段を降りる</GoDown>
+  <debugEnabledExplanation>デバッグログを有効</debugEnabledExplanation>
+  <ZGoHere>ラベル階段を使用してここに移動</ZGoHere>
+  <allowZLevelsInfestation>上下階層の侵入を許可</allowZLevelsInfestation>
 
 </LanguageData>
