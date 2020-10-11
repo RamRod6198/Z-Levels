@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <ZL_GoToStairs.reportString>TargetAを昇降中</ZL_GoToStairs.reportString>
+  <ZL_GoToLocation.reportString>TargetAに向けて昇降中</ZL_GoToLocation.reportString>
+  <ZL_GoToMap.reportString>TargetAを昇降中</ZL_GoToMap.reportString>
+  <ZL_HaulThingToDest.reportString>TargetAを昇降中</ZL_HaulThingToDest.reportString>
+  <ZL_HaulToCell.reportString>TargetAに運搬中</ZL_HaulToCell.reportString>
+
+</LanguageData>
