@@ -20,55 +20,54 @@ namespace ZLevels
     [StaticConstructorOnStartup]
     public static class FloatMenuPatches
     {
-
-        [HarmonyPatch(typeof(FloatMenuMakerMap), "GotoLocationOption")]
-        public class GotoLocationOption_Patch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref FloatMenuOption __result, ref IntVec3 clickCell, ref Pawn pawn)
-            {
-                var route = ZPathfinder.Instance.FindRoute(pawn.Position, clickCell, pawn.Map, pawn.Map,
-                    out float routeCost);
-
-                if (__result.Label == "CannotGoNoPath".Translate())
-                {
-                    ZLogger.Message($"postfix goto location node count = {route.Count}");
-                    //This means we know that there is a path, it just isn't direct
-                    if (route.Count > 0)
-                    {
-                        __result.Label = "ZGoHere".Translate();
-                        __result.Disabled = false;
-                        SetActionForDelegate(ref __result, clickCell, route, pawn);
-                        //These are the defaults for autotakeable in the original code
-                        __result.autoTakeable = true;
-                        __result.autoTakeablePriority = 10f;
-                    }
-                }
-                else
-                {
-                    //On this branch, we recognize that the direct path might not be the fastest
-                    PawnPath path = pawn.Map.pathFinder.FindPath(pawn.Position, clickCell, ZPathfinder.StairParms);
-                    float pathCost = path.TotalCost;
-                    path.ReleaseToPool();
-                    if (pathCost > routeCost)
-                    {
-                        SetActionForDelegate(ref __result, clickCell, route, pawn);
-                    }
-                }
-            }
-
-            private static void SetActionForDelegate(ref FloatMenuOption result, IntVec3 clickCell,
-                List<ZPathfinder.DijkstraGraph.Node> route, Pawn pawn)
-            {
-                result.action = delegate ()
-                {
-                    Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToLocation, clickCell);
-                    pawn.jobs.StartJob(job, JobCondition.InterruptForced);
-                };
-
-            }
-
-        }
+        //[HarmonyPatch(typeof(FloatMenuMakerMap), "GotoLocationOption")]
+        //public class GotoLocationOption_Patch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(ref FloatMenuOption __result, ref IntVec3 clickCell, ref Pawn pawn)
+        //    {
+        //        var route = ZPathfinder.Instance.FindRoute(pawn.Position, clickCell, pawn.Map, pawn.Map,
+        //            out float routeCost);
+        //
+        //        if (__result.Label == "CannotGoNoPath".Translate())
+        //        {
+        //            ZLogger.Message($"postfix goto location node count = {route.Count}");
+        //            //This means we know that there is a path, it just isn't direct
+        //            if (route.Count > 0)
+        //            {
+        //                __result.Label = "ZGoHere".Translate();
+        //                __result.Disabled = false;
+        //                SetActionForDelegate(ref __result, clickCell, route, pawn);
+        //                //These are the defaults for autotakeable in the original code
+        //                __result.autoTakeable = true;
+        //                __result.autoTakeablePriority = 10f;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            //On this branch, we recognize that the direct path might not be the fastest
+        //            PawnPath path = pawn.Map.pathFinder.FindPath(pawn.Position, clickCell, ZPathfinder.StairParms);
+        //            float pathCost = path.TotalCost;
+        //            path.ReleaseToPool();
+        //            if (pathCost > routeCost)
+        //            {
+        //                SetActionForDelegate(ref __result, clickCell, route, pawn);
+        //            }
+        //        }
+        //    }
+        //
+        //    private static void SetActionForDelegate(ref FloatMenuOption result, IntVec3 clickCell,
+        //        List<ZPathfinder.DijkstraGraph.Node> route, Pawn pawn)
+        //    {
+        //        result.action = delegate ()
+        //        {
+        //            Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToLocation, clickCell);
+        //            pawn.jobs.StartJob(job, JobCondition.InterruptForced);
+        //        };
+        //
+        //    }
+        //
+        //}
 
         [HarmonyPatch(typeof(FloatMenuOption), "Disabled", MethodType.Getter)]
         internal static class Patch_FloatDisabled
