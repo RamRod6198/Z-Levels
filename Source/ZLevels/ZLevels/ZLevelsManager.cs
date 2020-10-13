@@ -210,18 +210,18 @@ namespace ZLevels
 
         public Map GetUpperLevel(int tile, Map map)
         {
-            //ZLogger.Message("Index to get: " + this.GetZIndexFor(map));
+            //ZLogger.Message("Index to get: " + map.ZIndex);
             if (this.ZLevelsTracker != null && this.ZLevelsTracker.ContainsKey(tile)
-                && this.ZLevelsTracker[tile].ZLevels.ContainsKey(this.GetZIndexFor(map) + 1))
+                && this.ZLevelsTracker[tile].ZLevels.ContainsKey(map.ZIndex + 1))
             {
                 //foreach (var d in this.ZLevelsTracker[tile].ZLevels)
                 //{
                 //    ZLogger.Message("Data: " + d.Key + " - " + d.Value);
                 //}
-                //ZLogger.Message("Getting: " + this.ZLevelsTracker[tile].ZLevels[this.GetZIndexFor(map) + 1]);
+                //ZLogger.Message("Getting: " + this.ZLevelsTracker[tile].ZLevels[map.ZIndex + 1]);
 
                 //ZLogger.Message("Z_Levels contains key, getting map:" + Z_Levels[Z_LevelIndex + 1]);
-                return this.ZLevelsTracker[tile].ZLevels[this.GetZIndexFor(map) + 1];
+                return this.ZLevelsTracker[tile].ZLevels[map.ZIndex + 1];
             }
             return null;
         }
@@ -230,10 +230,10 @@ namespace ZLevels
             //ZLogger.Message("Current map index: " + Z_LevelIndex);
             //ZLogger.Message("Trying to get index:" + (Z_LevelIndex - 1));
             if (this.ZLevelsTracker != null && this.ZLevelsTracker.ContainsKey(tile)
-                && this.ZLevelsTracker[tile].ZLevels.ContainsKey(this.GetZIndexFor(map) - 1))
+                && this.ZLevelsTracker[tile].ZLevels.ContainsKey(map.ZIndex - 1))
             {
                 //ZLogger.Message("Z_Levels contains key, getting map:" + Z_Levels[Z_LevelIndex + 1]);
-                return this.ZLevelsTracker[tile].ZLevels[this.GetZIndexFor(map) - 1];
+                return this.ZLevelsTracker[tile].ZLevels[map.ZIndex - 1];
             }
             return null;
         }
@@ -282,7 +282,7 @@ namespace ZLevels
             if (this.ZLevelsTracker.ContainsKey(pawnMap.Tile))
             {
                 foreach (var map in this.ZLevelsTracker[pawnMap.Tile].ZLevels.Values.OrderBy(x =>
-                    (int)Mathf.Abs(this.GetZIndexFor(x) - this.GetZIndexFor(pawnMap))))
+                    (int)Mathf.Abs(x.ZIndex - pawnMap.ZIndex)))
                 {
                     //ZLogger.Message("Yielding " + this.GetMapInfo(map));
                     maps.Add(map);
@@ -1190,7 +1190,7 @@ namespace ZLevels
 
         public void SpawnStairsUpper(Pawn pawnToTeleport, IntVec3 cellToTeleport, Map mapToTeleport)
         {
-            if (this.GetZIndexFor(pawnToTeleport.Map) < this.GetZIndexFor(mapToTeleport))
+            if (pawnToTeleport.Map.ZIndex < mapToTeleport.ZIndex)
             {
                 var stairs = this.GetLowerLevel(mapToTeleport.Tile, mapToTeleport)?.thingGrid?
                     .ThingsListAt(cellToTeleport)?.Where(x => x is Building_StairsUp)?.FirstOrDefault();
@@ -1209,7 +1209,7 @@ namespace ZLevels
 
         public void SpawnStairsBelow(Pawn pawn, IntVec3 cell, Map map)
         {
-            if (this.GetZIndexFor(pawn.Map) > this.GetZIndexFor(map))
+            if (pawn.Map.ZIndex > map.ZIndex)
             {
                 var stairs = pawn.Map.thingGrid.ThingsListAt(cell)?
                     .Where(x => x is Building_StairsDown)?.FirstOrDefault();

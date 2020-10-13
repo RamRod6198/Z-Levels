@@ -34,7 +34,7 @@ namespace ZLevels
                     var upperMap = ZTracker.ZLevelsTracker[map.Tile]
                         .ZLevels.Values.Where(x => !pos.Roofed(x)
                         && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
-                        .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
+                        .OrderByDescending(x => x.ZIndex).FirstOrDefault();
                     if (upperMap != null)
                     {
                         ZTracker.TeleportThing(__result, pos, upperMap);
@@ -65,7 +65,7 @@ namespace ZLevels
                     var upperMap = ZTracker.ZLevelsTracker[map.Tile]
                         .ZLevels.Values.Where(x => !pos.Roofed(x)
                         && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
-                        .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault(); 
+                        .OrderByDescending(x => x.ZIndex).FirstOrDefault(); 
                     if (upperMap != null)
                     {
                         ZTracker.TeleportThing(__result, pos, upperMap);
@@ -96,7 +96,7 @@ namespace ZLevels
                     var upperMap = ZTracker.ZLevelsTracker[map.Tile]
                         .ZLevels.Values.Where(x => !pos.Roofed(x) 
                         && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
-                        .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault();
+                        .OrderByDescending(x => x.ZIndex).FirstOrDefault();
                     if (upperMap != null)
                     {
                         ZTracker.TeleportThing(__result, pos, upperMap);
@@ -126,7 +126,7 @@ namespace ZLevels
                     var upperMap = ZTracker.ZLevelsTracker[map.Tile]
                         .ZLevels.Values.Where(x => !pos.Roofed(x)
                         && pos.GetTerrain(x) != ZLevelsDefOf.ZL_OutsideTerrain)
-                        .OrderByDescending(x => ZTracker.GetZIndexFor(x)).FirstOrDefault(); 
+                        .OrderByDescending(x => x.ZIndex).FirstOrDefault(); 
                     if (upperMap != null)
                     {
                         ZTracker.TeleportThing(__result, pos, upperMap);

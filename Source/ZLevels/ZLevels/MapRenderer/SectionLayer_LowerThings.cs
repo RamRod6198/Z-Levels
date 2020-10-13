@@ -27,14 +27,14 @@ namespace ZLevels
 		public override void Regenerate()
 		{
 			var ZTracker = ZUtils.ZTracker;
-			int curLevel = ZTracker.GetZIndexFor(base.Map);
+			int curLevel = base.Map.ZIndex;
 			if (curLevel > 0) 
 			{
 				base.ClearSubMeshes(MeshParts.All);
 				foreach (var map in ZTracker.GetAllMaps(base.Map.Tile)
-					.OrderByDescending(x => ZTracker.GetZIndexFor(x)))
+					.OrderByDescending(x => x.ZIndex))
 				{
-					int baseLevel = ZTracker.GetZIndexFor(map);
+					int baseLevel = map.ZIndex;
 					if (curLevel > baseLevel && baseLevel >= 0)
 					{
 						foreach (IntVec3 intVec in this.section.CellRect)

@@ -63,7 +63,7 @@ namespace ZLevels
                 bool dontCheckForStairs = searcher.Thing is Building;
                 foreach (var map in ZUtils.GetAllMapsInClosestOrder(searcher.Thing, oldMap, oldPosition, dontCheckForStairs: dontCheckForStairs))
                 {
-                    if (ZUtils.ZTracker.GetZIndexFor(map) < ZUtils.ZTracker.GetZIndexFor(oldMap))
+                    if (map.ZIndex < oldMap.ZIndex)
                     {
                         CanBeSeenOverFast_Patch.checkLevels = true;
                         CanBeSeenOverFast_Patch.upperMap = oldMap;
@@ -155,8 +155,8 @@ namespace ZLevels
         
             if (__instance.caster.Map != ___currentTarget.Thing?.Map && __instance.caster.Map.Tile == ___currentTarget.Thing?.Map?.Tile)
             {
-                var ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
-                var ind2 = ZUtils.ZTracker.GetZIndexFor(___currentTarget.Thing.Map);
+                var ind1 = __instance.caster.Map.ZIndex;
+                var ind2 = ___currentTarget.Thing.Map.ZIndex;
                 if (ind1 > ind2)
                 {
                     teleportBack = true;
@@ -247,8 +247,8 @@ namespace ZLevels
         {
             if (__instance.caster?.Map != targ.Thing?.Map && __instance.caster?.Map?.Tile == targ.Thing?.Map?.Tile)
             {
-                ind1 = ZUtils.ZTracker.GetZIndexFor(__instance.caster.Map);
-                ind2 = ZUtils.ZTracker.GetZIndexFor(targ.Thing.Map);
+                ind1 = __instance.caster.Map.ZIndex;
+                ind2 = targ.Thing.Map.ZIndex;
                 if (ind1 > ind2)
                 {
                     teleportBack = true;

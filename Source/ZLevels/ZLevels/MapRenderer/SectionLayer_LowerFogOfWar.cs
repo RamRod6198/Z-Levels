@@ -23,14 +23,14 @@ namespace ZLevels
 		public override void Regenerate()
 		{
 			var ZTracker = ZUtils.ZTracker;
-			int curLevel = ZTracker.GetZIndexFor(base.Map);
+			int curLevel = base.Map.ZIndex;
 			bool[] fogGrid = base.Map.fogGrid.fogGrid;
 			if (curLevel > 0)
 			{
 				foreach (var map in ZTracker.GetAllMaps(base.Map.Tile)
-					.OrderByDescending(x => ZTracker.GetZIndexFor(x)))
+					.OrderByDescending(x => x.ZIndex))
 				{
-					int baseLevel = ZTracker.GetZIndexFor(map);
+					int baseLevel = map.ZIndex;
 					CellIndices cellIndices = map.cellIndices;
 
 					if (curLevel > baseLevel && baseLevel >= 0)

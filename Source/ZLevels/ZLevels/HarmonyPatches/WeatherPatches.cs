@@ -30,11 +30,11 @@ namespace ZLevels
                     if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(___map.Tile))
                     {
                         ZLogger.Message("Weather decider: " + __result + " - " + ZTracker.GetMapInfo(___map));
-                        if (ZTracker.GetZIndexFor(___map) == 0)
+                        if (___map.ZIndex == 0)
                         {
                             foreach (var map2 in ZTracker.GetAllMaps(___map.Tile))
                             {
-                                if (ZTracker.GetZIndexFor(map2) > 0)
+                                if (map2.ZIndex > 0)
                                 {
                                     ZLogger.Message("1 - " + ZTracker.GetMapInfo(map2) + " transitioting to " + __result);
                                     map2.weatherManager.TransitionTo(__result);
@@ -42,14 +42,14 @@ namespace ZLevels
                                 }
                             }
                         }
-                        else if (ZTracker.GetZIndexFor(___map) > 0)
+                        else if (___map.ZIndex > 0)
                         {
                             __result = ___map.weatherManager.curWeather;
                             ZLogger.Message("2 - " + ZTracker.GetMapInfo(___map) + " transitioting to " + __result);
 
                             ___map.weatherManager.TransitionTo(__result);
                         }
-                        else if (ZTracker.GetZIndexFor(___map) < 0)
+                        else if (___map.ZIndex < 0)
                         {
                             __result = WeatherDefOf.Clear;
                             ZLogger.Message("3 - " + ZTracker.GetMapInfo(___map) + " transitioting to " + __result);
@@ -76,11 +76,11 @@ namespace ZLevels
                     if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(___map.Tile))
                     {
                         ZLogger.Message("2 Weather decider: " + newWeather + " - " + ZTracker.GetMapInfo(___map));
-                        if (ZTracker.GetZIndexFor(___map) == 0)
+                        if (___map.ZIndex == 0)
                         {
                             foreach (var map2 in ZTracker.GetAllMaps(___map.Tile))
                             {
-                                if (ZTracker.GetZIndexFor(map2) > 0)
+                                if (map2.ZIndex > 0)
                                 {
                                     map2.weatherManager.lastWeather = __instance.curWeather;
                                     map2.weatherManager.curWeather = newWeather;
@@ -89,7 +89,7 @@ namespace ZLevels
                                 }
                             }
                         }
-                        else if (ZTracker.GetZIndexFor(___map) > 0)
+                        else if (___map.ZIndex > 0)
                         {
                             Map playerMap = ZTracker.GetMapByIndex(___map.Tile, 0);
                             __instance.lastWeather = playerMap.weatherManager.lastWeather;
@@ -97,7 +97,7 @@ namespace ZLevels
                             __instance.curWeatherAge = playerMap.weatherManager.curWeatherAge;
                             ZLogger.Message("2.2 - " + ZTracker.GetMapInfo(___map) + " transitioting to " + ___map.weatherManager.curWeather);
                         }
-                        else if (ZTracker.GetZIndexFor(___map) < 0)
+                        else if (___map.ZIndex < 0)
                         {
                             __instance.lastWeather = __instance.curWeather;
                             __instance.curWeather = WeatherDefOf.Clear;
@@ -123,7 +123,7 @@ namespace ZLevels
                 {
                     var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(___map.Tile)
-                        && ZTracker.GetZIndexFor(___map) < 0)
+                        && ___map.ZIndex < 0)
                     {
                         ___map.weatherManager.curWeather = null;
                         WeatherDef weatherDef = WeatherDefOf.Clear;
@@ -153,7 +153,7 @@ namespace ZLevels
                 {
                     var ZTracker = ZUtils.ZTracker;
                     if (ZTracker.ZLevelsTracker != null && ZTracker.ZLevelsTracker.ContainsKey(___map.Tile) 
-                        && ZTracker.GetZIndexFor(___map) > 0)
+                        && ___map.ZIndex > 0)
                     {
                         return false;
                     }
@@ -173,11 +173,11 @@ namespace ZLevels
             {
                 foreach (var map in __instance.AffectedMaps)
                 {
-                    if (ZUtils.ZTracker.GetZIndexFor(map) == 0)
+                    if (map.ZIndex == 0)
                     {
                         foreach (var otherMap in ZUtils.ZTracker.GetAllMaps(map.Tile))
                         {
-                            if (ZUtils.ZTracker.GetZIndexFor(otherMap) != 0)
+                            if (otherMap.ZIndex != 0)
                             {
                                 for (int num = otherMap.gameConditionManager.ActiveConditions.Count - 1; num >= 0; num--)
                                 {
@@ -216,14 +216,14 @@ namespace ZLevels
             {
                 if (__instance.ownerMap != null && !AddCondition)
                 {
-                    var ind = ZUtils.ZTracker.GetZIndexFor(__instance.ownerMap);
+                    var ind = __instance.ownerMap.ZIndex;
                     if (ind == 0 && !(__instance.ownerMap.Parent is MapParent_ZLevel))
                     {
                         AddCondition = true;
                         foreach (var map in ZUtils.ZTracker.GetAllMaps(__instance.ownerMap.Tile))
                         {
-                            if (map != __instance.ownerMap && (ZUtils.ZTracker.GetZIndexFor(map) < 0
-                                && !blackList.Contains(cond.def?.defName) || ZUtils.ZTracker.GetZIndexFor(map) > 0))
+                            if (map != __instance.ownerMap && (map.ZIndex < 0
+                                && !blackList.Contains(cond.def?.defName) || map.ZIndex > 0))
                             {
                                 var newCond = GameConditionMaker.MakeCondition(cond.def, cond.Duration);
                                 newCond.conditionCauser = cond.conditionCauser;
@@ -286,7 +286,7 @@ namespace ZLevels
         //    [HarmonyPrefix]
         //    public static bool Prefix(GameConditionManager __instance, Rect rect)
         //    {
-        //        if (__instance.ownerMap == null && ZUtils.ZTracker.GetZIndexFor(Find.CurrentMap) < 0)
+        //        if (__instance.ownerMap == null && Find.CurrentMap.ZIndex < 0)
         //        {
         //            DoConditionsUI(rect, __instance);
         //            return false;

@@ -37,12 +37,12 @@ namespace ZLevels
             try
             {
                 var ZTracker = ZUtils.ZTracker;
-                int curLevel = ZTracker.GetZIndexFor(base.Map);
+                int curLevel = base.Map.ZIndex;
                 base.ClearSubMeshes(MeshParts.All);
                 foreach (var map in ZTracker.GetAllMaps(base.Map.Tile)
-                    .OrderByDescending(x => ZTracker.GetZIndexFor(x)))
+                    .OrderByDescending(x => x.ZIndex))
                 {
-                    int baseLevel = ZTracker.GetZIndexFor(map);
+                    int baseLevel = map.ZIndex;
                     if (curLevel > baseLevel && baseLevel >= 0)
                     {
                         TerrainGrid terrainGrid = map.terrainGrid;

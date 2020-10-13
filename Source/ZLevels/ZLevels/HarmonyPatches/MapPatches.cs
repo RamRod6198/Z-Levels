@@ -49,7 +49,7 @@ namespace ZLevels
                         }
                         else if (parent.Z_LevelIndex == 0)
                         {
-                            var ind = ZUtils.ZTracker.GetZIndexFor(__instance);
+                            var ind = __instance.ZIndex;
                             if (ind < 0)
                             {
                                 parent.IsUnderground = true;
@@ -122,7 +122,7 @@ namespace ZLevels
             {
                 try
                 {
-                    if (t.def == ThingDefOf.SteamGeyser && ZUtils.ZTracker.GetZIndexFor(t.Map) < 0 && ZUtils.ZTracker.GetUpperLevel(t.Map.Tile,
+                    if (t.def == ThingDefOf.SteamGeyser && t.Map.ZIndex < 0 && ZUtils.ZTracker.GetUpperLevel(t.Map.Tile,
                         t.Map).listerThings.AllThings.Where(x => x.def == ThingDefOf.SteamGeyser && x.Position == t.Position).Count() > 0)
                     {
                         return false;

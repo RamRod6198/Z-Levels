@@ -52,7 +52,7 @@ namespace ZLevels
                 try
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    if (ZTracker.GetZIndexFor(___map) > 0)
+                    if (___map.ZIndex > 0)
                     {
                         int num = ___map.cellIndices.CellToIndex(c);
                         if (doLeavings)

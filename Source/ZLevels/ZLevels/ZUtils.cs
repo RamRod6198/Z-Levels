@@ -55,7 +55,7 @@ namespace ZLevels
                 if (!dontCheckForStairs)
                 {
                     var stairs = new List<Building_Stairs>();
-                    if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap) && !cantGoUP)
+                    if (otherMap.ZIndex > oldMap.ZIndex && !cantGoUP)
                     {
                         Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
                         if (lowerMap != null)
@@ -67,7 +67,7 @@ namespace ZLevels
                             ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
                         }
                     }
-                    else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap) && !cantGoDown)
+                    else if (otherMap.ZIndex < oldMap.ZIndex && !cantGoDown)
                     {
                         Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
                         if (upperMap != null)
@@ -96,12 +96,12 @@ namespace ZLevels
                     }
                     else
                     {
-                        if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+                        if (otherMap.ZIndex > oldMap.ZIndex)
                         {
                             ZLogger.Message(thing + " cant go up in " + ZTracker.GetMapInfo(otherMap));
                             cantGoUP = true;
                         }
-                        else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                        else if (otherMap.ZIndex < oldMap.ZIndex)
                         {
                             ZLogger.Message(thing + " cant go down in " + ZTracker.GetMapInfo(otherMap));
                             cantGoDown = true;
@@ -125,7 +125,7 @@ namespace ZLevels
             foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
             {
                 var stairs = new List<Building_Stairs>();
-                if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap) && !cantGoUP)
+                if (otherMap.ZIndex > oldMap.ZIndex && !cantGoUP)
                 {
                     Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
                     if (lowerMap != null)
@@ -137,7 +137,7 @@ namespace ZLevels
                         ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
                     }
                 }
-                else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap) && !cantGoDown)
+                else if (otherMap.ZIndex < oldMap.ZIndex && !cantGoDown)
                 {
                     Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
                     if (upperMap != null)
@@ -165,12 +165,12 @@ namespace ZLevels
                 }
                 else
                 {
-                    if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+                    if (otherMap.ZIndex > oldMap.ZIndex)
                     {
                         ZLogger.Message(thing + " cant go up in " + ZTracker.GetMapInfo(otherMap));
                         cantGoUP = true;
                     }
-                    else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                    else if (otherMap.ZIndex < oldMap.ZIndex)
                     {
                         ZLogger.Message(thing + " cant go down in " + ZTracker.GetMapInfo(otherMap));
                         cantGoDown = true;

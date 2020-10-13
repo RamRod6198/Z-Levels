@@ -953,34 +953,26 @@ namespace ZLevels
         {
             public static bool Prefix(Thing t, ref bool __result)
             {
-                try
+                IHaulDestination haulDestination = StoreUtility.CurrentHaulDestinationOf(t);
+                if (haulDestination == null || !haulDestination.Accepts(t))
                 {
-                    IHaulDestination haulDestination = StoreUtility.CurrentHaulDestinationOf(t);
-                    if (haulDestination == null || !haulDestination.Accepts(t))
+                    __result = false;
+                    return false;
+                }
+                var ZTracker = ZUtils.ZTracker;
+                foreach (var map in ZTracker.GetAllMapsInClosestOrder(t.Map))
+                {
+                    if (StoreUtility.TryFindBestBetterStorageFor(t, null, map,
+                        haulDestination.GetStoreSettings().Priority,
+                        Faction.OfPlayer, out IntVec3 _, out IHaulDestination _,
+                        needAccurateResult: false))
                     {
                         __result = false;
                         return false;
                     }
-                    var ZTracker = ZUtils.ZTracker;
-                    foreach (var map in ZTracker.GetAllMapsInClosestOrder(t.Map))
-                    {
-                        if (StoreUtility.TryFindBestBetterStorageFor(t, null, map,
-                            haulDestination.GetStoreSettings().Priority,
-                            Faction.OfPlayer, out IntVec3 _, out IHaulDestination _,
-                            needAccurateResult: false))
-                        {
-                            __result = false;
-                            return false;
-                        }
-                    }
-                    __result = true;
-                    return false;
                 }
-                catch
-                {
-
-                }
-                return true;
+                __result = true;
+                return false;
             }
         }
 
@@ -2214,7 +2206,7 @@ namespace ZLevels
                 foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(t.Map))
                 {
                     var stairs = new List<Building_Stairs>();
-                    if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+                    if (otherMap.ZIndex > oldMap.ZIndex)
                     {
                         Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
                         if (lowerMap != null)
@@ -2226,7 +2218,7 @@ namespace ZLevels
                             ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
                         }
                     }
-                    else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                    else if (otherMap.ZIndex < oldMap.ZIndex)
                     {
                         Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
                         if (upperMap != null)

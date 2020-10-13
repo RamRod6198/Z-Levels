@@ -66,12 +66,12 @@ namespace ZLevels
 		public static void DynamicDrawManagerPostfix(DynamicDrawManager __instance, Map ___map, ref bool ___drawingNow)
 		{
 			var ZTracker = ZUtils.ZTracker;
-			int curLevel = ZTracker.GetZIndexFor(___map);
+			int curLevel = ___map.ZIndex;
 			if (curLevel != 0)
             {
-				foreach (var map2 in ZTracker.GetAllMaps(___map.Tile).OrderBy(x => ZTracker.GetZIndexFor(x)))
+				foreach (var map2 in ZTracker.GetAllMaps(___map.Tile).OrderBy(x => x.ZIndex))
 				{
-					int baseLevel = ZTracker.GetZIndexFor(map2);
+					int baseLevel = map2.ZIndex;
 					if (curLevel > baseLevel && baseLevel >= 0)
 					{
 						if (!DebugViewSettings.drawThingsDynamic)
