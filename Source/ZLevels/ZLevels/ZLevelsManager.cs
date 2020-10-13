@@ -297,6 +297,8 @@ namespace ZLevels
 
         public int GetZIndexFor(Map map)
         {
+            //Log.Message(map + " - " + map.ZIndex);
+            return map.ZIndex;
             int index;
             if (this.mapIndex != null && this.mapIndex.TryGetValue(map, out index))
             {
@@ -1468,6 +1470,7 @@ namespace ZLevels
             Find.World.info.seedString = new System.Random().Next(0, 2147483646).ToString();
             Map newMap = null;
             mapParent.Z_LevelIndex = comp.Z_LevelIndex - 1;
+
             mapParent.IsUnderground = true;
             try
             {
@@ -1493,7 +1496,7 @@ namespace ZLevels
                 newMap = MapGenerator.GenerateMap(origin.Size, mapParent, mapParent.MapGeneratorDef, mapParent.ExtraGenStepDefs, null);
             }
             ZUtils.ZTracker.mapIndex[newMap] = mapParent.Z_LevelIndex;
-
+            newMap.ZIndex = mapParent.Z_LevelIndex;
             Find.World.info.seedString = seedString;
             try
             {
@@ -1558,6 +1561,7 @@ namespace ZLevels
                     mapParent.ExtraGenStepDefs, null);
             };
             ZUtils.ZTracker.mapIndex[newMap] = mapParent.Z_LevelIndex;
+            newMap.ZIndex = mapParent.Z_LevelIndex;
             Find.World.info.seedString = seedString;
             try
             {

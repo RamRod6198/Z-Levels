@@ -41,8 +41,8 @@
       <HintPath>..\..\..\RimWorld64_Data\Managed\0MultiplayerAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Assembly-CSharp_publicized">
-      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp_publicized.dll</HintPath>
+    <Reference Include="Assembly-CSharp_prepatched_publicizedForZ-Levels">
+      <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp_prepatched_publicizedForZ-Levels.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -349,6 +349,7 @@
     <Compile Include="JobTracker.cs" />
     <Compile Include="Map\MapComponentZLevel.cs" />
     <Compile Include="Map\MapParent_ZLevel.cs" />
+    <Compile Include="Map\MapZIndexSaveLoad.cs" />
     <Compile Include="ZLevelsMod.cs" />
     <Compile Include="ZLevelsSettings.cs" />
     <Compile Include="DebugLevel.cs" />
