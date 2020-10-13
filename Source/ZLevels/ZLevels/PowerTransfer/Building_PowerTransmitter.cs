@@ -93,7 +93,7 @@ namespace ZLevels
                         connectedPowerNets.powerNets.Add(0, powerComps);
                     }
                     else if (connectedPowerNets.powerNets.Values.Where(x => x.Where(y => y.PowerNet == baseComp.PowerNet
-                        && y.PowerNet.powerComps.Exists(c => c is CompPowerZTransmitter)).Count() > 0).Count() == 0)
+                        && y.PowerNet.powerComps.Exists(c => c is CompPowerZTransmitter)).Any()).Count() == 0)
                     {
                         //ZLogger.Message("4 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
                         powerComps.Add(baseComp);

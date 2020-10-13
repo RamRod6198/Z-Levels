@@ -86,7 +86,7 @@ namespace ZLevels
                     {
                         try
                         {
-                            if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+                            if (ZTracker.jobTracker[pawn]?.activeJobs?.Any() ?? false)
                             {
                                 if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
                                 {
@@ -321,7 +321,7 @@ namespace ZLevels
                         {
                             try
                             {
-                                if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+                                if (ZTracker.jobTracker[pawn]?.activeJobs?.Any() ?? false)
                                 {
                                     if (pawn.needs.food.CurCategory < HungerCategory.Starving
                                         && !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
@@ -519,7 +519,7 @@ namespace ZLevels
                     {
                         try
                         {
-                            if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+                            if (ZTracker.jobTracker[pawn]?.activeJobs?.Any() ?? false)
                             {
                                 if (pawn?.needs?.joy?.CurCategory > JoyCategory.Low
                                     && !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
@@ -712,7 +712,7 @@ namespace ZLevels
                         {
                             try
                             {
-                                if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+                                if (ZTracker.jobTracker[pawn]?.activeJobs?.Any() ?? false)
                                 {
                                     if (pawn.needs.rest.CurCategory < RestCategory.Exhausted &&
                                         !pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
@@ -1155,7 +1155,7 @@ namespace ZLevels
                     {
                         try
                         {
-                            if (ZTracker.jobTracker[pawn]?.activeJobs?.Count() > 0)
+                            if (ZTracker.jobTracker[pawn]?.activeJobs?.Any() ?? false)
                             {
                                 foreach (var activeJob in ZTracker.jobTracker[pawn]?.activeJobs)
                                 {
@@ -2238,7 +2238,7 @@ namespace ZLevels
                             ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
                         }
                     }
-                    if (stairs != null && stairs.Count() > 0)
+                    if (stairs != null && stairs.Any())
                     {
                         IntVec3 position = IntVec3.Invalid;
                         if (!entryPoints.ContainsKey(otherMap))
@@ -2412,7 +2412,7 @@ namespace ZLevels
                                                 enumerable != null);
                                             try
                                             {
-                                                if (enumerable != null && enumerable.Count() > 0)
+                                                if (enumerable != null && enumerable.Any())
                                                 {
                                                     ZLogger.Message("Try get thing from enumerable: " + enumerable.Count(), true, debugLevel: DebugLevel.Jobs);
                                                     //foreach (var t in enumerable)

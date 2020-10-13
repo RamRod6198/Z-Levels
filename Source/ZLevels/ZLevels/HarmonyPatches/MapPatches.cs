@@ -123,7 +123,7 @@ namespace ZLevels
                 try
                 {
                     if (t.def == ThingDefOf.SteamGeyser && ZUtils.ZTracker.GetZIndexFor(t.Map) < 0 && ZUtils.ZTracker.GetUpperLevel(t.Map.Tile,
-                        t.Map).listerThings.AllThings.Where(x => x.def == ThingDefOf.SteamGeyser && x.Position == t.Position).Count() > 0)
+                        t.Map).listerThings.AllThings.Where(x => x.def == ThingDefOf.SteamGeyser && x.Position == t.Position).Any())
                     {
                         return false;
                     }

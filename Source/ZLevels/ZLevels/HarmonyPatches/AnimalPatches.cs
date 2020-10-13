@@ -96,7 +96,7 @@ namespace ZLevels
                         {
                             var foods = map.listerThings.AllThings.Where(x => !(x is Plant) && !(x is Pawn)
                                     && x.GetStatValue(StatDefOf.Nutrition, true) > 0.1f);
-                            if (foods != null && foods.Count() > 0)
+                            if (foods != null && foods.Any())
                             {
                                 List<PawnKindDef> infestators = new List<PawnKindDef>
                             {

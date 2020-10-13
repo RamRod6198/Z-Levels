@@ -247,7 +247,7 @@ namespace ZLevels
 
                 foreach (var map in this.ZLevelsTracker[tile].ZLevels.Values)
                 {
-                    if (map == null && this.ZLevelsTracker[tile].ZLevels.Values.Where(x => x != null).Count() > 0)
+                    if (map == null && this.ZLevelsTracker[tile].ZLevels.Values.Where(x => x != null).Any())
                     {
                         Log.Error("ZLevels contains null map, this should never happen");
                         foreach (var mapData in this.ZLevelsTracker[tile].ZLevels)
@@ -546,7 +546,7 @@ namespace ZLevels
                 }
             }
             else if (jobToDo?.targetQueueA?.Count > 0
-                && jobToDo?.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
+                && jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).Any())
             {
                 ZLogger.Message("Job method 1.8");
                 log += "Job method 1.8\n";
@@ -683,7 +683,7 @@ namespace ZLevels
                 }
             }
             else if (jobToDo?.targetQueueB?.Count > 0
-                && jobToDo?.targetQueueB.Where(x => x.HasThing && x.Thing.Map != null).Count() > 0)
+                && jobToDo.targetQueueB.Where(x => x.HasThing && x.Thing.Map != null).Any())
             {
                 ZLogger.Message("Job method 2");
                 log += "Job method 2\n";
@@ -858,7 +858,7 @@ namespace ZLevels
             }
             if (this.jobTracker.ContainsKey(pawn))
             {
-                if (this.jobTracker[pawn].activeJobs?.Count() > 0)
+                if (this.jobTracker[pawn].activeJobs?.Any() ?? false)
                 {
                     this.jobTracker[pawn].activeJobs.Clear();
                 }
@@ -894,7 +894,7 @@ namespace ZLevels
             ZLogger.Message(pawn + " - START TryTakeFirstJob");
             try
             {
-                if (this.jobTracker.ContainsKey(pawn) && this.jobTracker[pawn].activeJobs?.Count() > 0)
+                if (this.jobTracker.ContainsKey(pawn) && this.jobTracker[pawn].activeJobs != null && this.jobTracker[pawn].activeJobs.Any())
                 {
                     job = this.jobTracker[pawn].activeJobs[0];
                     if (job?.def != null)
