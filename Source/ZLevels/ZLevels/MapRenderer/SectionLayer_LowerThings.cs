@@ -292,6 +292,8 @@ namespace ZLevels
 		}
 		protected void TakePrintFrom(Thing t, int curLevel, int baseLevel)
 		{
+			Log.Message("TakePrintFrom: " + t.def, true);
+			Log.messageCount = 0;
 			DrawPos_Patch.ChangeDrawPos = true;
 			TrueCenter_Patch.ChangeDrawPos = true;
 			DrawPos_Patch.levelOffset = -(curLevel - baseLevel) / 2f;
