@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Fields>
+    <Field Name="ZIndex" FieldType="System.Int32" TargetType="Verse.Map" />
+</Fields>
