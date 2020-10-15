@@ -29,7 +29,7 @@ namespace ZLevels
 				float result = 0;
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
-					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
+					if (Find.TickManager.TicksGame - ___lastCountTick > 5000f)
 					{
 						map.wealthWatcher.ForceRecount();
 					}
@@ -52,7 +52,7 @@ namespace ZLevels
 				float result = 0;
 				foreach (var map in ZUtils.ZTracker.GetAllMaps(___map.Tile))
 				{
-					if ((float)Find.TickManager.TicksGame - ___lastCountTick > 5000f)
+					if (Find.TickManager.TicksGame - ___lastCountTick > 5000f)
 					{
 						map.wealthWatcher.ForceRecount();
 					}

@@ -63,21 +63,25 @@ namespace ZLevels
                 bool dontCheckForStairs = searcher.Thing is Building;
                 foreach (var map in ZUtils.GetAllMapsInClosestOrder(searcher.Thing, oldMap, oldPosition, dontCheckForStairs: dontCheckForStairs))
                 {
-                    if (ZUtils.ZTracker.GetZIndexFor(map) < ZUtils.ZTracker.GetZIndexFor(oldMap))
+                    if (map != oldMap)
                     {
-                        CanBeSeenOverFast_Patch.checkLevels = true;
-                        CanBeSeenOverFast_Patch.upperMap = oldMap;
-                        CanBeSeenOverFast_Patch.lowerMap = map;
-                        CanBeSeenOverFast_Patch.caster = searcher.Thing;
-                    }
-                    var target = AttackTargetFinder.BestAttackTarget(searcher, flags, validator, minDist,
-                            maxDist, locus, maxTravelRadiusFromLocus, canBash, canTakeTargetsCloserThanEffectiveMinRange);
-                    //ZLogger.Message(searcher.Thing + " - 1: " + ZUtils.ZTracker.GetMapInfo(searcher.Thing.Map) + " - result: " + target);
-                    if (target != null)
-                    {
-                        __result = target;
-                        result = false;
-                        break;
+                        if (ZUtils.ZTracker.GetZIndexFor(map) < ZUtils.ZTracker.GetZIndexFor(oldMap))
+                        {
+                            CanBeSeenOverFast_Patch.checkLevels = true;
+                            CanBeSeenOverFast_Patch.upperMap = oldMap;
+                            CanBeSeenOverFast_Patch.lowerMap = map;
+                            CanBeSeenOverFast_Patch.caster = searcher.Thing;
+                        }
+                        var target = AttackTargetFinder.BestAttackTarget(searcher, flags, validator, minDist,
+                                maxDist, locus, maxTravelRadiusFromLocus, canBash, canTakeTargetsCloserThanEffectiveMinRange);
+                        Log.Message(searcher.Thing + " - 1: " + ZUtils.ZTracker.GetMapInfo(searcher.Thing.Map) + " - result: " + target);
+                        //ZLogger.Message(searcher.Thing + " - 1: " + ZUtils.ZTracker.GetMapInfo(searcher.Thing.Map) + " - result: " + target);
+                        if (target != null)
+                        {
+                            __result = target;
+                            result = false;
+                            break;
+                        }
                     }
                 }
                 //ZLogger.Message("1 Trying to get " + searcher.Thing + " back to " + oldMap + " - " + oldPosition, true);
@@ -88,10 +92,6 @@ namespace ZLevels
                 CanBeSeenOverFast_Patch.lowerMap = null;
                 CanBeSeenOverFast_Patch.caster = null;
             }
-            //else if (!multiMapSearch)
-            //{
-            //    ZLogger.Message("BestAttackTarget: multiMapSearch: " + multiMapSearch, true);
-            //}
             return result;
         }
     }

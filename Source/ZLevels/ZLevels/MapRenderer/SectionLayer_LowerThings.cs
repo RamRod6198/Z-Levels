@@ -124,13 +124,11 @@ namespace ZLevels
 					continue;
 				}
 				DrawPos_Patch.ChangeDrawPos = false;
-				TrueCenter_Patch.ChangeDrawPos = false;
 				Vector3 center = thing.DrawPos + GenAdj.DiagonalDirectionsAround[i].ToVector3().normalized * Graphic_LinkedCornerFiller.CoverOffsetDist + Altitudes.AltIncVect 
 					+ new Vector3(0f, 0f, 0.09f);
 				center.z -= (curLevel - baseLevel) / 2f;
 				center.y -= (curLevel - baseLevel) / 2f;
 				DrawPos_Patch.ChangeDrawPos = true;
-				TrueCenter_Patch.ChangeDrawPos = true;
 				Vector2 size = new Vector2(0.5f, 0.5f);
 				if (!c.InBounds(thing.Map))
 				{
@@ -295,9 +293,8 @@ namespace ZLevels
 			Log.Message("TakePrintFrom: " + t.def, true);
 			Log.messageCount = 0;
 			DrawPos_Patch.ChangeDrawPos = true;
-			TrueCenter_Patch.ChangeDrawPos = true;
-			DrawPos_Patch.levelOffset = -(curLevel - baseLevel) / 2f;
-			TrueCenter_Patch.levelOffset = -(curLevel - baseLevel) / 2f;
+			DrawPos_Patch.yLevelOffset = -(curLevel - baseLevel) / 2f;
+			DrawPos_Patch.zLevelOffset = -(curLevel - baseLevel) / 2f;
 			try
 			{
 
@@ -357,7 +354,6 @@ namespace ZLevels
 
 			}
 			DrawPos_Patch.ChangeDrawPos = false;
-			TrueCenter_Patch.ChangeDrawPos = false;
 		}
 		protected bool requireAddToMapMesh;
 	}

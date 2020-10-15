@@ -23,15 +23,14 @@ namespace ZLevels
         [HarmonyPatch("PowerNetsTick")]
         public class PowerNetsTick_Patch
         {
-            [HarmonyPrefix]
             private static void Prefix()
             {
                 try
                 {
-                    var connectedPowerNets = Current.Game.GetComponent<ConnectedPowerNets>();
-                    int? keyToRemove = null;
+                    var connectedPowerNets = ZUtils.ZTracker.connectedPowerNets;
                     if (Find.TickManager.TicksGame % 60 == 0)
                     {
+                        int? keyToRemove = null;
                         foreach (var powerNet in connectedPowerNets.powerNets)
                         {
                             foreach (var powerNet2 in connectedPowerNets.powerNets)
@@ -42,7 +41,6 @@ namespace ZLevels
                                     {
                                         if (powerNet.Key != powerNet2.Key && c1 == c2)
                                         {
-                                            //ZLogger.Message("PowerNetsTick_Patch: " + c1 + " == " + c2);
                                             if (powerNet.Value.Count > powerNet2.Value.Count)
                                             {
                                                 keyToRemove = powerNet2.Key;
@@ -60,10 +58,10 @@ namespace ZLevels
                                 }
                             }
                         }
-                    }
-                    if (keyToRemove.HasValue)
-                    {
-                        connectedPowerNets.powerNets.Remove(keyToRemove.Value);
+                        if (keyToRemove.HasValue)
+                        {
+                            connectedPowerNets.powerNets.Remove(keyToRemove.Value);
+                        }
                     }
 
                     foreach (var powerNet in connectedPowerNets.powerNets)
@@ -75,42 +73,28 @@ namespace ZLevels
                             foreach (var comp in powerNet.Value)
                             {
                                 comp.powerOutputInt = 0;
-                                //ZLogger.Message("1 Powernet has: " + comp + " - " + comp.PowerNet.Map + " - " + comp.GetHashCode() + " - " + comp.PowerNet.GetHashCode(), true);
                             }
-
                             foreach (var comp in powerNet.Value)
                             {
                                 var newPowerNet = comp.PowerNet.transmitters.FirstOrDefault()?.PowerNet;
-
                                 if (newPowerNet != null && comp.PowerNet != newPowerNet)
                                 {
                                     foreach (var comp2 in powerNet.Value)
                                     {
-                                        if (comp2.PowerNet.Map == newPowerNet.Map
-                                            && comp2.PowerNet != newPowerNet)
+                                        if (comp2.PowerNet.Map == newPowerNet.Map && comp2.PowerNet != newPowerNet)
                                         {
-                                            //ZLogger.Message("Replacing " + comp2.GetHashCode() + " - " + comp2.PowerNet.GetHashCode() 
-                                            //    + " with " + newPowerNet.GetHashCode() + " in " + comp2.PowerNet.Map, true);
                                             comp2.PowerNet.DeregisterConnector(comp2);
                                             comp2.transNet = newPowerNet;
                                             newPowerNet.RegisterConnector(comp2);
                                         }
                                     }
                                 }
-
                                 if (comp.PowerNet != null)
                                 {
-                                    compPowers[comp] = comp.PowerNet.CurrentEnergyGainRate()
-                                        / CompPower.WattsToWattDaysPerTick;
+                                    compPowers[comp] = comp.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick;
                                 }
                             }
                             var newValue = compPowers.Sum(x => x.Value) / compPowers.Count;
-                            //ZLogger.Message("------------------", true);
-                            //foreach (var comp in powerNet.Value)
-                            //{
-                            //    ZLogger.Message("2 Powernet has: " + comp + " - " + comp.PowerNet.Map + " - " + comp.GetHashCode() + " - " + comp.PowerNet.GetHashCode(), true);
-                            //}
-                            //ZLogger.Message("------------------", true);
                             foreach (var comp in powerNet.Value)
                             {
                                 if (compPowers.ContainsKey(comp))
@@ -118,25 +102,11 @@ namespace ZLevels
                                     if (!comp.PowerNet.powerComps.Contains(comp))
                                     {
                                         comp.PowerNet.powerComps.RemoveAll(x => x is CompPowerZTransmitter trans && trans.PowerNet != comp.PowerNet);
-                                        //ZLogger.Message("Adding " + comp + " - " + comp.GetHashCode() + " to " + comp.PowerNet.GetHashCode(), true);
                                         comp.PowerNet.powerComps.Add(comp);
                                     }
-                                    //ZLogger.Message("comp.powerNet energy: " + comp.PowerNet.Map + " - " + comp.PowerNet.CurrentEnergyGainRate()
-                                    //        / CompPower.WattsToWattDaysPerTick + " - " + comp.GetHashCode() + " - "
-                                    //        + comp.PowerNet.GetHashCode(), true);
-                                    //foreach (var p in comp.PowerNet.powerComps)
-                                    //{
-                                    //    ZLogger.Message("powerComp: " + p + " - " + p.powerOutputInt + " - " + p.GetHashCode() + " - " + p.PowerNet.GetHashCode(), true);
-                                    //}
-                                    
                                     comp.powerOutputInt = newValue - compPowers[comp];
-                                    //ZLogger.Message("comp.powerOutputInt: " + comp.powerOutputInt + " - " 
-                                    //    + comp.PowerNet.Map + " - " + comp.PowerNet.CurrentEnergyGainRate() 
-                                    //    / CompPower.WattsToWattDaysPerTick + " - " + comp.GetHashCode() + " - "
-                                    //    + comp.PowerNet.GetHashCode(), true);
                                 }
                             }
-                            //ZLogger.Message("powerNet.Value: " + powerNet.Value.Count + " - newValue: " + newValue, true);
                         }
                     }
                 }

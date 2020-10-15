@@ -14,13 +14,14 @@ namespace ZLevels
 	{
 		public static bool ChangeDrawPos = false;
 
-		public static float levelOffset = 0f;
+		public static float zLevelOffset = 0f;
+		public static float yLevelOffset = 0f;
 		public static void Postfix(ref Vector3 __result)
 		{
 			if (ChangeDrawPos)
 			{
-				__result.z += levelOffset;
-				__result.y += levelOffset;
+				__result.z += zLevelOffset;
+				__result.y += yLevelOffset;
 			}
 		}
 	}
@@ -41,15 +42,12 @@ namespace ZLevels
 		})]
 	public static class TrueCenter_Patch
     {
-		public static bool ChangeDrawPos = false;
-
-		public static float levelOffset = 0f;
 		public static void Postfix(ref Vector3 __result)
         {
-			if (ChangeDrawPos)
+			if (DrawPos_Patch.ChangeDrawPos)
 			{
-				__result.z += levelOffset;
-				__result.y += levelOffset;
+				__result.z += DrawPos_Patch.zLevelOffset;
+				__result.y += DrawPos_Patch.yLevelOffset;
 			}
 		}
     }
@@ -69,15 +67,11 @@ namespace ZLevels
 			int curLevel = ZTracker.GetZIndexFor(___map);
 			if (curLevel != 0)
             {
-				foreach (var map2 in ZTracker.GetAllMaps(___map.Tile).OrderBy(x => ZTracker.GetZIndexFor(x)))
+				foreach (var map2 in ZTracker.GetAllMaps(___map.Tile))//.OrderBy(x => ZTracker.GetZIndexFor(x)))
 				{
 					int baseLevel = ZTracker.GetZIndexFor(map2);
 					if (curLevel > baseLevel && baseLevel >= 0)
 					{
-						if (!DebugViewSettings.drawThingsDynamic)
-						{
-							return;
-						}
 						___drawingNow = true;
 						bool[] fogGrid = map2.fogGrid.fogGrid;
 						CellRect cellRect = Find.CameraDriver.CurrentViewRect;
@@ -99,30 +93,26 @@ namespace ZLevels
 									|| map2.snowGrid.GetDepth(position) <= thing.def.hideAtSnowDepth))
 								{
 									DrawPos_Patch.ChangeDrawPos = true;
-									TrueCenter_Patch.ChangeDrawPos = true;
-									DrawPos_Patch.levelOffset = -(baseLevel - curLevel) / 2f;
-									TrueCenter_Patch.levelOffset = -(baseLevel - curLevel) / 2f;
+									DrawPos_Patch.zLevelOffset = -(baseLevel - curLevel) / 2f;
+									DrawPos_Patch.yLevelOffset = -(baseLevel - curLevel) / 2f;
 									try
 									{
-										if (thing.Graphic is Graphic_Mote)
+										var graphicType = thing.Graphic.GetType();
+										if (graphicType == typeof(Graphic_Mote))
 										{
 									
 										}
-										else if (thing.Graphic is Graphic_LinkedCornerFiller
-											|| thing.Graphic is Graphic_RandomRotated
-											 || thing.Graphic is Graphic_Linked)
+										else if (graphicType == typeof(Graphic_LinkedCornerFiller) || graphicType == typeof(Graphic_RandomRotated) 
+											|| graphicType == typeof(Graphic_Linked))
 										{
-											DrawPos_Patch.levelOffset = (baseLevel - curLevel) / 3.9f;
-											TrueCenter_Patch.levelOffset = (baseLevel - curLevel) / 3.9f;
 											thing.Draw();
 										}
 										else if (thing is Pawn pawn)
 										{
 											DrawPos_Patch.ChangeDrawPos = false;
-											TrueCenter_Patch.ChangeDrawPos = false;
 											var newDrawPos = thing.DrawPos;
 											newDrawPos.z += (baseLevel - curLevel) / 2f;
-											newDrawPos.y -= (baseLevel - curLevel) / 2f;
+											newDrawPos.y -= baseLevel - curLevel;
 											if (cachedPawnRenderers.ContainsKey(pawn))
 											{
 												cachedPawnRenderers[pawn].RenderPawnAt(newDrawPos, curLevel, baseLevel);
@@ -146,10 +136,9 @@ namespace ZLevels
 										else if (thing is Corpse corpse)
 										{
 											DrawPos_Patch.ChangeDrawPos = false;
-											TrueCenter_Patch.ChangeDrawPos = false;
 											var newDrawPos = thing.DrawPos;
 											newDrawPos.z += (baseLevel - curLevel) / 2f;
-											newDrawPos.y -= (baseLevel - curLevel) / 2f;
+											newDrawPos.y -= baseLevel - curLevel;
 											if (cachedCorpseRenderers.ContainsKey(corpse.InnerPawn))
 											{
 												cachedCorpseRenderers[corpse.InnerPawn].RenderPawnAt(newDrawPos, curLevel, baseLevel);
@@ -172,12 +161,11 @@ namespace ZLevels
 										}
 										else if (thing.def.projectile == null && !thing.def.IsDoor)
 										{
-											DrawPos_Patch.levelOffset = (baseLevel - curLevel) / 3.9f;
-											TrueCenter_Patch.levelOffset = (baseLevel - curLevel) / 3.9f;
 											Vector2 drawSize = thing.Graphic.drawSize;
 											drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 											drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 											var newGraphic = thing.Graphic.GetCopy(drawSize);
+											DrawPos_Patch.zLevelOffset = (baseLevel - curLevel) / 3.5f;
 											newGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
 										}
 										else
@@ -185,7 +173,6 @@ namespace ZLevels
 											if (thing is Building_Door door)
                                             {
 												DrawPos_Patch.ChangeDrawPos = false;
-												TrueCenter_Patch.ChangeDrawPos = false;
 												DrawDoor(door, baseLevel, curLevel);
 											}
 											else
@@ -205,7 +192,6 @@ namespace ZLevels
 										}), false);
 									}
 									DrawPos_Patch.ChangeDrawPos = false;
-									TrueCenter_Patch.ChangeDrawPos = false;
 								}
 							}
 						}

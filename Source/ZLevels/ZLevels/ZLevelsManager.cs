@@ -24,6 +24,8 @@ namespace ZLevels
 
         }
 
+        public ConnectedPowerNets connectedPowerNets;
+
         public override void GameComponentTick()
         {
             base.GameComponentTick();
@@ -45,6 +47,12 @@ namespace ZLevels
             base.GameComponentOnGUI();
             this.CheckHotkeys();
         }
+
+        public void PreInit()
+        {
+            connectedPowerNets = Current.Game.GetComponent<ConnectedPowerNets>();
+        }
+
         public void Select(object obj, bool playSound = true, bool forceDesignatorDeselect = true)
         {
             if (obj == null)
@@ -1788,12 +1796,14 @@ namespace ZLevels
                     TryRegisterMap(map, 0);
                 }
             }
+            this.PreInit();
         }
         public override void LoadedGame()
         {
             base.LoadedGame();
             this.ReCheckStairs();
             ZUtils.ResetZTracker();
+            this.PreInit();
         }
 
         public override void ExposeData()
