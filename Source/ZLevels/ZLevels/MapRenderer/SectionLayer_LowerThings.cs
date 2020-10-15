@@ -127,7 +127,7 @@ namespace ZLevels
 				Vector3 center = thing.DrawPos + GenAdj.DiagonalDirectionsAround[i].ToVector3().normalized * Graphic_LinkedCornerFiller.CoverOffsetDist + Altitudes.AltIncVect 
 					+ new Vector3(0f, 0f, 0.09f);
 				center.z -= (curLevel - baseLevel) / 2f;
-				center.y -= (curLevel - baseLevel) / 2f;
+				center.y -= curLevel - baseLevel;
 				DrawPos_Patch.ChangeDrawPos = true;
 				Vector2 size = new Vector2(0.5f, 0.5f);
 				if (!c.InBounds(thing.Map))
@@ -249,7 +249,7 @@ namespace ZLevels
 				Material matSingle = newGraphic.MatSingle;
 				PlantUtility.SetWindExposureColors(Plant.workingColors, plant);
 				center.z -= (curLevel - baseLevel) / 2f;
-				center.y -= (curLevel - baseLevel) / 2f;
+				center.y -= curLevel - baseLevel;
 				num3 *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 				Printer_Plane.PrintPlane(size: new Vector2(num3, num3), layer: layer, center: center, mat: matSingle, rot: 0f, flipUv: @bool, uvs: null,
 					colors: Plant.workingColors, topVerticesAltitudeBias: 0.1f, uvzPayload: plant.HashOffset() % 1024);
@@ -293,7 +293,6 @@ namespace ZLevels
 			DrawPos_Patch.ChangeDrawPos = true;
 			DrawPos_Patch.zLevelOffset = -(curLevel - baseLevel) / 2f;
 			DrawPos_Patch.yLevelOffset = baseLevel - curLevel;
-			DrawPos_Patch.yLevelOffset -= 1;
 			try
 			{
 				if (t is Mineable || t.def.defName.ToLower().Contains("wall"))
@@ -320,6 +319,7 @@ namespace ZLevels
 				}
 				else
 				{
+					DrawPos_Patch.yLevelOffset -= 1;
 					Vector2 drawSize = t.Graphic.drawSize;
 					drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 					drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
@@ -343,7 +343,6 @@ namespace ZLevels
 							BasePrint(t, this, newGraphic);
                         }
                     }
-
 				}
 			}
 			catch (Exception ex)
