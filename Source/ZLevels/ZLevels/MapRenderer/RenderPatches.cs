@@ -65,7 +65,7 @@ namespace ZLevels
 		{
 			var ZTracker = ZUtils.ZTracker;
 			int curLevel = ZTracker.GetZIndexFor(___map);
-			if (curLevel != 0)
+			if (curLevel > 0)
             {
 				foreach (var map2 in ZTracker.GetAllMaps(___map.Tile))//.OrderBy(x => ZTracker.GetZIndexFor(x)))
 				{
@@ -93,17 +93,16 @@ namespace ZLevels
 									|| map2.snowGrid.GetDepth(position) <= thing.def.hideAtSnowDepth))
 								{
 									DrawPos_Patch.ChangeDrawPos = true;
-									DrawPos_Patch.zLevelOffset = -(baseLevel - curLevel) / 2f;
-									DrawPos_Patch.yLevelOffset = -(baseLevel - curLevel) / 2f;
+									DrawPos_Patch.zLevelOffset = (baseLevel - curLevel) / 3.5f;
+									DrawPos_Patch.yLevelOffset = baseLevel - curLevel;
 									try
 									{
 										var graphicType = thing.Graphic.GetType();
 										if (graphicType == typeof(Graphic_Mote))
 										{
-									
+											
 										}
-										else if (graphicType == typeof(Graphic_LinkedCornerFiller) || graphicType == typeof(Graphic_RandomRotated) 
-											|| graphicType == typeof(Graphic_Linked))
+										else if (graphicType == typeof(Graphic_LinkedCornerFiller) || graphicType == typeof(Graphic_RandomRotated) || graphicType == typeof(Graphic_Linked))
 										{
 											thing.Draw();
 										}
@@ -113,6 +112,7 @@ namespace ZLevels
 											var newDrawPos = thing.DrawPos;
 											newDrawPos.z += (baseLevel - curLevel) / 2f;
 											newDrawPos.y -= baseLevel - curLevel;
+											newDrawPos.y -= 4.1f;
 											if (cachedPawnRenderers.ContainsKey(pawn))
 											{
 												cachedPawnRenderers[pawn].RenderPawnAt(newDrawPos, curLevel, baseLevel);
@@ -139,6 +139,7 @@ namespace ZLevels
 											var newDrawPos = thing.DrawPos;
 											newDrawPos.z += (baseLevel - curLevel) / 2f;
 											newDrawPos.y -= baseLevel - curLevel;
+											newDrawPos.y -= 4f;
 											if (cachedCorpseRenderers.ContainsKey(corpse.InnerPawn))
 											{
 												cachedCorpseRenderers[corpse.InnerPawn].RenderPawnAt(newDrawPos, curLevel, baseLevel);
@@ -165,7 +166,6 @@ namespace ZLevels
 											drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 											drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 											var newGraphic = thing.Graphic.GetCopy(drawSize);
-											DrawPos_Patch.zLevelOffset = (baseLevel - curLevel) / 3.5f;
 											newGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
 										}
 										else

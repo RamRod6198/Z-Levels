@@ -290,15 +290,12 @@ namespace ZLevels
 		}
 		protected void TakePrintFrom(Thing t, int curLevel, int baseLevel)
 		{
-			Log.Message("TakePrintFrom: " + t.def, true);
-			Log.messageCount = 0;
 			DrawPos_Patch.ChangeDrawPos = true;
-			DrawPos_Patch.yLevelOffset = -(curLevel - baseLevel) / 2f;
 			DrawPos_Patch.zLevelOffset = -(curLevel - baseLevel) / 2f;
+			DrawPos_Patch.yLevelOffset = baseLevel - curLevel;
+			DrawPos_Patch.yLevelOffset -= 1;
 			try
 			{
-
-
 				if (t is Mineable || t.def.defName.ToLower().Contains("wall"))
 				{
 					if (t.Graphic is Graphic_LinkedCornerFiller linkedCornerFiller)
