@@ -248,7 +248,7 @@ namespace ZLevels
 				bool @bool = Rand.Bool;
 				Material matSingle = newGraphic.MatSingle;
 				PlantUtility.SetWindExposureColors(Plant.workingColors, plant);
-				center.z -= (curLevel - baseLevel) / 2f;
+				center.z -= (curLevel - baseLevel) / 1.5f;
 				center.y -= curLevel - baseLevel;
 				num3 *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 				Printer_Plane.PrintPlane(size: new Vector2(num3, num3), layer: layer, center: center, mat: matSingle, rot: 0f, flipUv: @bool, uvs: null,
@@ -267,6 +267,8 @@ namespace ZLevels
 					center2.z = plant.Position.ToVector3Shifted().z + plant.def.graphicData.shadowData.offset.z;
 				}
 				center2.y -= 3f / 70f;
+				center2.z -= (curLevel - baseLevel) / 2f;
+				center2.y -= curLevel - baseLevel;
 				Vector3 volume = plant.def.graphicData.shadowData.volume * num2;
 				Printer_Shadow.PrintShadow(layer, center2, volume, Rot4.North);
 			}

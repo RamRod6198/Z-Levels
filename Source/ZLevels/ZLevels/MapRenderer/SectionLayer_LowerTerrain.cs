@@ -55,15 +55,16 @@ namespace ZLevels
                             if (base.Map.terrainGrid.TerrainAt(intVec) == ZLevelsDefOf.ZL_OutsideTerrain)
                             {
                                 hashSet.Clear();
+                                float terrainLevelDiff = ((float)(curLevel - baseLevel)) / 2f;
                                 TerrainDef terrainDef = terrainGrid.TerrainAt(intVec);
                                 LayerSubMesh subMesh = base.GetSubMesh(this.GetMaterialFor(terrainDef));
                                 if (subMesh != null && this.AllowRenderingFor(terrainDef))
                                 {
                                     int count = subMesh.verts.Count;
-                                    subMesh.verts.Add(new Vector3((float)intVec.x, 0f, (float)intVec.z));
-                                    subMesh.verts.Add(new Vector3((float)intVec.x, 0f, (float)(intVec.z + 1)));
-                                    subMesh.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)(intVec.z + 1)));
-                                    subMesh.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)intVec.z));
+                                    subMesh.verts.Add(new Vector3((float)intVec.x, 0f, (float)intVec.z - terrainLevelDiff));
+                                    subMesh.verts.Add(new Vector3((float)intVec.x, 0f, (float)(intVec.z + 1 - terrainLevelDiff)));
+                                    subMesh.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)(intVec.z + 1 - terrainLevelDiff)));
+                                    subMesh.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)intVec.z - terrainLevelDiff));
                                     subMesh.colors.Add(SectionLayer_LowerTerrain.ColorWhite);
                                     subMesh.colors.Add(SectionLayer_LowerTerrain.ColorWhite);
                                     subMesh.colors.Add(SectionLayer_LowerTerrain.ColorWhite);
@@ -107,15 +108,15 @@ namespace ZLevels
                                     if (subMesh2 != null && this.AllowRenderingFor(terrainDef3))
                                     {
                                         int count = subMesh2.verts.Count;
-                                        subMesh2.verts.Add(new Vector3((float)intVec.x + 0.5f, 0f, (float)intVec.z));
-                                        subMesh2.verts.Add(new Vector3((float)intVec.x, 0f, (float)intVec.z));
-                                        subMesh2.verts.Add(new Vector3((float)intVec.x, 0f, (float)intVec.z + 0.5f));
-                                        subMesh2.verts.Add(new Vector3((float)intVec.x, 0f, (float)(intVec.z + 1)));
-                                        subMesh2.verts.Add(new Vector3((float)intVec.x + 0.5f, 0f, (float)(intVec.z + 1)));
-                                        subMesh2.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)(intVec.z + 1)));
-                                        subMesh2.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)intVec.z + 0.5f));
-                                        subMesh2.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)intVec.z));
-                                        subMesh2.verts.Add(new Vector3((float)intVec.x + 0.5f, 0f, (float)intVec.z + 0.5f));
+                                        subMesh2.verts.Add(new Vector3((float)intVec.x + 0.5f, 0f, (float)intVec.z - terrainLevelDiff));
+                                        subMesh2.verts.Add(new Vector3((float)intVec.x, 0f, (float)intVec.z - terrainLevelDiff));
+                                        subMesh2.verts.Add(new Vector3((float)intVec.x, 0f, (float)(intVec.z + 0.5f) - terrainLevelDiff));
+                                        subMesh2.verts.Add(new Vector3((float)intVec.x, 0f, (float)(intVec.z + 1) - terrainLevelDiff));
+                                        subMesh2.verts.Add(new Vector3((float)intVec.x + 0.5f, 0f, (float)(intVec.z + 1) - terrainLevelDiff));
+                                        subMesh2.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)(intVec.z + 1) - terrainLevelDiff));
+                                        subMesh2.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)(intVec.z + 0.5f) - terrainLevelDiff));
+                                        subMesh2.verts.Add(new Vector3((float)(intVec.x + 1), 0f, (float)intVec.z - terrainLevelDiff));
+                                        subMesh2.verts.Add(new Vector3((float)intVec.x + 0.5f, 0f, (float)(intVec.z + 0.5f) - terrainLevelDiff));
                                         for (int j = 0; j < 8; j++)
                                         {
                                             array2[j] = false;
