@@ -2346,15 +2346,15 @@ namespace ZLevels
                 Danger maxPathDanger;
                 var ZTracker = ZUtils.ZTracker;
                 var entryPoints = new Dictionary<Map, IntVec3>();
-                bool checkForIgnoredWorkgivers = ZTracker.jobTracker.ContainsKey(pawn) && ZTracker.jobTracker[pawn].ignoreGiversInFirstTime != null;
+                //bool checkForIgnoredWorkgivers = ZTracker.jobTracker.ContainsKey(pawn) && ZTracker.jobTracker[pawn].ignoreGiversInFirstTime != null;
                 for (int j = 0; j < list.Count; j++)
                 {
                     WorkGiver workGiver = list[j];
-                    if (checkForIgnoredWorkgivers && ZTracker.jobTracker[pawn].ignoreGiversInFirstTime.Contains(workGiver.def))
-                    {
-                        ZLogger.Message("Skipping ignored " + workGiver, debugLevel: DebugLevel.Jobs);
-                        continue;
-                    }
+                    //if (checkForIgnoredWorkgivers && ZTracker.jobTracker[pawn].ignoreGiversInFirstTime.Contains(workGiver.def))
+                    //{
+                    //    ZLogger.Message("Skipping ignored " + workGiver, debugLevel: DebugLevel.Jobs);
+                    //    continue;
+                    //}
                     ZLogger.Message("Workgiver N" + (j + 1) + " from " + list.Count + " - " + pawn + " search job - " + workGiver, debugLevel: DebugLevel.Jobs);
 
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))

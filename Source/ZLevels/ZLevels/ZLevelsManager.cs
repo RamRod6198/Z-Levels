@@ -879,7 +879,7 @@ namespace ZLevels
                 this.jobTracker[pawn].forceGoToDestMap = false;
                 this.jobTracker[pawn].failIfTargetMapIsNotDest = false;
                 this.jobTracker[pawn].target = null;
-                this.jobTracker[pawn].ignoreGiversInFirstTime = null;
+                //this.jobTracker[pawn].ignoreGiversInFirstTime = null;
                 this.jobTracker[pawn].oldMap = null;
                 this.jobTracker[pawn].reservedThings = null;
                 this.jobTracker[pawn].searchingJobsNow = false;
@@ -1145,18 +1145,18 @@ namespace ZLevels
                             ZLogger.Message(pawn + " taking " + job + " from TryTakeFirstJob");
                             this.jobTracker[pawn].activeJobs.RemoveAt(0);
                             ZLogger.Message("Clearing ignored workgivers");
-                            this.jobTracker[pawn].ignoreGiversInFirstTime?.Clear();
+                            //this.jobTracker[pawn].ignoreGiversInFirstTime?.Clear();
                         }
                         else
                         {
                             ZLogger.Pause("Fail in TryMakePreToilReservations in method TryTakeFirstJob, job: " + job + ", map: " + this.GetMapInfo(pawn.Map));
                             this.ResetJobs(pawn);
-                            ZLogger.Message("Adding " + job.workGiverDef + " to ignored workgivers");
-                            if (this.jobTracker[pawn].ignoreGiversInFirstTime == null)
-                            {
-                                this.jobTracker[pawn].ignoreGiversInFirstTime = new HashSet<WorkGiverDef>();
-                            }
-                            this.jobTracker[pawn].ignoreGiversInFirstTime.Add(job.workGiverDef);
+                            //ZLogger.Message("Adding " + job.workGiverDef + " to ignored workgivers");
+                            //if (this.jobTracker[pawn].ignoreGiversInFirstTime == null)
+                            //{
+                            //    this.jobTracker[pawn].ignoreGiversInFirstTime = new HashSet<WorkGiverDef>();
+                            //}
+                            //this.jobTracker[pawn].ignoreGiversInFirstTime.Add(job.workGiverDef);
                         }
                     }
                 }
