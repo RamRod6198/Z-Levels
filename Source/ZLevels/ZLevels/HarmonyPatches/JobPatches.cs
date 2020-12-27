@@ -1056,7 +1056,7 @@ namespace ZLevels
         {
             private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, ThinkResult __result, ref ThinkTreeDef thinkTree)
             {
-                if (___pawn.RaceProps.Humanlike || ___pawn.RaceProps.IsMechanoid)
+                if (___pawn.RaceProps.Humanlike)
                 {
                     try
                     {
@@ -1075,7 +1075,7 @@ namespace ZLevels
         {
             private static void Postfix(Pawn_JobTracker __instance, Pawn ___pawn, Job newJob, JobTag? tag)
             {
-                if (___pawn.RaceProps.Humanlike || ___pawn.RaceProps.IsMechanoid)
+                if (___pawn.RaceProps.Humanlike)
                 {
                     try
                     {
@@ -1095,12 +1095,10 @@ namespace ZLevels
         {
             private static void Prefix(Pawn_JobTracker __instance, Pawn ___pawn, JobCondition condition, ref bool startNewJob, bool canReturnToPool = true)
             {
-
-                if (___pawn.RaceProps.Humanlike || ___pawn.RaceProps.IsMechanoid)
+                if (___pawn.RaceProps.Humanlike)
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn)
-                        && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
+                    if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(___pawn) && ZTracker.jobTracker[___pawn].activeJobs?.Count > 0)
                     {
                         TryDropCarriedThingPatch.blockTryDrop = true;
                         startNewJob = false;
@@ -1163,190 +1161,104 @@ namespace ZLevels
         {
             private static bool Prefix(JobGiver_Work __instance, bool ___emergency, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
             {
-                var ZTracker = ZUtils.ZTracker;
-                ZTracker.ReCheckStairs();
-                try
+                if (pawn.RaceProps.Humanlike)
                 {
-                    foreach (var d in ZTracker.jobTracker[pawn].activeJobs)
+                    var ZTracker = ZUtils.ZTracker;
+                    ZTracker.ReCheckStairs();
+                    try
                     {
-                        ZLogger.Message("Active jobs: " + d + " - " + pawn);
-                    }
-                    foreach (var t in pawn.jobs.jobQueue)
-                    {
-                        ZLogger.Message("Active jobQueue: " + pawn + " - " + t.job);
-                    }
-                }
-                catch { }
-                ZLogger.Message("=============================", debugLevel: DebugLevel.Jobs);
-                try
-                {
+                        if (ZTracker.jobTracker == null)
+                        {
+                            ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
+                        }
+                        if (ZTracker.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
+                        {
+                            try
+                            {
+                                if (jobTracker.activeJobs?.Any() ?? false)
+                                {
+                                    if (!pawn.jobs.jobQueue.Contains(jobTracker.activeJobs[0]))
+                                    {
+                                        if (jobTracker.activeJobs[0].def.defName != "UnloadYourHauledInventory" && jobTracker.activeJobs[0].TryMakePreToilReservations(pawn, false))
+                                        {
+                                            __result = new ThinkResult(jobTracker.activeJobs[0], jobTracker.activeJobs[0].jobGiver);
+                                            jobTracker.activeJobs.RemoveAt(0);
+                                            return false;
+                                        }
+                                    }
+                                    else if (pawn.jobs.curJob == null)
+                                    {
 
-                    if (ZTracker.jobTracker == null)
-                    {
-                        ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
-                    }
-                    if (ZTracker.jobTracker.ContainsKey(pawn))
-                    {
+                                    }
+                                    else if (pawn.jobs.curJob != ZTracker.jobTracker[pawn].activeJobs[0])
+                                    {
+                                        ZLogger.Message("4 RESETTING JOB TRACKER FOR " + pawn);
+                                        ZTracker.ResetJobs(pawn);
+                                    }
+                                }
+                                else
+                                {
+                                    ZLogger.Message(pawn + " has no active jobs");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                ZLogger.Message("Error2: " + ex);
+                            };
+                        }
+                        else
+                        {
+                            ZTracker.jobTracker[pawn] = new JobTracker();
+                        }
+                        ThinkResult result;
+                        var oldMap = pawn.Map;
+                        var oldPosition = pawn.Position;
+                        bool select = false;
+                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+
+                        Map dest = null;
                         try
                         {
-                            if (ZTracker.jobTracker[pawn]?.activeJobs?.Any() ?? false)
+                            ZTracker.jobTracker[pawn].searchingJobsNow = true;
+                            ZTracker.jobTracker[pawn].oldMap = pawn.Map;
+                            result = TryIssueJobPackage(pawn, jobParams, __instance, ___emergency, ref dest, oldMap, oldPosition);
+                            ZTracker.jobTracker[pawn].searchingJobsNow = false;
+                            if (result.Job != null)
                             {
-                                foreach (var activeJob in ZTracker.jobTracker[pawn]?.activeJobs)
+                                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+
+                                ZLogger.Message(pawn + " got job " + result + " - map: "
+                                    + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position, debugLevel: DebugLevel.Jobs);
+                                if (dest != null)
                                 {
-                                    ZLogger.Message(pawn + " - active job: " + activeJob);
+                                    ZTracker.BuildJobListFor(pawn, dest, result.Job);
                                 }
-                                if (!pawn.jobs.jobQueue.Contains(ZTracker.jobTracker[pawn].activeJobs[0]))
+                                else
                                 {
-                                    if (ZTracker.jobTracker[pawn].activeJobs[0].def.defName != "UnloadYourHauledInventory"
-                                        && ZTracker.jobTracker[pawn].activeJobs[0].TryMakePreToilReservations(pawn, false))
-                                    {
-                                        ZLogger.Message("1 Queue: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-                                        try
-                                        {
-                                            ZLogger.Message("--------------------------");
-                                            for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                                            {
-                                                var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
-                                                ZLogger.Message("50 job.targetQueueB: " + target.Thing);
-                                                ZLogger.Message("50 job.targetQueueB.Map: " + target.Thing.Map);
-                                                ZLogger.Message("50 job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                                                ZLogger.Message("50 job.targetQueueB.countQueue: " + ZTracker.jobTracker[pawn].mainJob.countQueue[i]);
-                                            }
-                                        }
-                                        catch { }
-                                        if (pawn?.carryTracker?.CarriedThing != null)
-                                        {
-                                            ZLogger.Message(pawn + " carrying " + pawn?.carryTracker?.CarriedThing);
-                                        }
-
-                                        //if (ZTracker.jobTracker[pawn].activeJobs[0] == ZTracker.jobTracker[pawn].mainJob)
-                                        //{
-                                        //    ZTracker.FixMainJobIfThereIsProblems(pawn);
-                                        //}
-
-                                        ZLogger.Message("--------------------------");
-                                        try
-                                        {
-                                            for (int i = ZTracker.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                                            {
-                                                var target = ZTracker.jobTracker[pawn].mainJob.targetQueueB[i];
-                                                ZLogger.Message("51 job.targetQueueB: " + target.Thing);
-                                                ZLogger.Message("51 job.targetQueueB.Map: " + target.Thing.Map);
-                                                ZLogger.Message("51 job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                                                ZLogger.Message("51 job.targetQueueB.countQueue: " + ZTracker.jobTracker[pawn].mainJob.countQueue[i]);
-                                            }
-                                        }
-                                        catch { };
-
-                                        __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
-                                        ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-
-                                        //pawn.jobs.jobQueue.EnqueueLast(ZTracker.jobTracker[pawn].activeJobs[0]);
-
-                                        return false;
-                                    }
-                                    else
-                                    {
-                                        ZLogger.Message(pawn + " failed job queue " + ZTracker.jobTracker[pawn].activeJobs[0] + " in " + ZTracker.GetMapInfo(pawn.Map));
-                                    }
+                                    ZTracker.BuildJobListFor(pawn, oldMap, result.Job);
                                 }
-                                else if (pawn.jobs.curJob == null)
-                                {
-                                    //ZLogger.Message("4 START JOB "
-                                    //    + ZTracker.jobTracker[pawn].activeJobs[0] + " FOR " + pawn);
-                                    //
-                                    //ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
-                                    //ZLogger.Message(pawn + " - ZTracker.jobTracker[pawn].activeJobs[0]: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-
-                                    //foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
-                                    //{
-                                    //    ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
-                                    //}
-
-                                    //pawn.jobs.jobQueue.EnqueueFirst(ZTracker.jobTracker[pawn].activeJobs[0]);
-                                    //ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
-                                    ZLogger.Message(pawn + " - return 3");
-
-                                    return false;
-                                }
-                                else if (pawn.jobs.curJob != ZTracker.jobTracker[pawn].activeJobs[0])
-                                {
-                                    ZLogger.Message("4 RESETTING JOB TRACKER FOR " + pawn);
-                                    ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
-                                    ZLogger.Message(pawn + " - ZTracker.jobTracker[pawn].activeJobs[0]: " + ZTracker.jobTracker[pawn].activeJobs[0]);
-                                    foreach (var job in pawn.jobs.jobQueue)
-                                    {
-                                        ZLogger.Message(pawn + " - job in pawn queue: " + job.job);
-                                    }
-                                    foreach (var job in ZTracker.jobTracker[pawn].activeJobs)
-                                    {
-                                        ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
-                                    }
-                                    ZTracker.ResetJobs(pawn);
-                                }
+                                __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
+                                ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
                             }
                             else
                             {
-                                ZLogger.Message(pawn + " has no active jobs");
+                                __result = ThinkResult.NoJob;
+                                ZLogger.Message(pawn + " failed to find job", debugLevel: DebugLevel.Jobs);
                             }
                         }
                         catch (Exception ex)
                         {
-                            ZLogger.Message("Error2: " + ex);
-                        };
-                    }
-                    else
-                    {
-                        ZTracker.jobTracker[pawn] = new JobTracker();
-                    }
-                    ThinkResult result;
-                    var oldMap = pawn.Map;
-                    var oldPosition = pawn.Position;
-                    bool select = false;
-                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-
-                    Map dest = null;
-                    try
-                    {
-                        ZTracker.jobTracker[pawn].searchingJobsNow = true;
-                        ZTracker.jobTracker[pawn].oldMap = pawn.Map;
-                        result = TryIssueJobPackage(pawn, jobParams, __instance, ___emergency, ref dest, oldMap, oldPosition);
-                        ZTracker.jobTracker[pawn].searchingJobsNow = false;
-                        if (result.Job != null)
-                        {
-                            ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-
-                            ZLogger.Message(pawn + " got job " + result + " - map: "
-                                + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position, debugLevel: DebugLevel.Jobs);
-                            if (dest != null)
-                            {
-                                ZTracker.BuildJobListFor(pawn, dest, result.Job);
-                            }
-                            else
-                            {
-                                ZTracker.BuildJobListFor(pawn, oldMap, result.Job);
-                            }
-                            __result = new ThinkResult(ZTracker.jobTracker[pawn].activeJobs[0], ZTracker.jobTracker[pawn].activeJobs[0].jobGiver);
-                            ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
+                            ZLogger.Message("Exception in TryIssueJobPackagePatch: " + ex);
                         }
-                        else
-                        {
-                            __result = ThinkResult.NoJob;
-                            ZLogger.Message(pawn + " failed to find job", debugLevel: DebugLevel.Jobs);
-                        }
+
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                        if (select) Find.Selector.Select(pawn);
+                        return false;
                     }
                     catch (Exception ex)
                     {
-                        ZLogger.Message("Exception in TryIssueJobPackagePatch: " + ex);
+                        Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
                     }
-
-                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                    if (select) Find.Selector.Select(pawn);
-                    return false;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Some kind of error occurred in Z-Levels JobManager: " + ex);
                 }
                 return true;
             }

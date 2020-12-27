@@ -74,7 +74,6 @@ namespace ZLevels
                         }
                         var target = AttackTargetFinder.BestAttackTarget(searcher, flags, validator, minDist,
                                 maxDist, locus, maxTravelRadiusFromLocus, canBash, canTakeTargetsCloserThanEffectiveMinRange);
-                        Log.Message(searcher.Thing + " - 1: " + ZUtils.ZTracker.GetMapInfo(searcher.Thing.Map) + " - result: " + target);
                         //ZLogger.Message(searcher.Thing + " - 1: " + ZUtils.ZTracker.GetMapInfo(searcher.Thing.Map) + " - result: " + target);
                         if (target != null)
                         {
