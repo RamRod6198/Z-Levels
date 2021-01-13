@@ -66,13 +66,13 @@ namespace ZLevels
 
                 foreach (var powerNet in connectedPowerNets.powerNets)
                 {
-                    foreach (var test in powerNet.Value)
-                    {
-                        if (powerNet.Value.Count != 2)
-                        {
-                            Log.Message("Isn't connected: " + test + " - " + test.parent.Map + " - " + powerNet.Value.Count);
-                        }
-                    }
+                    //foreach (var test in powerNet.Value)
+                    //{
+                    //    if (powerNet.Value.Count != 2)
+                    //    {
+                    //        Log.Message("Isn't connected: " + test + " - " + test.parent.Map + " - " + powerNet.Value.Count);
+                    //    }
+                    //}
                     var zTransmitters = powerNet.Value;
                     zTransmitters.RemoveAll(x => x == null || x.PowerNet == null);
                     if (zTransmitters.Count > 1)
