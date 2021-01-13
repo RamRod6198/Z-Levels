@@ -36,12 +36,11 @@ namespace ZLevels
         {
             //ZLogger.Message($"{this.GetType()} is being destroyed, invoking handler {OnDestroyed != null} ");
             //OnDestroyed?.Invoke(this, new DestroyedEventArgs() { Map = Map, Location = Position });
-            ZPathfinder.Instance.getDijkstraGraphForTile(Map.Tile).RemoveNodeAt(Map, Position);
+            //ZPathfinder.Instance.getDijkstraGraphForTile(Map.Tile).RemoveNodeAt(Map, Position);
             base.Destroy(mode);
         }
 
         public bool syncDamage = true;
-
 
         public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
