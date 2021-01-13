@@ -63,23 +63,24 @@ namespace ZLevels
             var baseComp = this.GetComp<CompPowerZTransmitter>();
             if (baseComp.PowerNet != null)
             {
-                if (baseComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).Count() > 1
-                    && this.lowerPowerComp == null && this.upperPowerComp == null)
-                {
-                    //ZLogger.Message("1 Removing " + baseComp + " - " + baseComp.GetHashCode(), true);
-                    baseComp.PowerNet.powerComps.Remove(baseComp);
-                }
-                else if (baseComp != null && baseComp.PowerNet.powerComps.Contains(baseComp))
+                //if (baseComp.PowerNet.powerComps.Where(x => x is CompPowerZTransmitter).Count() > 1
+                //    && this.lowerPowerComp == null && this.upperPowerComp == null)
+                //{
+                //    ZLogger.Message("1 Removing " + baseComp + " - " + baseComp.GetHashCode(), true);
+                //    baseComp.PowerNet.powerComps.Remove(baseComp);
+                //}
+
+                if (baseComp != null && baseComp.PowerNet.powerComps.Contains(baseComp))
                 {
                     if (!baseComp.PowerNet.powerComps.Contains(baseComp))
                     {
-                        //ZLogger.Message("1 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
+                        ZLogger.Message("1 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
                         baseComp.PowerNet.powerComps.Add(baseComp);
                     }
                     var powerComps = new List<CompPowerZTransmitter>();
                     if (connectedPowerNets.powerNets == null)
                     {
-                        //ZLogger.Message("2 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
+                        ZLogger.Message("2 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
                         powerComps.Add(baseComp);
                         connectedPowerNets.powerNets = new Dictionary<int, List<CompPowerZTransmitter>>
                         {
@@ -88,14 +89,14 @@ namespace ZLevels
                     }
                     else if (connectedPowerNets.powerNets.Count == 0)
                     {
-                        //ZLogger.Message("3 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
+                        ZLogger.Message("3 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
                         powerComps.Add(baseComp);
                         connectedPowerNets.powerNets.Add(0, powerComps);
                     }
                     else if (connectedPowerNets.powerNets.Values.Where(x => x.Where(y => y.PowerNet == baseComp.PowerNet
                         && y.PowerNet.powerComps.Exists(c => c is CompPowerZTransmitter)).Any()).Count() == 0)
                     {
-                        //ZLogger.Message("4 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
+                        ZLogger.Message("4 Adding " + baseComp + " - " + baseComp.GetHashCode(), true);
                         powerComps.Add(baseComp);
                         int maxKey = connectedPowerNets.powerNets.Max(x => x.Key);
                         connectedPowerNets.powerNets.Add(maxKey + 1, powerComps);
@@ -106,19 +107,18 @@ namespace ZLevels
                             .Where(y => y.PowerNet == baseComp.PowerNet).Count() == 1).ToList().First();
                     }
 
-                    //ZLogger.Message(this + ZTracker.GetMapInfo(this.Map) + " works", true);
                     var upperMap = ZTracker.GetUpperLevel(this.Map.Tile, this.Map);
                     var lowerMap = ZTracker.GetLowerLevel(this.Map.Tile, this.Map);
 
-                    //if (Find.TickManager.TicksGame % 60 == 0)
-                    //{
-                    //    ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperTransmitter: " + this.upperTransmitter);
-                    //    ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperTransmitter.Spawned: " + this.upperTransmitter?.Spawned);
-                    //    ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperPowerComp: " + this.upperPowerComp);
-                    //    ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerTransmitter: " + this.lowerTransmitter);
-                    //    ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerTransmitter.Spawned: " + this.lowerTransmitter?.Spawned);
-                    //    ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerPowerComp: " + this.lowerPowerComp);
-                    //}
+                    if (Find.TickManager.TicksGame % 60 == 0)
+                    {
+                        ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperTransmitter: " + this.upperTransmitter);
+                        ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperTransmitter.Spawned: " + this.upperTransmitter?.Spawned);
+                        ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.upperPowerComp: " + this.upperPowerComp);
+                        ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerTransmitter: " + this.lowerTransmitter);
+                        ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerTransmitter.Spawned: " + this.lowerTransmitter?.Spawned);
+                        ZLogger.Message(this + " in " + ZTracker.GetMapInfo(this.Map) + " - this.lowerPowerComp: " + this.lowerPowerComp);
+                    }
 
                     if (this.upperPowerComp != null && (upperTransmitter == null || !upperTransmitter.Spawned))
                     {
@@ -136,7 +136,7 @@ namespace ZLevels
                         {
                             foreach (var t in pos.GetThingList(upperMap))
                             {
-                                //ZLogger.Message("Power candidate: " + t);
+                                ZLogger.Message("Power candidate: " + t);
                                 if (t.TryGetComp<CompPowerTransmitter>() != null)
                                 {
                                     upperTransmitter = t;
@@ -149,16 +149,15 @@ namespace ZLevels
                                         {
                                             parent = this,
                                             powerOutputInt = 0,
-                                            //PowerOn = true,
                                             transNet = upperComp.transNet
                                         };
                                         upperPowerComp.Initialize(new CompProperties_PowerZTransmitter());
-                                        //ZLogger.Message("5 Adding " + upperPowerComp + " - " + upperPowerComp.GetHashCode(), true);
+                                        ZLogger.Message("5 Adding " + upperPowerComp + " - " + upperPowerComp.GetHashCode(), true);
                                         upperComp.PowerNet.powerComps.Add(upperPowerComp);
                                     }
                                     if (upperPowerComp != null && !powerComps.Contains(upperPowerComp))
                                     {
-                                        //ZLogger.Message("6 Adding " + upperPowerComp + " - " + upperPowerComp.GetHashCode(), true);
+                                        ZLogger.Message("6 Adding " + upperPowerComp + " - " + upperPowerComp.GetHashCode(), true);
                                         powerComps.Add(upperPowerComp);
                                     }
                                     break;
@@ -185,16 +184,15 @@ namespace ZLevels
                                             parent = this,
                                             powerOutputInt = 0,
                                             transNet = lowerComp.transNet,
-                                            //PowerOn = true
                                         };
                                         lowerPowerComp.Initialize(new CompProperties_PowerZTransmitter());
-                                        //ZLogger.Message("7 Adding " + lowerPowerComp + " - " + lowerPowerComp.GetHashCode(), true);
+                                        ZLogger.Message("7 Adding " + lowerPowerComp + " - " + lowerPowerComp.GetHashCode(), true);
                                         lowerComp.PowerNet.powerComps.Add(lowerPowerComp);
                                     }
                                     if (lowerPowerComp != null && !powerComps.Contains(lowerPowerComp))
                                     {
-                                        //ZLogger.Message(this + " Lower add " + lowerPowerComp);
-                                        //ZLogger.Message("8 Adding " + lowerPowerComp + " - " + lowerPowerComp.GetHashCode(), true);
+                                        ZLogger.Message(this + " Lower add " + lowerPowerComp);
+                                        ZLogger.Message("8 Adding " + lowerPowerComp + " - " + lowerPowerComp.GetHashCode(), true);
                                         powerComps.Add(lowerPowerComp);
                                     }
                                     break;
@@ -223,7 +221,6 @@ namespace ZLevels
                     GenExplosion.DoExplosion(randomCell, base.Map, radius, DamageDefOf.Flame, null, -1, -1f, null, null, null, null, null, 0f, 1, false, null, 0f, 1, 0f, false, null, null);
                 }
             }
-            //ZLogger.Message(pawn + " - -----------------", true);
         }
         public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
         {
