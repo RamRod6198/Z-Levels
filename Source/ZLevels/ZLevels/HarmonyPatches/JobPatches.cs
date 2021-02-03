@@ -987,34 +987,26 @@ namespace ZLevels
         {
             public static bool Prefix(Thing t, ref bool __result)
             {
-                try
+                IHaulDestination haulDestination = StoreUtility.CurrentHaulDestinationOf(t);
+                if (haulDestination == null || !haulDestination.Accepts(t))
                 {
-                    IHaulDestination haulDestination = StoreUtility.CurrentHaulDestinationOf(t);
-                    if (haulDestination == null || !haulDestination.Accepts(t))
+                    __result = false;
+                    return false;
+                }
+                var ZTracker = ZUtils.ZTracker;
+                foreach (var map in ZTracker.GetAllMapsInClosestOrder(t.Map))
+                {
+                    if (StoreUtility.TryFindBestBetterStorageFor(t, null, map,
+                        haulDestination.GetStoreSettings().Priority,
+                        Faction.OfPlayer, out IntVec3 _, out IHaulDestination _,
+                        needAccurateResult: false))
                     {
                         __result = false;
                         return false;
                     }
-                    var ZTracker = ZUtils.ZTracker;
-                    foreach (var map in ZTracker.GetAllMapsInClosestOrder(t.Map))
-                    {
-                        if (StoreUtility.TryFindBestBetterStorageFor(t, null, map,
-                            haulDestination.GetStoreSettings().Priority,
-                            Faction.OfPlayer, out IntVec3 _, out IHaulDestination _,
-                            needAccurateResult: false))
-                        {
-                            __result = false;
-                            return false;
-                        }
-                    }
-                    __result = true;
-                    return false;
                 }
-                catch
-                {
-
-                }
-                return true;
+                __result = true;
+                return false;
             }
         }
 

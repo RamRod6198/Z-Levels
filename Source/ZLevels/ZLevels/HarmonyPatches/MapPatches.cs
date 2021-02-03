@@ -120,15 +120,11 @@ namespace ZLevels
             [HarmonyPrefix]
             private static bool Prefix(Thing t, float energy)
             {
-                try
+                if (t.def == ThingDefOf.SteamGeyser && ZUtils.ZTracker.GetZIndexFor(t.Map) < 0 
+                    && t.Position.GetThingList(ZUtils.ZTracker.GetUpperLevel(t.Map.Tile, t.Map)).Any(x => x.def == ThingDefOf.SteamGeyser))
                 {
-                    if (t.def == ThingDefOf.SteamGeyser && ZUtils.ZTracker.GetZIndexFor(t.Map) < 0 && ZUtils.ZTracker.GetUpperLevel(t.Map.Tile,
-                        t.Map).listerThings.AllThings.Where(x => x.def == ThingDefOf.SteamGeyser && x.Position == t.Position).Any())
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-                catch { };
                 return true;
             }
         }

@@ -50,7 +50,10 @@ namespace ZLevels
 
         public void PreInit()
         {
-            connectedPowerNets = Current.Game.GetComponent<ConnectedPowerNets>();
+            if (connectedPowerNets is null)
+            {
+                connectedPowerNets = new ConnectedPowerNets();
+            }
         }
 
         public void Select(object obj, bool playSound = true, bool forceDesignatorDeselect = true)
@@ -287,18 +290,12 @@ namespace ZLevels
         public List<Map> GetAllMapsInClosestOrder(Map pawnMap)
         {
             List<Map> maps = new List<Map>();
-            if (this.ZLevelsTracker.ContainsKey(pawnMap.Tile))
+            if (this.ZLevelsTracker.TryGetValue(pawnMap.Tile, out ZLevelData value))
             {
-                foreach (var map in this.ZLevelsTracker[pawnMap.Tile].ZLevels.Values.OrderBy(x =>
-                    (int)Mathf.Abs(this.GetZIndexFor(x) - this.GetZIndexFor(pawnMap))))
+                foreach (var map in value.ZLevels.Values.OrderBy(x => Mathf.Abs(this.GetZIndexFor(x) - this.GetZIndexFor(pawnMap))))
                 {
-                    //ZLogger.Message("Yielding " + this.GetMapInfo(map));
                     maps.Add(map);
                 }
-            }
-            else
-            {
-                ZLogger.Pause(pawnMap + " has no registered maps");
             }
             return maps;
         }
@@ -308,7 +305,6 @@ namespace ZLevels
             int index;
             if (this.mapIndex != null && this.mapIndex.TryGetValue(map, out index))
             {
-                //ZLogger.Message("1 return: " + index + " for " + map, true);
                 return index;
             }
             else
@@ -319,7 +315,6 @@ namespace ZLevels
                     this.mapIndex = new Dictionary<Map, int>();
                 }
                 this.mapIndex[map] = comp.Z_LevelIndex;
-                //ZLogger.Message("2 return: " + comp.Z_LevelIndex + " for " + map, true);
                 return comp.Z_LevelIndex;
             }
         }

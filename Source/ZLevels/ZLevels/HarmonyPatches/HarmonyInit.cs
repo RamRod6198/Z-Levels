@@ -25,7 +25,7 @@ namespace ZLevels
             [HarmonyPrefix]
             public static bool Prefix(string text, ref bool ignoreStopLoggingLimit)
             {
-                if (text.Contains("without a specific job end condition"))
+                if (text.Contains("without a specific job end condition") || text.Contains("Drew energy from a PowerNet that didn't have it"))
                 {
                     return false;
                 }
