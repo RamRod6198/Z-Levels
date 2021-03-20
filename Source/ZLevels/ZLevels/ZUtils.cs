@@ -116,8 +116,7 @@ namespace ZLevels
             }
         }
 
-        public static IEnumerable<Map> GetAllMapsInClosestOrderForTwoThings(Thing thing, Map oldMap, IntVec3 oldPosition, 
-            Thing thing2, Map oldMap2, IntVec3 oldPosition2)
+        public static IEnumerable<Map> GetAllMapsInClosestOrderForTwoThings(Thing thing, Map oldMap, IntVec3 oldPosition, Thing thing2, Map oldMap2, IntVec3 oldPosition2)
         {
             bool cantGoDown = false;
             bool cantGoUP = false;
@@ -160,7 +159,7 @@ namespace ZLevels
                 else if (otherMap == oldMap)
                 {
                     TeleportThing(thing, oldMap, oldPosition);
-                    TeleportThing(thing, oldMap2, oldPosition2);
+                    TeleportThing(thing2, oldMap2, oldPosition2);
                     yield return otherMap;
                 }
                 else
@@ -179,17 +178,7 @@ namespace ZLevels
             }
         }
 
-        static int GetIndex(List<Map> list, Map value)
-        {
-            for (int index = 0; index < list.Count; index++)
-            {
-                if (list[index] == value)
-                {
-                    return index;
-                }
-            }
-            return -1;
-        }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void TeleportThing(Thing thing, Map map, IntVec3 position)
