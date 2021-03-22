@@ -10,8 +10,9 @@ namespace ZLevels
 	{
 		public JobTracker()
 		{
+			activeJobs = new List<Job>();
+			reservedThings = new List<LocalTargetInfo>();
 		}
-
 		public void ExposeData()
 		{
 			if (Scribe.mode == LoadSaveMode.Saving && this.activeJobs != null)
