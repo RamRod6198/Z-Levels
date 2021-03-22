@@ -59,7 +59,8 @@ namespace ZLevels
 		{
 			if (ZLogger.DebugEnabled)
 			{
-				Log.Error("Pausing, reason: " + reason, true);
+				Log.Message("Pausing, reason: " + reason, true);
+				Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
 			}
 		}
 

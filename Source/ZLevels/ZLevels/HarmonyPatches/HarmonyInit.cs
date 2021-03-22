@@ -37,7 +37,6 @@ namespace ZLevels
         [HarmonyPatch(nameof(Log.Error))]
         static class Log_Error_Patch
         {
-            [HarmonyPrefix]
             public static bool Prefix(string text, ref bool ignoreStopLoggingLimit)
             {
                 // somehow the game periodically gives this error message when pawns haul between maps
@@ -59,13 +58,9 @@ namespace ZLevels
 
                 if (ZLogger.DebugEnabled)
                 {
-                    try
-                    {
-                        Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-                        ignoreStopLoggingLimit = true;
-                        ZLogger.Message("Error: " + text);
-                    }
-                    catch { };
+                    Log.ResetMessageCount();
+                    ZLogger.Pause(text);
+                    ignoreStopLoggingLimit = true;
                 }
                 return true;
             }
@@ -75,13 +70,13 @@ namespace ZLevels
         [HarmonyPatch(nameof(Log.Notify_MessageReceivedThreadedInternal))]
         static class Notify_MessageReceivedThreadedInternal_Patch
         {
-            public static void Postfix()
+            public static bool Prefix()
             {
                 if (ZLogger.DebugEnabled)
                 {
-                    Log.reachedMaxMessagesLimit = false;
-                    Debug.unityLogger.logEnabled = true;
+                    return false;
                 }
+                return true;
             }
         }
 

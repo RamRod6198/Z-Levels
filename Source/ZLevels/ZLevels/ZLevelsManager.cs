@@ -490,6 +490,7 @@ namespace ZLevels
                 this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Thing);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = jobToDo.count;
+
                 tempJobs.Add(job);
             }
             else if (jobToDo.def == JobDefOf.Rescue || jobToDo.def == JobDefOf.Capture || jobToDo.def == JobDefOf.Arrest)
@@ -1131,19 +1132,11 @@ namespace ZLevels
                             }
                             ZLogger.Message(pawn + " taking " + job + " from TryTakeFirstJob");
                             this.jobTracker[pawn].activeJobs.RemoveAt(0);
-                            ZLogger.Message("Clearing ignored workgivers");
-                            //this.jobTracker[pawn].ignoreGiversInFirstTime?.Clear();
                         }
                         else
                         {
-                            ZLogger.Pause("Fail in TryMakePreToilReservations in method TryTakeFirstJob, job: " + job + ", map: " + this.GetMapInfo(pawn.Map));
+                            ZLogger.Pause($"Fail in TryMakePreToilReservations, pawn: {pawn}, job: {job}, driver: {job.GetCachedDriver(pawn)}, map: {this.GetMapInfo(pawn.Map)}");
                             this.ResetJobs(pawn);
-                            //ZLogger.Message("Adding " + job.workGiverDef + " to ignored workgivers");
-                            //if (this.jobTracker[pawn].ignoreGiversInFirstTime == null)
-                            //{
-                            //    this.jobTracker[pawn].ignoreGiversInFirstTime = new HashSet<WorkGiverDef>();
-                            //}
-                            //this.jobTracker[pawn].ignoreGiversInFirstTime.Add(job.workGiverDef);
                         }
                     }
                 }

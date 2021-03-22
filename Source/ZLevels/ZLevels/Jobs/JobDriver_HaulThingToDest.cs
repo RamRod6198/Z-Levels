@@ -63,6 +63,7 @@ namespace ZLevels
 
             yield return toilGoto;
             yield return Toils_Haul.StartCarryThing(TargetIndex.A, putRemainderInQueue: false, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.A);
+            
             if (job.haulOpportunisticDuplicates)
             {
                 yield return new Toil
