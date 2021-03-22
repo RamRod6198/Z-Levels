@@ -58,9 +58,7 @@ namespace ZLevels
 
                 if (ZLogger.DebugEnabled)
                 {
-                    Log.ResetMessageCount();
-                    ZLogger.Pause(text);
-                    ignoreStopLoggingLimit = true;
+                    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
                 }
                 return true;
             }

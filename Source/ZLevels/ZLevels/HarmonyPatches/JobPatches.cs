@@ -485,7 +485,7 @@ namespace ZLevels
         {
             [HarmonyPrefix]
             private static bool JobGiver_GetJoyPrefix(JobGiver_GetJoy __instance, ref Job __result,
-                 DefMap<JoyGiverDef, float> ___joyGiverChances, Pawn pawn)
+                 ref DefMap<JoyGiverDef, float> ___joyGiverChances, Pawn pawn)
             {
                 try
                 {
@@ -523,7 +523,6 @@ namespace ZLevels
                             //pawn.jobs.StartJob(jobTracker.activeJobs[0]);
                             //jobTracker.activeJobs.RemoveAt(0);
                             ZLogger.Message("Return 4");
-
                             return false;
                         }
                         else if (pawn?.needs?.joy?.CurCategory <= JoyCategory.Low && pawn.jobs.curJob != jobTracker.activeJobs[0])
@@ -540,7 +539,6 @@ namespace ZLevels
                                 ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                             }
                             ZTracker.ResetJobs(pawn);
-
                         }
                     }
                     Job result = null;
@@ -551,13 +549,12 @@ namespace ZLevels
                     try
                     {
                         var jobList = new Dictionary<Job, Map>();
-
                         bool CanDoDuringMedicalRest = __instance.CanDoDuringMedicalRest;
                         bool InBed = pawn.InBed();
 
                         if (pawn.MentalStateDef != null)
                         {
-                            __result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, InBed, ___joyGiverChances, __instance);
+                            __result = TryGiveJob(pawn, CanDoDuringMedicalRest, InBed, ___joyGiverChances, __instance);
                             ZLogger.Pause(pawn + " in mental state, result: " + __result);
                             return false;
                         }
@@ -567,7 +564,7 @@ namespace ZLevels
                             ZLogger.Message("Searching joy job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                 + " for " + ZTracker.GetMapInfo(oldMap));
 
-                            result = JobGiver_GetJoyPatch.TryGiveJob(pawn, CanDoDuringMedicalRest, InBed, ___joyGiverChances, __instance);
+                            result = TryGiveJob(pawn, CanDoDuringMedicalRest, InBed, ___joyGiverChances, __instance);
                             if (result != null)
                             {
                                 ZLogger.Message(pawn + " got joy job " + result + " - map: "
@@ -578,11 +575,11 @@ namespace ZLevels
 
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition);
 
-                        if (jobList.Count > 0)
+                        if (jobList.Count > 0 && jobList.Keys.TryRandomElementByWeight(j => j.def.joyGainRate, out Job job))
                         {
-                            //var job = jobList.MaxBy(j => j.Key.def.joyGainRate);
-                            var job = jobList.RandomElement();
-                            ZTracker.BuildJobListFor(pawn, job.Value, job.Key);
+                            //var job = jobList.RandomElement();
+                            ZLogger.Message(pawn + " found joy " + job);
+                            ZTracker.BuildJobListFor(pawn, jobList[job], job);
                             __result = jobTracker.activeJobs[0];
                             jobTracker.activeJobs.RemoveAt(0);
                         }
@@ -611,9 +608,6 @@ namespace ZLevels
             }
             public static Job TryGiveJob(Pawn pawn, bool CanDoDuringMedicalRest, bool InBed, DefMap<JoyGiverDef, float> joyGiverChances, JobGiver_GetJoy __instance)
             {
-                ZLogger.Message("!CanDoDuringMedicalRest: " + !CanDoDuringMedicalRest);
-                ZLogger.Message("pawn.InBed(): " + InBed);
-                ZLogger.Message("HealthAIUtility.ShouldSeekMedicalRest(pawn): " + HealthAIUtility.ShouldSeekMedicalRest(pawn));
                 if (!CanDoDuringMedicalRest && InBed && HealthAIUtility.ShouldSeekMedicalRest(pawn))
                 {
                     return null;
@@ -1165,7 +1159,6 @@ namespace ZLevels
                     }
                     try
                     {
-                        //ZLogger.Message("3 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
                         ZLogger.Message(___pawn + " ends " + __instance.curJob + " - " + startNewJob);
                     }
                     catch
@@ -1187,30 +1180,6 @@ namespace ZLevels
                     {
                         TryDropCarriedThingPatch.blockTryDrop = false;
                         ZTracker.TryTakeFirstJob(___pawn);
-                        //try
-                        //{
-                        //    ZLogger.Message(___pawn + " taking first job 1");
-                        //    try
-                        //    {
-                        //        ZLogger.Message("POSTFIX 0: " + ___pawn.CurJob);
-                        //        foreach (var job in ___pawn.jobs.jobQueue)
-                        //        {
-                        //            ZLogger.Message("POSTFIX 1: " + job.job);
-                        //        }
-                        //        foreach (var job in ZTracker.jobTracker[___pawn].activeJobs)
-                        //        {
-                        //            ZLogger.Message("POSTFIX 2: " + job);
-                        //        }
-                        //        ZLogger.Message("POSTFIX 3: " + ZTracker.jobTracker[___pawn].activeJobs[0]);
-                        //        ZLogger.Message("4 CARRIED TRHING: " + ___pawn.carryTracker?.CarriedThing);
-                        //    }
-                        //    catch { };
-                        //
-                        //}
-                        //catch
-                        //{
-                        //
-                        //}
                     }
                 }
             }

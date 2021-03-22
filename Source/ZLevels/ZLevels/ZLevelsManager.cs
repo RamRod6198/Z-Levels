@@ -410,7 +410,13 @@ namespace ZLevels
                     }
                 }
                 catch { }
-                str += "Job.countQueue: " + job.countQueue + "\n";
+                if (job.countQueue != null)
+                {
+                    foreach (var c in job.countQueue)
+                    {
+                        str += "Job.countQueue: " + c + "\n";
+                    }
+                }
 
                 try
                 {
@@ -507,11 +513,11 @@ namespace ZLevels
             }
             else if (jobToDo.def == JobDefOf.Refuel)
             {
-                ZLogger.Message("Job method 1.7: " + jobToDo.count);
-                log += "Job method 1.7: " + jobToDo.count + "\n";
+                ZLogger.Message("Job method 1.7");
+                log += "Job method 1.7" + "\n";
                 this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Thing);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetB.Thing);
-                job.count = jobToDo.count;
+                job.count = jobToDo.GetTarget(TargetIndex.A).Thing.TryGetComp<CompRefuelable>().GetFuelCountToFullyRefuel();
                 tempJobs.Add(job);
             }
             else if (jobToDo.def == JobDefOf.Harvest)
@@ -970,7 +976,13 @@ namespace ZLevels
                                     ZLogger.Message("17 job.targetQueueB: " + target.Thing);
                                     ZLogger.Message("17 job.targetQueueB.Map: " + target.Thing.Map);
                                     ZLogger.Message("17 job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                                    ZLogger.Message("17 job.targetQueueB.countQueue: " + job.countQueue);
+                                    if (job.countQueue != null)
+                                    {
+                                        foreach (var c in job.countQueue)
+                                        {
+                                            ZLogger.Message("17 job.targetQueueB.countQueue: " + c);
+                                        }
+                                    }
                                     if (newThing != null && target.Thing == savedThing && savedThing != newThing)
                                     {
                                         ZLogger.Message(newThing + " 0 job.targetQueueB is not same: " + target.Thing);
@@ -1044,7 +1056,13 @@ namespace ZLevels
                                         ZLogger.Message("BEFORE job.targetQueueB: " + target.Thing);
                                         ZLogger.Message("BEFORE job.targetQueueB.Map: " + target.Thing.Map);
                                         ZLogger.Message("BEFORE job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                                        ZLogger.Message("BEFORE job.targetQueueB.countQueue: " + job.countQueue);
+                                        if (job.countQueue != null)
+                                        {
+                                            foreach (var c in job.countQueue)
+                                            {
+                                                ZLogger.Message("BEFORE job.targetQueueB.countQueue: " + c);
+                                            }
+                                        }
 
                                     }
                                 }
@@ -1107,7 +1125,13 @@ namespace ZLevels
                                         ZLogger.Message("AFTER job.targetQueueB: " + target.Thing);
                                         ZLogger.Message("AFTER job.targetQueueB.Map: " + target.Thing.Map);
                                         ZLogger.Message("AFTER job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                                        ZLogger.Message("AFTER job.targetQueueB.countQueue: " + job.countQueue);
+                                        if (job.countQueue != null)
+                                        {
+                                            foreach (var c in job.countQueue)
+                                            {
+                                                ZLogger.Message("AFTER job.targetQueueB.countQueue: " + c);
+                                            }
+                                        }
 
                                     }
                                 }
