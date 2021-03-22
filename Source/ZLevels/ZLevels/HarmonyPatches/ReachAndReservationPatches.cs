@@ -22,7 +22,7 @@ namespace ZLevels
     {
         private static void Postfix(ref bool __result, Pawn pawn, LocalTargetInfo dest, PathEndMode peMode, Danger maxDanger, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
         {
-            if (pawn.RaceProps.Humanlike)
+            if (!__result && pawn.RaceProps.Humanlike)
             {
                 if (dest.HasThing)
                 {
@@ -69,7 +69,7 @@ namespace ZLevels
                                         if (reservation.HasThing && reservation.thingInt == target.thingInt)
                                         {
                                             __result = false;
-                                            ZLogger.Error($"FAIL: {__result}, Detected ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, thing: {thing}");
+                                            ZLogger.Message($"Detected ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, thing: {thing}");
                                             return;
                                         }
                                         //Log.Message($"ZTracker reservation: map: Reservation: {data.Key}, target: {reservation}, {data.Key.Map} - {reservation.Thing?.Map}");

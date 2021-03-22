@@ -490,7 +490,12 @@ namespace ZLevels
                 this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Thing);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = jobToDo.count;
-
+                job.targetQueueA = jobToDo.targetQueueA;
+                Log.Message("job.targetQueueA: " + job.targetQueueA.Count);
+                foreach (var t in job.targetQueueA) 
+                {
+                    Log.Message("T: " + t);
+                }
                 tempJobs.Add(job);
             }
             else if (jobToDo.def == JobDefOf.Rescue || jobToDo.def == JobDefOf.Capture || jobToDo.def == JobDefOf.Arrest)
