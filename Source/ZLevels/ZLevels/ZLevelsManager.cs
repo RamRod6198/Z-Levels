@@ -292,6 +292,44 @@ namespace ZLevels
             return maps;
         }
 
+        public List<Map> GetAllMapsFromToUpper(Map pawnMap, Map destMap)
+        {
+            List<Map> maps = new List<Map>();
+            if (this.ZLevelsTracker.TryGetValue(pawnMap.Tile, out ZLevelData value))
+            {
+                foreach (var map in value.ZLevels.Values.Where(x => this.GetZIndexFor(x) >= this.GetZIndexFor(pawnMap)).OrderBy(x => this.GetZIndexFor(x)))
+                {
+                    if (map != destMap)
+                    {
+                        Log.Message("Adding: " + this.GetMapInfo(map));
+                        maps.Add(map);
+                    }
+                    else
+                    {
+                        Log.Message("Broke on: " + this.GetMapInfo(map));
+                        break;
+                    }
+                }
+            }
+            return maps;
+        }
+        public List<Map> GetAllMapsFromToBelow(Map pawnMap, Map destMap)
+        {
+            List<Map> maps = new List<Map>();
+            if (this.ZLevelsTracker.TryGetValue(pawnMap.Tile, out ZLevelData value))
+            {
+                foreach (var map in value.ZLevels.Values.Where(x => this.GetZIndexFor(x) <= this.GetZIndexFor(pawnMap)).OrderByDescending(x => this.GetZIndexFor(x)))
+                {
+                    if (map != destMap)
+                    {
+                        maps.Add(map);
+                    }
+                    else break;
+                }
+            }
+            return maps;
+        }
+
         public int GetZIndexFor(Map map)
         {
             int index;
@@ -509,7 +547,9 @@ namespace ZLevels
                 ZLogger.Message("Job method 1.5: " + jobToDo.targetA.Thing);
                 log += "Job method 1.5: " + jobToDo.targetA.Thing + "\n";
                 this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Thing);
-                tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing));
+                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
+                job.count = 1;
+                tempJobs.Add(job);
             }
             else if (jobToDo.def == JobDefOf.Refuel)
             {
@@ -546,11 +586,20 @@ namespace ZLevels
                 var target = jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).FirstOrDefault();
                 if (target != null && target.Thing?.Map != null)
                 {
-                    ZLogger.Message("Job method 1.79");
+                    ZLogger.Message("Job method 1.77");
                     log += "Job method 1.79\n";
                     this.jobTracker[pawn].targetDest = new TargetInfo(target.Thing);
                     tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
                 }
+            }
+            else if (jobToDo.def == JobDefOf.TendPatient)
+            {
+                ZLogger.Message("Job method 1.78");
+                log += "Job method 1.78" + "\n";
+                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Thing);
+                Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetB.Thing);
+                job.count = Medicine.GetMedicineCountToFullyHeal(jobToDo.targetA.Thing as Pawn);
+                tempJobs.Add(job);
             }
             else if (jobToDo?.targetQueueA?.Count > 0
                 && jobToDo.targetQueueA.Where(x => x.HasThing && x.Thing.Map != null).Any())

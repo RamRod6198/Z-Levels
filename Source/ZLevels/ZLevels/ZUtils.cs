@@ -178,14 +178,71 @@ namespace ZLevels
             }
         }
 
+        public static IntVec3 GetCellToTeleportFor(Thing thing, Map newMap)
+        {
+            IntVec3 position = IntVec3.Invalid;
+            var oldMapZIndex = ZTracker.GetZIndexFor(thing.Map);
+            var newMapZIndex = ZTracker.GetZIndexFor(newMap);
+            var maps = oldMapZIndex > newMapZIndex ? ZTracker.GetAllMapsFromToBelow(thing.Map, newMap) : ZTracker.GetAllMapsFromToUpper(thing.Map, newMap);
+            foreach (var otherMap in maps)
+            {
+                var stairs = new List<Building_Stairs>();
 
+                if (otherMap == thing.Map)
+                {
+                    if (oldMapZIndex > newMapZIndex)
+                    {
+                        Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                        if (lowerMap != null)
+                        {
+                            stairs = ZTracker.stairsUp[lowerMap];
+                        }
+                    }
+                    else if (oldMapZIndex < newMapZIndex)
+                    {
+                        Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                        if (upperMap != null)
+                        {
+                            stairs = ZTracker.stairsDown[upperMap];
+                        }
+                    }
+                }
+                else if (ZTracker.GetZIndexFor(otherMap) > oldMapZIndex)
+                {
+                    Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                    if (lowerMap != null)
+                    {
+                        stairs = ZTracker.stairsUp[lowerMap];
+                    }
+                }
+                else if (ZTracker.GetZIndexFor(otherMap) < oldMapZIndex)
+                {
+                    Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                    if (upperMap != null)
+                    {
+                        stairs = ZTracker.stairsDown[upperMap];
+                    }
+                }
+
+                if (stairs != null && stairs.Any())
+                {
+                    Log.Message(" - GetCellToTeleportFor - var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(thing.Position, x.Position)); - 16", true);
+                    var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(thing.Position, x.Position));
+                    Log.Message(" - GetCellToTeleportFor - position = selectedStairs.Position; - 17", true);
+                    position = selectedStairs.Position;
+                }
+                else
+                {
+                    Log.Message(" - GetCellToTeleportFor - return IntVec3.Invalid; - 18", true);
+                    return IntVec3.Invalid;
+                }
+            }
+            return position;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void TeleportThing(Thing thing, Map map, IntVec3 position)
         {
-            //    var mth = new StackTrace().GetFrame(1).GetMethod();
-            //    var cls = mth.ReflectedType.Name;
-            //    ZLogger.Message(cls + " - " + mth.Name + " - teleport " + thing + " from " + thing.Map + " to " + map + " from " + thing.Position + " to " + position, true);
             var value = (sbyte)Find.Maps.IndexOf(map);
             if (thing.mapIndexOrState != value)
             {
