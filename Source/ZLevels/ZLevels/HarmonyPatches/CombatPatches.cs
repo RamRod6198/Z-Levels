@@ -229,7 +229,7 @@ namespace ZLevels
     {
         public static void Postfix(ref Building_TurretGun __instance, ref LocalTargetInfo __result)
         {
-            ZLogger.Message(__instance + " got target " + __result, true);
+            //ZLogger.Message(__instance + " got target " + __result, true);
         }
     }
     

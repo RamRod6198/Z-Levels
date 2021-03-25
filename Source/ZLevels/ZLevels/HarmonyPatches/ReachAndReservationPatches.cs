@@ -243,7 +243,7 @@ namespace ZLevels
                     //}
                 }
             }
-            else
+            else if (ZLogger.DebugEnabled)
             {
                 ZLogger.Message($"claimant {claimant} can't reserve target: {target}");
                 var ZTracker = ZUtils.ZTracker;
