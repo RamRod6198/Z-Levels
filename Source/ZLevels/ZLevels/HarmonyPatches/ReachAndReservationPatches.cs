@@ -105,7 +105,7 @@ namespace ZLevels
             {
                 if (dest.HasThing && dest.thingInt.Map != pawn.Map)
                 {
-                    var cell = ZUtils.GetCellToTeleportFor(pawn, dest.thingInt.Map);
+                    var cell = ZUtils.GetCellToTeleportFrom(pawn.Map, pawn.Position, dest.thingInt.Map);
                     if (cell.IsValid)
                     {
                         __state = true;
@@ -146,7 +146,7 @@ namespace ZLevels
             {
                 if (target.HasThing && target.thingInt.Map != null && target.thingInt.Map != claimant.Map)
                 {
-                    var cell = ZUtils.GetCellToTeleportFor(claimant, target.thingInt.Map);
+                    var cell = ZUtils.GetCellToTeleportFrom(claimant.Map, claimant.Position, target.thingInt.Map);
                     if (cell.IsValid)
                     {
                         __state = true;

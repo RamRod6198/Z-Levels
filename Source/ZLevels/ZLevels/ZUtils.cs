@@ -178,17 +178,17 @@ namespace ZLevels
             }
         }
 
-        public static IntVec3 GetCellToTeleportFor(Thing thing, Map newMap)
+        public static IntVec3 GetCellToTeleportFrom(Map oldMap, IntVec3 originPosition, Map newMap)
         {
-            IntVec3 position = IntVec3.Invalid;
-            var oldMapZIndex = ZTracker.GetZIndexFor(thing.Map);
+            IntVec3 position = originPosition;
+            var oldMapZIndex = ZTracker.GetZIndexFor(oldMap);
             var newMapZIndex = ZTracker.GetZIndexFor(newMap);
-            var maps = oldMapZIndex > newMapZIndex ? ZTracker.GetAllMapsFromToBelow(thing.Map, newMap) : ZTracker.GetAllMapsFromToUpper(thing.Map, newMap);
+            var maps = oldMapZIndex > newMapZIndex ? ZTracker.GetAllMapsFromToBelow(oldMap, newMap) : ZTracker.GetAllMapsFromToUpper(oldMap, newMap);
             foreach (var otherMap in maps)
             {
                 var stairs = new List<Building_Stairs>();
 
-                if (otherMap == thing.Map)
+                if (otherMap == oldMap)
                 {
                     if (oldMapZIndex > newMapZIndex)
                     {
@@ -226,14 +226,11 @@ namespace ZLevels
 
                 if (stairs != null && stairs.Any())
                 {
-                    Log.Message(" - GetCellToTeleportFor - var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(thing.Position, x.Position)); - 16", true);
-                    var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(thing.Position, x.Position));
-                    Log.Message(" - GetCellToTeleportFor - position = selectedStairs.Position; - 17", true);
+                    var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(position, x.Position));
                     position = selectedStairs.Position;
                 }
                 else
                 {
-                    Log.Message(" - GetCellToTeleportFor - return IntVec3.Invalid; - 18", true);
                     return IntVec3.Invalid;
                 }
             }
