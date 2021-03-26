@@ -26,9 +26,18 @@ namespace ZLevels
 
         public ConnectedPowerNets connectedPowerNets;
 
+        public bool recheckStairs;
         public override void GameComponentTick()
         {
             base.GameComponentTick();
+            if (recheckStairs)
+            {
+                foreach (var tile in this.ZLevelsTracker.Keys)
+                {
+                    ReCheckStairs(tile);
+                }
+                recheckStairs = false;
+            }
             if (Find.TickManager.TicksGame % 60 == 0)
             {
                 foreach (var tile in this.ZLevelsTracker)
@@ -53,6 +62,19 @@ namespace ZLevels
             if (connectedPowerNets is null)
             {
                 connectedPowerNets = new ConnectedPowerNets();
+            }
+            if (allMapsInClosestOrder is null)
+            {
+                allMapsInClosestOrder = new Dictionary<Map, List<Map>>();
+            }
+            if (this.jobTracker is null)
+            {
+                this.jobTracker = new Dictionary<Pawn, JobTracker>();
+            }
+
+            foreach (var tile in this.ZLevelsTracker.Keys)
+            {
+                ReCheckStairs(tile);
             }
         }
 
@@ -279,7 +301,19 @@ namespace ZLevels
             return maps;
         }
 
+
+        private Dictionary<Map, List<Map>> allMapsInClosestOrder;
         public List<Map> GetAllMapsInClosestOrder(Map pawnMap)
+        {
+            if (!allMapsInClosestOrder.TryGetValue(pawnMap, out var maps))
+            {
+                maps = GetAllMapsInClosestOrderInt(pawnMap);
+                allMapsInClosestOrder[pawnMap] = maps;
+            }
+            return maps;
+        }
+
+        private List<Map> GetAllMapsInClosestOrderInt(Map pawnMap)
         {
             List<Map> maps = new List<Map>();
             if (this.ZLevelsTracker.TryGetValue(pawnMap.Tile, out ZLevelData value))
@@ -292,6 +326,7 @@ namespace ZLevels
             return maps;
         }
 
+        private Dictionary<Map, List<Map>> allMapsFromToUpper;
         public List<Map> GetAllMapsFromToUpper(Map pawnMap, Map destMap)
         {
             List<Map> maps = new List<Map>();
@@ -301,12 +336,10 @@ namespace ZLevels
                 {
                     if (map != destMap)
                     {
-                        Log.Message("Adding: " + this.GetMapInfo(map));
                         maps.Add(map);
                     }
                     else
                     {
-                        Log.Message("Broke on: " + this.GetMapInfo(map));
                         break;
                     }
                 }
@@ -1516,7 +1549,6 @@ namespace ZLevels
 
             FloodFillerFog.FloodUnfog(pawnToTeleport.Position, mapToTeleport);
             mapToTeleport.fogGrid.FloodUnfogAdjacent(pawnToTeleport.PositionHeld);
-            this.ReCheckStairs();
         }
 
         public Map CreateLowerLevel(Map origin, IntVec3 playerStartSpot)
@@ -1762,84 +1794,73 @@ namespace ZLevels
             catch { };
         }
 
-        public void ReCheckStairs()
+        private void ReCheckStairs(int tile)
         {
-            try
+            foreach (var map in this.GetAllMaps(tile))
             {
-                foreach (var tile in this.ZLevelsTracker)
+                this.stairsDown[map] = this.totalStairsDown.Where(x => x.Map == map).ToList();
+                this.stairsUp[map] = this.totalStairsUp.Where(x => x.Map == map).ToList();
+                if (this.stairsDown[map].Count == 0 && this.GetLowerLevel(tile, map) != null)
                 {
-                    foreach (var map in this.GetAllMaps(tile.Key))
+                    this.stairsDown[map] = map.listerThings.AllThings.Where(x => x is Building_StairsDown).Cast<Building_Stairs>().ToList();
+                    this.totalStairsDown.AddRange(this.stairsDown[map]);
+                }
+                if (this.stairsUp[map].Count == 0 && this.GetUpperLevel(tile, map) != null)
+                {
+                    
+                    this.stairsUp[map] = map.listerThings.AllThings.Where(x => x is Building_StairsUp).Cast<Building_Stairs>().ToList();
+                    this.totalStairsUp.AddRange(this.stairsUp[map]);
+                }
+                if (this.stairsDown.TryGetValue(map, out var stairsDown))
+                {
+                    for (int i = stairsDown.Count - 1; i >= 0; i--)
                     {
-                        this.stairsDown[map] = this.totalStairsDown.Where(x => x.Map == map).ToList();
-                        this.stairsUp[map] = this.totalStairsUp.Where(x => x.Map == map).ToList();
-                        if (this.stairsDown[map].Count == 0 && this.GetLowerLevel(tile.Key, map) != null)
+                        if (!stairsDown[i].Position.Walkable(map))
                         {
-                            this.stairsDown[map] = map.listerThings.AllThings.Where(x => x is Building_StairsDown).Cast<Building_Stairs>().ToList();
-                            this.totalStairsDown.AddRange(this.stairsDown[map]);
-                        }
-                        if (this.stairsUp[map].Count == 0 && this.GetUpperLevel(tile.Key, map) != null)
-                        {
-                            this.stairsUp[map] = map.listerThings.AllThings.Where(x => x is Building_StairsUp).Cast<Building_Stairs>().ToList();
-                            this.totalStairsUp.AddRange(this.stairsUp[map]);
-                        }
-                        if (this.stairsDown.ContainsKey(map))
-                        {
-                            for (int i = this.stairsDown[map].Count - 1; i >= 0; i--)
-                            {
-                                if (!this.stairsDown[map][i].Position.Walkable(map))
-                                {
-                                    ZLogger.Message(this.stairsDown[map][i] + " not walkable, removing it");
-                                    this.stairsDown[map].RemoveAt(i);
-                                }
-                            }
-                        }
-                        if (this.stairsUp.ContainsKey(map))
-                        {
-                            for (int i = this.stairsUp[map].Count - 1; i >= 0; i--)
-                            {
-
-                                if (!this.stairsUp[map][i].Position.Walkable(map))
-                                {
-                                    ZLogger.Message(this.stairsUp[map][i] + " not walkable, removing it");
-                                    this.stairsUp[map].RemoveAt(i);
-                                }
-                            }
+                            ZLogger.Message(stairsDown[i] + " not walkable, removing it");
+                            stairsDown.RemoveAt(i);
                         }
                     }
-                    foreach (var map in this.GetAllMaps(tile.Key))
+                }
+                if (this.stairsUp.TryGetValue(map, out var stairsUp))
+                {
+                    for (int i = stairsUp.Count - 1; i >= 0; i--)
                     {
-                        if (this.stairsDown.ContainsKey(map))
+                        if (!stairsUp[i].Position.Walkable(map))
                         {
-                            for (int i = this.stairsDown[map].Count - 1; i >= 0; i--)
-                            {
-                                Map lowerMap = this.GetLowerLevel(tile.Key, map);
-                                if (lowerMap != null && this.stairsUp?[lowerMap]?.Where(x => x.Position
-                                    == this.stairsDown[map][i].Position).Count() == 0)
-                                {
-                                    ZLogger.Message(this.stairsDown[map][i] + " - has no stairs upper, removing it");
-                                    this.stairsDown[map].RemoveAt(i);
-                                }
-                            }
-                        }
-                        if (this.stairsUp.ContainsKey(map))
-                        {
-                            for (int i = this.stairsUp[map].Count - 1; i >= 0; i--)
-                            {
-                                Map upperMap = this.GetUpperLevel(tile.Key, map);
-                                if (upperMap != null && this.stairsDown?[upperMap]?.Where(x => x.Position
-                                    == this.stairsUp[map][i].Position).Count() == 0)
-                                {
-                                    ZLogger.Message(this.stairsUp[map][i] + " - has no stairs below, removing it");
-                                    this.stairsUp[map].RemoveAt(i);
-                                }
-                            }
+                            ZLogger.Message(this.stairsUp[map][i] + " not walkable, removing it");
+                            stairsUp.RemoveAt(i);
                         }
                     }
                 }
             }
-            catch (Exception ex)
+
+            foreach (var map in this.GetAllMaps(tile))
             {
-                Log.Error("Error in ZLevels in ReCheckStairs: " + ex);
+                if (this.stairsDown.TryGetValue(map, out var stairsDown))
+                {
+                    for (int i = stairsDown.Count - 1; i >= 0; i--)
+                    {
+                        Map lowerMap = this.GetLowerLevel(tile, map);
+                        if (lowerMap != null && (!this.stairsUp?[lowerMap]?.Any(x => x.Position == stairsDown[i].Position) ?? false))
+                        {
+                            ZLogger.Message(this.stairsDown[map][i] + " - has no stairs upper, removing it");
+                            stairsDown.RemoveAt(i);
+                        }
+                    }
+                }
+                if (this.stairsUp.TryGetValue(map, out var stairsUp))
+                {
+                    for (int i = stairsUp.Count - 1; i >= 0; i--)
+                    {
+                        Map upperMap = this.GetUpperLevel(tile, map);
+                        if (upperMap != null && (!this.stairsDown?[upperMap]?.Any(x => x.Position == stairsUp[i].Position) ?? false))
+                        {
+                            ZLogger.Message(this.stairsUp[map][i] + " - has no stairs below, removing it");
+                            stairsUp.RemoveAt(i);
+                        }
+                    }
+                }
             }
         }
 
@@ -1859,7 +1880,6 @@ namespace ZLevels
         public override void LoadedGame()
         {
             base.LoadedGame();
-            this.ReCheckStairs();
             ZUtils.ResetZTracker();
             this.PreInit();
         }
@@ -1877,6 +1897,7 @@ namespace ZLevels
                 LookMode.Value, LookMode.Deep, ref this.Z_LevelsKeys, ref this.ZLevelsTrackerValues);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
+                PreInit();
                 try
                 {
                     ZLogger.Message("START");

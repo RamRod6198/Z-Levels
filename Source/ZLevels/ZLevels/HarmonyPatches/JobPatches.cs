@@ -1095,13 +1095,8 @@ namespace ZLevels
                 if (pawn.RaceProps.Humanlike)
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    ZTracker.ReCheckStairs();
                     try
                     {
-                        if (ZTracker.jobTracker == null)
-                        {
-                            ZTracker.jobTracker = new Dictionary<Pawn, JobTracker>();
-                        }
                         if (!ZTracker.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
                         {
                             jobTracker = new JobTracker();

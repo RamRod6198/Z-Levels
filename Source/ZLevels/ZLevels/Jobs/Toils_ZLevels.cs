@@ -75,7 +75,6 @@ namespace ZLevels
                 initAction = delegate ()
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    ZTracker.ReCheckStairs();
                     if (ZTracker.GetZIndexFor(pawn.Map) > ZTracker.GetZIndexFor(dest))
                     {
                         var stairs = ZTracker.stairsDown[pawn.Map];

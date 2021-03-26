@@ -42,119 +42,71 @@ namespace ZLevels
             {
                 yield return toil;
             }
-            yield return new Toil
-            {
-                initAction = delegate ()
-                {
-                    ZLogger.Message("JobDriver_HaulThingToDest 1: " + pawn + " trying to reserve: " + TargetA, true);
-                }
-            };
             Toil toilGoto = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
-
             yield return reserveItem.FailOnDespawnedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
-
-            yield return new Toil
-            {
-                initAction = delegate ()
-                {
-                    ZLogger.Message("JobDriver_HaulThingToDest 1: " + pawn + " reserved: " + TargetA, true);
-                }
-            };
-
             yield return toilGoto;
             yield return Toils_Haul.StartCarryThing(TargetIndex.A, putRemainderInQueue: false, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.A);
             if (job.haulOpportunisticDuplicates)
             {
-                yield return new Toil
-                {
-                    initAction = delegate ()
-                    {
-                        ZLogger.Message("2: " + pawn + " trying to reserve other things: " + TargetA, true);
-                    }
-                };
-
                 yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveItem, TargetIndex.A, TargetIndex.None, takeFromValidStorage: true);
-                yield return new Toil
-                {
-                    initAction = delegate ()
-                    {
-                        ZLogger.Message("2: " + pawn + " reserved other things: " + TargetA, true);
-                    }
-                };
             }
             yield return Toils_Haul.JumpIfAlsoCollectingNextTargetInQueue(toilGoto, TargetIndex.A);
             yield return new Toil
             {
                 initAction = delegate ()
                 {
-                    try
+                    if (ZTracker.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
                     {
-                        if (ZTracker.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
+                        if (jobTracker.mainJob.targetA.Thing != null
+                        && jobTracker.mainJob.targetA.Thing == this.savedThing
+                        && jobTracker.mainJob.targetA.Thing != TargetA.Thing)
                         {
-                            if (jobTracker.mainJob.targetA.Thing != null
-                            && jobTracker.mainJob.targetA.Thing == this.savedThing
-                            && jobTracker.mainJob.targetA.Thing != TargetA.Thing)
-                            {
-                                jobTracker.mainJob.targetA = new LocalTargetInfo(TargetA.Thing);
-                            }
-                            else if (jobTracker.mainJob.targetB.Thing != null
+                            jobTracker.mainJob.targetA = new LocalTargetInfo(TargetA.Thing);
+                        }
+                        else if (jobTracker.mainJob.targetB.Thing != null
                             && jobTracker.mainJob.targetB.Thing == this.savedThing
                             && jobTracker.mainJob.targetB.Thing != TargetA.Thing)
-                            {
-                                jobTracker.mainJob.targetB = new LocalTargetInfo(TargetA.Thing);
-                            }
-
-                            try
-                            {
-                                for (int i = jobTracker.mainJob.targetQueueA.Count - 1; i >= 0; i--)
-                                {
-                                    var target = jobTracker.mainJob.targetQueueA[i];
-                                    if (target.Thing != null && target.Thing == this.savedThing && target.Thing != TargetA.Thing)
-                                    {
-                                        jobTracker.mainJob.targetQueueA[i] = new LocalTargetInfo(TargetA.Thing);
-                                    }
-                                }
-                            }
-                            catch { }
-                            try
-                            {
-                                for (int i = jobTracker.mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                                {
-                                    var target = jobTracker.mainJob.targetQueueB[i];
-                                    if (target.Thing != null && target.Thing == this.savedThing && target.Thing != TargetA.Thing)
-                                    {
-                                        if (jobTracker.mainJob.targetQueueB[i].Thing.stackCount == 0)
-                                        {
-                                            jobTracker.mainJob.targetQueueB[i] = new LocalTargetInfo(TargetA.Thing);
-                                            jobTracker.mainJob.countQueue[i] = TargetA.Thing.stackCount;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            if (jobTracker.mainJob.targetQueueB
-                                            .Where(x => x.Thing == TargetA.Thing).Count() == 0)
-                                            {
-                                                var newTarget = new LocalTargetInfo(TargetA.Thing);
-                                                ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.Add(newTarget);
-                                                ZTracker.jobTracker[this.pawn].mainJob.countQueue.Add(newTarget.Thing.stackCount);
-                                                int ind = ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.FirstIndexOf(x => x.Thing == this.savedThing);
-                                                ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.RemoveAt(ind);
-                                                ZTracker.jobTracker[this.pawn].mainJob.countQueue.RemoveAt(ind);
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            catch { }
+                        {
+                            jobTracker.mainJob.targetB = new LocalTargetInfo(TargetA.Thing);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("Z-Tracker produced an error in JobDriver_HaulThingToStairs class. Report about it to devs. Error: " + ex);
+                        for (int i = jobTracker.mainJob.targetQueueA.Count - 1; i >= 0; i--)
+                        {
+                            var target = jobTracker.mainJob.targetQueueA[i];
+                            if (target.Thing != null && target.Thing == this.savedThing && target.Thing != TargetA.Thing)
+                            {
+                                jobTracker.mainJob.targetQueueA[i] = new LocalTargetInfo(TargetA.Thing);
+                            }
+                        }
+                        for (int i = jobTracker.mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                        {
+                            var target = jobTracker.mainJob.targetQueueB[i];
+                            if (target.Thing != null && target.Thing == this.savedThing && target.Thing != TargetA.Thing)
+                            {
+                                if (jobTracker.mainJob.targetQueueB[i].Thing.stackCount == 0)
+                                {
+                                    jobTracker.mainJob.targetQueueB[i] = new LocalTargetInfo(TargetA.Thing);
+                                    jobTracker.mainJob.countQueue[i] = TargetA.Thing.stackCount;
+                                    break;
+                                }
+                                else
+                                {
+                                    if (jobTracker.mainJob.targetQueueB.Where(x => x.Thing == TargetA.Thing).Count() == 0)
+                                    {
+                                        var newTarget = new LocalTargetInfo(TargetA.Thing);
+                                        ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.Add(newTarget);
+                                        ZTracker.jobTracker[this.pawn].mainJob.countQueue.Add(newTarget.Thing.stackCount);
+                                        int ind = ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.FirstIndexOf(x => x.Thing == this.savedThing);
+                                        ZTracker.jobTracker[this.pawn].mainJob.targetQueueB.RemoveAt(ind);
+                                        ZTracker.jobTracker[this.pawn].mainJob.countQueue.RemoveAt(ind);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             };
+            Log.Message("Pawn: " + pawn);
             ZLogger.Message($"JobDriver HaulThingToDest 2About to call findRouteWithStairs, with pawn {GetActor()}, dest {ZTracker.jobTracker[pawn].targetDest}, instance {this}");
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].targetDest.Map, this))
             {

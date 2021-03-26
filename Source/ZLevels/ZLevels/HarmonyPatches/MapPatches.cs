@@ -149,5 +149,23 @@ namespace ZLevels
                 }
             }
         }
+
+        [HarmonyPatch(typeof(Building), "SpawnSetup")]
+        public static class SpawnSetup_Patch
+        {
+            public static void Postfix()
+            {
+                ZUtils.ZTracker.recheckStairs = true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Building), "DeSpawn")]
+        public static class DeSpawn_Patch
+        {
+            public static void Postfix()
+            {
+                ZUtils.ZTracker.recheckStairs = true;
+            }
+        }
     }
 }
