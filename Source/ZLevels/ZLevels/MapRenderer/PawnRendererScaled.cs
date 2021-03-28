@@ -181,7 +181,6 @@ namespace ZLevels
                         Vector2 drawSize = this.graphics.nakedGraphic.drawSize;
                         drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
                         drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-
                         var newGraphic = this.graphics.nakedGraphic.GetCopy(drawSize);
                         mesh = newGraphic.MeshAt(bodyFacing);
                     }
@@ -321,7 +320,7 @@ namespace ZLevels
                 {
                     num = (a - this.pawn.DrawPos).AngleFlat();
                 }
-                Vector3 drawLoc = rootLoc + new Vector3(0f, 0f, 0.4f).RotatedBy(num);
+                Vector3 drawLoc = rootLoc + new Vector3(0f, 0f, 0.4f).RotatedBy(num) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
                 drawLoc.y += 0.03787879f;
                 this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc, num, curLevel, baseLevel);
                 return;
@@ -330,28 +329,28 @@ namespace ZLevels
             {
                 if (this.pawn.Rotation == Rot4.South)
                 {
-                    Vector3 drawLoc2 = rootLoc + new Vector3(0f, 0f, -0.22f);
+                    Vector3 drawLoc2 = rootLoc + new Vector3(0f, 0f, -0.22f) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
                     drawLoc2.y += 0.03787879f;
                     this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc2, 143f, curLevel, baseLevel);
                     return;
                 }
                 if (this.pawn.Rotation == Rot4.North)
                 {
-                    Vector3 drawLoc3 = rootLoc + new Vector3(0f, 0f, -0.11f);
+                    Vector3 drawLoc3 = rootLoc + new Vector3(0f, 0f, -0.11f) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
                     drawLoc3.y += 0f;
                     this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc3, 143f, curLevel, baseLevel);
                     return;
                 }
                 if (this.pawn.Rotation == Rot4.East)
                 {
-                    Vector3 drawLoc4 = rootLoc + new Vector3(0.2f, 0f, -0.22f);
+                    Vector3 drawLoc4 = rootLoc + new Vector3(0.2f, 0f, -0.22f) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
                     drawLoc4.y += 0.03787879f;
                     this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc4, 143f, curLevel, baseLevel);
                     return;
                 }
                 if (this.pawn.Rotation == Rot4.West)
                 {
-                    Vector3 drawLoc5 = rootLoc + new Vector3(-0.2f, 0f, -0.22f);
+                    Vector3 drawLoc5 = rootLoc + new Vector3(-0.2f, 0f, -0.22f) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
                     drawLoc5.y += 0.03787879f;
                     this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc5, 217f, curLevel, baseLevel);
                 }
@@ -385,7 +384,6 @@ namespace ZLevels
             if (graphic_StackCount != null)
             {
                 matSingle = graphic_StackCount.SubGraphicForStackCount(1, eq.def).MatSingle;
-                Log.Message("FAIL");
             }
             else
             {
@@ -400,7 +398,6 @@ namespace ZLevels
                     {
                         Vector2 drawSize = graphicRandomRotated.subGraphic.drawSize;
                         drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-
                         drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
                         graphic = graphicRandomRotated.subGraphic.GetCopy(drawSize);
                     }
@@ -416,7 +413,6 @@ namespace ZLevels
 
                 matrix.SetTRS(drawLoc, Quaternion.AngleAxis(num, Vector3.up), new Vector3(graphic.drawSize.x, 1f, graphic.drawSize.y));
                 matSingle = graphic.MatSingle;
-                Log.Message("graphic.drawSize: " + graphic.drawSize);
             }
             Graphics.DrawMesh(mesh, matrix, matSingle, 0);
         }
