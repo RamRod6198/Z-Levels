@@ -64,7 +64,6 @@ namespace ZLevels
                     {
                         pawn.CurJob.targetC = null;
                     }
-
                 }
             };
         }
@@ -75,6 +74,7 @@ namespace ZLevels
                 initAction = delegate ()
                 {
                     var ZTracker = ZUtils.ZTracker;
+                    Log.Message($"pawn.Map: {pawn.Map}, dest: {dest}");
                     if (ZTracker.GetZIndexFor(pawn.Map) > ZTracker.GetZIndexFor(dest))
                     {
                         var stairs = ZTracker.stairsDown[pawn.Map];

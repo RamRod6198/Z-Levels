@@ -54,14 +54,15 @@ namespace ZLevels
 
 
 	[HarmonyPatch(typeof(DynamicDrawManager), "DrawDynamicThings")]
-	public static class GenerateGraphics
+	public static class DrawDynamicThings
 	{
-		public static Dictionary<Pawn, PawnRendererScaled> cachedPawnRenderers = new Dictionary<Pawn, PawnRendererScaled>();
-		public static Dictionary<Pawn, PawnRendererScaled> cachedCorpseRenderers = new Dictionary<Pawn, PawnRendererScaled>();
-	
-	
-		[HarmonyPostfix]
-		public static void DynamicDrawManagerPostfix(DynamicDrawManager __instance, Map ___map, ref bool ___drawingNow)
+		private static Dictionary<Pawn, PawnRendererScaled> cachedPawnRenderers = new Dictionary<Pawn, PawnRendererScaled>();
+		private static Dictionary<Pawn, PawnRendererScaled> cachedCorpseRenderers = new Dictionary<Pawn, PawnRendererScaled>();
+		private static Dictionary<Thing, Dictionary<int, Graphic>> cachedGraphics = new Dictionary<Thing, Dictionary<int, Graphic>>();
+
+		[TweakValue("0ZLevels", 0, 20)] public static float turretDrawZOffset = 1.9f;
+		[TweakValue("0ZLevels", 0, 20)] public static float globalZOffset = 3.95f;
+		public static void Postfix(DynamicDrawManager __instance, Map ___map, ref bool ___drawingNow)
 		{
 			var ZTracker = ZUtils.ZTracker;
 			int curLevel = ZTracker.GetZIndexFor(___map);
@@ -80,11 +81,27 @@ namespace ZLevels
 						CellIndices cellIndices = map2.cellIndices;
 						foreach (Thing thing in map2.dynamicDrawManager.drawThings)
 						{
+
+							if (thing.def.drawerType != DrawerType.None && thing.def.drawerType != DrawerType.RealtimeOnly)
+                            {
+								if (thing is Building_TurretGun turretGun)
+								{
+									var turretDrawPos = turretGun.DrawPos;
+									turretDrawPos.y += Math.Abs(baseLevel - curLevel);
+									turretDrawPos.z += (baseLevel - curLevel) / turretDrawZOffset;
+									Vector3 b = new Vector3(turretGun.def.building.turretTopOffset.x, 0f, turretGun.def.building.turretTopOffset.y).RotatedBy(turretGun.top.CurRotation);
+									float turretTopDrawSize = turretGun.top.parentTurret.def.building.turretTopDrawSize
+										* (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
+									Matrix4x4 matrix = default(Matrix4x4);
+									matrix.SetTRS(turretDrawPos + Altitudes.AltIncVect + b, (turretGun.top.CurRotation + (float)TurretTop.ArtworkRotation).ToQuat(), new Vector3(turretTopDrawSize, 1f, turretTopDrawSize));
+									Graphics.DrawMesh(MeshPool.plane10, matrix, turretGun.def.building.turretTopMat, 0);
+								}
+								continue;
+							}
 							IntVec3 position = thing.Position;
 							IntVec3 position2 = position + new IntVec3(0, 0, -1);
-							if (position.GetTerrain(___map) == ZLevelsDefOf.ZL_OutsideTerrain ||
-								position2.InBounds(___map) && position.GetTerrain(___map) != ZLevelsDefOf.ZL_OutsideTerrain 
-								&& position2.GetTerrain(___map) == ZLevelsDefOf.ZL_OutsideTerrain)
+							var positionTerrain = position.GetTerrain(___map);
+							if (positionTerrain == ZLevelsDefOf.ZL_OutsideTerrain || position2.InBounds(___map) && positionTerrain != ZLevelsDefOf.ZL_OutsideTerrain && position2.GetTerrain(___map) == ZLevelsDefOf.ZL_OutsideTerrain)
 							{
 								if ((cellRect.Contains(position) || thing.def.drawOffscreen)
 									//&& (!fogGrid[cellIndices.CellToIndex(position)]
@@ -93,7 +110,7 @@ namespace ZLevels
 									|| map2.snowGrid.GetDepth(position) <= thing.def.hideAtSnowDepth))
 								{
 									DrawPos_Patch.ChangeDrawPos = true;
-									DrawPos_Patch.zLevelOffset = (baseLevel - curLevel) / 3.5f;
+									DrawPos_Patch.zLevelOffset = (baseLevel - curLevel) / globalZOffset;
 									DrawPos_Patch.yLevelOffset = baseLevel - curLevel;
 									try
 									{
@@ -113,9 +130,9 @@ namespace ZLevels
 											newDrawPos.z += (baseLevel - curLevel) / 2f;
 											newDrawPos.y -= baseLevel - curLevel;
 											newDrawPos.y -= 4.1f;
-											if (cachedPawnRenderers.ContainsKey(pawn))
+											if (cachedPawnRenderers.TryGetValue(pawn, out var pawnRenderer))
 											{
-												cachedPawnRenderers[pawn].RenderPawnAt(newDrawPos, curLevel, baseLevel);
+												pawnRenderer.RenderPawnAt(newDrawPos, curLevel, baseLevel);
 											}
 											else
 											{
@@ -140,9 +157,9 @@ namespace ZLevels
 											newDrawPos.z += (baseLevel - curLevel) / 2f;
 											newDrawPos.y -= baseLevel - curLevel;
 											newDrawPos.y -= 4f;
-											if (cachedCorpseRenderers.ContainsKey(corpse.InnerPawn))
+											if (cachedCorpseRenderers.TryGetValue(corpse.InnerPawn, out var pawnRenderer))
 											{
-												cachedCorpseRenderers[corpse.InnerPawn].RenderPawnAt(newDrawPos, curLevel, baseLevel);
+												pawnRenderer.RenderPawnAt(newDrawPos, curLevel, baseLevel);
 											}
 											else
 											{
@@ -162,11 +179,20 @@ namespace ZLevels
 										}
 										else if (thing.def.projectile == null && !thing.def.IsDoor)
 										{
-											Vector2 drawSize = thing.Graphic.drawSize;
-											drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-											drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-											var newGraphic = thing.Graphic.GetCopy(drawSize);
-											newGraphic.Draw(thing.DrawPos, thing.Rotation, thing);
+											if (!cachedGraphics.TryGetValue(thing, out var graphics))
+											{
+												graphics = new Dictionary<int, Graphic>();
+												cachedGraphics[thing] = graphics;
+											}
+											if (!graphics.TryGetValue(curLevel, out var graphic))
+											{
+												Vector2 drawSize = thing.Graphic.drawSize;
+												drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+												drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+												graphic = thing.Graphic.GetCopy(drawSize);
+												graphics[curLevel] = graphic;
+											}
+											graphic.Draw(thing.DrawPos, thing.Rotation, thing);
 										}
 										else
 										{

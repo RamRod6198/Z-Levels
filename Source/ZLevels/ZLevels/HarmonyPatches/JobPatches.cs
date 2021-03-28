@@ -887,6 +887,37 @@ namespace ZLevels
             }
         }
 
+
+        [HarmonyPatch(typeof(WorkGiver_InteractAnimal), "TakeFoodForAnimalInteractJob")]
+        public class TakeFoodForAnimalInteractJob_Patch
+        {
+            public static bool recursiveTrap;
+            private static void Postfix(WorkGiver_InteractAnimal __instance, ref Job __result, Pawn pawn, Pawn tamee)
+            {
+                if (!recursiveTrap && __result is null)
+                {
+                    recursiveTrap = true;
+                    Map oldMap = pawn.Map;
+                    IntVec3 oldPosition = pawn.Position;
+                    foreach (var map in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+                    {
+                        if (map != oldMap)
+                        {
+                            var newPosition = ZUtils.GetCellToTeleportFrom(pawn.Map, pawn.Position, map);
+                            ZUtils.TeleportThing(pawn, map, newPosition);
+                            var job = __instance.TakeFoodForAnimalInteractJob(pawn, tamee);
+                            if (job != null)
+                            {
+                                __result = job;
+                            }
+                        }
+                    }
+                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                    recursiveTrap = false;
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(WorkGiver_ConstructDeliverResources), "FindNearbyNeeders")]
         public class FindNearbyNeedersPatch
         {
@@ -996,8 +1027,7 @@ namespace ZLevels
                 if (__instance.pawn.RaceProps.Humanlike)
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    if (ZTracker.jobTracker != null && ZTracker.jobTracker.ContainsKey(__instance.pawn)
-                        && ZTracker.jobTracker[__instance.pawn].activeJobs?.Count > 0 && blockTryDrop)
+                    if (ZTracker.jobTracker != null && ZTracker.jobTracker.TryGetValue(__instance.pawn, out var jobTracker) && jobTracker.activeJobs?.Count > 0 && blockTryDrop)
                     {
                         return false;
                     }

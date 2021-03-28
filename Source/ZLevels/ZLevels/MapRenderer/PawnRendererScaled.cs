@@ -35,8 +35,8 @@ namespace ZLevels
                     this.pawn.IsInvisible(), curLevel, baseLevel);
         }
 
-        public void RenderPawnAt(Vector3 drawLoc, RotDrawMode bodyDrawType, bool headStump, bool invisible
-                , int curLevel, int baseLevel)
+        private static Dictionary<Thing, Dictionary<int, Graphic>> cachedGraphics = new Dictionary<Thing, Dictionary<int, Graphic>>();
+        public void RenderPawnAt(Vector3 drawLoc, RotDrawMode bodyDrawType, bool headStump, bool invisible, int curLevel, int baseLevel)
         {
             if (!this.graphics.AllResolved)
             {
@@ -72,7 +72,22 @@ namespace ZLevels
                         {
                             vector.y += 0.03787879f;
                         }
-                        carriedThing.DrawAt(vector, flip);
+
+                        if (!cachedGraphics.TryGetValue(carriedThing, out var graphics))
+                        {
+                            graphics = new Dictionary<int, Graphic>();
+                            cachedGraphics[carriedThing] = graphics;
+                        }
+                        if (!graphics.TryGetValue(curLevel, out var graphic))
+                        {
+                            Vector2 drawSize = carriedThing.Graphic.drawSize;
+                            drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+                            drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+                            graphic = carriedThing.Graphic.GetCopy(drawSize);
+                            graphics[curLevel] = graphic;
+                        }
+
+                        graphic.Draw(vector, carriedThing.Rotation, carriedThing);
                     }
                 }
                 if (!invisible)
@@ -260,7 +275,7 @@ namespace ZLevels
             }
             if (!portrait)
             {
-                this.DrawEquipment(rootLoc);
+                this.DrawEquipment(rootLoc, curLevel, baseLevel);
                 if (this.pawn.apparel != null)
                 {
                     List<Apparel> wornApparel = this.pawn.apparel.WornApparel;
@@ -275,7 +290,7 @@ namespace ZLevels
             }
         }
 
-        private void DrawEquipment(Vector3 rootLoc)
+        private void DrawEquipment(Vector3 rootLoc, int curLevel, int baseLevel)
         {
             if (this.pawn.Dead || !this.pawn.Spawned)
             {
@@ -308,7 +323,7 @@ namespace ZLevels
                 }
                 Vector3 drawLoc = rootLoc + new Vector3(0f, 0f, 0.4f).RotatedBy(num);
                 drawLoc.y += 0.03787879f;
-                this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc, num);
+                this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc, num, curLevel, baseLevel);
                 return;
             }
             if (this.CarryWeaponOpenly())
@@ -317,33 +332,33 @@ namespace ZLevels
                 {
                     Vector3 drawLoc2 = rootLoc + new Vector3(0f, 0f, -0.22f);
                     drawLoc2.y += 0.03787879f;
-                    this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc2, 143f);
+                    this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc2, 143f, curLevel, baseLevel);
                     return;
                 }
                 if (this.pawn.Rotation == Rot4.North)
                 {
                     Vector3 drawLoc3 = rootLoc + new Vector3(0f, 0f, -0.11f);
                     drawLoc3.y += 0f;
-                    this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc3, 143f);
+                    this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc3, 143f, curLevel, baseLevel);
                     return;
                 }
                 if (this.pawn.Rotation == Rot4.East)
                 {
                     Vector3 drawLoc4 = rootLoc + new Vector3(0.2f, 0f, -0.22f);
                     drawLoc4.y += 0.03787879f;
-                    this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc4, 143f);
+                    this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc4, 143f, curLevel, baseLevel);
                     return;
                 }
                 if (this.pawn.Rotation == Rot4.West)
                 {
                     Vector3 drawLoc5 = rootLoc + new Vector3(-0.2f, 0f, -0.22f);
                     drawLoc5.y += 0.03787879f;
-                    this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc5, 217f);
+                    this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc5, 217f, curLevel, baseLevel);
                 }
             }
         }
 
-        public void DrawEquipmentAiming(Thing eq, Vector3 drawLoc, float aimAngle)
+        public void DrawEquipmentAiming(Thing eq, Vector3 drawLoc, float aimAngle, int curLevel, int baseLevel)
         {
             float num = aimAngle - 90f;
             Mesh mesh;
@@ -366,15 +381,58 @@ namespace ZLevels
             num %= 360f;
             Graphic_StackCount graphic_StackCount = eq.Graphic as Graphic_StackCount;
             Material matSingle;
+            var matrix = default(Matrix4x4);
             if (graphic_StackCount != null)
             {
                 matSingle = graphic_StackCount.SubGraphicForStackCount(1, eq.def).MatSingle;
+                Log.Message("FAIL");
             }
             else
             {
-                matSingle = eq.Graphic.MatSingle;
+                if (!cachedGraphics.TryGetValue(eq, out var graphics))
+                {
+                    graphics = new Dictionary<int, Graphic>();
+                    cachedGraphics[eq] = graphics;
+                }
+                if (!graphics.TryGetValue(curLevel, out var graphic))
+                {
+                    if (eq.Graphic is Graphic_RandomRotated graphicRandomRotated)
+                    {
+                        Vector2 drawSize = graphicRandomRotated.subGraphic.drawSize;
+                        drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+
+                        drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+                        graphic = graphicRandomRotated.subGraphic.GetCopy(drawSize);
+                    }
+                    else
+                    {
+                        Vector2 drawSize = eq.Graphic.drawSize;
+                        drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+                        drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+                        graphic = graphic.GetCopy(drawSize);
+                    }
+                    graphics[curLevel] = graphic;
+                }
+
+                matrix.SetTRS(drawLoc, Quaternion.AngleAxis(num, Vector3.up), new Vector3(graphic.drawSize.x, 1f, graphic.drawSize.y));
+                matSingle = graphic.MatSingle;
+                Log.Message("graphic.drawSize: " + graphic.drawSize);
             }
-            Graphics.DrawMesh(mesh, drawLoc, Quaternion.AngleAxis(num, Vector3.up), matSingle, 0);
+            Graphics.DrawMesh(mesh, matrix, matSingle, 0);
+        }
+
+        public static Graphic GetGraphicRandomRotated(Thing thing, Graphic graphic, Type graphicClass, string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, GraphicData data, List<ShaderParameter> shaderParameters)
+        {
+            GraphicRequest graphicRequest = new GraphicRequest(graphicClass, path, shader, drawSize, color, colorTwo, data, 0, shaderParameters);
+            graphicRequest.color = (Color32)graphicRequest.color;
+            graphicRequest.colorTwo = (Color32)graphicRequest.colorTwo;
+            if (!GraphicDatabase.allGraphics.TryGetValue(graphicRequest, out Graphic value))
+            {
+                value = new Graphic_RandomRotated((graphic as Graphic_RandomRotated).subGraphic, thing.def.graphicData.onGroundRandomRotateAngle);
+                value.Init(graphicRequest);
+                GraphicDatabase.allGraphics.Add(graphicRequest, value);
+            }
+            return value;
         }
 
         private Material OverrideMaterialIfNeeded(Material original, Pawn pawn)

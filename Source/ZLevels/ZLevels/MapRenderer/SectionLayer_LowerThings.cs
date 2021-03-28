@@ -14,16 +14,20 @@ namespace ZLevels
 			this.relevantChangeTypes = MapMeshFlag.Things;
 			this.requireAddToMapMesh = true;
 		}
-
+	
 		public override void DrawLayer()
 		{
-			if (!DebugViewSettings.drawThingsPrinted)
+			int count = subMeshes.Count;
+			for (int i = 0; i < count; i++)
 			{
-				return;
+				LayerSubMesh layerSubMesh = subMeshes[i];
+				if (layerSubMesh.finalized && !layerSubMesh.disabled)
+				{
+					Graphics.DrawMesh(layerSubMesh.mesh, Vector3.zero, Quaternion.identity, layerSubMesh.material, 0);
+				}
 			}
-			base.DrawLayer();
 		}
-
+	
 		public override void Regenerate()
 		{
 			var ZTracker = ZUtils.ZTracker;
@@ -53,9 +57,7 @@ namespace ZLevels
 									   //	!map.fogGrid.fogGrid[CellIndicesUtility.CellToIndex
 									   //	(thing.Position, map.Size.x)]) && 
 										
-										(thing.def.drawerType != DrawerType.None
-										&& (thing.def.drawerType != DrawerType.RealtimeOnly 
-										|| !this.requireAddToMapMesh)
+										(thing.def.drawerType != DrawerType.None && (thing.def.drawerType != DrawerType.RealtimeOnly || !this.requireAddToMapMesh)
 										&& (thing.def.hideAtSnowDepth >= 1f 
 										|| map.snowGrid.GetDepth(thing.Position)
 										<= thing.def.hideAtSnowDepth) && thing.Position.x == intVec.x
@@ -70,9 +72,9 @@ namespace ZLevels
 				}
 				base.FinalizeMesh(MeshParts.All);
 			}
-
+	
 		}
-
+	
 		protected float AngleFromRot(Rot4 rot, Graphic graphic)
 		{
 			if (graphic.ShouldDrawRotated)
@@ -87,7 +89,7 @@ namespace ZLevels
 			}
 			return 0f;
 		}
-
+	
 		public Material LinkedDrawMatFrom(Graphic_LinkedCornerFiller graphic, Thing parent, IntVec3 cell)
 		{
 			int num = 0;
@@ -156,8 +158,8 @@ namespace ZLevels
 				Printer_Plane.PrintPlane(layer, center, size, LinkedDrawMatFrom(graphic, thing, thing.Position), 0f, flipUv: false, Graphic_LinkedCornerFiller.CornerFillUVs);
 			}
 		}
-
-
+	
+	
 		public void Print(Blight blight, SectionLayer layer, Graphic newGraphic)
 		{
 			Plant plant = blight.Plant;
@@ -179,7 +181,7 @@ namespace ZLevels
 			Printer_Plane.PrintPlane(layer, blight.TrueCenter(), blight.def.graphic.drawSize * num, newGraphic.MatAt(blight.Rotation, blight), 0f, flipUv: false, null, 
 				Blight.workingColors, 0.1f);
 		}
-
+	
 		public void Print(Plant plant, SectionLayer layer, Graphic newGraphic, int curLevel, int baseLevel)
 		{
 			Vector3 a = plant.TrueCenter();
@@ -192,7 +194,7 @@ namespace ZLevels
 			}
 			float num2 = plant.def.plant.visualSizeRange.LerpThroughRange(plant.growthInt);
 			float num3 = plant.def.graphicData.drawSize.x * num2;
-
+	
 			Vector3 center = Vector3.zero;
 			int num4 = 0;
 			int[] positionIndices = PlantPosIndices.GetPositionIndices(plant);
@@ -274,7 +276,7 @@ namespace ZLevels
 			}
 			Rand.PopState();
 		}
-
+	
 		public void BasePrint(Thing thing, SectionLayer layer, Graphic newGraphic)
         {
 			newGraphic.Print(layer, thing);
@@ -311,7 +313,7 @@ namespace ZLevels
 				
 				else if (t.Graphic is Graphic_Mote)
 				{
-
+	
 				}
 				else if (t.Graphic is Graphic_LinkedCornerFiller
 					|| t.Graphic is Graphic_RandomRotated
@@ -349,7 +351,7 @@ namespace ZLevels
 			}
 			catch (Exception ex)
 			{
-
+	
 			}
 			DrawPos_Patch.ChangeDrawPos = false;
 		}
