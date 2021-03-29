@@ -1513,36 +1513,30 @@ namespace ZLevels
             {
                 if (t.Faction != pawn.Faction)
                 {
-                    Log.Message(" - JobOnThing - return null; - 2", true);
                     return null;
                 }
                 Blueprint blueprint = t as Blueprint;
                 if (blueprint == null)
                 {
-                    Log.Message(" - JobOnThing - return null; - 5", true);
                     return null;
                 }
                 if (GenConstruct.FirstBlockingThing(blueprint, pawn) != null)
                 {
-                    Log.Message(" - JobOnThing - return GenConstruct.HandleBlockingThingJob(blueprint, pawn, forced); - 7", true);
                     return GenConstruct.HandleBlockingThingJob(blueprint, pawn, forced);
                 }
                 bool flag = scanner.def.workType == WorkTypeDefOf.Construction;
                 if (!GenConstruct.CanConstruct(blueprint, pawn, flag, forced))
                 {
-                    Log.Message(" - JobOnThing - return null; - 10", true);
                     return null;
                 }
                 if (!flag && blueprint.def.entityDefToBuild is TerrainDef
                     && pawn.Map.terrainGrid.CanRemoveTopLayerAt(blueprint.Position))
                 {
-                    Log.Message(" - JobOnThing - return null; - 12", true);
                     return null;
                 }
                 Job job = scanner.RemoveExistingFloorJob(pawn, blueprint);
                 if (job != null)
                 {
-                    Log.Message(" - JobOnThing - return job; - 15", true);
                     return job;
                 }
                 var oldMap = pawn.Map;
@@ -1553,7 +1547,6 @@ namespace ZLevels
                     if (job2 != null)
                     {
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                        Log.Message(" - JobOnThing - return job2; - 22", true);
                         return job2;
                     }
                 }
@@ -1563,11 +1556,9 @@ namespace ZLevels
                     Job job3 = scanner.NoCostFrameMakeJobFor(pawn, blueprint);
                     if (job3 != null)
                     {
-                        Log.Message(" - JobOnThing - return job3; - 27", true);
                         return job3;
                     }
                 }
-                Log.Message(" - JobOnThing - return null - 24", true);
                 return null;
             }
             public static Job JobOnThing(WorkGiver_ConstructDeliverResourcesToFrames scanner, Pawn pawn, Thing t, bool forced = false)

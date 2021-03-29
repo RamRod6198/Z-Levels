@@ -27,8 +27,9 @@ namespace ZLevels
             __state = false;
             if (pawn.RaceProps.Humanlike)
             {
-                if (dest.HasThing && dest.thingInt.Map != pawn.Map)
+                if (dest.HasThing && dest.thingInt.Map != null && dest.thingInt.Map != pawn.Map)
                 {
+                    Log.Message("dest: " + dest + " - dest.thingInt.Map: " + dest.thingInt.Map + " - pawn.Map: " + pawn.Map);
                     var cell = ZUtils.GetCellToTeleportFrom(pawn.Map, pawn.Position, dest.thingInt.Map);
                     if (cell.IsValid)
                     {
