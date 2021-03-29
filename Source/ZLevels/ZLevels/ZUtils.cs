@@ -64,7 +64,7 @@ namespace ZLevels
                         }
                         else
                         {
-                            ZLogger.Message("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
+                            ZLogger.Error("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
                         }
                     }
                     else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap) && !cantGoDown)
@@ -76,16 +76,20 @@ namespace ZLevels
                         }
                         else
                         {
-                            ZLogger.Message("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                            ZLogger.Error("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
                         }
                     }
                     if (stairs != null && stairs.Count > 0)
                     {
+                        foreach (var stair in stairs)
+                        {
+                            ZLogger.Message($"CHECKING STAIR: {stair}, stair.Spawned: {stair.Spawned}, stair.Destroyed: {stair.Destroyed}, stair.Position: {stair.Position}, stair.Map: {stair.Map}, otherMap: {otherMap}");
+                        }
                         var selectedStairs = stairs.MinBy(x => IntVec3Utility.DistanceTo(thing.Position, x.Position));
                         var position = selectedStairs.Position;
-                        TeleportThing(thing, otherMap, position);
                         if (!skipOldMap || skipOldMap && otherMap != oldMap)
                         {
+                            TeleportThing(thing, otherMap, position);
                             yield return otherMap;
                         }
                     }

@@ -2000,16 +2000,9 @@ namespace ZLevels
                 bool allowUnreachable;
                 Danger maxPathDanger;
                 var ZTracker = ZUtils.ZTracker;
-                //bool checkForIgnoredWorkgivers = ZTracker.jobTracker.TryGetValue(pawn, out JobTracker jobTracker) && jobTracker.ignoreGiversInFirstTime != null;
                 for (int j = 0; j < list.Count; j++)
                 {
                     WorkGiver workGiver = list[j];
-                    //if (checkForIgnoredWorkgivers && jobTracker.ignoreGiversInFirstTime.Contains(workGiver.def))
-                    //{
-                    //    ZLogger.Message("Skipping ignored " + workGiver, debugLevel: DebugLevel.Jobs);
-                    //    continue;
-                    //}
-
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
                         ZLogger.Message("Workgiver N" + (j + 1) + " from " + list.Count + " - " + pawn + " search job - " + workGiver + " in " + ZUtils.ZTracker.GetMapInfo(otherMap), debugLevel: DebugLevel.Jobs);
@@ -2037,34 +2030,25 @@ namespace ZLevels
                             {
                                 if (scanner.def.scanThings)
                                 {
-                                    Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) &&
-                                    scanner.HasJobOnThing(pawn, t)
-                                    ;
+                                    Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t);
 
-                                    Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn)
-                                    && JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn,
-                                    t) != null
-                                    ;
+                                    Predicate<Thing> deliverResourcesValidator = (Thing t) => !t.IsForbidden(pawn) 
+                                        && JobOnThing((WorkGiver_ConstructDeliverResourcesToBlueprints)scanner, pawn, t) != null;
 
                                     Predicate<Thing> deliverResourcesValidator2 = (Thing t) => !t.IsForbidden(pawn)
-                                    && JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t)
-                                    != null
-                                    ;
+                                    && JobOnThing((WorkGiver_ConstructDeliverResourcesToFrames)scanner, pawn, t) != null;
 
                                     Predicate<Thing> refuelValidator = (Thing t) => !t.IsForbidden(pawn) &&
-                                        JobOnThing((WorkGiver_Refuel)scanner, pawn, t) != null
-                                        ;
+                                        JobOnThing((WorkGiver_Refuel)scanner, pawn, t) != null;
 
                                     Predicate<Thing> rescueValidator = (Thing t) => !t.IsForbidden(pawn) &&
-                                    HasJobOnThingRescue((WorkGiver_RescueDowned)scanner, pawn, t)
-                                    ;
-                                    Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn)
-                                    && TryIssueJobPackagePatch.JobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null
-                                    ;
+                                        HasJobOnThingRescue((WorkGiver_RescueDowned)scanner, pawn, t);
+                                    Predicate<Thing> billValidator = (Thing t) => !t.IsForbidden(pawn) && 
+                                        JobOnThing((WorkGiver_DoBill)scanner, pawn, t) != null;
 
-                                    Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn)
-                                    && HasJobOnThing(scanner, pawn, t, false) != null
-                                    ;
+                                    Predicate<Thing> haulingValidator = (Thing t) => !t.IsForbidden(pawn) && 
+                                        HasJobOnThing(scanner, pawn, t, false) != null;
+
                                     IEnumerable<Thing> enumerable = scanner.PotentialWorkThingsGlobal(pawn);
 
                                     Thing thing = null;
@@ -2313,7 +2297,6 @@ namespace ZLevels
                         num = workGiver.def.priorityInType;
                     }
                 }
-
                 return ThinkResult.NoJob;
             }
 

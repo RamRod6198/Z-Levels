@@ -1800,14 +1800,13 @@ namespace ZLevels
             {
                 this.stairsDown[map] = this.totalStairsDown.Where(x => x.Map == map).ToList();
                 this.stairsUp[map] = this.totalStairsUp.Where(x => x.Map == map).ToList();
-                if (this.stairsDown[map].Count == 0 && this.GetLowerLevel(tile, map) != null)
+                if (this.GetLowerLevel(tile, map) != null)
                 {
                     this.stairsDown[map] = map.listerThings.AllThings.Where(x => x is Building_StairsDown).Cast<Building_Stairs>().ToList();
                     this.totalStairsDown.AddRange(this.stairsDown[map]);
                 }
-                if (this.stairsUp[map].Count == 0 && this.GetUpperLevel(tile, map) != null)
+                if (this.GetUpperLevel(tile, map) != null)
                 {
-                    
                     this.stairsUp[map] = map.listerThings.AllThings.Where(x => x is Building_StairsUp).Cast<Building_Stairs>().ToList();
                     this.totalStairsUp.AddRange(this.stairsUp[map]);
                 }
@@ -1837,15 +1836,20 @@ namespace ZLevels
 
             foreach (var map in this.GetAllMaps(tile))
             {
-                if (this.stairsDown.TryGetValue(map, out var stairsDown))
+                if (this.stairsDown.TryGetValue(map, out var stairs))
                 {
-                    for (int i = stairsDown.Count - 1; i >= 0; i--)
+                    for (int i = stairs.Count - 1; i >= 0; i--)
                     {
+                        if (stairs[i].Map != map)
+                        {
+                            ZLogger.Message(stairs[i] + " - has incorrect map, removing it");
+                            stairs.RemoveAt(i);
+                        }
                         Map lowerMap = this.GetLowerLevel(tile, map);
-                        if (lowerMap != null && (!this.stairsUp?[lowerMap]?.Any(x => x.Position == stairsDown[i].Position) ?? false))
+                        if (lowerMap != null && (!this.stairsUp?[lowerMap]?.Any(x => x.Position == stairs[i].Position) ?? false))
                         {
                             ZLogger.Message(this.stairsDown[map][i] + " - has no stairs upper, removing it");
-                            stairsDown.RemoveAt(i);
+                            stairs.RemoveAt(i);
                         }
                     }
                 }
@@ -1853,12 +1857,35 @@ namespace ZLevels
                 {
                     for (int i = stairsUp.Count - 1; i >= 0; i--)
                     {
+                        if (stairsUp[i].Map != map)
+                        {
+                            ZLogger.Message(stairsUp[i] + " - has incorrect map, removing it");
+                            stairsUp.RemoveAt(i);
+                        }
                         Map upperMap = this.GetUpperLevel(tile, map);
                         if (upperMap != null && (!this.stairsDown?[upperMap]?.Any(x => x.Position == stairsUp[i].Position) ?? false))
                         {
                             ZLogger.Message(this.stairsUp[map][i] + " - has no stairs below, removing it");
                             stairsUp.RemoveAt(i);
                         }
+                    }
+                }
+            }
+
+            foreach (var map in this.GetAllMaps(tile))
+            {
+                if (this.stairsDown.TryGetValue(map, out var stairs))
+                {
+                    for (int i = stairs.Count - 1; i >= 0; i--)
+                    {
+                        ZLogger.Message(stairs[i] + " - adding it");
+                    }
+                }
+                if (this.stairsUp.TryGetValue(map, out var stairsUp))
+                {
+                    for (int i = stairsUp.Count - 1; i >= 0; i--)
+                    {
+                        ZLogger.Message(stairsUp[i] + " - adding it");
                     }
                 }
             }

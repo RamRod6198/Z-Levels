@@ -18,18 +18,30 @@ namespace ZLevels
         {
             base.SpawnSetup(map, respawningAfterLoad);
             var ZTracker = ZUtils.ZTracker;
-            if (ZTracker.totalStairsDown == null) ZTracker.totalStairsDown = new HashSet<Building_Stairs>();
-            ZTracker.totalStairsDown.Add(this);
+            ZTracker.totalStairsDown = new HashSet<Building_Stairs>();
+            ZTracker.stairsDown = new Dictionary<Map, List<Building_Stairs>>();
 
-            if (!ZTracker.stairsDown.ContainsKey(this.Map))
-            {
-                ZTracker.stairsDown[this.Map] = new List<Building_Stairs>();
-            }
-            if (!ZTracker.stairsDown[this.Map].Contains(this))
-            {
-                ZTracker.stairsDown[this.Map].Add(this);
-            }
-            ZLogger.Message("Spawning " + this);
+            //if (ZTracker.totalStairsDown == null) ZTracker.totalStairsDown = new HashSet<Building_Stairs>();
+            //ZTracker.totalStairsDown.Add(this);
+            //
+            //foreach (var stairsPair in ZTracker.stairsDown)
+            //{
+            //    if (stairsPair.Key != map && stairsPair.Value.Contains(this))
+            //    {
+            //        ZTracker.stairsDown[stairsPair.Key].Remove(this);
+            //    }
+            //}
+            //
+            //if (!ZTracker.stairsDown.ContainsKey(this.Map))
+            //{
+            //    ZTracker.stairsDown[this.Map] = new List<Building_Stairs>();
+            //}
+            //if (!ZTracker.stairsDown[this.Map].Contains(this))
+            //{
+            //    ZTracker.stairsDown[this.Map].Add(this);
+            //}
+
+
             if (!respawningAfterLoad)
             {
                 if (this.Position.GetTerrain(this.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
@@ -84,7 +96,7 @@ namespace ZLevels
         public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
         {
             var ZTracker = ZUtils.ZTracker;
-            if (ZTracker.stairsDown[this.Map].Contains(this))
+            if (ZTracker.stairsDown.TryGetValue(this.Map, out var stairsDown) && stairsDown.Contains(this))
             {
                 ZTracker.stairsDown[this.Map].Remove(this);
             }
