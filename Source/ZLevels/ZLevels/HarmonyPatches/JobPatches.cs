@@ -1209,7 +1209,232 @@ namespace ZLevels
                 }
                 return true;
             }
+            private static Job StartOrResumeBillJob(WorkGiver_DoBill scanner, Pawn pawn, IBillGiver giver)
+            {
+                List<ThingCount> chosenIngThings = scanner.chosenIngThings;
+                for (int i = 0; i < giver.BillStack.Count; i++)
+                {
+                    Bill bill = giver.BillStack[i];
+                    if ((bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType
+                        != scanner.def.workType) || (Find.TickManager.TicksGame < bill.lastIngredientSearchFailTicks
+                        + WorkGiver_DoBill.ReCheckFailedBillTicksRange.RandomInRange
+                        && FloatMenuMakerMap.makingFor != pawn))
+                    {
+                        continue;
+                    }
+                    bill.lastIngredientSearchFailTicks = 0;
+                    if (!bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn))
+                    {
+                        continue;
+                    }
+                    SkillRequirement skillRequirement = bill.recipe.FirstSkillRequirementPawnDoesntSatisfy(pawn);
+                    if (skillRequirement != null)
+                    {
+                        JobFailReason.Is("UnderRequiredSkill".Translate(skillRequirement.minLevel), bill.Label);
+                        continue;
+                    }
+                    Bill_ProductionWithUft bill_ProductionWithUft = bill as Bill_ProductionWithUft;
 
+                    if (bill_ProductionWithUft != null)
+                    {
+                        if (bill_ProductionWithUft.BoundUft != null)
+                        {
+                            if (bill_ProductionWithUft.BoundWorker == pawn && pawn.CanReserveAndReach(bill_ProductionWithUft.BoundUft, PathEndMode.Touch, Danger.Deadly) && !bill_ProductionWithUft.BoundUft.IsForbidden(pawn))
+                            {
+                                return WorkGiver_DoBill.FinishUftJob(pawn, bill_ProductionWithUft.BoundUft, bill_ProductionWithUft);
+                            }
+                            continue;
+                        }
+                        UnfinishedThing unfinishedThing = WorkGiver_DoBill.ClosestUnfinishedThingForBill(pawn, bill_ProductionWithUft);
+
+                        if (unfinishedThing != null)
+                        {
+                            return WorkGiver_DoBill.FinishUftJob(pawn, unfinishedThing, bill_ProductionWithUft);
+                        }
+                    }
+
+                    bool flag = false;
+                    var ZTracker = ZUtils.ZTracker;
+                    var workBench = ((Thing)giver);
+                    var origBillGiverMap = giver.Map;
+                    var origPawnMap = pawn.Map;
+                    var origBillGiverPosition = workBench.Position;
+                    var origPawnPosition = pawn.Position;
+                    ZLogger.Message(giver + " - billGiver.Map: " + ZTracker.GetMapInfo(giver.Map));
+                    ZLogger.Message(giver + " - billGiver.Position: " + workBench.Position);
+                    foreach (var map in ZTracker.GetAllMapsInClosestOrder(origBillGiverMap))
+                    {
+                        try
+                        {
+                            if (origBillGiverMap != map)
+                            {
+                                workBench.positionInt = ZUtils.GetCellToTeleportFrom(workBench.Map, workBench.Position, map);
+                                pawn.positionInt = workBench.positionInt;
+                            }
+                            else if (workBench.Position != origBillGiverPosition)
+                            {
+                                workBench.positionInt = origBillGiverPosition;
+                                pawn.positionInt = origPawnPosition;
+                            }
+                            workBench.mapIndexOrState = (sbyte)Find.Maps.IndexOf(map);
+                            pawn.mapIndexOrState = (sbyte)Find.Maps.IndexOf(map);
+                            flag = WorkGiver_DoBill.TryFindBestBillIngredients(bill, pawn, (Thing)giver, chosenIngThings);
+                            ZLogger.Message("Found ingredients: " + flag + " in " + ZTracker.GetMapInfo(map) + " for " + bill);
+                            if (flag) break;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("Z-Levels failed to process HasJobOnThing of DoBill workgiver. Report about it to devs and provide Hugslib log. Error: " + ex);
+                        }
+                    }
+
+                    ZLogger.Message("Final position " + workBench.Position);
+                    ZUtils.TeleportThing(workBench, origBillGiverMap, origBillGiverPosition);
+                    ZUtils.TeleportThing(pawn, origPawnMap, origPawnPosition);
+
+                    if (!flag)
+                    {
+                        if (FloatMenuMakerMap.makingFor != pawn)
+                        {
+                            bill.lastIngredientSearchFailTicks = Find.TickManager.TicksGame;
+                        }
+                        else
+                        {
+                            JobFailReason.Is("MissingMaterials".Translate(), bill.Label);
+                        }
+                        chosenIngThings.Clear();
+                        continue;
+                    }
+                    Job haulOffJob;
+                    Job result = WorkGiver_DoBill.TryStartNewDoBillJob(pawn, bill, giver, chosenIngThings, out haulOffJob);
+                    chosenIngThings.Clear();
+                    return result;
+                }
+                chosenIngThings.Clear();
+                return null;
+            }
+            public static Job JobOnThing(WorkGiver_DoBill scanner, Pawn pawn, Thing thing, bool forced = false)
+            {
+                IBillGiver billGiver = thing as IBillGiver;
+                if (billGiver == null || !scanner.ThingIsUsableBillGiver(thing)
+                    || !billGiver.BillStack.AnyShouldDoNow || !billGiver.UsableForBillsAfterFueling()
+                    || !pawn.CanReserve(thing, 1, -1, null, forced) || thing.IsBurning()
+                    || thing.IsForbidden(pawn))
+                {
+                    return null;
+                }
+                CompRefuelable compRefuelable = thing.TryGetComp<CompRefuelable>();
+
+                if (compRefuelable == null || compRefuelable.HasFuel)
+                {
+                    billGiver.BillStack.RemoveIncompletableBills();
+                    Job job = StartOrResumeBillJob(scanner, pawn, billGiver);
+                    return job;
+                }
+                if (!RefuelWorkGiverUtility.CanRefuel(pawn, thing, forced))
+                {
+                    return null;
+                }
+                return RefuelWorkGiverUtility.RefuelJob(pawn, thing, forced, null, null);
+            }
+
+            // Construction job
+            public static Job JobOnThing(WorkGiver_ConstructDeliverResourcesToBlueprints scanner, Pawn pawn, Thing t, bool forced = false)
+            {
+                if (t.Faction != pawn.Faction)
+                {
+                    return null;
+                }
+                Blueprint blueprint = t as Blueprint;
+                if (blueprint == null)
+                {
+                    return null;
+                }
+                if (GenConstruct.FirstBlockingThing(blueprint, pawn) != null)
+                {
+                    return GenConstruct.HandleBlockingThingJob(blueprint, pawn, forced);
+                }
+                bool flag = scanner.def.workType == WorkTypeDefOf.Construction;
+                if (!GenConstruct.CanConstruct(blueprint, pawn, flag, forced))
+                {
+                    return null;
+                }
+                if (!flag && blueprint.def.entityDefToBuild is TerrainDef
+                    && pawn.Map.terrainGrid.CanRemoveTopLayerAt(blueprint.Position))
+                {
+                    return null;
+                }
+                Job job = scanner.RemoveExistingFloorJob(pawn, blueprint);
+                if (job != null)
+                {
+                    return job;
+                }
+                var oldMap = pawn.Map;
+                var oldPosition = pawn.Position;
+                foreach (var map in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+                {
+                    Job job2 = scanner.ResourceDeliverJobFor(pawn, blueprint, true);
+                    if (job2 != null)
+                    {
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                        return job2;
+                    }
+                }
+                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                if (scanner.def.workType != WorkTypeDefOf.Hauling)
+                {
+                    Job job3 = scanner.NoCostFrameMakeJobFor(pawn, blueprint);
+                    if (job3 != null)
+                    {
+                        return job3;
+                    }
+                }
+                return null;
+            }
+            public static Job JobOnThing(WorkGiver_ConstructDeliverResourcesToFrames scanner, Pawn pawn, Thing t, bool forced = false)
+            {
+                if (t.Faction != pawn.Faction)
+                {
+                    return null;
+                }
+                Frame frame = t as Frame;
+                if (frame == null)
+                {
+                    return null;
+                }
+
+                if (GenConstruct.FirstBlockingThing(frame, pawn) != null)
+                {
+                    return GenConstruct.HandleBlockingThingJob(frame, pawn, forced);
+                }
+                bool checkSkills = scanner.def.workType == WorkTypeDefOf.Construction;
+                if (!GenConstruct.CanConstruct(frame, pawn, checkSkills, forced))
+                {
+                    return null;
+                }
+
+                Job job2 = scanner.ResourceDeliverJobFor(pawn, frame, true);
+                if (job2 == null)
+                {
+                    var oldMap = pawn.Map;
+                    var oldPosition = pawn.Position;
+                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
+                    {
+                        if (otherMap != oldMap)
+                        {
+                            job2 = scanner.ResourceDeliverJobFor(pawn, frame, true);
+                            if (job2 != null)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                }
+                return job2;
+            }
+
+            // Haul job
             public static bool TryFindBestBetterStoreCellForValidator(Thing t, Pawn carrier, Map mapToSearch,
                 StoragePriority currentPriority, Faction faction, out IntVec3 foundCell, bool needAccurateResult = true)
             {
@@ -1348,7 +1573,7 @@ namespace ZLevels
                     }
                 }
 
-                return true;// carrier == null || carrier.Map.reachability.CanReach(t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld, c, PathEndMode.ClosestTouch, TraverseParms.For(carrier, Danger.Deadly, TraverseMode.ByPawn, false));
+                return carrier == null || carrier.Map.reachability.CanReach(t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld, c, PathEndMode.ClosestTouch, TraverseParms.For(carrier, Danger.Deadly, TraverseMode.ByPawn, false));
             }
 
             private static bool NoStorageBlockersIn(IntVec3 c, Map map, Thing thing)
@@ -1379,231 +1604,6 @@ namespace ZLevels
                 }
                 return true;
             }
-
-            private static Job StartOrResumeBillJob(WorkGiver_DoBill scanner, Pawn pawn, IBillGiver giver)
-            {
-                List<ThingCount> chosenIngThings = scanner.chosenIngThings;
-                for (int i = 0; i < giver.BillStack.Count; i++)
-                {
-                    Bill bill = giver.BillStack[i];
-                    if ((bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType
-                        != scanner.def.workType) || (Find.TickManager.TicksGame < bill.lastIngredientSearchFailTicks
-                        + WorkGiver_DoBill.ReCheckFailedBillTicksRange.RandomInRange
-                        && FloatMenuMakerMap.makingFor != pawn))
-                    {
-                        continue;
-                    }
-                    bill.lastIngredientSearchFailTicks = 0;
-                    if (!bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn))
-                    {
-                        continue;
-                    }
-                    SkillRequirement skillRequirement = bill.recipe.FirstSkillRequirementPawnDoesntSatisfy(pawn);
-                    if (skillRequirement != null)
-                    {
-                        JobFailReason.Is("UnderRequiredSkill".Translate(skillRequirement.minLevel), bill.Label);
-                        continue;
-                    }
-                    Bill_ProductionWithUft bill_ProductionWithUft = bill as Bill_ProductionWithUft;
-
-                    if (bill_ProductionWithUft != null)
-                    {
-                        if (bill_ProductionWithUft.BoundUft != null)
-                        {
-                            if (bill_ProductionWithUft.BoundWorker == pawn && pawn.CanReserveAndReach(bill_ProductionWithUft.BoundUft, PathEndMode.Touch, Danger.Deadly) && !bill_ProductionWithUft.BoundUft.IsForbidden(pawn))
-                            {
-                                return WorkGiver_DoBill.FinishUftJob(pawn, bill_ProductionWithUft.BoundUft, bill_ProductionWithUft);
-                            }
-                            continue;
-                        }
-                        UnfinishedThing unfinishedThing = WorkGiver_DoBill.ClosestUnfinishedThingForBill(pawn, bill_ProductionWithUft);
-
-                        if (unfinishedThing != null)
-                        {
-                            return WorkGiver_DoBill.FinishUftJob(pawn, unfinishedThing, bill_ProductionWithUft);
-                        }
-                    }
-
-                    bool flag = false;
-                    var ZTracker = ZUtils.ZTracker;
-                    var workBench = ((Thing)giver);
-                    var origBillGiverMap = giver.Map;
-                    var origPawnMap = pawn.Map;
-                    var origBillGiverPosition = workBench.Position;
-                    var origPawnPosition = pawn.Position;
-                    ZLogger.Message(giver + " - billGiver.Map: " + ZTracker.GetMapInfo(giver.Map));
-                    ZLogger.Message(giver + " - billGiver.Position: " + workBench.Position);
-                    foreach (var map in ZTracker.GetAllMapsInClosestOrder(origBillGiverMap))
-                    {
-                        try
-                        {
-                            if (origBillGiverMap != map)
-                            {
-                                workBench.positionInt = ZUtils.GetCellToTeleportFrom(workBench.Map, workBench.Position, map);
-                                pawn.positionInt = workBench.positionInt;
-                            }
-                            else if (workBench.Position != origBillGiverPosition)
-                            {
-                                workBench.positionInt = origBillGiverPosition;
-                                pawn.positionInt = origPawnPosition;
-                            }
-                            workBench.mapIndexOrState = (sbyte)Find.Maps.IndexOf(map);
-                            pawn.mapIndexOrState = (sbyte)Find.Maps.IndexOf(map);
-                            flag = WorkGiver_DoBill.TryFindBestBillIngredients(bill, pawn, (Thing)giver, chosenIngThings);
-                            ZLogger.Message("Found ingredients: " + flag + " in " + ZTracker.GetMapInfo(map) + " for " + bill);
-                            if (flag) break;
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error("Z-Levels failed to process HasJobOnThing of DoBill workgiver. Report about it to devs and provide Hugslib log. Error: " + ex);
-                        }
-                    }
-
-                    ZLogger.Message("Final position " + workBench.Position);
-                    ZUtils.TeleportThing(workBench, origBillGiverMap, origBillGiverPosition);
-                    ZUtils.TeleportThing(pawn, origPawnMap, origPawnPosition);
-
-                    if (!flag)
-                    {
-                        if (FloatMenuMakerMap.makingFor != pawn)
-                        {
-                            bill.lastIngredientSearchFailTicks = Find.TickManager.TicksGame;
-                        }
-                        else
-                        {
-                            JobFailReason.Is("MissingMaterials".Translate(), bill.Label);
-                        }
-                        chosenIngThings.Clear();
-                        continue;
-                    }
-                    Job haulOffJob;
-                    Job result = WorkGiver_DoBill.TryStartNewDoBillJob(pawn, bill, giver, chosenIngThings, out haulOffJob);
-                    chosenIngThings.Clear();
-                    return result;
-                }
-                chosenIngThings.Clear();
-                return null;
-            }
-            public static Job JobOnThing(WorkGiver_DoBill scanner, Pawn pawn, Thing thing, bool forced = false)
-            {
-                IBillGiver billGiver = thing as IBillGiver;
-                if (billGiver == null || !scanner.ThingIsUsableBillGiver(thing)
-                    || !billGiver.BillStack.AnyShouldDoNow || !billGiver.UsableForBillsAfterFueling()
-                    || !pawn.CanReserve(thing, 1, -1, null, forced) || thing.IsBurning()
-                    || thing.IsForbidden(pawn))
-                {
-                    return null;
-                }
-                CompRefuelable compRefuelable = thing.TryGetComp<CompRefuelable>();
-
-                if (compRefuelable == null || compRefuelable.HasFuel)
-                {
-                    billGiver.BillStack.RemoveIncompletableBills();
-                    Job job = StartOrResumeBillJob(scanner, pawn, billGiver);
-                    return job;
-                }
-                if (!RefuelWorkGiverUtility.CanRefuel(pawn, thing, forced))
-                {
-                    return null;
-                }
-                return RefuelWorkGiverUtility.RefuelJob(pawn, thing, forced, null, null);
-            }
-
-            public static Job JobOnThing(WorkGiver_ConstructDeliverResourcesToBlueprints scanner, Pawn pawn, Thing t, bool forced = false)
-            {
-                if (t.Faction != pawn.Faction)
-                {
-                    return null;
-                }
-                Blueprint blueprint = t as Blueprint;
-                if (blueprint == null)
-                {
-                    return null;
-                }
-                if (GenConstruct.FirstBlockingThing(blueprint, pawn) != null)
-                {
-                    return GenConstruct.HandleBlockingThingJob(blueprint, pawn, forced);
-                }
-                bool flag = scanner.def.workType == WorkTypeDefOf.Construction;
-                if (!GenConstruct.CanConstruct(blueprint, pawn, flag, forced))
-                {
-                    return null;
-                }
-                if (!flag && blueprint.def.entityDefToBuild is TerrainDef
-                    && pawn.Map.terrainGrid.CanRemoveTopLayerAt(blueprint.Position))
-                {
-                    return null;
-                }
-                Job job = scanner.RemoveExistingFloorJob(pawn, blueprint);
-                if (job != null)
-                {
-                    return job;
-                }
-                var oldMap = pawn.Map;
-                var oldPosition = pawn.Position;
-                foreach (var map in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
-                {
-                    Job job2 = scanner.ResourceDeliverJobFor(pawn, blueprint, true);
-                    if (job2 != null)
-                    {
-                        ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                        return job2;
-                    }
-                }
-                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                if (scanner.def.workType != WorkTypeDefOf.Hauling)
-                {
-                    Job job3 = scanner.NoCostFrameMakeJobFor(pawn, blueprint);
-                    if (job3 != null)
-                    {
-                        return job3;
-                    }
-                }
-                return null;
-            }
-            public static Job JobOnThing(WorkGiver_ConstructDeliverResourcesToFrames scanner, Pawn pawn, Thing t, bool forced = false)
-            {
-                if (t.Faction != pawn.Faction)
-                {
-                    return null;
-                }
-                Frame frame = t as Frame;
-                if (frame == null)
-                {
-                    return null;
-                }
-
-                if (GenConstruct.FirstBlockingThing(frame, pawn) != null)
-                {
-                    return GenConstruct.HandleBlockingThingJob(frame, pawn, forced);
-                }
-                bool checkSkills = scanner.def.workType == WorkTypeDefOf.Construction;
-                if (!GenConstruct.CanConstruct(frame, pawn, checkSkills, forced))
-                {
-                    return null;
-                }
-
-                Job job2 = scanner.ResourceDeliverJobFor(pawn, frame, true);
-                if (job2 == null)
-                {
-                    var oldMap = pawn.Map;
-                    var oldPosition = pawn.Position;
-                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
-                    {
-                        if (otherMap != oldMap)
-                        {
-                            job2 = scanner.ResourceDeliverJobFor(pawn, frame, true);
-                            if (job2 != null)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-                }
-                return job2;
-            }
-
             public static bool PawnCanAutomaticallyHaulFast(Pawn p, Thing t, bool forced)
             {
                 UnfinishedThing unfinishedThing = t as UnfinishedThing;
@@ -1781,10 +1781,10 @@ namespace ZLevels
                     {
                         if (thing != null)
                         {
-                            //if (!carrier.Map.reachability.CanReach(intVec, thing, PathEndMode.ClosestTouch, TraverseParms.For(carrier)))
-                            //{
-                            //    continue;
-                            //}
+                            if (!carrier.Map.reachability.CanReach(intVec, thing, PathEndMode.ClosestTouch, TraverseParms.For(carrier)))
+                            {
+                                continue;
+                            }
                         }
                         else if (!carrier.Map.reachability.CanReach(intVec, container.Position, PathEndMode.ClosestTouch, TraverseParms.For(carrier)))
                         {
