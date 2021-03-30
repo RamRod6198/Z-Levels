@@ -81,8 +81,8 @@ namespace ZLevels
                         if (!graphics.TryGetValue(curLevel, out var graphic))
                         {
                             Vector2 drawSize = carriedThing.Graphic.drawSize;
-                            drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-                            drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+                            drawSize.x *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
+                            drawSize.y *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
                             graphic = carriedThing.Graphic.GetCopy(drawSize);
                             graphics[curLevel] = graphic;
                         }
@@ -158,7 +158,8 @@ namespace ZLevels
             {
                 this.graphics.ResolveAllGraphics();
             }
-            float scaledSize = 1.5f * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
+
+            float scaledSize = 1.5f * (1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale));
 
             Quaternion quaternion = Quaternion.AngleAxis(angle, Vector3.up);
             Mesh mesh = null;
@@ -179,8 +180,8 @@ namespace ZLevels
                     else
                     {
                         Vector2 drawSize = this.graphics.nakedGraphic.drawSize;
-                        drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-                        drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+                        drawSize.x *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
+                        drawSize.y *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
                         var newGraphic = this.graphics.nakedGraphic.GetCopy(drawSize);
                         mesh = newGraphic.MeshAt(bodyFacing);
                     }
@@ -213,7 +214,7 @@ namespace ZLevels
             }
             if (this.graphics.headGraphic != null)
             {
-                Vector3 b = (quaternion * this.BaseHeadOffsetAt(headFacing)) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
+                Vector3 b = (quaternion * this.BaseHeadOffsetAt(headFacing)) * (1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale));
                 Material material = this.graphics.HeadMatAt(headFacing, bodyDrawType, headStump);
                 if (material != null)
                 {
@@ -320,7 +321,7 @@ namespace ZLevels
                 {
                     num = (a - this.pawn.DrawPos).AngleFlat();
                 }
-                Vector3 drawLoc = rootLoc + new Vector3(0f, 0f, 0.4f).RotatedBy(num) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
+                Vector3 drawLoc = rootLoc + new Vector3(0f, 0f, 0.4f).RotatedBy(num) * (1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale));
                 drawLoc.y += 0.03787879f;
                 this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc, num, curLevel, baseLevel);
                 return;
@@ -329,28 +330,28 @@ namespace ZLevels
             {
                 if (this.pawn.Rotation == Rot4.South)
                 {
-                    Vector3 drawLoc2 = rootLoc + new Vector3(0f, 0f, -0.22f) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
+                    Vector3 drawLoc2 = rootLoc + new Vector3(0f, 0f, -0.22f) * (1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale));
                     drawLoc2.y += 0.03787879f;
                     this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc2, 143f, curLevel, baseLevel);
                     return;
                 }
                 if (this.pawn.Rotation == Rot4.North)
                 {
-                    Vector3 drawLoc3 = rootLoc + new Vector3(0f, 0f, -0.11f) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
+                    Vector3 drawLoc3 = rootLoc + new Vector3(0f, 0f, -0.11f) * (1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale));
                     drawLoc3.y += 0f;
                     this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc3, 143f, curLevel, baseLevel);
                     return;
                 }
                 if (this.pawn.Rotation == Rot4.East)
                 {
-                    Vector3 drawLoc4 = rootLoc + new Vector3(0.2f, 0f, -0.22f) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
+                    Vector3 drawLoc4 = rootLoc + new Vector3(0.2f, 0f, -0.22f) * (1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale));
                     drawLoc4.y += 0.03787879f;
                     this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc4, 143f, curLevel, baseLevel);
                     return;
                 }
                 if (this.pawn.Rotation == Rot4.West)
                 {
-                    Vector3 drawLoc5 = rootLoc + new Vector3(-0.2f, 0f, -0.22f) * (1f - (((float)(curLevel) - (float)baseLevel) / 5f));
+                    Vector3 drawLoc5 = rootLoc + new Vector3(-0.2f, 0f, -0.22f) * (1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale));
                     drawLoc5.y += 0.03787879f;
                     this.DrawEquipmentAiming(this.pawn.equipment.Primary, drawLoc5, 217f, curLevel, baseLevel);
                 }
@@ -397,16 +398,16 @@ namespace ZLevels
                     if (eq.Graphic is Graphic_RandomRotated graphicRandomRotated)
                     {
                         Vector2 drawSize = graphicRandomRotated.subGraphic.drawSize;
-                        drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-                        drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+                        drawSize.x *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
+                        drawSize.y *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
                         Log.Message("Get copy 1 from " + graphicRandomRotated.subGraphic);
                         graphic = graphicRandomRotated.subGraphic.GetCopy(drawSize);
                     }
                     else
                     {
                         Vector2 drawSize = eq.Graphic.drawSize;
-                        drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-                        drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
+                        drawSize.x *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
+                        drawSize.y *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
                         Log.Message("Get copy 2 from " + eq.Graphic);
                         graphic = eq.Graphic.GetCopy(drawSize);
 

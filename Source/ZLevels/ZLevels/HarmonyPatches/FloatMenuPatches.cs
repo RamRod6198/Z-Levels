@@ -20,6 +20,138 @@ namespace ZLevels
     [StaticConstructorOnStartup]
     public static class FloatMenuPatches
     {
+        //[HarmonyPatch(typeof(FloatMenuMakerMap), "ChoicesAtFor")]
+        //internal static class Patch_ChoicesAtFor
+        //{
+        //    private static void Postfix(Vector3 clickPos, Pawn pawn)
+        //    {
+        //        ChoicesAtFor(clickPos, pawn);
+        //    }
+        //    public static List<FloatMenuOption> ChoicesAtFor(Vector3 clickPos, Pawn pawn)
+        //    {
+        //        IntVec3 intVec = IntVec3.FromVector3(clickPos);
+        //        List<FloatMenuOption> list = new List<FloatMenuOption>();
+        //        if (!intVec.InBounds(pawn.Map) || !FloatMenuMakerMap.CanTakeOrder(pawn))
+        //        {
+        //            return list;
+        //        }
+        //        if (pawn.Map != Find.CurrentMap)
+        //        {
+        //            return list;
+        //        }
+        //        FloatMenuMakerMap.makingFor = pawn;
+        //        try
+        //        {
+        //            if (!intVec.Fogged(pawn.Map))
+        //            {
+        //                if (pawn.Drafted)
+        //                {
+        //                    FloatMenuMakerMap.AddDraftedOrders(clickPos, pawn, list);
+        //                }
+        //                if (pawn.RaceProps.Humanlike)
+        //                {
+        //                    FloatMenuMakerMap.AddHumanlikeOrders(clickPos, pawn, list);
+        //                }
+        //                if (!pawn.Drafted)
+        //                {
+        //                    Log.Message($"FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {list?.Count}");
+        //                    FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list);
+        //                    Log.Message($"2 FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {list?.Count}");
+        //                }
+        //                {
+        //                    foreach (FloatMenuOption item in pawn.GetExtraFloatMenuOptionsFor(intVec))
+        //                    {
+        //                        list.Add(item);
+        //                    }
+        //                    return list;
+        //                }
+        //            }
+        //            if (!pawn.Drafted)
+        //            {
+        //                return list;
+        //            }
+        //            FloatMenuOption floatMenuOption = FloatMenuMakerMap.GotoLocationOption(intVec, pawn);
+        //            if (floatMenuOption == null)
+        //            {
+        //                return list;
+        //            }
+        //            if (floatMenuOption.Disabled)
+        //            {
+        //                return list;
+        //            }
+        //            list.Add(floatMenuOption);
+        //            return list;
+        //        }
+        //        finally
+        //        {
+        //            FloatMenuMakerMap.makingFor = null;
+        //        }
+        //    }
+        //}
+
+
+        //[HarmonyPatch(typeof(FloatMenuOption), "Chosen")]
+        //internal static class Patch_FloatMenuOption
+        //{
+        //    private static void Postfix(FloatMenuOption __instance, bool colonistOrdering, FloatMenu floatMenu)
+        //    {
+        //        bool goDown = __instance.Label != "GoDown".Translate();
+        //        if (goDown && __instance.Label != "GoUP".Translate()) return;
+        //        if (Find.Selector.SelectedObjects.Count(x => x is Pawn) > 1)
+        //        {
+        //            foreach (var pawn in Find.Selector.SelectedObjects.Where(x => x is Pawn))
+        //            {
+        //                Thing thing;
+        //                if (goDown)
+        //                {
+        //                    thing = GenClosest.ClosestThing_Global_Reachable(UI.MouseMapPosition().ToIntVec3()
+        //                        , ((Pawn)pawn).Map, ((Pawn)pawn).Map.listerThings.AllThings
+        //                        .Where(x => x is Building_StairsDown), PathEndMode.OnCell,
+        //                        TraverseParms.For(TraverseMode.ByPawn, Danger.Deadly, false), 9999f);
+        //                    Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, thing);
+        //                    ((Pawn)pawn).jobs.StartJob(job, JobCondition.InterruptForced);
+        //                }
+        //                else
+        //                {
+        //                    thing = GenClosest.ClosestThing_Global_Reachable(UI.MouseMapPosition().ToIntVec3()
+        //                        , ((Pawn)pawn).Map, ((Pawn)pawn).Map.listerThings.AllThings
+        //                        .Where(x => x is Building_StairsUp), PathEndMode.OnCell,
+        //                        TraverseParms.For(TraverseMode.ByPawn, Danger.Deadly, false), 9999f);
+        //                    Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, thing);
+        //                    ((Pawn)pawn).jobs.StartJob(job, JobCondition.InterruptForced);
+        //                }
+        //            }
+        //        
+        //            ZLogger.Message("Chosen");
+        //        }
+        //    }
+        //}
+
+        //[HarmonyPatch(typeof(GenUI), "TargetsAt_NewTemp", new Type[] { typeof(Vector3), typeof(TargetingParameters), typeof(bool), typeof(ITargetingSource) })]
+        //public static class TargetsAtMouse_NewTemp_Patch3
+        //{
+        //    public static void Prefix(Vector3 clickPos, TargetingParameters clickParams, bool thingsOnly = false, ITargetingSource source = null)
+        //    {
+        //        Log.Message(clickPos + " - TargetsAt_NewTemp");
+        //    }
+        //}
+
+        //
+        //[HarmonyPatch(typeof(FloatMenuMakerMap), "AddUndraftedOrders")]
+        //internal static class Patch_FloatMenuMakerMap
+        //{
+        //    private static void Postfix(Vector3 clickPos, Pawn pawn, ref List<FloatMenuOption> opts)
+        //    {
+        //        if (clickPos.ToIntVec3().GetTerrain(pawn.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
+        //        {
+        //            Log.Message($"3 FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {opts?.Count}");
+        //            FloatMenuMakerMap.AddJobGiverWorkOrders_NewTmp(clickPos, pawn, opts, drafted: false);
+        //            Log.Message($"4 FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {opts?.Count}");
+        //
+        //        }
+        //    }
+        //}
+
         //[HarmonyPatch(typeof(FloatMenuMakerMap), "GotoLocationOption")]
         //public class GotoLocationOption_Patch
         //{
@@ -69,77 +201,214 @@ namespace ZLevels
         //
         //}
 
-        [HarmonyPatch(typeof(FloatMenuOption), "Disabled", MethodType.Getter)]
-        internal static class Patch_FloatDisabled
+        //[HarmonyPatch(typeof(FloatMenuOption), "Disabled", MethodType.Getter)]
+        //internal static class Patch_FloatDisabled
+        //{
+        //    private static bool Prefix(FloatMenuOption __instance, ref bool __result)
+        //    {
+        //        if (__instance.Label != "GoDown".Translate() && __instance.Label != "GoUP".Translate()) return true;
+        //        __result = false;
+        //        return false;
+        //    }
+        //}
+        //
+
+        //[HarmonyPatch(typeof(FloatMenuOption), "Disabled", MethodType.Setter)]
+        //internal static class Patch_Disabled
+        //{
+        //    private static void Postfix(FloatMenuOption __instance, bool value)
+        //    {
+        //        Log.Message($"Setting {__instance} to {value}");
+        //    }
+        //}
+
+
+        [HarmonyPatch(typeof(GenUI), "ThingsUnderMouse")]
+        public static class ThingsUnderMouse_Patch
         {
-            private static bool Prefix(FloatMenuOption __instance, ref bool __result)
+            public static void Postfix(ref List<Thing> __result, ref Vector3 clickPos, float pawnWideClickRadius, TargetingParameters clickParams)
             {
-                if (__instance.Label != "GoDown".Translate() && __instance.Label != "GoUP".Translate()) return true;
-                __result = false;
-                return false;
+                //System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
+                //Log.Message("ThingsUnderMouse: " + t);
+                //foreach (var thin in __result)
+                //{
+                //    Log.Message("Prev: " + thin);
+                //}
+                var map = Find.CurrentMap;
+                var curMapIndex = ZUtils.ZTracker.GetZIndexFor(map);
+                var c = clickPos.ToIntVec3();
 
-            }
-        }
+                if (c.GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain) return;
 
-
-        [HarmonyPatch(typeof(FloatMenuOption), "Chosen")]
-        internal static class Patch_FloatMenuOption
-        {
-            private static void Postfix(FloatMenuOption __instance, bool colonistOrdering, FloatMenu floatMenu)
-            {
-
-                bool goDown = __instance.Label != "GoDown".Translate();
-                if (goDown && __instance.Label != "GoUP".Translate()) return;
-                if (Find.Selector.SelectedObjects.Count(x => x is Pawn) > 1)
+                while (true)
                 {
-                    foreach (var pawn in Find.Selector.SelectedObjects.Where(x => x is Pawn))
+                    map = ZUtils.ZTracker.GetLowerLevel(map.Tile, map);
+                    if (map != null)
                     {
-                        Thing thing;
-                        if (goDown)
+                        if (map.terrainGrid?.TerrainAt(c) == ZLevelsDefOf.ZL_OutsideTerrain)
                         {
-                            thing = GenClosest.ClosestThing_Global_Reachable(UI.MouseMapPosition().ToIntVec3()
-                                , ((Pawn)pawn).Map, ((Pawn)pawn).Map.listerThings.AllThings
-                                .Where(x => x is Building_StairsDown), PathEndMode.OnCell,
-                                TraverseParms.For(TraverseMode.ByPawn, Danger.Deadly, false), 9999f);
-                            Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, thing);
-                            ((Pawn)pawn).jobs.StartJob(job, JobCondition.InterruptForced);
+                            continue;
                         }
                         else
                         {
-                            thing = GenClosest.ClosestThing_Global_Reachable(UI.MouseMapPosition().ToIntVec3()
-                                , ((Pawn)pawn).Map, ((Pawn)pawn).Map.listerThings.AllThings
-                                .Where(x => x is Building_StairsUp), PathEndMode.OnCell,
-                                TraverseParms.For(TraverseMode.ByPawn, Danger.Deadly, false), 9999f);
-                            Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToStairs, thing);
-                            ((Pawn)pawn).jobs.StartJob(job, JobCondition.InterruptForced);
+                            clickPos.z += (curMapIndex - ZUtils.ZTracker.GetZIndexFor(map)) * 0.5f;
+                            __result.AddRange(ThingsUnderMouse(map, clickPos, pawnWideClickRadius, clickParams));
+                            break;
                         }
                     }
-
-                    ZLogger.Message("Chosen");
                 }
+
+                //foreach (var thin in __result)
+                //{
+                //    Log.Message("Added: " + thin);
+                //}
+            }
+
+            private static List<Pawn> clickedPawns = new List<Pawn>();
+            public static List<Thing> ThingsUnderMouse(Map map, Vector3 clickPos, float pawnWideClickRadius, TargetingParameters clickParams)
+            {
+                IntVec3 c = IntVec3.FromVector3(clickPos);
+                List<Thing> list = new List<Thing>();
+                clickedPawns.Clear();
+                List<Pawn> allPawnsSpawned = map.mapPawns.AllPawnsSpawned;
+                for (int i = 0; i < allPawnsSpawned.Count; i++)
+                {
+                    Pawn pawn = allPawnsSpawned[i];
+                    if ((pawn.DrawPos - clickPos).MagnitudeHorizontal() < 0.4f && clickParams.CanTarget(pawn))
+                    {
+                        clickedPawns.Add(pawn);
+                    }
+                }
+                clickedPawns.Sort(CompareThingsByDistanceToMousePointer);
+                for (int j = 0; j < clickedPawns.Count; j++)
+                {
+                    list.Add(clickedPawns[j]);
+                }
+                List<Thing> list2 = new List<Thing>();
+                foreach (Thing item in map.thingGrid.ThingsAt(c))
+                {
+                    if (!list.Contains(item) && clickParams.CanTarget(item))
+                    {
+                        list2.Add(item);
+                    }
+                }
+                List<Thing> list3 = map.listerThings.ThingsInGroup(ThingRequestGroup.WithCustomRectForSelector);
+                for (int k = 0; k < list3.Count; k++)
+                {
+                    Thing thing = list3[k];
+                    if (thing.CustomRectForSelector.HasValue && thing.CustomRectForSelector.Value.Contains(c) && !list.Contains(thing) && clickParams.CanTarget(thing))
+                    {
+                        list2.Add(thing);
+                    }
+                }
+                list2.Sort(CompareThingsByDrawAltitude);
+                list.AddRange(list2);
+                clickedPawns.Clear();
+                List<Pawn> allPawnsSpawned2 = map.mapPawns.AllPawnsSpawned;
+                for (int l = 0; l < allPawnsSpawned2.Count; l++)
+                {
+                    Pawn pawn2 = allPawnsSpawned2[l];
+                    if ((pawn2.DrawPos - clickPos).MagnitudeHorizontal() < pawnWideClickRadius && clickParams.CanTarget(pawn2))
+                    {
+                        clickedPawns.Add(pawn2);
+                    }
+                }
+                clickedPawns.Sort(CompareThingsByDistanceToMousePointer);
+                for (int m = 0; m < clickedPawns.Count; m++)
+                {
+                    if (!list.Contains(clickedPawns[m]))
+                    {
+                        list.Add(clickedPawns[m]);
+                    }
+                }
+                list.RemoveAll((Thing t) => !t.Spawned);
+                clickedPawns.Clear();
+                return list;
+            }
+
+            private static int CompareThingsByDistanceToMousePointer(Thing a, Thing b)
+            {
+                Vector3 b2 = UI.MouseMapPosition();
+                float num = (a.DrawPos - b2).MagnitudeHorizontalSquared();
+                float num2 = (b.DrawPos - b2).MagnitudeHorizontalSquared();
+                if (num < num2)
+                {
+                    return -1;
+                }
+                if (num == num2)
+                {
+                    return 0;
+                }
+                return 1;
+            }
+
+            private static int CompareThingsByDrawAltitude(Thing A, Thing B)
+            {
+                if (A.def.Altitude < B.def.Altitude)
+                {
+                    return 1;
+                }
+                if (A.def.Altitude == B.def.Altitude)
+                {
+                    return 0;
+                }
+                return -1;
             }
         }
 
+        [HarmonyPatch(typeof(FloatMenuMap), "StillValid", new Type[] { typeof(FloatMenuOption), typeof(List<FloatMenuOption>), typeof(Pawn)})]
+        internal static class Patch_StillValid
+        {
+            private static bool Prefix(ref bool __result, FloatMenuMap __instance, FloatMenuOption opt, List<FloatMenuOption> curOpts, Pawn forPawn)
+            {
+                if (opt.revalidateClickTarget?.Map != Find.CurrentMap)
+                {
+                    __result = StillValid(__instance, opt, curOpts, forPawn);
+                    Log.Message("Result: " + __result);
+                    return false;
+                }
+                return true;
+            }
+        
+            private static bool StillValid(FloatMenuMap __instance, FloatMenuOption opt, List<FloatMenuOption> curOpts, Pawn forPawn)
+            {
+                if (opt.revalidateClickTarget == null)
+                {
+                    for (int i = 0; i < curOpts.Count; i++)
+                    {
+                        if (FloatMenuMap.OptionsMatch(opt, curOpts[i]))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!opt.revalidateClickTarget.Spawned)
+                    {
+                        return false;
+                    }
 
-        //[HarmonyPatch(typeof(FloatMenuMakerMap), "AddDraftedOrders")]
-        //public class AddDraftedOrders_Patch
-        //{
-        //    [HarmonyPostfix]
-        //    public static void Postfix(Vector3 clickPos, Pawn pawn, List<FloatMenuOption> opts)
-        //    {
-        //        IntVec3 dest = clickPos.ToIntVec3();
-        //        var ti = new LocalTargetInfo(dest);
-        //        var lists = ZPathfinder.Instance.FindRoute(pawn.Position, dest, pawn.Map, pawn.Map);
-        //        foreach (var t in lists)
-        //        {
-        //            ZLogger.Message($"t has {t.neighbors.Count} neighbors.  It's at {t.Location}");
-        //        }
+                    Vector3 key = opt.revalidateClickTarget.Position.ToVector3Shifted();
+                    key.z += (ZUtils.ZTracker.GetZIndexFor(opt.revalidateClickTarget.Map) - ZUtils.ZTracker.GetZIndexFor(Find.CurrentMap)) * 0.5f;
 
-        //        //ZPathfinder.Instance.CalculateStairPaths();
-        //        ZPathfinder.Instance.SetOrCreateDijkstraGraph(pawn.Tile);
-        //        //  ZPathfinder.Instance.FindPath(pawn.Position, dest, pawn.Map);
-        //    }
-        //}
+                    if (!FloatMenuMap.cachedChoices.TryGetValue(key, out List<FloatMenuOption> value))
+                    {
+                        List<FloatMenuOption> list = FloatMenuMakerMap.ChoicesAtFor(key, forPawn);
+                        FloatMenuMap.cachedChoices.Add(key, list);
+                        value = list;
+                    }
+                    for (int j = 0; j < value.Count; j++)
+                    {
+                        if (FloatMenuMap.OptionsMatch(opt, value[j]))
+                        {
+                            return !value[j].Disabled;
+                        }
+                    }
+                }
+                return false;
+            }
+        }
 
         [HarmonyPatch(typeof(FloatMenuMakerMap), "AddHumanlikeOrders")]
         public class AddHumanlikeOrders_Patch
@@ -149,7 +418,7 @@ namespace ZLevels
                 Pawn pawn2 = GridsUtility.GetThingList(IntVec3.FromVector3(clickPos), pawn.Map)
                     .FirstOrDefault((Thing x) => x is Pawn) as Pawn;
                 var ZTracker = ZUtils.ZTracker;
-
+        
                 if (pawn2 != null && ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Count > 1)
                 {
                     TaggedString toCheck = "Rescue".Translate(pawn2.LabelCap, pawn2);
@@ -160,7 +429,7 @@ namespace ZLevels
                         opts.Remove(floatMenuOption);
                         opts.Add(AddHumanlikeOrders_Patch.AddRescueOption(pawn, pawn2));
                     }
-
+        
                     TaggedString toCheck2 = "Capture".Translate(pawn2.LabelCap, pawn2);
                     FloatMenuOption floatMenuOption2 = opts.FirstOrDefault((FloatMenuOption x) => x.Label.Contains
                         (toCheck2));
@@ -169,7 +438,7 @@ namespace ZLevels
                         opts.Remove(floatMenuOption2);
                         opts.Add(AddHumanlikeOrders_Patch.AddCaptureOption(pawn, pawn2));
                     }
-
+        
                     TaggedString toCheck3 = "TryToArrest".Translate(pawn2.LabelCap, pawn2,
                         pawn2.GetAcceptArrestChance(pawn).ToStringPercent());
                     FloatMenuOption floatMenuOption3 = opts.FirstOrDefault((FloatMenuOption x) => x.Label.Contains
@@ -181,7 +450,7 @@ namespace ZLevels
                     }
                 }
             }
-
+        
             public static FloatMenuOption AddArrestOption(Pawn pawn, Pawn victim)
             {
                 if (!pawn.CanReach(victim, PathEndMode.OnCell, Danger.Deadly))
@@ -200,7 +469,7 @@ namespace ZLevels
                         var oldPosition2 = victim.Position;
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-
+        
                         Building building_Bed3 = null;
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap,
                             oldPosition1, victim, oldMap, oldPosition2))
@@ -212,15 +481,15 @@ namespace ZLevels
                                 building_Bed3 = RestUtility.FindBedFor(pTarg2, pawn, sleeperWillBePrisoner: true,
                                     checkSocialProperness: false, ignoreOtherReservations: true);
                             }
-
+        
                             if (building_Bed3 != null) break;
                         }
-
+        
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
                         ZUtils.TeleportThing(victim, oldMap, oldPosition2);
-
+        
                         if (select) Find.Selector.Select(pawn);
-
+        
                         if (building_Bed3 == null)
                         {
                             Messages.Message("CannotArrest".Translate() + ": " + "NoPrisonerBed".Translate(),
@@ -233,7 +502,7 @@ namespace ZLevels
                             ZTracker.BuildJobListFor(pawn, pawn.Map, job);
                             ZLogger.Message(pawn + " taking first job 3");
                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
-
+        
                             if (pTarg2.Faction != null &&
                                 ((pTarg2.Faction != Faction.OfPlayer && !pTarg2.Faction.def.hidden) ||
                                  pTarg2.IsQuestLodger()))
@@ -249,111 +518,111 @@ namespace ZLevels
                             MenuOptionPriority.High, null, victim), pawn, pTarg2);
                 }
             }
-
+        
             public static FloatMenuOption AddCaptureOption(Pawn pawn, Pawn victim)
             {
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Capture".Translate
                     (victim.LabelCap, victim), delegate ()
-                {
-                    var ZTracker = ZUtils.ZTracker;
-                    var oldMap = pawn.Map;
-                    var oldPosition1 = pawn.Position;
-                    var oldPosition2 = victim.Position;
-                    bool select = Find.Selector.SelectedObjects.Contains(pawn);
-
-                    Building building_Bed = null;
-                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1,
-                        victim, oldMap, oldPosition2))
                     {
-                        building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, false);
+                        var ZTracker = ZUtils.ZTracker;
+                        var oldMap = pawn.Map;
+                        var oldPosition1 = pawn.Position;
+                        var oldPosition2 = victim.Position;
+                        bool select = Find.Selector.SelectedObjects.Contains(pawn);
+        
+                        Building building_Bed = null;
+                        foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1,
+                            victim, oldMap, oldPosition2))
+                        {
+                            building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, false);
+                            if (building_Bed == null)
+                            {
+                                building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, true);
+                            }
+        
+                            if (building_Bed != null) break;
+                        }
+        
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
+                        ZUtils.TeleportThing(victim, oldMap, oldPosition2);
+        
+                        if (select) Find.Selector.Select(pawn);
+        
                         if (building_Bed == null)
                         {
-                            building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, true);
+                            Messages.Message("CannotCapture".Translate() + ": " + "NoPrisonerBed".Translate(), victim,
+                                MessageTypeDefOf.RejectInput, false);
+                            return;
                         }
-
-                        if (building_Bed != null) break;
-                    }
-
-                    ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
-                    ZUtils.TeleportThing(victim, oldMap, oldPosition2);
-
-                    if (select) Find.Selector.Select(pawn);
-
-                    if (building_Bed == null)
-                    {
-                        Messages.Message("CannotCapture".Translate() + ": " + "NoPrisonerBed".Translate(), victim,
-                            MessageTypeDefOf.RejectInput, false);
-                        return;
-                    }
-
-                    Job job = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
-                    job.count = 1;
-                    ZTracker.BuildJobListFor(pawn, pawn.Map, job);
-                    ZLogger.Message(pawn + " taking first job 3");
-                    pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
-                    PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Capturing, KnowledgeAmount.Total);
-                    if (victim.Faction != null && victim.Faction != Faction.OfPlayer &&
-                        !victim.Faction.def.hidden && !victim.Faction.HostileTo(Faction.OfPlayer) &&
-                        !victim.IsPrisonerOfColony)
-                    {
-                        Messages.Message("MessageCapturingWillAngerFaction".Translate(victim.Named("PAWN"))
-                            .AdjustedFor(victim, "PAWN", true), victim, MessageTypeDefOf.CautionInput, false);
-                    }
-                }, MenuOptionPriority.RescueOrCapture, null, victim, 0f, null, null), pawn, victim, "ReservedBy");
+        
+                        Job job = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
+                        job.count = 1;
+                        ZTracker.BuildJobListFor(pawn, pawn.Map, job);
+                        ZLogger.Message(pawn + " taking first job 3");
+                        pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
+                        PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Capturing, KnowledgeAmount.Total);
+                        if (victim.Faction != null && victim.Faction != Faction.OfPlayer &&
+                            !victim.Faction.def.hidden && !victim.Faction.HostileTo(Faction.OfPlayer) &&
+                            !victim.IsPrisonerOfColony)
+                        {
+                            Messages.Message("MessageCapturingWillAngerFaction".Translate(victim.Named("PAWN"))
+                                .AdjustedFor(victim, "PAWN", true), victim, MessageTypeDefOf.CautionInput, false);
+                        }
+                    }, MenuOptionPriority.RescueOrCapture, null, victim, 0f, null, null), pawn, victim, "ReservedBy");
                 return floatOption;
             }
-
+        
             public static FloatMenuOption AddRescueOption(Pawn pawn, Pawn victim)
             {
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Rescue".Translate
                     (victim.LabelCap, victim), delegate ()
-                {
-                    var ZTracker = ZUtils.ZTracker;
-                    var oldMap = pawn.Map;
-                    var oldPosition1 = pawn.Position;
-                    var oldPosition2 = victim.Position;
-                    bool select = false;
-                    if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-                    Building building_Bed = null;
-
-                    foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1,
-                        victim, oldMap, oldPosition2))
                     {
-                        ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
-                                        + " for " + ZTracker.GetMapInfo(oldMap));
-                        building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false,
-                            checkSocialProperness: false);
+                        var ZTracker = ZUtils.ZTracker;
+                        var oldMap = pawn.Map;
+                        var oldPosition1 = pawn.Position;
+                        var oldPosition2 = victim.Position;
+                        bool select = false;
+                        if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                        Building building_Bed = null;
+        
+                        foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1,
+                            victim, oldMap, oldPosition2))
+                        {
+                            ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
+                                            + " for " + ZTracker.GetMapInfo(oldMap));
+                            building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false,
+                                checkSocialProperness: false);
+                            if (building_Bed == null)
+                            {
+                                building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false,
+                                    checkSocialProperness: false, ignoreOtherReservations: true);
+                            }
+        
+                            if (building_Bed != null) break;
+                        }
+        
+                        if (select) Find.Selector.Select(pawn);
+                        ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
+                        ZUtils.TeleportThing(victim, oldMap, oldPosition2);
+        
                         if (building_Bed == null)
                         {
-                            building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false,
-                                checkSocialProperness: false, ignoreOtherReservations: true);
+                            string t3 = (!victim.RaceProps.Animal)
+                                ? ((string)"NoNonPrisonerBed".Translate())
+                                : ((string)"NoAnimalBed".Translate());
+                            Messages.Message("CannotRescue".Translate() + ": " + t3, victim,
+                                MessageTypeDefOf.RejectInput, historical: false);
                         }
-
-                        if (building_Bed != null) break;
-                    }
-
-                    if (select) Find.Selector.Select(pawn);
-                    ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
-                    ZUtils.TeleportThing(victim, oldMap, oldPosition2);
-
-                    if (building_Bed == null)
-                    {
-                        string t3 = (!victim.RaceProps.Animal)
-                            ? ((string)"NoNonPrisonerBed".Translate())
-                            : ((string)"NoAnimalBed".Translate());
-                        Messages.Message("CannotRescue".Translate() + ": " + t3, victim,
-                            MessageTypeDefOf.RejectInput, historical: false);
-                    }
-                    else
-                    {
-                        Job job = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
-                        job.count = 1;
-                        ZTracker.BuildJobListFor(pawn, pawn.Map, job);
-                        Log.Message(pawn + " taking first job 2");
-                        pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
-                        PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
-                    }
-                }, MenuOptionPriority.RescueOrCapture, null, victim, 0f, null, null), pawn, victim, "ReservedBy");
+                        else
+                        {
+                            Job job = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
+                            job.count = 1;
+                            ZTracker.BuildJobListFor(pawn, pawn.Map, job);
+                            Log.Message(pawn + " taking first job 2");
+                            pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
+                            PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
+                        }
+                    }, MenuOptionPriority.RescueOrCapture, null, victim, 0f, null, null), pawn, victim, "ReservedBy");
                 return floatOption;
             }
         }
@@ -373,7 +642,7 @@ namespace ZLevels
                     }
                 }
                 var duplicateOptions = new List<FloatMenuOption>();
-
+        
                 if (pawn.thinker.TryGetMainTreeThinkNode<JobGiver_Work>() != null)
                 {
                     IntVec3 clickCell = IntVec3.FromVector3(clickPos);
@@ -397,8 +666,10 @@ namespace ZLevels
                                     if (workGiver_Scanner != null && workGiver_Scanner.def.directOrderable)
                                     {
                                         JobFailReason.Clear();
-                                        if ((workGiver_Scanner.PotentialWorkThingRequest.Accepts(item) || (workGiver_Scanner.PotentialWorkThingsGlobal(pawn) != null && workGiver_Scanner.PotentialWorkThingsGlobal(pawn).Contains(item))) && !workGiver_Scanner.ShouldSkip(pawn, forced: true))
+                                        if (workGiver_Scanner.PotentialWorkThingRequest.Accepts(item))// || (workGiver_Scanner.PotentialWorkThingsGlobal(pawn) != null
+                                            //&& workGiver_Scanner.PotentialWorkThingsGlobal(pawn).Contains(item))) && !workGiver_Scanner.ShouldSkip(pawn, forced: true))
                                         {
+                                            //Log.Message($"Iterating over {workGiver_Scanner} for {item}");
                                             string text = null;
                                             Action action = null;
                                             PawnCapacityDef pawnCapacityDef = workGiver_Scanner.MissingRequiredCapacity(pawn);
@@ -412,9 +683,10 @@ namespace ZLevels
                                                 Map dest = null;
                                                 Map oldPawnMap = pawn.Map;
                                                 IntVec3 oldPawnPosition = pawn.Position;
-
+        
                                                 foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldPawnMap))
                                                 {
+                                                    Log.Message("Checking otherMap: " + otherMap + " - " + workGiver_Scanner);
                                                     if (oldPawnMap != otherMap)
                                                     {
                                                         pawn.positionInt = ZUtils.GetCellToTeleportFrom(pawn.Map, pawn.Position, otherMap);
@@ -424,44 +696,53 @@ namespace ZLevels
                                                         pawn.positionInt = oldPawnPosition;
                                                     }
                                                     pawn.mapIndexOrState = (sbyte)Find.Maps.IndexOf(otherMap);
-
+        
                                                     if (workGiver_Scanner is WorkGiver_Refuel scanner1)
                                                     {
-                                                        job = JobPatches.TryIssueJobPackagePatch.JobOnThing(scanner1, pawn, item, true);
+                                                        job = JobPatches.TryIssueJobPackagePatch.RefuelJobOnThing(scanner1, pawn, item, true);
                                                     }
-                                                    else if (workGiver_Scanner.def.defName == "HaulGeneral" ||
-                                                             workGiver_Scanner.def.defName == "HaulCorpses")
+                                                    else if (workGiver_Scanner.def.defName == "HaulGeneral" || workGiver_Scanner.def.defName == "HaulCorpses")
                                                     {
-                                                        job = JobPatches.TryIssueJobPackagePatch.JobOnThing(pawn, item, ref dest, true);
+                                                        job = JobPatches.TryIssueJobPackagePatch.HaulJobOnThing(pawn, item, ref dest, true);
                                                     }
                                                     else if (workGiver_Scanner is WorkGiver_DoBill scanner2)
                                                     {
-                                                        job = JobPatches.TryIssueJobPackagePatch.JobOnThing(scanner2, pawn, item, true);
+                                                        job = JobPatches.TryIssueJobPackagePatch.DoBillJobOnThing(scanner2, pawn, item, ref dest, true);
                                                     }
                                                     else if (workGiver_Scanner is
                                                         WorkGiver_ConstructDeliverResourcesToBlueprints scanner3)
                                                     {
-                                                        job = JobPatches.TryIssueJobPackagePatch.JobOnThing(scanner3, pawn, item, true);
+                                                        job = JobPatches.TryIssueJobPackagePatch.ConstructDeliverJobOnThing(scanner3, pawn, item, true);
                                                     }
                                                     else if (workGiver_Scanner is WorkGiver_ConstructDeliverResourcesToFrames scanner4)
                                                     {
-                                                        job = JobPatches.TryIssueJobPackagePatch.JobOnThing(scanner4, pawn, item, true);
+                                                        job = JobPatches.TryIssueJobPackagePatch.ConstructDeliverJobOnThing(scanner4, pawn, item, true);
                                                     }
                                                     else if (workGiver_Scanner is WorkGiver_Tend)
                                                     {
-                                                        job = JobPatches.TryIssueJobPackagePatch.JobOnThingTend(pawn, item, true);
+                                                        job = JobPatches.TryIssueJobPackagePatch.TendJobOnThing(pawn, item, true);
                                                     }
                                                     else
                                                     {
-                                                        job = workGiver_Scanner.HasJobOnThing(pawn, item,
-                                                            forced: true)
-                                                            ? workGiver_Scanner.JobOnThing(pawn, item, forced: true)
-                                                            : null;
+                                                        job = workGiver_Scanner.HasJobOnThing(pawn, item, forced: true) ? workGiver_Scanner.JobOnThing(pawn, item, forced: true) : null;
                                                     }
-                                                    if (job != null) break;
-                                                    else Log.Message("NO job was yielded: " + workGiver_Scanner + " in " + otherMap);
+        
+                                                    if (job != null)
+                                                    {
+                                                        Log.Message($"1 Found job {job} from " + workGiver_Scanner + " in " + otherMap + " dest: " + dest);
+                                                        if (dest == null)
+                                                        {
+                                                            dest = otherMap;
+                                                        }
+                                                        Log.Message($"2 Found job {job} from " + workGiver_Scanner + " in " + otherMap + " dest: " + dest);
+                                                        break;
+                                                    }
+                                                    else
+                                                    {
+                                                        dest = null;
+                                                        //Log.Message("No job was yielded from " + workGiver_Scanner + " in " + otherMap);
+                                                    }
                                                 }
-
                                                 ZUtils.TeleportThing(pawn, oldPawnMap, oldPawnPosition);
                                                 if (job == null)
                                                 {
@@ -520,10 +801,12 @@ namespace ZLevels
                                                             }
                                                             if (dest != null)
                                                             {
+                                                                Log.Message("1 Dest: " + dest);
                                                                 ZTracker.BuildJobListFor(pawn, dest, job);
                                                             }
                                                             else
                                                             {
+                                                                Log.Message("2 Dest (oldPawnMap): " + oldPawnMap);
                                                                 ZTracker.BuildJobListFor(pawn, oldPawnMap, job);
                                                             }
                                                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
@@ -546,11 +829,12 @@ namespace ZLevels
                                                 menuOption.autoTakeable = true;
                                                 menuOption.autoTakeablePriority = workGiver2.autoTakeablePriorityDrafted;
                                             }
+        
                                             if (!opts.Any(op => op.Label == menuOption.Label))
                                             {
                                                 if (workGiver2.equivalenceGroup != null)
                                                 {
-                                                    if (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] == null 
+                                                    if (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] == null
                                                         || (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index].Disabled && !menuOption.Disabled))
                                                     {
                                                         ___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] = menuOption;
@@ -567,10 +851,15 @@ namespace ZLevels
                                                 duplicateOptions.Add(menuOption);
                                             }
                                         }
+                                        //else
+                                        //{
+                                        //    Log.Message($"Failed to get result from {workGiver_Scanner} for {item}");
+                                        //}
                                     }
                                 }
                             }
                         }
+        
                         if (flag)
                         {
                             for (int j = 0; j < ___equivalenceGroupTempStorage.Length; j++)
@@ -584,7 +873,8 @@ namespace ZLevels
                         }
                     }
                 }
-
+        
+        
                 foreach (var inactiveOption in inactiveOptions)
                 {
                     if (!duplicateOptions.Contains(inactiveOption))

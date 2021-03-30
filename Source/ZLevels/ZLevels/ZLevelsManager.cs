@@ -149,6 +149,7 @@ namespace ZLevels
 
                     var rememberedCamera = Current.Game.CurrentMap.rememberedCameraPos;
                     Current.Game.CurrentMap = mapToSwitch;
+                    rememberedCamera.rootPos.z -= 0.5f;
                     Find.CameraDriver.SetRootPosAndSize(rememberedCamera.rootPos, rememberedCamera.rootSize);
 
                     //foreach (var select in selectedObjects)
@@ -168,6 +169,7 @@ namespace ZLevels
 
                     var rememberedCamera = Current.Game.CurrentMap.rememberedCameraPos;
                     Current.Game.CurrentMap = mapToSwitch;
+                    rememberedCamera.rootPos.z += 0.5f;
                     Find.CameraDriver.SetRootPosAndSize(rememberedCamera.rootPos, rememberedCamera.rootSize);
 
                     //foreach (var select in selectedObjects)

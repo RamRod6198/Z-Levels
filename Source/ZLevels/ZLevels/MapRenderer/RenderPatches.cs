@@ -9,6 +9,29 @@ using Verse;
 
 namespace ZLevels
 {
+	[HarmonyPatch(typeof(GenView), "ShouldSpawnMotesAt", new Type[] { typeof(IntVec3), typeof(Map)})]
+	public static class ShouldSpawnMotesAt_Patch
+	{
+		private static CellRect viewRect;
+		public static bool Prefix(ref bool __result, IntVec3 loc, Map map)
+		{
+			if (map.Tile != Find.CurrentMap?.Tile)
+			{
+				__result = false;
+				return false;
+			}
+			if (!loc.InBounds(map))
+			{
+				__result = false;
+				return false;
+			}
+			viewRect = Find.CameraDriver.CurrentViewRect;
+			viewRect = viewRect.ExpandedBy(5);
+			__result = viewRect.Contains(loc);
+			return false;
+		}
+	}
+
 	[HarmonyPatch(typeof(Thing), "DrawPos", MethodType.Getter)]
 	public static class DrawPos_Patch
 	{
@@ -22,6 +45,19 @@ namespace ZLevels
 			{
 				__result.z += zLevelOffset;
 				__result.y += yLevelOffset;
+			}
+		}
+	}
+
+	[HarmonyPatch(typeof(Mote), "DrawPos", MethodType.Getter)]
+	public static class Mote_DrawPos_Patch
+	{
+		public static void Postfix(Mote __instance, ref Vector3 __result)
+		{
+			if (DrawPos_Patch.ChangeDrawPos)
+			{
+				__result.z += DrawPos_Patch.zLevelOffset;
+				__result.y += DrawPos_Patch.yLevelOffset;
 			}
 		}
 	}
@@ -61,7 +97,13 @@ namespace ZLevels
 		private static Dictionary<Thing, Dictionary<int, Graphic>> cachedGraphics = new Dictionary<Thing, Dictionary<int, Graphic>>();
 
 		[TweakValue("0ZLevels", 0, 20)] public static float turretDrawZOffset = 1.9f;
-		[TweakValue("0ZLevels", 0, 20)] public static float globalZOffset = 3.95f;
+		[TweakValue("0ZLevels", 0, 20)] public static float globalZOffset = 3.178f;
+		[TweakValue("0ZLevels", 0, 20)] public static float pawnYOffset = 4.1f;
+		[TweakValue("0ZLevels", 0, 20)] public static float moteZOffset = 1.614f;
+		[TweakValue("0ZLevels", 0, 20)] public static float pawnZOffset = 1.614f;
+		[TweakValue("0ZLevels", 0, 20)] public static float thingDrawScale = 10f;
+		[TweakValue("0ZLevels", 0, 20)] public static float pawnDrawScale = 10f;
+
 		public static void Postfix(DynamicDrawManager __instance, Map ___map, ref bool ___drawingNow)
 		{
 			var ZTracker = ZUtils.ZTracker;
@@ -81,7 +123,6 @@ namespace ZLevels
 						CellIndices cellIndices = map2.cellIndices;
 						foreach (Thing thing in map2.dynamicDrawManager.drawThings)
 						{
-
 							if (thing.def.drawerType != DrawerType.None && thing.def.drawerType != DrawerType.RealtimeOnly)
                             {
 								if (thing is Building_TurretGun turretGun)
@@ -115,11 +156,7 @@ namespace ZLevels
 									try
 									{
 										var graphicType = thing.Graphic.GetType();
-										if (graphicType == typeof(Graphic_Mote))
-										{
-											
-										}
-										else if (graphicType == typeof(Graphic_LinkedCornerFiller) || graphicType == typeof(Graphic_RandomRotated) || graphicType == typeof(Graphic_Linked))
+										if (graphicType == typeof(Graphic_LinkedCornerFiller) || graphicType == typeof(Graphic_Linked))
 										{
 											thing.Draw();
 										}
@@ -127,9 +164,9 @@ namespace ZLevels
 										{
 											DrawPos_Patch.ChangeDrawPos = false;
 											var newDrawPos = thing.DrawPos;
-											newDrawPos.z += (baseLevel - curLevel) / 2f;
+											newDrawPos.z += (baseLevel - curLevel) / pawnZOffset;
 											newDrawPos.y -= baseLevel - curLevel;
-											newDrawPos.y -= 4.1f;
+											newDrawPos.y -= pawnYOffset;
 											if (cachedPawnRenderers.TryGetValue(pawn, out var pawnRenderer))
 											{
 												pawnRenderer.RenderPawnAt(newDrawPos, curLevel, baseLevel);
@@ -154,7 +191,7 @@ namespace ZLevels
 										{
 											DrawPos_Patch.ChangeDrawPos = false;
 											var newDrawPos = thing.DrawPos;
-											newDrawPos.z += (baseLevel - curLevel) / 2f;
+											newDrawPos.z += (baseLevel - curLevel) / pawnZOffset;
 											newDrawPos.y -= baseLevel - curLevel;
 											newDrawPos.y -= 4f;
 											if (cachedCorpseRenderers.TryGetValue(corpse.InnerPawn, out var pawnRenderer))
@@ -184,13 +221,29 @@ namespace ZLevels
 												graphics = new Dictionary<int, Graphic>();
 												cachedGraphics[thing] = graphics;
 											}
-											if (!graphics.TryGetValue(curLevel, out var graphic))
+											if (!graphics.TryGetValue(curLevel, out var graphic) || true)
 											{
 												Vector2 drawSize = thing.Graphic.drawSize;
-												drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-												drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-												graphic = thing.Graphic.GetCopy(drawSize);
+												drawSize.x *= 1f - ((curLevel - baseLevel) / thingDrawScale);
+												drawSize.y *= 1f - ((curLevel - baseLevel) / thingDrawScale);
+
+												if (thing.Graphic is Graphic_RandomRotated graphicRandomRotated)
+												{
+													graphic = graphicRandomRotated.subGraphic.GetCopy(drawSize);
+													graphic.data = graphicRandomRotated.subGraphic.data;
+												}
+												else
+                                                {
+													graphic = thing.Graphic.GetCopy(drawSize);
+													graphic.data = thing.Graphic.data;
+                                                }
+												graphic.data.drawSize = drawSize;
 												graphics[curLevel] = graphic;
+											}
+
+											if (thing.def.mote != null)
+                                            {
+												DrawPos_Patch.zLevelOffset = (baseLevel - curLevel) / moteZOffset;
 											}
 											graphic.Draw(thing.DrawPos, thing.Rotation, thing);
 										}
@@ -226,7 +279,6 @@ namespace ZLevels
 				}
 			}
 		}
-
 		public static void DrawDoor(Building_Door door, int baseLevel, int curLevel)
 		{
 			door.Rotation = Building_Door.DoorRotationAt(door.Position, door.Map);

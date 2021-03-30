@@ -44,51 +44,50 @@ namespace ZLevels
 		{
 			zTracker = null;
 		}
-
         public static IEnumerable<Map> GetAllMapsInClosestOrder(Thing thing, Map oldMap, IntVec3 oldPosition, bool skipOldMap = false, bool dontCheckForStairs = false)
         {
             bool cantGoDown = false;
             bool cantGoUP = false;
-
-            foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldMap))
+            var zTracker = ZTracker;
+            foreach (var otherMap in zTracker.GetAllMapsInClosestOrder(oldMap))
             {
                 if (!dontCheckForStairs)
                 {
                     var stairs = new List<Building_Stairs>();
-                    var otherMapZIndex = ZTracker.GetZIndexFor(otherMap);
-                    var oldMapZIndex = ZTracker.GetZIndexFor(oldMap);
+                    var otherMapZIndex = zTracker.GetZIndexFor(otherMap);
+                    var oldMapZIndex = zTracker.GetZIndexFor(oldMap);
 
                     if (otherMapZIndex > oldMapZIndex && !cantGoUP) // old map is lower than other map
                     {
-                        Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
+                        Map lowerMap = zTracker.GetLowerLevel(otherMap.Tile, otherMap);
                         if (lowerMap != null)
                         {
-                            stairs = ZTracker.stairsUp[lowerMap]; // fetching stairs from lower map, in this case from map below than other map
+                            stairs = zTracker.stairsUp[lowerMap]; // fetching stairs from lower map, in this case from map below than other map
                         }
                         else
                         {
-                            ZLogger.Error("Lower map is null in " + ZTracker.GetMapInfo(otherMap));
+                            ZLogger.Error("Lower map is null in " + zTracker.GetMapInfo(otherMap));
                         }
                     }
                     else if (otherMapZIndex < oldMapZIndex && !cantGoDown) // other map is lower than old map
                     {
-                        Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
+                        Map upperMap = zTracker.GetUpperLevel(otherMap.Tile, otherMap);
                         if (upperMap != null)
                         {
-                            stairs = ZTracker.stairsDown[upperMap]; // fetching stairs from upper map, in this case from map upper than other map
+                            stairs = zTracker.stairsDown[upperMap]; // fetching stairs from upper map, in this case from map upper than other map
                         }
                         else
                         {
-                            ZLogger.Error("Upper map is null in " + ZTracker.GetMapInfo(otherMap));
+                            ZLogger.Error("Upper map is null in " + zTracker.GetMapInfo(otherMap));
                         }
                     }
 
                     if (stairs != null && stairs.Count > 0)
                     {
-                        foreach (var stair in stairs)
-                        {
-                            ZLogger.Message($"CHECKING STAIR: {stair}, stair.Spawned: {stair.Spawned}, stair.Destroyed: {stair.Destroyed}, stair.Position: {stair.Position}, stair.Map: {stair.Map}, otherMap: {otherMap}");
-                        }
+                        //foreach (var stair in stairs)
+                        //{
+                        //    ZLogger.Message($"CHECKING STAIR: {stair}, stair.Spawned: {stair.Spawned}, stair.Destroyed: {stair.Destroyed}, stair.Position: {stair.Position}, stair.Map: {stair.Map}, otherMap: {otherMap}");
+                        //}
 
                         if (!skipOldMap || skipOldMap && otherMap != oldMap)
                         {
@@ -97,8 +96,8 @@ namespace ZLevels
                             {
                                 foreach (var stair in stairs.OrderBy(x => IntVec3Utility.DistanceTo(thing.Position, x.Position)))
                                 {
-                                    ZLogger.Message($"CHECK: {pawn} is from {ZTracker.GetMapInfo(pawn.Map)}, can reach {stair} - {pawn.CanReach(stair, Verse.AI.PathEndMode.OnCell, Danger.Deadly)}," +
-                                        $" stair is from {ZTracker.GetMapInfo(stair.Map)}");
+                                    //ZLogger.Message($"CHECK: {pawn} is from {zTracker.GetMapInfo(pawn.Map)}, can reach {stair} - {pawn.CanReach(stair, Verse.AI.PathEndMode.OnCell, Danger.Deadly)}," +
+                                    //    $" stair is from {zTracker.GetMapInfo(stair.Map)}");
                                     if (pawn.CanReach(stair, Verse.AI.PathEndMode.OnCell, Danger.Deadly))
                                     {
                                         newPosition = stair.Position;
@@ -110,7 +109,7 @@ namespace ZLevels
                             if (newPosition.IsValid)
                             {
                                 TeleportThing(thing, otherMap, newPosition);
-                                ZLogger.Message($"1 CHECK: {thing} is going to {ZTracker.GetMapInfo(otherMap)}");
+                                //ZLogger.Message($"1 CHECK: {thing} is going to {zTracker.GetMapInfo(otherMap)}");
                                 yield return otherMap;
                             }
                             else
@@ -119,10 +118,10 @@ namespace ZLevels
                                 var map = firstStairs?.Map;
                                 if (map != null)
                                 {
-                                    ZLogger.Message($"3 CHECK: stairs map: {ZTracker.GetMapInfo(map)} - other map: {ZTracker.GetMapInfo(otherMap)} - pawn map: {ZTracker.GetMapInfo(thing.Map)}");
+                                    //ZLogger.Message($"3 CHECK: stairs map: {zTracker.GetMapInfo(map)} - other map: {zTracker.GetMapInfo(otherMap)} - pawn map: {zTracker.GetMapInfo(thing.Map)}");
                                     if (map != oldMap)
                                     {
-                                        var stairsMapIndex = ZTracker.GetZIndexFor(map);
+                                        var stairsMapIndex = zTracker.GetZIndexFor(map);
                                         if (stairsMapIndex > oldMapZIndex)
                                         {
                                             cantGoUP = true;
@@ -147,19 +146,19 @@ namespace ZLevels
                     else if (otherMap == oldMap && !skipOldMap)
                     {
                         TeleportThing(thing, oldMap, oldPosition);
-                        ZLogger.Message($"2 CHECK: {thing} is going to {ZTracker.GetMapInfo(otherMap)}");
+                        //ZLogger.Message($"2 CHECK: {thing} is going to {zTracker.GetMapInfo(otherMap)}");
                         yield return otherMap;
                     }
                     else
                     {
-                        if (ZTracker.GetZIndexFor(otherMap) > ZTracker.GetZIndexFor(oldMap))
+                        if (otherMapZIndex > oldMapZIndex)
                         {
-                            ZLogger.Message(thing + " cant go up in " + ZTracker.GetMapInfo(otherMap));
+                            //ZLogger.Message(thing + " cant go up in " + zTracker.GetMapInfo(otherMap));
                             cantGoUP = true;
                         }
-                        else if (ZTracker.GetZIndexFor(otherMap) < ZTracker.GetZIndexFor(oldMap))
+                        else if (otherMapZIndex < oldMapZIndex)
                         {
-                            ZLogger.Message(thing + " cant go down in " + ZTracker.GetMapInfo(otherMap));
+                            //ZLogger.Message(thing + " cant go down in " + zTracker.GetMapInfo(otherMap));
                             cantGoDown = true;
                         }
                     }

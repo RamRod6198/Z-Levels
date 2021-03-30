@@ -17,39 +17,50 @@ using static Verse.AI.ReservationManager;
 
 namespace ZLevels
 {
-    [HarmonyPatch(typeof(ReachabilityUtility), "CanReach")]
+    [HarmonyPatch(typeof(Reachability), "CanReach", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) })]
     public class CanReach_Patch
     {
         private static Map oldMap;
         private static IntVec3 oldPosition;
-        private static void Prefix(Pawn pawn, LocalTargetInfo dest, PathEndMode peMode, Danger maxDanger, out bool __state, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
+        private static bool Prefix(ref bool __result, Reachability __instance, IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParams, out bool __state)
         {
             __state = false;
-            if (pawn.RaceProps.Humanlike)
+            var pawn = traverseParams.pawn;
+            if (pawn != null)
             {
-                if (dest.HasThing && dest.thingInt.Map != null && dest.thingInt.Map != pawn.Map)
+                if (pawn.RaceProps.Humanlike)
                 {
-                    Log.Message("dest: " + dest + " - dest.thingInt.Map: " + dest.thingInt.Map + " - pawn.Map: " + pawn.Map);
-                    var cell = ZUtils.GetCellToTeleportFrom(pawn.Map, pawn.Position, dest.thingInt.Map);
-                    if (cell.IsValid)
+                    if (dest.HasThing && dest.thingInt.Map != null && dest.thingInt.Map != pawn.Map)
                     {
-                        __state = true;
-                        oldMap = pawn.Map;
-                        oldPosition = pawn.Position;
-                        ZUtils.TeleportThing(pawn, dest.thingInt.Map, cell);
-                    }
-                    else
-                    {
-                        ZLogger.Pause($"CanReach: Detected reachability disfunction: pawn: {pawn}, thing: {dest.thingInt}, pawn.Map: {pawn.Map}, thing.Map: {dest.thingInt.Map}");
+                        var cell = ZUtils.GetCellToTeleportFrom(pawn.Map, pawn.Position, dest.thingInt.Map);
+                        if (cell.IsValid)
+                        {
+                            __state = true;
+                            oldMap = pawn.Map;
+                            oldPosition = pawn.Position;
+                            ZUtils.TeleportThing(pawn, dest.thingInt.Map, cell);
+                            if (dest.thingInt.Map != __instance.map)
+                            {
+                                __result = dest.thingInt.Map.reachability.CanReach(start, dest, peMode, traverseParams);
+                                ZLogger.Message($"CanReach: Used other's map reachability: pawn: {pawn}, thing: {dest.thingInt}, pawn.Map: {pawn.Map}, thing.Map: {dest.thingInt.Map}, result: {__result}");
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            ZLogger.Pause($"CanReach: Detected reachability disfunction: pawn: {pawn}, thing: {dest.thingInt}, pawn.Map: {pawn.Map}, thing.Map: {dest.thingInt.Map}");
+                        }
                     }
                 }
             }
+            return true;
         }
-        private static void Postfix(ref bool __result, Pawn pawn, LocalTargetInfo dest, PathEndMode peMode, Danger maxDanger, bool __state, bool canBash = false, TraverseMode mode = TraverseMode.ByPawn)
+        private static void Postfix(Reachability __instance, ref bool __result, IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParams, bool __state)
         {
-            if (__state)
+            if (__state && traverseParams.pawn != null)
             {
-                ZUtils.TeleportThing(pawn, oldMap, oldPosition);
+                //Log.Message("Postfix: dest: " + dest + " - dest.thingInt.Map: " + dest.thingInt?.Map + " - pawn.Map: " + traverseParams.pawn.Map + " - __instance: " + __instance.map);
+                ZUtils.TeleportThing(traverseParams.pawn, oldMap, oldPosition);
             }
 
             //if (dest.HasThing)
