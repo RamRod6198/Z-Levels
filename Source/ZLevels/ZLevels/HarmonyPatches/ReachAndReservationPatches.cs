@@ -69,6 +69,30 @@ namespace ZLevels
             //}
         }
     }
+
+    [HarmonyPatch(typeof(ReservationManager))]
+    [HarmonyPatch("CanReserveStack")]
+    public class ReservationManager_CanReserveStack_Patch
+    {
+        private static Map oldMap;
+        private static void Prefix(ref int __result, ReservationManager __instance, Pawn claimant, LocalTargetInfo target, ref bool __state, int maxPawns = 1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
+        {
+            if (target.HasThing && target.Thing.Map != claimant.Map)
+            {
+                oldMap = claimant.Map;
+                ZUtils.TeleportThing(claimant, target.Thing.Map, claimant.Position);
+                __state = true;
+            }
+        }
+
+        private static void Postfix(ReservationManager __instance, Pawn claimant, LocalTargetInfo target, ref bool __state, int maxPawns = 1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
+        {
+            if (__state)
+            {
+                ZUtils.TeleportThing(claimant, oldMap, claimant.Position);
+            }
+        }
+    }
     [HarmonyPatch(typeof(ReservationManager))]
     [HarmonyPatch("CanReserve")]
     public class ReservationManager_CanReserve_Patch

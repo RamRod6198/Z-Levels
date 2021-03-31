@@ -975,7 +975,50 @@ namespace ZLevels
                 }
             }
         }
+        [HarmonyPatch(typeof(WorkGiver_Haul), "PotentialWorkThingsGlobal")]
+        public static class PotentialWorkThingsGlobalPatch
+        {
+            private static void Postfix(ref IEnumerable<Thing> __result, Pawn pawn)
+            {
+                var list = __result.ToList();
+                foreach (var map in ZUtils.ZTracker.GetAllMaps(pawn.Tile))
+                {
+                    if (map != pawn.Map)
+                    {
+                        list.AddRange(map.listerHaulables.ThingsPotentiallyNeedingHauling());
+                    }
+                }
+                __result = list;
+            }
+        }
 
+        [HarmonyPatch(typeof(WorkGiver_DoBill), "ShouldSkip")]
+        public static class ShouldSkipPatch
+        {
+            private static void Postfix(ref bool __result, WorkGiver_DoBill __instance, Pawn pawn, bool forced = false)
+            {
+                if (__result)
+                {
+                    foreach (var map in ZUtils.ZTracker.GetAllMaps(pawn.Tile))
+                    {
+                        if (map != pawn.Map)
+                        {
+                            List<Thing> list = map.listerThings.ThingsInGroup(ThingRequestGroup.PotentialBillGiver);
+                            for (int i = 0; i < list.Count; i++)
+                            {
+                                IBillGiver billGiver;
+                                if ((billGiver = (list[i] as IBillGiver)) != null && __instance.ThingIsUsableBillGiver(list[i]) && billGiver.BillStack.AnyShouldDoNow)
+                                {
+                                    __result = false;
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
         [HarmonyPatch(typeof(StoreUtility), "IsInValidBestStorage")]
         public static class IsInValidBestStoragePatch
         {

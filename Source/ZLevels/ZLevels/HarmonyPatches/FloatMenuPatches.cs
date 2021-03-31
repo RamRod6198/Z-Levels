@@ -449,8 +449,79 @@ namespace ZLevels
                         opts.Add(AddHumanlikeOrders_Patch.AddArrestOption(pawn, pawn2));
                     }
                 }
+
+                var map = Find.CurrentMap;
+                var curMapIndex = ZUtils.ZTracker.GetZIndexFor(map);
+                var c = clickPos.ToIntVec3();
+
+                if (c.GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain) return;
+
+                while (true)
+                {
+                    map = ZUtils.ZTracker.GetLowerLevel(map.Tile, map);
+                    if (map != null)
+                    {
+                        if (map.terrainGrid?.TerrainAt(c) == ZLevelsDefOf.ZL_OutsideTerrain)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            clickPos.z += (curMapIndex - ZUtils.ZTracker.GetZIndexFor(map)) * 0.5f;
+                            c = IntVec3.FromVector3(clickPos);
+                            foreach (Thing thing2 in c.GetThingList(map))
+                            {
+                                Thing t = thing2;
+                                if (t.def.ingestible != null && pawn.RaceProps.CanEverEat(t) && t.IngestibleNow)
+                                {
+                                    string text = (!t.def.ingestible.ingestCommandString.NullOrEmpty()) ? string.Format(t.def.ingestible.ingestCommandString, t.LabelShort) : ((string)"ConsumeThing".Translate(t.LabelShort, t));
+                                    if (!t.IsSociallyProper(pawn))
+                                    {
+                                        text = text + ": " + "ReservedForPrisoners".Translate().CapitalizeFirst();
+                                    }
+                                    FloatMenuOption floatMenuOption;
+                                    if (t.def.IsNonMedicalDrug && pawn.IsTeetotaler())
+                                    {
+                                        floatMenuOption = new FloatMenuOption(text + ": " + TraitDefOf.DrugDesire.DataAtDegree(-1).GetLabelCapFor(pawn), null);
+                                    }
+                                    else if (FoodUtility.InappropriateForTitle(t.def, pawn, allowIfStarving: true))
+                                    {
+                                        floatMenuOption = new FloatMenuOption(text + ": " + "FoodBelowTitleRequirements".Translate(pawn.royalty.MostSeniorTitle.def.GetLabelFor(pawn)), null);
+                                    }
+                                    else if (!pawn.CanReach(t, PathEndMode.OnCell, Danger.Deadly))
+                                    {
+                                        floatMenuOption = new FloatMenuOption(text + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+                                    }
+                                    else
+                                    {
+
+                                        MenuOptionPriority priority = (t is Corpse) ? MenuOptionPriority.Low : MenuOptionPriority.Default;
+                                        int maxAmountToPickup = FoodUtility.GetMaxAmountToPickup(t, pawn, FoodUtility.WillIngestStackCountOf(pawn, t.def, t.GetStatValue(StatDefOf.Nutrition)));
+                                        floatMenuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, delegate
+                                        {
+                                            int maxAmountToPickup2 = FoodUtility.GetMaxAmountToPickup(t, pawn, FoodUtility.WillIngestStackCountOf(pawn, t.def, t.GetStatValue(StatDefOf.Nutrition)));
+                                            if (maxAmountToPickup2 != 0)
+                                            {
+                                                t.SetForbidden(value: false);
+                                                Job job18 = JobMaker.MakeJob(JobDefOf.Ingest, t);
+                                                job18.count = maxAmountToPickup2;
+                                                ZTracker.BuildJobListFor(pawn, pawn.Map, job18);
+                                                pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+                                            }
+                                        }, priority), pawn, t);
+                                        if (maxAmountToPickup == 0)
+                                        {
+                                            floatMenuOption.action = null;
+                                        }
+                                    }
+                                    opts.Add(floatMenuOption);
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
             }
-        
             public static FloatMenuOption AddArrestOption(Pawn pawn, Pawn victim)
             {
                 if (!pawn.CanReach(victim, PathEndMode.OnCell, Danger.Deadly))
@@ -627,11 +698,12 @@ namespace ZLevels
             }
         }
 
+
         [HarmonyPatch(typeof(FloatMenuMakerMap))]
         [HarmonyPatch("AddJobGiverWorkOrders_NewTmp")]
         internal static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
         {
-            private static void Postfix(Vector3 clickPos, Pawn pawn, ref List<FloatMenuOption> opts, bool drafted, ref FloatMenuOption[] ___equivalenceGroupTempStorage)
+            private static bool Prefix(Vector3 clickPos, Pawn pawn, ref List<FloatMenuOption> opts, bool drafted, ref FloatMenuOption[] ___equivalenceGroupTempStorage)
             {
                 var inactiveOptions = new List<FloatMenuOption>();
                 foreach (var option in opts)
@@ -666,10 +738,9 @@ namespace ZLevels
                                     if (workGiver_Scanner != null && workGiver_Scanner.def.directOrderable)
                                     {
                                         JobFailReason.Clear();
-                                        if (workGiver_Scanner.PotentialWorkThingRequest.Accepts(item))// || (workGiver_Scanner.PotentialWorkThingsGlobal(pawn) != null
-                                            //&& workGiver_Scanner.PotentialWorkThingsGlobal(pawn).Contains(item))) && !workGiver_Scanner.ShouldSkip(pawn, forced: true))
+                                        if ((workGiver_Scanner.PotentialWorkThingRequest.Accepts(item) || (workGiver_Scanner.PotentialWorkThingsGlobal(pawn) != null 
+                                            && workGiver_Scanner.PotentialWorkThingsGlobal(pawn).Contains(item))) && !workGiver_Scanner.ShouldSkip(pawn, forced: true))
                                         {
-                                            //Log.Message($"Iterating over {workGiver_Scanner} for {item}");
                                             string text = null;
                                             Action action = null;
                                             PawnCapacityDef pawnCapacityDef = workGiver_Scanner.MissingRequiredCapacity(pawn);
@@ -740,7 +811,7 @@ namespace ZLevels
                                                     else
                                                     {
                                                         dest = null;
-                                                        //Log.Message("No job was yielded from " + workGiver_Scanner + " in " + otherMap);
+                                                        Log.Message("No job was yielded from " + workGiver_Scanner + " in " + otherMap);
                                                     }
                                                 }
                                                 ZUtils.TeleportThing(pawn, oldPawnMap, oldPawnPosition);
@@ -837,17 +908,20 @@ namespace ZLevels
                                                     if (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] == null
                                                         || (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index].Disabled && !menuOption.Disabled))
                                                     {
+                                                        Log.Message("2 Adding menuOption: " + menuOption);
                                                         ___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] = menuOption;
                                                         flag = true;
                                                     }
                                                 }
                                                 else
                                                 {
+                                                    Log.Message("Adding menuOption: " + menuOption);
                                                     opts.Add(menuOption);
                                                 }
                                             }
                                             else
                                             {
+                                                Log.Message("Adding duplicate: " + menuOption);
                                                 duplicateOptions.Add(menuOption);
                                             }
                                         }
@@ -873,23 +947,24 @@ namespace ZLevels
                         }
                     }
                 }
-        
-        
-                foreach (var inactiveOption in inactiveOptions)
-                {
-                    if (!duplicateOptions.Contains(inactiveOption))
-                    {
-                        for (int num = opts.Count - 1; num >= 0; num--)
-                        {
-                            var option = opts[num];
-                            if (inactiveOption.Label != option.Label && option.revalidateClickTarget != null && inactiveOption.Label.Contains(option.revalidateClickTarget.Label))
-                            {
-                                Log.Message("Removing " + inactiveOption);
-                                opts.Remove(inactiveOption);
-                            }
-                        }
-                    }
-                }
+
+
+                //foreach (var inactiveOption in inactiveOptions)
+                //{
+                //    if (!duplicateOptions.Any(x => inactiveOption.Label == x.Label))
+                //    {
+                //        for (int num = opts.Count - 1; num >= 0; num--)
+                //        {
+                //            var option = opts[num];
+                //            if (inactiveOption.Label != option.Label && option.revalidateClickTarget != null && inactiveOption.Label.Contains(option.revalidateClickTarget.Label))
+                //            {
+                //                Log.Message("Removing " + inactiveOption);
+                //                opts.Remove(inactiveOption);
+                //            }
+                //        }
+                //    }
+                //}
+                return false;
             }
         }
     }
