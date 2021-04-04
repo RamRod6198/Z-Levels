@@ -162,6 +162,14 @@ namespace ZLevels
                                             var shouldChangeResult = !(data.Key.jobs?.curDriver is JobDriver_TakeToBed);
                                             if (shouldChangeResult)
                                             {
+                                                Log.Message(data.Key + " - data.Value.mainJob: " + data.Value.mainJob);
+                                                Log.Message(data.Key + " - data.Key.CurJob: " + data.Key.CurJob);
+                                                Log.Message(data.Key + " - thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key): " + thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key));
+                                                if (data.Key.Map == thing.Map && !thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key))
+                                                {
+                                                    ZLogger.Error($"PREVENTED ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, thing: {thing}");
+                                                    continue;
+                                                }
                                                 __result = false;
                                                 ZLogger.Message($"Detected ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, thing: {thing}");
                                                 return;

@@ -508,29 +508,34 @@ namespace ZLevels
         public void ReserveTargets(Pawn pawn, Job job)
         {
             ZLogger.Message(pawn + " is starting reserving things for " + job, debugLevel: DebugLevel.Jobs);
-            if (!this.jobTracker.ContainsKey(pawn)) this.jobTracker[pawn] = new JobTracker();
-            if (this.jobTracker[pawn].reservedThings == null) this.jobTracker[pawn].reservedThings = new List<LocalTargetInfo>();
+            if (!this.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
+            {
+                jobTracker = new JobTracker();
+                this.jobTracker[pawn] = jobTracker;
+            }
+            if (jobTracker.reservedThings == null) 
+                jobTracker.reservedThings = new List<LocalTargetInfo>();
             if (job.targetA != null)
             {
                 ZLogger.Message(pawn + " reserving " + job.targetA, true, debugLevel: DebugLevel.Jobs);
-                this.jobTracker[pawn].reservedThings.Add(job.targetA);
+                jobTracker.reservedThings.Add(job.targetA);
             }
             if (job.targetB != null)
             {
                 ZLogger.Message(pawn + " reserving " + job.targetB, true, debugLevel: DebugLevel.Jobs);
-                this.jobTracker[pawn].reservedThings.Add(job.targetB);
+                jobTracker.reservedThings.Add(job.targetB);
             }
             if (job.targetC != null)
             {
                 ZLogger.Message(pawn + " reserving " + job.targetC, true, debugLevel: DebugLevel.Jobs);
-                this.jobTracker[pawn].reservedThings.Add(job.targetC);
+                jobTracker.reservedThings.Add(job.targetC);
             }
             try
             {
                 foreach (var t in job.targetQueueA)
                 {
                     ZLogger.Message(pawn + " reserving " + t, true, debugLevel: DebugLevel.Jobs);
-                    this.jobTracker[pawn].reservedThings.Add(t);
+                    jobTracker.reservedThings.Add(t);
                 }
             }
             catch { }
@@ -539,7 +544,7 @@ namespace ZLevels
                 foreach (var t in job.targetQueueB)
                 {
                     ZLogger.Message(pawn + " reserving " + t, true, debugLevel: DebugLevel.Jobs);
-                    this.jobTracker[pawn].reservedThings.Add(t);
+                    jobTracker.reservedThings.Add(t);
                 }
             }
             catch { }
