@@ -159,7 +159,7 @@ namespace ZLevels
                                     {
                                         if (reservation.HasThing && reservation.thingInt == target.thingInt)
                                         {
-                                            var shouldChangeResult = !(data.Key.jobs?.curDriver is JobDriver_TakeToBed);
+                                            var shouldChangeResult = !((data.Key.jobs?.curDriver is JobDriver_TakeToBed) || (data.Key.jobs?.curDriver is JobDriver_LayDown));
                                             if (shouldChangeResult)
                                             {
                                                 Log.Message(data.Key + " - data.Value.mainJob: " + data.Value.mainJob);
