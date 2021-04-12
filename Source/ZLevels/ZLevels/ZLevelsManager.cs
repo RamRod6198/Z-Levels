@@ -575,10 +575,13 @@ namespace ZLevels
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = jobToDo.count;
                 job.targetQueueA = jobToDo.targetQueueA;
-                Log.Message("job.targetQueueA: " + job.targetQueueA.Count);
-                foreach (var t in job.targetQueueA) 
+                if (job.targetQueueA != null)
                 {
-                    Log.Message("T: " + t);
+                    Log.Message("job.targetQueueA: " + job.targetQueueA.Count);
+                    foreach (var t in job.targetQueueA)
+                    {
+                        Log.Message("T: " + t);
+                    }
                 }
                 tempJobs.Add(job);
             }
