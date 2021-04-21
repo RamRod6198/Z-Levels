@@ -8,7 +8,7 @@ namespace ZLevels
 	{
 		public static DebugLevel curDebugLevel = DebugLevel.All;
 
-		//[Conditional("Debug")]
+		[Conditional("Debug")]
 		public static void Message(string message, bool temp = true, DebugLevel debugLevel = DebugLevel.All)
 		{
 			if (ZLogger.DebugEnabled && curDebugLevel != DebugLevel.None)

@@ -113,9 +113,9 @@ namespace ZLevels
                             {
                                 TeleportThing(thing, otherMap, newPosition);
                                 //ZLogger.Message($"1 CHECK: {thing} is going to {zTracker.GetMapInfo(otherMap)}");
-                                if (jobTracker != null)
+                                if (jobTracker != null && jobTracker.mapDest is null)
                                 {
-                                    jobTracker.lookedAtMap = otherMap;
+                                    jobTracker.mapDest = otherMap;
                                 }
                                 yield return otherMap;
                             }
@@ -154,9 +154,9 @@ namespace ZLevels
                     {
                         TeleportThing(thing, oldMap, oldPosition);
                         //ZLogger.Message($"2 CHECK: {thing} is going to {zTracker.GetMapInfo(otherMap)}");
-                        if (jobTracker != null)
+                        if (jobTracker != null && jobTracker.mapDest is null)
                         {
-                            jobTracker.lookedAtMap = otherMap;
+                            jobTracker.mapDest = otherMap;
                         }
                         yield return otherMap;
                     }
@@ -177,9 +177,9 @@ namespace ZLevels
                 else
                 {
                     TeleportThing(thing, otherMap, oldPosition);
-                    if (jobTracker != null)
+                    if (jobTracker != null && jobTracker.mapDest is null)
                     {
-                        jobTracker.lookedAtMap = otherMap;
+                        jobTracker.mapDest = otherMap;
                     }
                     yield return otherMap;
                 }

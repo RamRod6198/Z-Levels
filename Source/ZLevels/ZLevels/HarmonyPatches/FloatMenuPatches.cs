@@ -729,6 +729,10 @@ namespace ZLevels
                     targetingParameters.mapObjectTargetsMustBeAutoAttackable = false;
                     var ZTracker = ZUtils.ZTracker;
                     ZTracker.ResetJobTrackerFor(pawn);
+                    if (!ZTracker.jobTracker.TryGetValue(pawn, out var jobTracker))
+                    {
+                        jobTracker = new JobTracker();
+                    }
                     foreach (Thing item in GenUI.ThingsUnderMouse(clickPos, 1f, targetingParameters))
                     {
                         bool flag = false;
@@ -779,11 +783,11 @@ namespace ZLevels
                                                     }
                                                     else if (workGiver_Scanner.def.defName == "HaulGeneral" || workGiver_Scanner.def.defName == "HaulCorpses")
                                                     {
-                                                        job = JobPatches.TryIssueJobPackagePatch.HaulJobOnThing(pawn, item, ref dest, true);
+                                                        job = JobPatches.TryIssueJobPackagePatch.HaulJobOnThing(pawn, item, jobTracker, true);
                                                     }
                                                     else if (workGiver_Scanner is WorkGiver_DoBill scanner2)
                                                     {
-                                                        job = JobPatches.TryIssueJobPackagePatch.DoBillJobOnThing(scanner2, pawn, item, ref dest, true);
+                                                        job = JobPatches.TryIssueJobPackagePatch.DoBillJobOnThing(scanner2, pawn, item, jobTracker, true);
                                                     }
                                                     else if (workGiver_Scanner is
                                                         WorkGiver_ConstructDeliverResourcesToBlueprints scanner3)

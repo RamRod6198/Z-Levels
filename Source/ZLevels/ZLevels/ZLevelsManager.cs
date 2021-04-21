@@ -453,7 +453,7 @@ namespace ZLevels
                 str += "Pawn map: " + pawn.Map + "\n";
                 str += "ZTracker dest map: " + this.jobTracker[pawn].targetDest + "\n";
                 str += "Dest map: " + dest + "\n";
-                str += "lookedAtMap: " + this.jobTracker[pawn].lookedAtMap + "\n";
+                str += "lookedAtMap: " + this.jobTracker[pawn].mapDest + "\n";
                 str += "lookedAtLocalCell: " + this.jobTracker[pawn].lookedAtLocalCell + "\n";
                 str += "Job.workGiverDef: " + job.workGiverDef + "\n";
                 str += "Job.jobGiver: " + job.jobGiver + "\n";
@@ -975,7 +975,7 @@ namespace ZLevels
                 jobTracker.oldMap = null;
                 jobTracker.reservedTargets = null;
                 jobTracker.searchingJobsNow = false;
-                jobTracker.lookedAtMap = null;
+                jobTracker.mapDest = null;
                 jobTracker.lookedAtLocalCell = IntVec3.Invalid;
                 ZLogger.Message("Resetting job data");
             }

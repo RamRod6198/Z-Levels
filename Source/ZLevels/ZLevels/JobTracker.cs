@@ -28,7 +28,7 @@ namespace ZLevels
 			Scribe_References.Look<Map>(ref oldMap, "oldMap");
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "forceGoToDestMap", false);
 			Scribe_References.Look<Thing>(ref target, "target");
-			//Scribe_References.Look<Map>(ref lookedAtMap, "lookedAtMap");
+			Scribe_References.Look<Map>(ref mapDest, "mapDest");
 			Scribe_Values.Look(ref lookedAtLocalCell, "lookedAtLocalCell");
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "failIfTargetMapIsNotDest", false);
 			Scribe_Collections.Look<LocalTargetInfo>(ref reservedTargets, "reservedThings", LookMode.LocalTargetInfo);
@@ -52,20 +52,21 @@ namespace ZLevels
 
 		public TargetInfo targetDest;
 
-		private Map mapTest;
-		public Map lookedAtMap
-        {
-            get
-            {
-				return mapTest;
-            }
-            set
-            {
-				Log.Message(new StackTrace().ToString());
-				Log.Message(pawn + " setting to " + value);
-				mapTest = value;
-			}
-        }
+		public Map mapDest;
+		//private Map mapTest;
+		//public Map mapDest
+		//{
+		//    get
+		//    {
+		//		return mapTest;
+		//    }
+		//    set
+		//    {
+		//		ZLogger.Message(new StackTrace().ToString());
+		//		ZLogger.Message(pawn + " setting to " + value);
+		//		mapTest = value;
+		//	}
+		//}
 		public IntVec3 lookedAtLocalCell;
 	}
 }

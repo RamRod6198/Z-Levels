@@ -78,15 +78,16 @@ namespace ZLevels
             }
         }
 
-        [HarmonyPatch(typeof(Map))]
-        [HarmonyPatch(nameof(Map.ToString))]
-        static class Map_ToString
-        {
-            public static void Postfix(Map __instance, ref string __result)
-            {
-                __result = "(" + __result + " - Level " + ZUtils.ZTracker.GetZIndexFor(__instance) + ")";
-            }
-        }
+        //[HarmonyPatch(typeof(Map))]
+        //[HarmonyPatch(nameof(Map.ToString))]
+        //static class Map_ToString
+        //{
+        //    public static void Postfix(Map __instance, ref string __result)
+        //    {
+        //        __result = "(" + __result + " - Level " + ZUtils.ZTracker.GetZIndexFor(__instance) + ")";
+        //    }
+        //}
+
         [HarmonyPatch(typeof(ColonistBarColonistDrawer), "DrawIcons")]
         public static class DrawIcons_Patch
         {
