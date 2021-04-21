@@ -117,6 +117,7 @@ namespace ZLevels
                     var oldPosition = pawn.Position;
                     bool select = false;
                     if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                    ZTracker.ResetJobTrackerFor(pawn);
 
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
@@ -128,7 +129,6 @@ namespace ZLevels
                             ZLogger.Message(pawn + " got follow job " + result + " - map: "
                                 + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position);
                             ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-
                             ZTracker.BuildJobListFor(pawn, otherMap, result);
                             __result = jobTracker.activeJobs[0];
                             jobTracker.activeJobs.RemoveAt(0);
@@ -361,7 +361,7 @@ namespace ZLevels
                         var oldPosition = pawn.Position;
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-
+                        ZTracker.ResetJobTrackerFor(pawn);
                         try
                         {
                             if (pawn.MentalStateDef != null)
@@ -537,7 +537,7 @@ namespace ZLevels
                             {
                                 ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                             }
-                            ZTracker.ResetJobs(pawn);
+                            ZTracker.ResetJobTrackerFor(pawn);
                         }
                     }
                     Job result = null;
@@ -545,6 +545,8 @@ namespace ZLevels
                     var oldPosition = pawn.Position;
                     bool select = false;
                     if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                    ZTracker.ResetJobTrackerFor(pawn);
+
                     try
                     {
                         var jobList = new Dictionary<Job, Map>();
@@ -763,7 +765,7 @@ namespace ZLevels
                                 {
                                     ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
                                 }
-                                ZTracker.ResetJobs(pawn);
+                                ZTracker.ResetJobTrackerFor(pawn);
 
                             }
                         }
@@ -773,6 +775,7 @@ namespace ZLevels
                         var oldPosition = pawn.Position;
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                        ZTracker.ResetJobTrackerFor(pawn);
 
                         try
                         {
@@ -1193,7 +1196,7 @@ namespace ZLevels
                             else if (pawn.jobs.curJob != jobTracker.activeJobs[0])
                             {
                                 ZLogger.Message("4 RESETTING JOB TRACKER FOR " + pawn);
-                                ZTracker.ResetJobs(pawn);
+                                ZTracker.ResetJobTrackerFor(pawn);
                             }
                         }
                         else
@@ -1205,12 +1208,14 @@ namespace ZLevels
                         var oldPosition = pawn.Position;
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
+                        ZTracker.ResetJobTrackerFor(pawn);
 
                         Map dest = null;
                         try
                         {
                             jobTracker.searchingJobsNow = true;
                             jobTracker.oldMap = pawn.Map;
+                            jobTracker.pawn = pawn;
                             result = TryIssueJobPackage(pawn, jobParams, __instance, ___emergency, ref dest, oldMap, oldPosition);
                             jobTracker.searchingJobsNow = false;
                             if (result.Job != null)
@@ -1229,6 +1234,8 @@ namespace ZLevels
                                     Log.Message("2 Dest (oldMap): " + oldMap);
                                     ZTracker.BuildJobListFor(pawn, oldMap, result.Job);
                                 }
+                                ZLogger.Message($"Assigned local data: jobTracker.lookedAtMap: {ZTracker.GetMapInfo(jobTracker.lookedAtMap)}, jobTracker.lookedAtLocalCell: {jobTracker.lookedAtLocalCell}");
+
                                 __result = new ThinkResult(jobTracker.activeJobs[0], jobTracker.activeJobs[0].jobGiver);
                                 jobTracker.activeJobs.RemoveAt(0);
                             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -8,10 +9,11 @@ namespace ZLevels
 {
 	public class JobTracker : IExposable
 	{
+		public Pawn pawn;
 		public JobTracker()
 		{
 			activeJobs = new List<Job>();
-			reservedThings = new List<LocalTargetInfo>();
+			reservedTargets = new List<LocalTargetInfo>();
 		}
 		public void ExposeData()
 		{
@@ -26,8 +28,10 @@ namespace ZLevels
 			Scribe_References.Look<Map>(ref oldMap, "oldMap");
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "forceGoToDestMap", false);
 			Scribe_References.Look<Thing>(ref target, "target");
+			//Scribe_References.Look<Map>(ref lookedAtMap, "lookedAtMap");
+			Scribe_Values.Look(ref lookedAtLocalCell, "lookedAtLocalCell");
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "failIfTargetMapIsNotDest", false);
-			Scribe_Collections.Look<LocalTargetInfo>(ref reservedThings, "reservedThings", LookMode.LocalTargetInfo);
+			Scribe_Collections.Look<LocalTargetInfo>(ref reservedTargets, "reservedThings", LookMode.LocalTargetInfo);
 		}
 
 		public bool searchingJobsNow = false;
@@ -44,9 +48,25 @@ namespace ZLevels
 
 		public List<Job> activeJobs;
 
-		public List<LocalTargetInfo> reservedThings;
+		public List<LocalTargetInfo> reservedTargets;
 
 		public TargetInfo targetDest;
+
+		private Map mapTest;
+		public Map lookedAtMap
+        {
+            get
+            {
+				return mapTest;
+            }
+            set
+            {
+				Log.Message(new StackTrace().ToString());
+				Log.Message(pawn + " setting to " + value);
+				mapTest = value;
+			}
+        }
+		public IntVec3 lookedAtLocalCell;
 	}
 }
 

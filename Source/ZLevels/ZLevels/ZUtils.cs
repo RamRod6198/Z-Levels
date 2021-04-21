@@ -44,11 +44,14 @@ namespace ZLevels
 		{
 			zTracker = null;
 		}
+
+        //public static Map currentLookedIntoMap;
         public static IEnumerable<Map> GetAllMapsInClosestOrder(Thing thing, Map oldMap, IntVec3 oldPosition, bool skipOldMap = false, bool dontCheckForStairs = false)
         {
             bool cantGoDown = false;
             bool cantGoUP = false;
             var zTracker = ZTracker;
+            var jobTracker = thing is Pawn p ? zTracker.jobTracker.TryGetValue(p, out var value) ? value : null : null;
             foreach (var otherMap in zTracker.GetAllMapsInClosestOrder(oldMap))
             {
                 if (!dontCheckForStairs)
@@ -110,6 +113,10 @@ namespace ZLevels
                             {
                                 TeleportThing(thing, otherMap, newPosition);
                                 //ZLogger.Message($"1 CHECK: {thing} is going to {zTracker.GetMapInfo(otherMap)}");
+                                if (jobTracker != null)
+                                {
+                                    jobTracker.lookedAtMap = otherMap;
+                                }
                                 yield return otherMap;
                             }
                             else
@@ -147,6 +154,10 @@ namespace ZLevels
                     {
                         TeleportThing(thing, oldMap, oldPosition);
                         //ZLogger.Message($"2 CHECK: {thing} is going to {zTracker.GetMapInfo(otherMap)}");
+                        if (jobTracker != null)
+                        {
+                            jobTracker.lookedAtMap = otherMap;
+                        }
                         yield return otherMap;
                     }
                     else
@@ -166,6 +177,10 @@ namespace ZLevels
                 else
                 {
                     TeleportThing(thing, otherMap, oldPosition);
+                    if (jobTracker != null)
+                    {
+                        jobTracker.lookedAtMap = otherMap;
+                    }
                     yield return otherMap;
                 }
             }
@@ -294,6 +309,7 @@ namespace ZLevels
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void TeleportThing(Thing thing, Map map, IntVec3 position)
         {
+            //ZLogger.Message($"Instant Teleporting {thing} to {map} - {position}");
             var value = (sbyte)Find.Maps.IndexOf(map);
             if (thing.mapIndexOrState != value)
             {

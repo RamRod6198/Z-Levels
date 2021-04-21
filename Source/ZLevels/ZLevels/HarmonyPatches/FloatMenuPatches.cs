@@ -505,6 +505,7 @@ namespace ZLevels
                                                 t.SetForbidden(value: false);
                                                 Job job18 = JobMaker.MakeJob(JobDefOf.Ingest, t);
                                                 job18.count = maxAmountToPickup2;
+                                                ZTracker.ResetJobTrackerFor(pawn);
                                                 ZTracker.BuildJobListFor(pawn, pawn.Map, job18);
                                                 pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
                                             }
@@ -570,6 +571,7 @@ namespace ZLevels
                         {
                             Job job = JobMaker.MakeJob(JobDefOf.Arrest, pTarg2, building_Bed3);
                             job.count = 1;
+                            ZTracker.ResetJobTrackerFor(pawn);
                             ZTracker.BuildJobListFor(pawn, pawn.Map, job);
                             ZLogger.Message(pawn + " taking first job 3");
                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
@@ -628,6 +630,7 @@ namespace ZLevels
         
                         Job job = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
                         job.count = 1;
+                        ZTracker.ResetJobTrackerFor(pawn);
                         ZTracker.BuildJobListFor(pawn, pawn.Map, job);
                         ZLogger.Message(pawn + " taking first job 3");
                         pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
@@ -688,6 +691,7 @@ namespace ZLevels
                         {
                             Job job = JobMaker.MakeJob(JobDefOf.Rescue, victim, building_Bed);
                             job.count = 1;
+                            ZTracker.ResetJobTrackerFor(pawn);
                             ZTracker.BuildJobListFor(pawn, pawn.Map, job);
                             Log.Message(pawn + " taking first job 2");
                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
@@ -724,6 +728,7 @@ namespace ZLevels
                     targetingParameters.canTargetItems = true;
                     targetingParameters.mapObjectTargetsMustBeAutoAttackable = false;
                     var ZTracker = ZUtils.ZTracker;
+                    ZTracker.ResetJobTrackerFor(pawn);
                     foreach (Thing item in GenUI.ThingsUnderMouse(clickPos, 1f, targetingParameters))
                     {
                         bool flag = false;
@@ -873,11 +878,13 @@ namespace ZLevels
                                                             if (dest != null)
                                                             {
                                                                 Log.Message("1 Dest: " + dest);
+
                                                                 ZTracker.BuildJobListFor(pawn, dest, job);
                                                             }
                                                             else
                                                             {
                                                                 Log.Message("2 Dest (oldPawnMap): " + oldPawnMap);
+
                                                                 ZTracker.BuildJobListFor(pawn, oldPawnMap, job);
                                                             }
                                                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);

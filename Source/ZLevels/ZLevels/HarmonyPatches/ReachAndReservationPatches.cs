@@ -17,6 +17,20 @@ using static Verse.AI.ReservationManager;
 
 namespace ZLevels
 {
+    [HarmonyPatch(typeof(LocalTargetInfo), MethodType.Constructor, new Type[] { typeof(IntVec3) })]
+    public class LocalTargetInfo_Constructor_Patch
+    {
+        public static JobTracker curPawnJobTracker;
+        private static void Postfix(LocalTargetInfo __instance)
+        {
+            if (__instance != null && curPawnJobTracker != null)
+            {
+                curPawnJobTracker.lookedAtLocalCell = __instance.cellInt;
+                ZLogger.Message($"Looking into {curPawnJobTracker.lookedAtLocalCell}");
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(Reachability), "CanReach", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) })]
     public class CanReach_Patch
     {
@@ -42,8 +56,12 @@ namespace ZLevels
                             if (dest.thingInt.Map != __instance.map)
                             {
                                 __result = dest.thingInt.Map.reachability.CanReach(start, dest, peMode, traverseParams);
-                                ZLogger.Message($"CanReach: Used other's map reachability: pawn: {pawn}, thing: {dest.thingInt}, pawn.Map: {pawn.Map}, thing.Map: {dest.thingInt.Map}, result: {__result}");
+                                ZLogger.Message($"CanReach: Used dest thing map reachability: __instance.map: {__instance.map}, pawn: {pawn}, thing: {dest.thingInt}, pawn.Map: {pawn.Map}, thing.Map: {dest.thingInt.Map}, result: {__result}");
                                 return false;
+                            }
+                            else
+                            {
+                                ZLogger.Message($"CanReach: using instance map reachability: __instance.map: {__instance.map}, pawn: {pawn}, thing: {dest.thingInt}, pawn.Map: {pawn.Map}, thing.Map: {dest.thingInt.Map}, result: {__result}");
                             }
                         }
                         else
@@ -104,22 +122,59 @@ namespace ZLevels
             __state = false;
             if (claimant.RaceProps.Humanlike)
             {
-                if (target.HasThing && target.thingInt.Map != null && target.thingInt.Map != claimant.Map)
+                if (target.HasThing)
                 {
-                    var cell = ZUtils.GetCellToTeleportFrom(claimant.Map, claimant.Position, target.thingInt.Map);
-                    if (cell.IsValid)
+                    if (target.thingInt.Map != null && target.thingInt.Map != claimant.Map)
                     {
-                        __state = true;
-                        oldMap = claimant.Map;
-                        oldPosition = claimant.Position;
-                        ZUtils.TeleportThing(claimant, target.thingInt.Map, cell);
-                        ZLogger.Message($"Teleporting claimaint {claimant} to {target.thingInt.Map}");
-                        __result = claimant.CanReserve(target, maxPawns, stackCount, layer, ignoreOtherReservations);
-                        return false;
+                        var cell = ZUtils.GetCellToTeleportFrom(claimant.Map, claimant.Position, target.thingInt.Map);
+                        if (cell.IsValid)
+                        {
+                            __state = true;
+                            oldMap = claimant.Map;
+                            oldPosition = claimant.Position;
+                            ZUtils.TeleportThing(claimant, target.thingInt.Map, cell);
+                            ZLogger.Message($"Teleporting claimaint {claimant} to {target.thingInt.Map}");
+                            __result = claimant.CanReserve(target, maxPawns, stackCount, layer, ignoreOtherReservations);
+                            return false;
+                        }
+                        else
+                        {
+                            ZLogger.Pause($"CanReserve: Detected reservation disfunction: pawn: {claimant}, thing: {target.thingInt}, pawn.Map: {claimant.Map}, thing.Map: {target.thingInt.Map}");
+                        }
+                    }
+                }
+                else
+                {
+                    if (ZUtils.ZTracker.jobTracker.TryGetValue(claimant, out var jobTracker) && target.Cell == jobTracker.lookedAtLocalCell)
+                    {
+                        if (jobTracker.lookedAtMap != null && jobTracker.lookedAtMap != claimant.Map)
+                        {
+                            var cell = ZUtils.GetCellToTeleportFrom(claimant.Map, claimant.Position, jobTracker.lookedAtMap);
+                            if (cell.IsValid)
+                            {
+                                __state = true;
+                                oldMap = claimant.Map;
+                                oldPosition = claimant.Position;
+                                ZUtils.TeleportThing(claimant, jobTracker.lookedAtMap, cell);
+                                ZLogger.Message($"3 Teleporting claimaint {claimant} to {jobTracker.lookedAtMap}");
+                                __result = claimant.CanReserve(target, maxPawns, stackCount, layer, ignoreOtherReservations);
+                                return false;
+                            }
+                            else
+                            {
+                                ZLogger.Pause($"3 CanReserve: Detected reservation disfunction: pawn: {claimant}, thing: {target.thingInt}, pawn.Map: {claimant.Map}, thing.Map: {target.thingInt.Map}");
+                            }
+                        }
                     }
                     else
                     {
-                        ZLogger.Pause($"CanReserve: Detected reservation disfunction: pawn: {claimant}, thing: {target.thingInt}, pawn.Map: {claimant.Map}, thing.Map: {target.thingInt.Map}");
+                        if (ZUtils.ZTracker.jobTracker.TryGetValue(claimant, out var job))
+                        {
+                            Log.Message("jobTracker.lookedAtMap: " + job.lookedAtMap);
+                            Log.Message("jobTracker.lookedAtLocalTarget: " + job.lookedAtLocalCell);
+                        }
+                        Log.Message("target: " + target);
+                        ZLogger.Pause($"Unsupported target (most likely cell), claimant: {claimant}, target {target}");
                     }
                 }
             }
@@ -134,110 +189,130 @@ namespace ZLevels
             }
             if (__result)
             {
-                var thing = target.Thing;
-                if (thing != null)
+                ZLogger.Message($"CHECKING: claimant {claimant} can reserve target: {target} - CHECK");
+                var ZTracker = ZUtils.ZTracker;
+                if (claimant.RaceProps.Humanlike && ZTracker.jobTracker != null)
                 {
-                    if (claimant.RaceProps.Humanlike && target.HasThing)
+                    if (target.HasThing)
                     {
-                        var ZTracker = ZUtils.ZTracker;
-                        //foreach (var map in ZTracker.GetAllMaps(claimant.Map.Tile))
-                        //{
-                        //    foreach (var reservation in map.reservationManager.reservations)
-                        //    {
-                        //        Log.Message($"map: {map}, Reservation: {reservation.claimant}, target: {reservation.target}, {reservation.claimant.Map} - {reservation.target.Thing?.Map}");
-                        //    }
-                        //}
-
-                        if (ZTracker.jobTracker != null)
+                        var thing = target.thingInt;
+                        foreach (var data in ZTracker.jobTracker)
                         {
-                            foreach (var data in ZTracker.jobTracker)
+                            if (data.Key != claimant && data.Value.reservedTargets != null)
                             {
-
-                                if (data.Key != claimant && data.Value.reservedThings != null)
+                                foreach (var reservation in data.Value.reservedTargets)
                                 {
-                                    foreach (var reservation in data.Value.reservedThings)
+                                    if (reservation.HasThing && reservation.thingInt == target.thingInt)
                                     {
-                                        if (reservation.HasThing && reservation.thingInt == target.thingInt)
+                                        var shouldChangeResult = !(data.Key.jobs?.curDriver is JobDriver_TakeToBed);
+                                        if (shouldChangeResult)
                                         {
-                                            var shouldChangeResult = !(data.Key.jobs?.curDriver is JobDriver_TakeToBed);
-                                            if (shouldChangeResult)
+                                            Log.Message(data.Key + " - 1 data.Value.mainJob: " + data.Value.mainJob);
+                                            Log.Message(data.Key + " - 1 data.Key.CurJob: " + data.Key.CurJob);
+                                            Log.Message(data.Key + " - 1 thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key): " + thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key));
+                                            if (data.Key.Map == thing.Map && !thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key))
                                             {
-                                                Log.Message(data.Key + " - data.Value.mainJob: " + data.Value.mainJob);
-                                                Log.Message(data.Key + " - data.Key.CurJob: " + data.Key.CurJob);
-                                                Log.Message(data.Key + " - thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key): " + thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key));
-                                                if (data.Key.Map == thing.Map && !thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key))
-                                                {
-                                                    ZLogger.Error($"PREVENTED ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, thing: {thing}");
-                                                    continue;
-                                                }
-                                                __result = false;
-                                                ZLogger.Message($"Detected ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, thing: {thing}");
-                                                return;
+                                                ZLogger.Error($"PREVENTED ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, thing: {thing}");
+                                                continue;
                                             }
+                                            __result = false;
+                                            ZLogger.Pause($"Detected ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, thing: {thing}");
+                                            return;
                                         }
-                                        //Log.Message($"ZTracker reservation: map: Reservation: {data.Key}, target: {reservation}, {data.Key.Map} - {reservation.Thing?.Map}");
                                     }
+                                    //Log.Message($"ZTracker reservation: map: Reservation: {data.Key}, target: {reservation}, {data.Key.Map} - {reservation.Thing?.Map}");
                                 }
                             }
                         }
-                        //Log.Message($"---------------------");
                     }
-                    //Log.Message($"{claimant} can reserve {target}: {__result}, {claimant.Map} - {target.Thing?.Map}");
-
-                    //if (claimant.Map != thing.Map)
-                    //{
-                    //    ZLogger.Pause($"CanReserve: {__result}, Detected reservation disfunction: claimant.Map != thing.Map, claimant: {claimant}, thing: {thing}");
-                    //    var ZTracker = ZUtils.ZTracker;
-                    //    foreach (var map in ZTracker.GetAllMaps(thing.Map.Tile))
-                    //    {
-                    //        var pawn = map.reservationManager.FirstRespectedReserver(target, claimant);
-                    //        if (pawn != null && pawn != claimant)
-                    //        {
-                    //            ZLogger.Pause($"CanReserve: {__result}, Detected reservation disfunction: claimant: {claimant}, pawn: {pawn}, thing: {thing}");
-                    //        }
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    var ZTracker = ZUtils.ZTracker;
-                    //    foreach (var map in ZTracker.GetAllMaps(thing.Map.Tile))
-                    //    {
-                    //        var pawn = map.reservationManager.FirstRespectedReserver(target, claimant);
-                    //        if (pawn != null && pawn != claimant)
-                    //        {
-                    //            ZLogger.Pause($"CanReserve: {__result}, Detected other claimant: first claimant: {claimant}, second claimant: {pawn}, thing: {thing}");
-                    //        }
-                    //    }
-                    //}
+                    else if (ZTracker.jobTracker.TryGetValue(claimant, out var jobTracker) && jobTracker.lookedAtMap != null)
+                    {
+                        var cell = target.cellInt;
+                        foreach (var data in ZTracker.jobTracker)
+                        {
+                            if (data.Key != claimant && data.Value.reservedTargets != null)
+                            {
+                                foreach (var reservation in data.Value.reservedTargets)
+                                {
+                                    Log.Message($"data.Key: {data.Key}, reservation: {reservation}, reservation.HasThing: {reservation.HasThing}, reservation.cellInt: {reservation.cellInt}, data.Value.lookedAtMap: {data.Value.lookedAtMap}, cell: {cell}, jobTracker.lookedAtMap: {jobTracker.lookedAtMap}");
+                                    if (!reservation.HasThing && reservation.cellInt == cell && data.Value.lookedAtMap == jobTracker.lookedAtMap)
+                                    {
+                                        Log.Message("claimant: " + claimant + " - " + data.Key + " - 2 data.Value.mainJob: " + data.Value.mainJob);
+                                        Log.Message("claimant: " + claimant + " - " + data.Key + " - 2 data.Key.CurJob: " + data.Key.CurJob);
+                                        Log.Message("claimant: " + claimant + " - " + data.Key + " - 2 jobTracker.lookedAtMap.reservationManager.reservations.Any(x => !x.Target.HasThing && x.Target.cellInt == cell && x.claimant == data.Key)): " + jobTracker.lookedAtMap.reservationManager.reservations.Any(x => !x.Target.HasThing && x.Target.cellInt == cell && x.claimant == data.Key));
+                                        if (data.Key.Map == jobTracker.lookedAtMap && !jobTracker.lookedAtMap.reservationManager.reservations.Any(x => !x.Target.HasThing && x.Target.cellInt == cell && x.claimant == data.Key))
+                                        {
+                                            ZLogger.Error($"2 PREVENTED ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, cell: {cell}");
+                                            continue;
+                                        }
+                                        __result = false;
+                                        ZLogger.Pause($"2 Detected ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, cell: {cell}");
+                                        return;
+                                    }
+                                    //Log.Message($"ZTracker reservation: map: Reservation: {data.Key}, target: {reservation}, {data.Key.Map} - {reservation.Thing?.Map}");
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            else if (ZLogger.DebugEnabled)
+            if (ZLogger.DebugEnabled)
             {
-                ZLogger.Message($"claimant {claimant} can't reserve target: {target}");
-                //var ZTracker = ZUtils.ZTracker;
-                //if (target.HasThing)
-                //{
-                //    foreach (var map in ZTracker.GetAllMaps(claimant.Map.Tile))
-                //    {
-                //        foreach (var reservation in map.reservationManager.reservations)
-                //        {
-                //            Log.Message($"Vanilla reservation: map: {map}, Reservation: {reservation.claimant}, target: {reservation.target}, {reservation.claimant.Map} - {reservation.target.Thing?.Map}");
-                //        }
-                //    }
-                //    if (ZTracker.jobTracker != null)
-                //    {
-                //        foreach (var data in ZTracker.jobTracker)
-                //        {
-                //            if (data.Value.reservedThings != null)
-                //            {
-                //                foreach (var reservation in data.Value.reservedThings)
-                //                {
-                //                    Log.Message($"ZTracker reservation: map: Reservation: {data.Key}, target: {reservation}, {data.Key.Map} - {reservation.Thing?.Map}");
-                //                }
-                //            }
-                //        }
-                //    }
-                //}
+                if (__result)
+                {
+                    ZLogger.Message($"claimant {claimant} can reserve target: {target}");
+                }
+                else
+                {
+                    ZLogger.Message($"claimant {claimant} can't reserve target: {target}");
+                }
+                var ZTracker = ZUtils.ZTracker;
+                if (target.HasThing)
+                {
+                    foreach (var map in ZTracker.GetAllMaps(claimant.Map.Tile))
+                    {
+                        foreach (var reservation in map.reservationManager.reservations)
+                        {
+                            Log.Message($"Vanilla reservation: map: {map}, Reservation: {reservation.claimant}, target: {reservation.target}, {reservation.claimant.Map} - {reservation.target.Thing?.Map}");
+                        }
+                    }
+                    if (ZTracker.jobTracker != null)
+                    {
+                        foreach (var data in ZTracker.jobTracker)
+                        {
+                            if (data.Value.reservedTargets != null)
+                            {
+                                foreach (var reservation in data.Value.reservedTargets)
+                                {
+                                    Log.Message($"ZTracker reservation: map: Reservation: {data.Key}, target: {reservation}, {data.Key.Map} - {reservation.Thing?.Map}");
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var map in ZTracker.GetAllMaps(claimant.Map.Tile))
+                    {
+                        foreach (var reservation in map.reservationManager.reservations)
+                        {
+                            Log.Message($"2 Vanilla reservation: map: {map}, claimant: {reservation.claimant}, target: {reservation.target}, {reservation.claimant.Map}");
+                        }
+                    }
+                    if (ZTracker.jobTracker != null)
+                    {
+                        foreach (var data in ZTracker.jobTracker)
+                        {
+                            if (data.Value.reservedTargets != null)
+                            {
+                                foreach (var reservation in data.Value.reservedTargets)
+                                {
+                                    Log.Message($"2 ZTracker reservation: claimant: {data.Key}, target: {reservation}, pawn.Map: {data.Key.Map}, lookedAtLocalCell: {data.Value.lookedAtLocalCell}, lookedAtMap: {data.Value.lookedAtMap}");
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
