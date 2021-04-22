@@ -74,8 +74,9 @@ namespace ZLevels
                 initAction = delegate ()
                 {
                     var ZTracker = ZUtils.ZTracker;
-                    Log.Message($"pawn.Map: {pawn.Map}, dest: {dest}");
-                    if (ZTracker.GetZIndexFor(pawn.Map) > ZTracker.GetZIndexFor(dest))
+                    var pawnMapZIndex = ZTracker.GetZIndexFor(pawn.Map);
+                    var destMapZIndex = ZTracker.GetZIndexFor(dest);
+                    if (pawnMapZIndex > destMapZIndex)
                     {
                         var stairs = ZTracker.stairsDown[pawn.Map];
                         if (stairs?.Any() ?? false)
@@ -87,7 +88,7 @@ namespace ZLevels
                             ZLogger.Pause(pawn + " cant find stairs down");
                         }
                     }
-                    else if (ZTracker.GetZIndexFor(pawn.Map) < ZTracker.GetZIndexFor(dest))
+                    else if (pawnMapZIndex < destMapZIndex)
                     {
                         var stairs = ZTracker.stairsUp[pawn.Map];
                         if (stairs?.Any() ?? false)

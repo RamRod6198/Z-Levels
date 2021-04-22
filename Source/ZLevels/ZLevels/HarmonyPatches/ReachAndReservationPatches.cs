@@ -193,24 +193,26 @@ namespace ZLevels
                 var ZTracker = ZUtils.ZTracker;
                 if (claimant.RaceProps.Humanlike && ZTracker.jobTracker != null)
                 {
-                    if (target.HasThing)
+                    var thing = target.thingInt;
+                    if (thing != null)
                     {
-                        var thing = target.thingInt;
                         foreach (var data in ZTracker.jobTracker)
                         {
-                            if (data.Key != claimant && data.Value.reservedTargets != null)
+                            var otherPawn = data.Key;
+                            var otherPawnJobTracker = data.Value;
+                            if (otherPawn != claimant && otherPawnJobTracker.reservedThings != null)
                             {
-                                foreach (var reservation in data.Value.reservedTargets)
+                                foreach (var reservation in otherPawnJobTracker.reservedThings)
                                 {
-                                    if (reservation.HasThing && reservation.thingInt == target.thingInt)
+                                    if (reservation.thingInt == target.thingInt)
                                     {
-                                        var shouldChangeResult = !(data.Key.jobs?.curDriver is JobDriver_TakeToBed);// || !(data.Key.jobs?.curDriver is JobDriver_LayDown));
+                                        var shouldChangeResult = !(otherPawn.jobs?.curDriver is JobDriver_TakeToBed);// || !(data.Key.jobs?.curDriver is JobDriver_LayDown));
                                         if (shouldChangeResult)
                                         {
                                             ZLogger.Message(data.Key + " - 1 data.Value.mainJob: " + data.Value.mainJob);
                                             ZLogger.Message(data.Key + " - 1 data.Key.CurJob: " + data.Key.CurJob);
                                             ZLogger.Message(data.Key + " - 1 thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key): " + thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key));
-                                            if (data.Key.Map == thing.Map && !thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == data.Key))
+                                            if (otherPawn.Map == thing.Map && !thing.Map.reservationManager.reservations.Any(x => x.Target.thingInt == thing && x.claimant == otherPawn))
                                             {
                                                 ZLogger.Message($"PREVENTED ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, thing: {thing}");
                                                 continue;
@@ -230,17 +232,19 @@ namespace ZLevels
                         var cell = target.cellInt;
                         foreach (var data in ZTracker.jobTracker)
                         {
-                            if (data.Key != claimant && data.Value.reservedTargets != null)
+                            var otherPawn = data.Key;
+                            var otherPawnJobTracker = data.Value;
+                            if (otherPawn != claimant && otherPawnJobTracker.reservedCells != null)
                             {
-                                foreach (var reservation in data.Value.reservedTargets)
+                                foreach (var reservation in otherPawnJobTracker.reservedCells)
                                 {
-                                    ZLogger.Message($"data.Key: {data.Key}, reservation: {reservation}, reservation.HasThing: {reservation.HasThing}, reservation.cellInt: {reservation.cellInt}, data.Value.lookedAtMap: {data.Value.mapDest}, cell: {cell}, jobTracker.lookedAtMap: {jobTracker.mapDest}");
-                                    if (!reservation.HasThing && reservation.cellInt == cell && data.Value.mapDest == jobTracker.mapDest)
+                                    ZLogger.Message($"otherPawn: {otherPawn}, reservation: {reservation}, reservation.HasThing: {reservation.HasThing}, reservation.cellInt: {reservation.cellInt}, data.Value.lookedAtMap: {data.Value.mapDest}, cell: {cell}, jobTracker.lookedAtMap: {jobTracker.mapDest}");
+                                    if (reservation.cellInt == cell && otherPawnJobTracker.mapDest == jobTracker.mapDest)
                                     {
-                                        ZLogger.Message("claimant: " + claimant + " - " + data.Key + " - 2 data.Value.mainJob: " + data.Value.mainJob);
-                                        ZLogger.Message("claimant: " + claimant + " - " + data.Key + " - 2 data.Key.CurJob: " + data.Key.CurJob);
-                                        ZLogger.Message("claimant: " + claimant + " - " + data.Key + " - 2 jobTracker.lookedAtMap.reservationManager.reservations.Any(x => !x.Target.HasThing && x.Target.cellInt == cell && x.claimant == data.Key)): " + jobTracker.mapDest.reservationManager.reservations.Any(x => !x.Target.HasThing && x.Target.cellInt == cell && x.claimant == data.Key));
-                                        if (data.Key.Map == jobTracker.mapDest && !jobTracker.mapDest.reservationManager.reservations.Any(x => !x.Target.HasThing && x.Target.cellInt == cell && x.claimant == data.Key))
+                                        ZLogger.Message("claimant: " + claimant + " - " + otherPawn + " - 2 data.Value.mainJob: " + data.Value.mainJob);
+                                        ZLogger.Message("claimant: " + claimant + " - " + otherPawn + " - 2 data.Key.CurJob: " + data.Key.CurJob);
+                                        ZLogger.Message("claimant: " + claimant + " - " + otherPawn + " - 2 jobTracker.lookedAtMap.reservationManager.reservations.Any(x => !x.Target.HasThing && x.Target.cellInt == cell && x.claimant == data.Key)): " + jobTracker.mapDest.reservationManager.reservations.Any(x => !x.Target.HasThing && x.Target.cellInt == cell && x.claimant == data.Key));
+                                        if (otherPawn.Map == jobTracker.mapDest && !jobTracker.mapDest.reservationManager.reservations.Any(x => !x.Target.HasThing && x.Target.cellInt == cell && x.claimant == otherPawn))
                                         {
                                             ZLogger.Message($"2 PREVENTED ZTRACKER reservation disfunction: claimant: {claimant}, pawn: {data.Key}, cell: {cell}");
                                             continue;
@@ -256,6 +260,7 @@ namespace ZLevels
                     }
                 }
             }
+
             if (ZLogger.DebugEnabled)
             {
                 if (__result)
@@ -280,9 +285,9 @@ namespace ZLevels
                     {
                         foreach (var data in ZTracker.jobTracker)
                         {
-                            if (data.Value.reservedTargets != null)
+                            if (data.Value.reservedThings != null)
                             {
-                                foreach (var reservation in data.Value.reservedTargets)
+                                foreach (var reservation in data.Value.reservedThings)
                                 {
                                     ZLogger.Message($"ZTracker reservation: map: Reservation: {data.Key}, target: {reservation}, {data.Key.Map} - {reservation.Thing?.Map}");
                                 }
@@ -303,9 +308,9 @@ namespace ZLevels
                     {
                         foreach (var data in ZTracker.jobTracker)
                         {
-                            if (data.Value.reservedTargets != null)
+                            if (data.Value.reservedThings != null)
                             {
-                                foreach (var reservation in data.Value.reservedTargets)
+                                foreach (var reservation in data.Value.reservedThings)
                                 {
                                     ZLogger.Message($"2 ZTracker reservation: claimant: {data.Key}, target: {reservation}, pawn.Map: {data.Key.Map}, lookedAtLocalCell: {data.Value.lookedAtLocalCell}, lookedAtMap: {data.Value.mapDest}");
                                 }

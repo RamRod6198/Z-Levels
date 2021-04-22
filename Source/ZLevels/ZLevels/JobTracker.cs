@@ -13,7 +13,7 @@ namespace ZLevels
 		public JobTracker()
 		{
 			activeJobs = new List<Job>();
-			reservedTargets = new List<LocalTargetInfo>();
+			reservedThings = new List<LocalTargetInfo>();
 		}
 		public void ExposeData()
 		{
@@ -31,7 +31,8 @@ namespace ZLevels
 			Scribe_References.Look<Map>(ref mapDest, "mapDest");
 			Scribe_Values.Look(ref lookedAtLocalCell, "lookedAtLocalCell");
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "failIfTargetMapIsNotDest", false);
-			Scribe_Collections.Look<LocalTargetInfo>(ref reservedTargets, "reservedThings", LookMode.LocalTargetInfo);
+			Scribe_Collections.Look<LocalTargetInfo>(ref reservedThings, "reservedThings", LookMode.LocalTargetInfo);
+			Scribe_Collections.Look<LocalTargetInfo>(ref reservedCells, "reservedCells", LookMode.LocalTargetInfo);
 		}
 
 		public bool searchingJobsNow = false;
@@ -48,7 +49,8 @@ namespace ZLevels
 
 		public List<Job> activeJobs;
 
-		public List<LocalTargetInfo> reservedTargets;
+		public List<LocalTargetInfo> reservedThings;
+		public List<LocalTargetInfo> reservedCells;
 
 		public TargetInfo targetDest;
 

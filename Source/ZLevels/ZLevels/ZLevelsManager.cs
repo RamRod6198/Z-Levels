@@ -515,29 +515,35 @@ namespace ZLevels
                 jobTracker = new JobTracker();
                 this.jobTracker[pawn] = jobTracker;
             }
-            if (jobTracker.reservedTargets == null) 
-                jobTracker.reservedTargets = new List<LocalTargetInfo>();
+            if (jobTracker.reservedThings is null)
+            {
+                jobTracker.reservedThings = new List<LocalTargetInfo>();
+            }
+            if (jobTracker.reservedCells is null)
+            {
+                jobTracker.reservedCells = new List<LocalTargetInfo>();
+            }
             if (job.targetA != null)
             {
                 ZLogger.Message(pawn + " reserving " + job.targetA, true, debugLevel: DebugLevel.Jobs);
-                jobTracker.reservedTargets.Add(job.targetA);
+                ReserveTarget(job.targetA);
             }
             if (job.targetB != null)
             {
                 ZLogger.Message(pawn + " reserving " + job.targetB, true, debugLevel: DebugLevel.Jobs);
-                jobTracker.reservedTargets.Add(job.targetB);
+                ReserveTarget(job.targetB);
             }
             if (job.targetC != null)
             {
                 ZLogger.Message(pawn + " reserving " + job.targetC, true, debugLevel: DebugLevel.Jobs);
-                jobTracker.reservedTargets.Add(job.targetC);
+                ReserveTarget(job.targetC);
             }
             try
             {
                 foreach (var t in job.targetQueueA)
                 {
                     ZLogger.Message(pawn + " reserving " + t, true, debugLevel: DebugLevel.Jobs);
-                    jobTracker.reservedTargets.Add(t);
+                    ReserveTarget(t);
                 }
             }
             catch { }
@@ -546,10 +552,22 @@ namespace ZLevels
                 foreach (var t in job.targetQueueB)
                 {
                     ZLogger.Message(pawn + " reserving " + t, true, debugLevel: DebugLevel.Jobs);
-                    jobTracker.reservedTargets.Add(t);
+                    ReserveTarget(t);
                 }
             }
             catch { }
+
+            void ReserveTarget(LocalTargetInfo localTargetInfo)
+            {
+                if (localTargetInfo.HasThing)
+                {
+                    jobTracker.reservedThings.Add(localTargetInfo);
+                }
+                else
+                {
+                    jobTracker.reservedCells.Add(localTargetInfo);
+                }
+            };
         }
         public void BuildJobListFor(Pawn pawn, Map dest, Job jobToDo)
         {
@@ -973,7 +991,8 @@ namespace ZLevels
                 jobTracker.failIfTargetMapIsNotDest = false;
                 jobTracker.target = null;
                 jobTracker.oldMap = null;
-                jobTracker.reservedTargets = null;
+                jobTracker.reservedThings = null;
+                jobTracker.reservedCells = null;
                 jobTracker.searchingJobsNow = false;
                 jobTracker.mapDest = null;
                 jobTracker.lookedAtLocalCell = IntVec3.Invalid;

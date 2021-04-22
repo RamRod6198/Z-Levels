@@ -662,33 +662,6 @@ namespace ZLevels
             }
         }
 
-        [HarmonyPatch(typeof(DrugAIUtility), "IngestAndTakeToInventoryJob")]
-        public class IngestAndTakeToInventoryJobPatch
-        {
-            private static void Prefix(Thing drug, Pawn pawn, int maxNumToCarry = 9999)
-            {
-                Log.Message(" - Prefix - Job job = JobMaker.MakeJob(JobDefOf.Ingest, drug); - 1", true);
-                Job job = JobMaker.MakeJob(JobDefOf.Ingest, drug);
-                Log.Message(" - Prefix - job.count = Mathf.Min(drug.stackCount, drug.def.ingestible.maxNumToIngestAtOnce, maxNumToCarry); - 2", true);
-                job.count = Mathf.Min(drug.stackCount, drug.def.ingestible.maxNumToIngestAtOnce, maxNumToCarry);
-                Log.Message(" - Prefix - if (pawn.drugs != null) - 3", true);
-                if (pawn.drugs != null)
-                {
-                    Log.Message(" - Prefix - DrugPolicyEntry drugPolicyEntry = pawn.drugs.CurrentPolicy[drug.def]; - 4", true);
-                    DrugPolicyEntry drugPolicyEntry = pawn.drugs.CurrentPolicy[drug.def];
-                    Log.Message(" - Prefix - int num = pawn.inventory.innerContainer.TotalStackCountOfDef(drug.def) - job.count; - 5", true);
-                    int num = pawn.inventory.innerContainer.TotalStackCountOfDef(drug.def) - job.count;
-                    Log.Message(" - Prefix - if (drugPolicyEntry.allowScheduled && num <= 0) - 6", true);
-                    if (drugPolicyEntry.allowScheduled && num <= 0)
-                    {
-                        Log.Message(" - Prefix - job.takeExtraIngestibles = drugPolicyEntry.takeToInventory; - 7", true);
-                        job.takeExtraIngestibles = drugPolicyEntry.takeToInventory;
-                    }
-                }
-                return;
-            }
-        }
-
         [HarmonyPatch(typeof(JobGiver_GetRest), "TryGiveJob")]
         public class JobGiver_GetRestPatch
         {
@@ -1220,17 +1193,14 @@ namespace ZLevels
                             if (result.Job != null)
                             {
                                 ZUtils.TeleportThing(pawn, oldMap, oldPosition);
-
                                 ZLogger.Message(pawn + " got job " + result + " - map: "
                                     + ZTracker.GetMapInfo(pawn.Map) + " - " + pawn.Position, debugLevel: DebugLevel.Jobs);
                                 if (jobTracker.mapDest != null)
                                 {
-                                    Log.Message("1 Dest: " + jobTracker.mapDest);
                                     ZTracker.BuildJobListFor(pawn, jobTracker.mapDest, result.Job);
                                 }
                                 else
                                 {
-                                    Log.Message("2 Dest (oldMap): " + oldMap);
                                     ZTracker.BuildJobListFor(pawn, oldMap, result.Job);
                                 }
                                 ZLogger.Message($"Assigned local data: jobTracker.lookedAtMap: {ZTracker.GetMapInfo(jobTracker.mapDest)}, jobTracker.lookedAtLocalCell: {jobTracker.lookedAtLocalCell}");

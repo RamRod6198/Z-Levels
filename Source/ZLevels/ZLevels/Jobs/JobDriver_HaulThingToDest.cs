@@ -28,10 +28,6 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    Log.Message("pawn.Map: " + pawn.Map);
-                    Log.Message("this.job.targetA.Thing.Map: " + this.job.targetA.Thing?.Map);
-                    Log.Message("ZTracker.jobTracker[pawn].targetDest.Map: " + ZTracker.jobTracker[pawn].targetDest.Map);
-
                     if (pawn.Map == this.job.targetA.Thing?.Map && pawn.Map == ZTracker.jobTracker[pawn].targetDest.Map)
                     {
                         ZLogger.Message("pawn map and thing map and dest map are same, yield breaking in JobDriver_HaulThingToDest");
@@ -63,7 +59,6 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    Log.Message("Pawn: " + pawn);
                     if (ZTracker.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
                     {
                         if (jobTracker.mainJob.targetA.Thing != null && jobTracker.mainJob.targetA.Thing == this.savedThing && jobTracker.mainJob.targetA.Thing != TargetA.Thing)

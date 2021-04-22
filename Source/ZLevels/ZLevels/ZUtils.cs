@@ -257,6 +257,8 @@ namespace ZLevels
             foreach (var otherMap in maps)
             {
                 var stairs = new List<Building_Stairs>();
+                var otherMapZIndex = ZTracker.GetZIndexFor(otherMap);
+
                 if (otherMap == oldMap)
                 {
                     if (oldMapZIndex > newMapZIndex)
@@ -276,7 +278,7 @@ namespace ZLevels
                         }
                     }
                 }
-                else if (ZTracker.GetZIndexFor(otherMap) > oldMapZIndex)
+                else if (otherMapZIndex > oldMapZIndex)
                 {
                     Map lowerMap = ZTracker.GetLowerLevel(otherMap.Tile, otherMap);
                     if (lowerMap != null)
@@ -284,7 +286,7 @@ namespace ZLevels
                         stairs = ZTracker.stairsUp[lowerMap];
                     }
                 }
-                else if (ZTracker.GetZIndexFor(otherMap) < oldMapZIndex)
+                else if (otherMapZIndex < oldMapZIndex)
                 {
                     Map upperMap = ZTracker.GetUpperLevel(otherMap.Tile, otherMap);
                     if (upperMap != null)
