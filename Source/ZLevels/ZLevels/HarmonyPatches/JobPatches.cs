@@ -72,8 +72,7 @@ namespace ZLevels
         [HarmonyPatch(typeof(JobGiver_AIFollowPawn), "TryGiveJob")]
         public class JobGiver_AIFollowPawnPatch
         {
-            [HarmonyPrefix]
-            private static bool JobGiver_AIFollowPawnPrefix(JobGiver_AIFollowPawn __instance, ref Job __result, Pawn pawn)
+            private static bool Prefix(JobGiver_AIFollowPawn __instance, ref Job __result, Pawn pawn)
             {
                 try
                 {

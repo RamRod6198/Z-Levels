@@ -966,10 +966,17 @@ namespace ZLevels
             }
             if (this.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
             {
-                jobTracker.activeJobs.Clear();
-                jobTracker.reservedThings.Clear();
-                jobTracker.reservedCells.Clear();
-                jobTracker.lookedAtLocalCellMap.Clear();
+                if (jobTracker.activeJobs is null) jobTracker.activeJobs = new List<Job>();
+                else jobTracker.activeJobs.Clear();
+
+                if (jobTracker.reservedThings is null) jobTracker.reservedThings = new List<LocalTargetInfo>();
+                else jobTracker.reservedThings.Clear();
+
+                if (jobTracker.reservedCells is null) jobTracker.reservedCells = new List<LocalTargetInfo>();
+                else jobTracker.reservedCells.Clear();
+
+                if (jobTracker.lookedAtLocalCellMap is null) jobTracker.lookedAtLocalCellMap = new Dictionary<IntVec3, Map>();
+                else jobTracker.lookedAtLocalCellMap.Clear();
 
                 jobTracker.targetDest = null;
                 jobTracker.mainJob = null;
@@ -988,7 +995,6 @@ namespace ZLevels
             }
 
             LocalTargetInfo_Constructor_Patch.curPawnJobTracker = this.jobTracker[pawn];
-            pawn.jobs.EndCurrentJob(JobCondition.Errored);
         }
 
         public bool TryTakeFirstJob(Pawn pawn, bool forced = false)

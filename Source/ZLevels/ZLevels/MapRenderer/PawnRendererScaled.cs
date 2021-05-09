@@ -83,7 +83,14 @@ namespace ZLevels
                             Vector2 drawSize = carriedThing.Graphic.drawSize;
                             drawSize.x *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
                             drawSize.y *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
-                            graphic = carriedThing.Graphic.GetCopy(drawSize);
+                            if (carriedThing.Graphic is Graphic_RandomRotated graphicRandomRotated)
+                            {
+                                graphic = graphicRandomRotated.subGraphic.GetCopy(drawSize);
+                            }
+                            else
+                            {
+                                graphic = carriedThing.Graphic.GetCopy(drawSize);
+                            }
                             graphics[curLevel] = graphic;
                         }
 
@@ -400,7 +407,6 @@ namespace ZLevels
                         Vector2 drawSize = graphicRandomRotated.subGraphic.drawSize;
                         drawSize.x *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
                         drawSize.y *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
-                        Log.Message("Get copy 1 from " + graphicRandomRotated.subGraphic);
                         graphic = graphicRandomRotated.subGraphic.GetCopy(drawSize);
                     }
                     else
@@ -410,7 +416,6 @@ namespace ZLevels
                         drawSize.y *= 1f - ((curLevel - baseLevel) / DrawDynamicThings.pawnDrawScale);
                         Log.Message("Get copy 2 from " + eq.Graphic);
                         graphic = eq.Graphic.GetCopy(drawSize);
-
                     }
                     graphics[curLevel] = graphic;
                 }

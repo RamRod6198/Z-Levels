@@ -717,8 +717,8 @@ namespace ZLevels
                         inactiveOptions.Add(option);
                     }
                 }
+
                 var duplicateOptions = new List<FloatMenuOption>();
-        
                 if (pawn.thinker.TryGetMainTreeThinkNode<JobGiver_Work>() != null)
                 {
                     IntVec3 clickCell = IntVec3.FromVector3(clickPos);
@@ -766,7 +766,6 @@ namespace ZLevels
         
                                                 foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldPawnMap))
                                                 {
-                                                    Log.Message("Checking otherMap: " + otherMap + " - " + workGiver_Scanner);
                                                     if (oldPawnMap != otherMap)
                                                     {
                                                         pawn.positionInt = ZUtils.GetCellToTeleportFrom(pawn.Map, pawn.Position, otherMap);
@@ -809,18 +808,17 @@ namespace ZLevels
         
                                                     if (job != null)
                                                     {
-                                                        Log.Message($"1 Found job {job} from " + workGiver_Scanner + " in " + otherMap + " dest: " + dest);
                                                         if (dest == null)
                                                         {
                                                             dest = otherMap;
                                                         }
-                                                        Log.Message($"2 Found job {job} from " + workGiver_Scanner + " in " + otherMap + " dest: " + dest);
+                                                        Log.Message($"Found job {job} from " + workGiver_Scanner + " in " + otherMap + " dest: " + dest);
                                                         break;
                                                     }
                                                     else
                                                     {
                                                         dest = null;
-                                                        Log.Message("No job was yielded from " + workGiver_Scanner + " in " + otherMap);
+                                                        //Log.Message("No job was yielded from " + workGiver_Scanner + " in " + otherMap);
                                                     }
                                                 }
                                                 ZUtils.TeleportThing(pawn, oldPawnMap, oldPawnPosition);
