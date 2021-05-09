@@ -14,6 +14,7 @@ namespace ZLevels
 		{
 			activeJobs = new List<Job>();
 			reservedThings = new List<LocalTargetInfo>();
+			reservedCells = new List<LocalTargetInfo>();
 		}
 		public void ExposeData()
 		{
@@ -33,6 +34,13 @@ namespace ZLevels
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "failIfTargetMapIsNotDest", false);
 			Scribe_Collections.Look<LocalTargetInfo>(ref reservedThings, "reservedThings", LookMode.LocalTargetInfo);
 			Scribe_Collections.Look<LocalTargetInfo>(ref reservedCells, "reservedCells", LookMode.LocalTargetInfo);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+				if (activeJobs is null)
+                {
+					activeJobs = new List<Job>();
+                }
+			}
 		}
 
 		public bool searchingJobsNow = false;

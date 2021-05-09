@@ -1553,34 +1553,46 @@ namespace ZLevels
 
             public static bool IsGoodStoreCell(IntVec3 c, Map map, Thing t, Pawn carrier, Faction faction)
             {
+                Log.Message(" - IsGoodStoreCell - if (carrier != null && c.IsForbidden(carrier)) - 1", true);
                 if (carrier != null && c.IsForbidden(carrier))
                 {
+                    Log.Message(" - IsGoodStoreCell - return false; - 2", true);
                     return false;
                 }
+                Log.Message(" - IsGoodStoreCell - if (!NoStorageBlockersIn(c, map, t)) - 3", true);
                 if (!NoStorageBlockersIn(c, map, t))
                 {
+                    Log.Message(" - IsGoodStoreCell - return false; - 4", true);
                     return false;
                 }
+                Log.Message(" - IsGoodStoreCell - if (carrier != null) - 5", true);
                 if (carrier != null)
                 {
+                    Log.Message(" - IsGoodStoreCell - if (!carrier.CanReserveNew(c)) - 6", true);
                     if (!carrier.CanReserveNew(c))
                     {
+                        Log.Message(" - IsGoodStoreCell - return false; - 7", true);
                         return false;
                     }
                 }
                 else if (faction != null && map.reservationManager.IsReservedByAnyoneOf(c, faction))
                 {
+                    Log.Message(" - IsGoodStoreCell - return false; - 9", true);
                     return false;
                 }
+                Log.Message(" - IsGoodStoreCell - if (c.ContainsStaticFire(map)) - 10", true);
                 if (c.ContainsStaticFire(map))
                 {
+                    Log.Message(" - IsGoodStoreCell - return false; - 11", true);
                     return false;
                 }
                 List<Thing> thingList = c.GetThingList(map);
                 for (int i = 0; i < thingList.Count; i++)
                 {
+                    Log.Message(" - IsGoodStoreCell - if (thingList[i] is IConstructible && GenConstruct.BlocksConstruction(thingList[i], t)) - 13", true);
                     if (thingList[i] is IConstructible && GenConstruct.BlocksConstruction(thingList[i], t))
                     {
+                        Log.Message(" - IsGoodStoreCell - return false; - 14", true);
                         return false;
                     }
                 }
@@ -1589,8 +1601,8 @@ namespace ZLevels
                 //Log.Message($"{carrier} CanReach({tPosition}, {c}, PathEndMode.ClosestTouch, TraverseParms.For(carrier, Danger.Deadly, TraverseMode.ByPawn, false)): " +
                 //    $"{carrier.Map.reachability.CanReach(tPosition, c, PathEndMode.ClosestTouch, TraverseParms.For(carrier, Danger.Deadly, TraverseMode.ByPawn, false))}");
 
-                return true;// carrier == null || carrier.Map.reachability.CanReach(t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld, c, PathEndMode.ClosestTouch, 
-                    //TraverseParms.For(carrier, Danger.Deadly, TraverseMode.ByPawn, false));
+                return true;// carrier == null || carrier.Map.reachability.CanReach(t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld, c, PathEndMode.ClosestTouch,
+                            //TraverseParms.For(carrier, Danger.Deadly, TraverseMode.ByPawn, false));
             }
 
             private static bool NoStorageBlockersIn(IntVec3 c, Map map, Thing thing)

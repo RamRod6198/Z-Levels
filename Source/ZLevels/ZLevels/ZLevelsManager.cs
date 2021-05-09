@@ -523,6 +523,7 @@ namespace ZLevels
             {
                 jobTracker.reservedCells = new List<LocalTargetInfo>();
             }
+
             if (job.targetA != null)
             {
                 ZLogger.Message(pawn + " reserving " + job.targetA, true, debugLevel: DebugLevel.Jobs);
@@ -538,7 +539,7 @@ namespace ZLevels
                 ZLogger.Message(pawn + " reserving " + job.targetC, true, debugLevel: DebugLevel.Jobs);
                 ReserveTarget(job.targetC);
             }
-            try
+            if (job.targetQueueA != null)
             {
                 foreach (var t in job.targetQueueA)
                 {
@@ -546,8 +547,7 @@ namespace ZLevels
                     ReserveTarget(t);
                 }
             }
-            catch { }
-            try
+            if (job.targetQueueB != null)
             {
                 foreach (var t in job.targetQueueB)
                 {
@@ -555,8 +555,6 @@ namespace ZLevels
                     ReserveTarget(t);
                 }
             }
-            catch { }
-
             void ReserveTarget(LocalTargetInfo localTargetInfo)
             {
                 if (localTargetInfo.HasThing)
