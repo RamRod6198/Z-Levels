@@ -454,7 +454,7 @@ namespace ZLevels
                 str += "ZTracker dest map: " + this.jobTracker[pawn].targetDest + "\n";
                 str += "Dest map: " + dest + "\n";
                 str += "lookedAtMap: " + this.jobTracker[pawn].mapDest + "\n";
-                str += "lookedAtLocalCell: " + this.jobTracker[pawn].lookedAtLocalCell + "\n";
+                str += "lookedAtLocalCell: " + this.jobTracker[pawn].lookedAtLocalCellMap + "\n";
                 str += "Job.workGiverDef: " + job.workGiverDef + "\n";
                 str += "Job.jobGiver: " + job.jobGiver + "\n";
                 str += "Job.count: " + job.count + "\n";
@@ -515,15 +515,6 @@ namespace ZLevels
                 jobTracker = new JobTracker();
                 this.jobTracker[pawn] = jobTracker;
             }
-            if (jobTracker.reservedThings is null)
-            {
-                jobTracker.reservedThings = new List<LocalTargetInfo>();
-            }
-            if (jobTracker.reservedCells is null)
-            {
-                jobTracker.reservedCells = new List<LocalTargetInfo>();
-            }
-
             if (job.targetA != null)
             {
                 ZLogger.Message(pawn + " reserving " + job.targetA, true, debugLevel: DebugLevel.Jobs);
@@ -975,34 +966,25 @@ namespace ZLevels
             }
             if (this.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
             {
-                if (jobTracker.activeJobs?.Any() ?? false)
-                {
-                    jobTracker.activeJobs.Clear();
-                }
-                if (jobTracker.activeJobs == null)
-                {
-                    jobTracker.activeJobs = new List<Job>();
-                }
+                jobTracker.activeJobs.Clear();
+                jobTracker.reservedThings.Clear();
+                jobTracker.reservedCells.Clear();
+                jobTracker.lookedAtLocalCellMap.Clear();
+
                 jobTracker.targetDest = null;
                 jobTracker.mainJob = null;
                 jobTracker.forceGoToDestMap = false;
                 jobTracker.failIfTargetMapIsNotDest = false;
                 jobTracker.target = null;
                 jobTracker.oldMap = null;
-                jobTracker.reservedThings = null;
-                jobTracker.reservedCells = null;
                 jobTracker.searchingJobsNow = false;
                 jobTracker.mapDest = null;
-                jobTracker.lookedAtLocalCell = IntVec3.Invalid;
                 ZLogger.Message("Resetting job data");
             }
             else
             {
                 ZLogger.Message("Resetting jobTracker for " + pawn);
-                this.jobTracker[pawn] = new JobTracker
-                {
-                    activeJobs = new List<Job>()
-                };
+                this.jobTracker[pawn] = new JobTracker();
             }
 
             LocalTargetInfo_Constructor_Patch.curPawnJobTracker = this.jobTracker[pawn];

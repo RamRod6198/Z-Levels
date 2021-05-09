@@ -1203,7 +1203,7 @@ namespace ZLevels
                                 {
                                     ZTracker.BuildJobListFor(pawn, oldMap, result.Job);
                                 }
-                                ZLogger.Message($"Assigned local data: jobTracker.lookedAtMap: {ZTracker.GetMapInfo(jobTracker.mapDest)}, jobTracker.lookedAtLocalCell: {jobTracker.lookedAtLocalCell}");
+                                ZLogger.Message($"Assigned local data: jobTracker.lookedAtMap: {ZTracker.GetMapInfo(jobTracker.mapDest)}, jobTracker.lookedAtLocalCell: {jobTracker.lookedAtLocalCellMap}");
                                 __result = new ThinkResult(jobTracker.activeJobs[0], jobTracker.activeJobs[0].jobGiver);
                                 jobTracker.activeJobs.RemoveAt(0);
                             }
@@ -1553,46 +1553,34 @@ namespace ZLevels
 
             public static bool IsGoodStoreCell(IntVec3 c, Map map, Thing t, Pawn carrier, Faction faction)
             {
-                Log.Message(" - IsGoodStoreCell - if (carrier != null && c.IsForbidden(carrier)) - 1", true);
                 if (carrier != null && c.IsForbidden(carrier))
                 {
-                    Log.Message(" - IsGoodStoreCell - return false; - 2", true);
                     return false;
                 }
-                Log.Message(" - IsGoodStoreCell - if (!NoStorageBlockersIn(c, map, t)) - 3", true);
                 if (!NoStorageBlockersIn(c, map, t))
                 {
-                    Log.Message(" - IsGoodStoreCell - return false; - 4", true);
                     return false;
                 }
-                Log.Message(" - IsGoodStoreCell - if (carrier != null) - 5", true);
                 if (carrier != null)
                 {
-                    Log.Message(" - IsGoodStoreCell - if (!carrier.CanReserveNew(c)) - 6", true);
                     if (!carrier.CanReserveNew(c))
                     {
-                        Log.Message(" - IsGoodStoreCell - return false; - 7", true);
                         return false;
                     }
                 }
                 else if (faction != null && map.reservationManager.IsReservedByAnyoneOf(c, faction))
                 {
-                    Log.Message(" - IsGoodStoreCell - return false; - 9", true);
                     return false;
                 }
-                Log.Message(" - IsGoodStoreCell - if (c.ContainsStaticFire(map)) - 10", true);
                 if (c.ContainsStaticFire(map))
                 {
-                    Log.Message(" - IsGoodStoreCell - return false; - 11", true);
                     return false;
                 }
                 List<Thing> thingList = c.GetThingList(map);
                 for (int i = 0; i < thingList.Count; i++)
                 {
-                    Log.Message(" - IsGoodStoreCell - if (thingList[i] is IConstructible && GenConstruct.BlocksConstruction(thingList[i], t)) - 13", true);
                     if (thingList[i] is IConstructible && GenConstruct.BlocksConstruction(thingList[i], t))
                     {
-                        Log.Message(" - IsGoodStoreCell - return false; - 14", true);
                         return false;
                     }
                 }
@@ -2035,8 +2023,6 @@ namespace ZLevels
                     foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
                     {
                         jobTracker.mapDest = otherMap;
-                        jobTracker.lookedAtLocalCell = IntVec3.Invalid;
-
                         ZLogger.Message("Workgiver N" + (j + 1) + " from " + list.Count + " - " + pawn + " search job - " + workGiver + " in " + ZUtils.ZTracker.GetMapInfo(otherMap), debugLevel: DebugLevel.Jobs);
                         if (workGiver.def.priorityInType != num && bestTargetOfLastPriority.IsValid)
                         {

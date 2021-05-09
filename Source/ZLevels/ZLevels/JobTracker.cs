@@ -15,6 +15,7 @@ namespace ZLevels
 			activeJobs = new List<Job>();
 			reservedThings = new List<LocalTargetInfo>();
 			reservedCells = new List<LocalTargetInfo>();
+			lookedAtLocalCellMap = new Dictionary<IntVec3, Map>();
 		}
 		public void ExposeData()
 		{
@@ -30,17 +31,10 @@ namespace ZLevels
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "forceGoToDestMap", false);
 			Scribe_References.Look<Thing>(ref target, "target");
 			Scribe_References.Look<Map>(ref mapDest, "mapDest");
-			Scribe_Values.Look(ref lookedAtLocalCell, "lookedAtLocalCell");
+			Scribe_Values.Look(ref lookedAtLocalCellMap, "lookedAtLocalCell");
 			Scribe_Values.Look<bool>(ref forceGoToDestMap, "failIfTargetMapIsNotDest", false);
 			Scribe_Collections.Look<LocalTargetInfo>(ref reservedThings, "reservedThings", LookMode.LocalTargetInfo);
 			Scribe_Collections.Look<LocalTargetInfo>(ref reservedCells, "reservedCells", LookMode.LocalTargetInfo);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-            {
-				if (activeJobs is null)
-                {
-					activeJobs = new List<Job>();
-                }
-			}
 		}
 
 		public bool searchingJobsNow = false;
@@ -77,7 +71,7 @@ namespace ZLevels
 		//		mapTest = value;
 		//	}
 		//}
-		public IntVec3 lookedAtLocalCell;
+		public Dictionary<IntVec3, Map> lookedAtLocalCellMap;
 	}
 }
 

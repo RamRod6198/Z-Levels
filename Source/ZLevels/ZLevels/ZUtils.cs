@@ -45,7 +45,7 @@ namespace ZLevels
 			zTracker = null;
 		}
 
-        //public static Map currentLookedIntoMap;
+        public static Map currentLookedIntoMap;
         public static IEnumerable<Map> GetAllMapsInClosestOrder(Thing thing, Map oldMap, IntVec3 oldPosition, bool skipOldMap = false, bool dontCheckForStairs = false)
         {
             bool cantGoDown = false;
@@ -113,10 +113,7 @@ namespace ZLevels
                             {
                                 TeleportThing(thing, otherMap, newPosition);
                                 //ZLogger.Message($"1 CHECK: {thing} is going to {zTracker.GetMapInfo(otherMap)}");
-                                if (jobTracker != null && jobTracker.mapDest is null)
-                                {
-                                    jobTracker.mapDest = otherMap;
-                                }
+                                currentLookedIntoMap = otherMap;
                                 yield return otherMap;
                             }
                             else
@@ -154,10 +151,7 @@ namespace ZLevels
                     {
                         TeleportThing(thing, oldMap, oldPosition);
                         //ZLogger.Message($"2 CHECK: {thing} is going to {zTracker.GetMapInfo(otherMap)}");
-                        if (jobTracker != null && jobTracker.mapDest is null)
-                        {
-                            jobTracker.mapDest = otherMap;
-                        }
+                        currentLookedIntoMap = otherMap;
                         yield return otherMap;
                     }
                     else
@@ -177,10 +171,7 @@ namespace ZLevels
                 else
                 {
                     TeleportThing(thing, otherMap, oldPosition);
-                    if (jobTracker != null && jobTracker.mapDest is null)
-                    {
-                        jobTracker.mapDest = otherMap;
-                    }
+                    currentLookedIntoMap = otherMap;
                     yield return otherMap;
                 }
             }
@@ -224,12 +215,14 @@ namespace ZLevels
                     var position = selectedStairs.Position;
                     TeleportThing(thing, otherMap, position);
                     TeleportThing(thing2, otherMap, position);
+                    currentLookedIntoMap = otherMap;
                     yield return otherMap;
                 }
                 else if (otherMap == oldMap)
                 {
                     TeleportThing(thing, oldMap, oldPosition);
                     TeleportThing(thing2, oldMap2, oldPosition2);
+                    currentLookedIntoMap = otherMap;
                     yield return otherMap;
                 }
                 else
