@@ -54,6 +54,7 @@ namespace ZLevels
             var jobTracker = thing is Pawn p ? zTracker.jobTracker.TryGetValue(p, out var value) ? value : null : null;
             foreach (var otherMap in zTracker.GetAllMapsInClosestOrder(oldMap))
             {
+                ZLogger.Message("otherMap: " + otherMap);
                 if (!dontCheckForStairs)
                 {
                     var stairs = new List<Building_Stairs>();
@@ -87,11 +88,6 @@ namespace ZLevels
 
                     if (stairs != null && stairs.Count > 0)
                     {
-                        //foreach (var stair in stairs)
-                        //{
-                        //    ZLogger.Message($"CHECKING STAIR: {stair}, stair.Spawned: {stair.Spawned}, stair.Destroyed: {stair.Destroyed}, stair.Position: {stair.Position}, stair.Map: {stair.Map}, otherMap: {otherMap}");
-                        //}
-
                         if (!skipOldMap || skipOldMap && otherMap != oldMap)
                         {
                             IntVec3 newPosition = IntVec3.Invalid;// stairs.MinBy(x => IntVec3Utility.DistanceTo(thing.Position, x.Position)).Position;

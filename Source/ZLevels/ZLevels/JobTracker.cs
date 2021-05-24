@@ -31,7 +31,6 @@ namespace ZLevels
 			Scribe_Values.Look(ref forceGoToDestMap, "forceGoToDestMap", false);
 			Scribe_References.Look(ref target, "target");
 			Scribe_References.Look(ref mapDest, "mapDest");
-			Scribe_Values.Look(ref lookedAtLocalCellMap, "lookedAtLocalCell");
 			Scribe_Values.Look(ref forceGoToDestMap, "failIfTargetMapIsNotDest", false);
 			Scribe_Collections.Look(ref reservedThings, "reservedThings", LookMode.LocalTargetInfo);
 			Scribe_Collections.Look(ref reservedCells, "reservedCells", LookMode.LocalTargetInfo);

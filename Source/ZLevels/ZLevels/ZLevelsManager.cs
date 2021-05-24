@@ -328,7 +328,6 @@ namespace ZLevels
             return maps;
         }
 
-        private Dictionary<Map, List<Map>> allMapsFromToUpper;
         public List<Map> GetAllMapsFromToUpper(Map pawnMap, Map destMap)
         {
             List<Map> maps = new List<Map>();
@@ -396,54 +395,48 @@ namespace ZLevels
 
         public bool TryRegisterMap(Map map, int index)
         {
-            ZLogger.Message(" - TryRegisterMap - if (this.ZLevelsTracker == null) - 1", true);
+            void RefreshMapLists()
+            {
+                if (allMapsInClosestOrder is null)
+                {
+                    allMapsInClosestOrder = new Dictionary<Map, List<Map>>();
+                }
+                allMapsInClosestOrder.Clear();
+            }
             if (this.ZLevelsTracker == null) this.ZLevelsTracker = new Dictionary<int, ZLevelData>();
-
-            ZLogger.Message(" - TryRegisterMap - if (this.mapIndex == null) - 4", true);
             if (this.mapIndex == null)
             {
-                ZLogger.Message(" - TryRegisterMap - this.mapIndex = new Dictionary<Map, int>(); - 5", true);
                 this.mapIndex = new Dictionary<Map, int>();
             }
-            ZLogger.Message(" - TryRegisterMap - if (this.ZLevelsTracker.ContainsKey(map.Tile)) - 6", true);
-            if (this.ZLevelsTracker.ContainsKey(map.Tile))
+            if (this.ZLevelsTracker.TryGetValue(map.Tile, out var zTileTracker))
             {
-                ZLogger.Message(" - TryRegisterMap - if (this.ZLevelsTracker[map.Tile].ZLevels == null) - 7", true);
-                if (this.ZLevelsTracker[map.Tile].ZLevels == null) this.ZLevelsTracker[map.Tile].ZLevels = new Dictionary<int, Map>();
-                    
-                ZLogger.Message(" - TryRegisterMap - this.ZLevelsTracker[map.Tile].ZLevels[index] = map; - 9", true);
-                this.ZLevelsTracker[map.Tile].ZLevels[index] = map;
-
-                ZLogger.Message(" - TryRegisterMap - if (!this.mapIndex.ContainsKey(map)) - 10", true);
+                if (zTileTracker.ZLevels == null) zTileTracker.ZLevels = new Dictionary<int, Map>();
+                zTileTracker.ZLevels[index] = map;
                 if (!this.mapIndex.ContainsKey(map))
                 {
-                    ZLogger.Message(" - TryRegisterMap - this.mapIndex[map] = index; - 11", true);
                     this.mapIndex[map] = index;
                 }
-
-                ZLogger.Message("1 Registering " + this.GetMapInfo(map) + " for index: " + index);
-                ZLogger.Message(" - TryRegisterMap - return true; - 13", true);
+                ZLogger.Message("Registering " + this.GetMapInfo(map) + " for index: " + index);
+                RefreshMapLists();
                 return true;
             }
             else
             {
-                this.ZLevelsTracker[map.Tile] = new ZLevelData
-                                                    {
-                                                        ZLevels = new Dictionary<int, Map>
-                                                        {
-                                                            [index] = map
-                                                        }
-                                                    };
-
-                ZLogger.Message("this.ZLevelsTracker.ContainsKey(map.Tile): " + this.ZLevelsTracker.ContainsKey(map.Tile) + " - " + map.Tile + " - " + map, true);
+                this.ZLevelsTracker[map.Tile] = new ZLevelData {ZLevels = new Dictionary<int, Map>
+                                                                {
+                                                                    [index] = map
+                                                                }};
                 if (!this.mapIndex.ContainsKey(map))
                 {
                     this.mapIndex[map] = index;
                 }
+                RefreshMapLists();
                 return true;
             }
             return false;
         }
+
+
         public string ShowJobData(Job job, Pawn pawn, Map dest)
         {
             string str = "-------------------------\n";
@@ -584,14 +577,6 @@ namespace ZLevels
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = jobToDo.count;
                 job.targetQueueA = jobToDo.targetQueueA;
-                if (job.targetQueueA != null)
-                {
-                    Log.Message("job.targetQueueA: " + job.targetQueueA.Count);
-                    foreach (var t in job.targetQueueA)
-                    {
-                        Log.Message("T: " + t);
-                    }
-                }
                 tempJobs.Add(job);
             }
             else if (jobToDo.def == JobDefOf.Rescue || jobToDo.def == JobDefOf.Capture || jobToDo.def == JobDefOf.Arrest)
@@ -1290,13 +1275,13 @@ namespace ZLevels
         {
             try
             {
-                if (this.ZLevelsTracker.ContainsKey(tile) && this.ZLevelsTracker[tile].ZLevels != null
-                    && this.ZLevelsTracker[tile].ZLevels[0] != null
-                    && this.ZLevelsTracker[tile].ZLevels[0].listerThings == null)
+                if (this.ZLevelsTracker.TryGetValue(tile, out var zTileTracker) && zTileTracker.ZLevels != null && zTileTracker.ZLevels[0] != null && zTileTracker.ZLevels[0].listerThings == null)
                 {
-                    var map = Find.WorldObjects.MapParents.Where(x => x.Tile == tile
-                    && x.HasMap && x.Map != null && x.Map.IsPlayerHome).FirstOrDefault().Map;
-                    this.ZLevelsTracker[tile].ZLevels[0] = map;
+                    var map = Find.WorldObjects.MapParents.FirstOrDefault(x => x.Tile == tile && x.HasMap && x.Map != null && x.Map.IsPlayerHome)?.Map;
+                    if (map != null)
+                    {
+                        zTileTracker.ZLevels[0] = map;
+                    }
                 }
             }
             catch (Exception ex)

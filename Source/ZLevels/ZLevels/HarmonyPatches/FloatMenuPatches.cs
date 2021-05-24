@@ -54,9 +54,9 @@ namespace ZLevels
         //                }
         //                if (!pawn.Drafted)
         //                {
-        //                    Log.Message($"FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {list?.Count}");
+        //                    ZLogger.Message($"FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {list?.Count}");
         //                    FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list);
-        //                    Log.Message($"2 FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {list?.Count}");
+        //                    ZLogger.Message($"2 FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {list?.Count}");
         //                }
         //                {
         //                    foreach (FloatMenuOption item in pawn.GetExtraFloatMenuOptionsFor(intVec))
@@ -132,7 +132,7 @@ namespace ZLevels
         //{
         //    public static void Prefix(Vector3 clickPos, TargetingParameters clickParams, bool thingsOnly = false, ITargetingSource source = null)
         //    {
-        //        Log.Message(clickPos + " - TargetsAt_NewTemp");
+        //        ZLogger.Message(clickPos + " - TargetsAt_NewTemp");
         //    }
         //}
 
@@ -144,9 +144,9 @@ namespace ZLevels
         //    {
         //        if (clickPos.ToIntVec3().GetTerrain(pawn.Map) == ZLevelsDefOf.ZL_OutsideTerrain)
         //        {
-        //            Log.Message($"3 FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {opts?.Count}");
+        //            ZLogger.Message($"3 FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {opts?.Count}");
         //            FloatMenuMakerMap.AddJobGiverWorkOrders_NewTmp(clickPos, pawn, opts, drafted: false);
-        //            Log.Message($"4 FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {opts?.Count}");
+        //            ZLogger.Message($"4 FloatMenuMakerMap.AddUndraftedOrders(clickPos, pawn, list): {opts?.Count}");
         //
         //        }
         //    }
@@ -218,7 +218,7 @@ namespace ZLevels
         //{
         //    private static void Postfix(FloatMenuOption __instance, bool value)
         //    {
-        //        Log.Message($"Setting {__instance} to {value}");
+        //        ZLogger.Message($"Setting {__instance} to {value}");
         //    }
         //}
 
@@ -229,10 +229,10 @@ namespace ZLevels
             public static void Postfix(ref List<Thing> __result, ref Vector3 clickPos, float pawnWideClickRadius, TargetingParameters clickParams)
             {
                 //System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
-                //Log.Message("ThingsUnderMouse: " + t);
+                //ZLogger.Message("ThingsUnderMouse: " + t);
                 //foreach (var thin in __result)
                 //{
-                //    Log.Message("Prev: " + thin);
+                //    ZLogger.Message("Prev: " + thin);
                 //}
                 var map = Find.CurrentMap;
                 var curMapIndex = ZUtils.ZTracker.GetZIndexFor(map);
@@ -260,7 +260,7 @@ namespace ZLevels
 
                 //foreach (var thin in __result)
                 //{
-                //    Log.Message("Added: " + thin);
+                //    ZLogger.Message("Added: " + thin);
                 //}
             }
 
@@ -356,7 +356,7 @@ namespace ZLevels
             }
         }
 
-        [HarmonyPatch(typeof(FloatMenuMap), "StillValid", new Type[] { typeof(FloatMenuOption), typeof(List<FloatMenuOption>), typeof(Pawn)})]
+        [HarmonyPatch(typeof(FloatMenuMap), "StillValid", new Type[] { typeof(FloatMenuOption), typeof(List<FloatMenuOption>), typeof(Pawn) })]
         internal static class Patch_StillValid
         {
             private static bool Prefix(ref bool __result, FloatMenuMap __instance, FloatMenuOption opt, List<FloatMenuOption> curOpts, Pawn forPawn)
@@ -364,12 +364,12 @@ namespace ZLevels
                 if (opt.revalidateClickTarget?.Map != Find.CurrentMap)
                 {
                     __result = StillValid(__instance, opt, curOpts, forPawn);
-                    Log.Message("Result: " + __result);
+                    ZLogger.Message("Result: " + __result);
                     return false;
                 }
                 return true;
             }
-        
+
             private static bool StillValid(FloatMenuMap __instance, FloatMenuOption opt, List<FloatMenuOption> curOpts, Pawn forPawn)
             {
                 if (opt.revalidateClickTarget == null)
@@ -418,7 +418,7 @@ namespace ZLevels
                 Pawn pawn2 = GridsUtility.GetThingList(IntVec3.FromVector3(clickPos), pawn.Map)
                     .FirstOrDefault((Thing x) => x is Pawn) as Pawn;
                 var ZTracker = ZUtils.ZTracker;
-        
+
                 if (pawn2 != null && ZTracker.ZLevelsTracker[pawn.Map.Tile].ZLevels.Count > 1)
                 {
                     TaggedString toCheck = "Rescue".Translate(pawn2.LabelCap, pawn2);
@@ -429,7 +429,7 @@ namespace ZLevels
                         opts.Remove(floatMenuOption);
                         opts.Add(AddHumanlikeOrders_Patch.AddRescueOption(pawn, pawn2));
                     }
-        
+
                     TaggedString toCheck2 = "Capture".Translate(pawn2.LabelCap, pawn2);
                     FloatMenuOption floatMenuOption2 = opts.FirstOrDefault((FloatMenuOption x) => x.Label.Contains
                         (toCheck2));
@@ -438,7 +438,7 @@ namespace ZLevels
                         opts.Remove(floatMenuOption2);
                         opts.Add(AddHumanlikeOrders_Patch.AddCaptureOption(pawn, pawn2));
                     }
-        
+
                     TaggedString toCheck3 = "TryToArrest".Translate(pawn2.LabelCap, pawn2,
                         pawn2.GetAcceptArrestChance(pawn).ToStringPercent());
                     FloatMenuOption floatMenuOption3 = opts.FirstOrDefault((FloatMenuOption x) => x.Label.Contains
@@ -541,7 +541,7 @@ namespace ZLevels
                         var oldPosition2 = victim.Position;
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
-        
+
                         Building building_Bed3 = null;
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap,
                             oldPosition1, victim, oldMap, oldPosition2))
@@ -553,15 +553,15 @@ namespace ZLevels
                                 building_Bed3 = RestUtility.FindBedFor(pTarg2, pawn, sleeperWillBePrisoner: true,
                                     checkSocialProperness: false, ignoreOtherReservations: true);
                             }
-        
+
                             if (building_Bed3 != null) break;
                         }
-        
+
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
                         ZUtils.TeleportThing(victim, oldMap, oldPosition2);
-        
+
                         if (select) Find.Selector.Select(pawn);
-        
+
                         if (building_Bed3 == null)
                         {
                             Messages.Message("CannotArrest".Translate() + ": " + "NoPrisonerBed".Translate(),
@@ -575,7 +575,7 @@ namespace ZLevels
                             ZTracker.BuildJobListFor(pawn, pawn.Map, job);
                             ZLogger.Message(pawn + " taking first job 3");
                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
-        
+
                             if (pTarg2.Faction != null &&
                                 ((pTarg2.Faction != Faction.OfPlayer && !pTarg2.Faction.def.hidden) ||
                                  pTarg2.IsQuestLodger()))
@@ -591,7 +591,7 @@ namespace ZLevels
                             MenuOptionPriority.High, null, victim), pawn, pTarg2);
                 }
             }
-        
+
             public static FloatMenuOption AddCaptureOption(Pawn pawn, Pawn victim)
             {
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Capture".Translate
@@ -602,7 +602,7 @@ namespace ZLevels
                         var oldPosition1 = pawn.Position;
                         var oldPosition2 = victim.Position;
                         bool select = Find.Selector.SelectedObjects.Contains(pawn);
-        
+
                         Building building_Bed = null;
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1,
                             victim, oldMap, oldPosition2))
@@ -612,22 +612,22 @@ namespace ZLevels
                             {
                                 building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, true);
                             }
-        
+
                             if (building_Bed != null) break;
                         }
-        
+
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
                         ZUtils.TeleportThing(victim, oldMap, oldPosition2);
-        
+
                         if (select) Find.Selector.Select(pawn);
-        
+
                         if (building_Bed == null)
                         {
                             Messages.Message("CannotCapture".Translate() + ": " + "NoPrisonerBed".Translate(), victim,
                                 MessageTypeDefOf.RejectInput, false);
                             return;
                         }
-        
+
                         Job job = JobMaker.MakeJob(JobDefOf.Capture, victim, building_Bed);
                         job.count = 1;
                         ZTracker.ResetJobTrackerFor(pawn);
@@ -645,7 +645,7 @@ namespace ZLevels
                     }, MenuOptionPriority.RescueOrCapture, null, victim, 0f, null, null), pawn, victim, "ReservedBy");
                 return floatOption;
             }
-        
+
             public static FloatMenuOption AddRescueOption(Pawn pawn, Pawn victim)
             {
                 var floatOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Rescue".Translate
@@ -658,7 +658,7 @@ namespace ZLevels
                         bool select = false;
                         if (Find.Selector.SelectedObjects.Contains(pawn)) select = true;
                         Building building_Bed = null;
-        
+
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1,
                             victim, oldMap, oldPosition2))
                         {
@@ -671,14 +671,14 @@ namespace ZLevels
                                 building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false,
                                     checkSocialProperness: false, ignoreOtherReservations: true);
                             }
-        
+
                             if (building_Bed != null) break;
                         }
-        
+
                         if (select) Find.Selector.Select(pawn);
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition1);
                         ZUtils.TeleportThing(victim, oldMap, oldPosition2);
-        
+
                         if (building_Bed == null)
                         {
                             string t3 = (!victim.RaceProps.Animal)
@@ -693,7 +693,7 @@ namespace ZLevels
                             job.count = 1;
                             ZTracker.ResetJobTrackerFor(pawn);
                             ZTracker.BuildJobListFor(pawn, pawn.Map, job);
-                            Log.Message(pawn + " taking first job 2");
+                            ZLogger.Message(pawn + " taking first job 2");
                             pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, false);
                             PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
                         }
@@ -747,7 +747,7 @@ namespace ZLevels
                                     if (workGiver_Scanner != null && workGiver_Scanner.def.directOrderable)
                                     {
                                         JobFailReason.Clear();
-                                        if ((workGiver_Scanner.PotentialWorkThingRequest.Accepts(item) || (workGiver_Scanner.PotentialWorkThingsGlobal(pawn) != null 
+                                        if ((workGiver_Scanner.PotentialWorkThingRequest.Accepts(item) || (workGiver_Scanner.PotentialWorkThingsGlobal(pawn) != null
                                             && workGiver_Scanner.PotentialWorkThingsGlobal(pawn).Contains(item))) && !workGiver_Scanner.ShouldSkip(pawn, forced: true))
                                         {
                                             string text = null;
@@ -763,7 +763,7 @@ namespace ZLevels
                                                 Map dest = null;
                                                 Map oldPawnMap = pawn.Map;
                                                 IntVec3 oldPawnPosition = pawn.Position;
-        
+
                                                 foreach (var otherMap in ZTracker.GetAllMapsInClosestOrder(oldPawnMap))
                                                 {
                                                     if (oldPawnMap != otherMap)
@@ -775,7 +775,7 @@ namespace ZLevels
                                                         pawn.positionInt = oldPawnPosition;
                                                     }
                                                     pawn.mapIndexOrState = (sbyte)Find.Maps.IndexOf(otherMap);
-        
+
                                                     if (workGiver_Scanner is WorkGiver_Refuel scanner1)
                                                     {
                                                         job = JobPatches.TryIssueJobPackagePatch.RefuelJobOnThing(scanner1, pawn, item, true);
@@ -805,20 +805,20 @@ namespace ZLevels
                                                     {
                                                         job = workGiver_Scanner.HasJobOnThing(pawn, item, forced: true) ? workGiver_Scanner.JobOnThing(pawn, item, forced: true) : null;
                                                     }
-        
+
                                                     if (job != null)
                                                     {
                                                         if (dest == null)
                                                         {
                                                             dest = otherMap;
                                                         }
-                                                        Log.Message($"Found job {job} from " + workGiver_Scanner + " in " + otherMap + " dest: " + dest);
+                                                        ZLogger.Message($"Found job {job} from " + workGiver_Scanner + " in " + otherMap + " dest: " + dest);
                                                         break;
                                                     }
                                                     else
                                                     {
                                                         dest = null;
-                                                        //Log.Message("No job was yielded from " + workGiver_Scanner + " in " + otherMap);
+                                                        //ZLogger.Message("No job was yielded from " + workGiver_Scanner + " in " + otherMap);
                                                     }
                                                 }
                                                 ZUtils.TeleportThing(pawn, oldPawnMap, oldPawnPosition);
@@ -879,13 +879,13 @@ namespace ZLevels
                                                             }
                                                             if (dest != null)
                                                             {
-                                                                Log.Message("1 Dest: " + dest);
+                                                                ZLogger.Message("1 Dest: " + dest);
 
                                                                 ZTracker.BuildJobListFor(pawn, dest, job);
                                                             }
                                                             else
                                                             {
-                                                                Log.Message("2 Dest (oldPawnMap): " + oldPawnMap);
+                                                                ZLogger.Message("2 Dest (oldPawnMap): " + oldPawnMap);
 
                                                                 ZTracker.BuildJobListFor(pawn, oldPawnMap, job);
                                                             }
@@ -909,7 +909,7 @@ namespace ZLevels
                                                 menuOption.autoTakeable = true;
                                                 menuOption.autoTakeablePriority = workGiver2.autoTakeablePriorityDrafted;
                                             }
-        
+
                                             if (!opts.Any(op => op.Label == menuOption.Label))
                                             {
                                                 if (workGiver2.equivalenceGroup != null)
@@ -917,32 +917,32 @@ namespace ZLevels
                                                     if (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] == null
                                                         || (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index].Disabled && !menuOption.Disabled))
                                                     {
-                                                        Log.Message("2 Adding menuOption: " + menuOption);
+                                                        ZLogger.Message("2 Adding menuOption: " + menuOption);
                                                         ___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] = menuOption;
                                                         flag = true;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    Log.Message("Adding menuOption: " + menuOption);
+                                                    ZLogger.Message("Adding menuOption: " + menuOption);
                                                     opts.Add(menuOption);
                                                 }
                                             }
                                             else
                                             {
-                                                Log.Message("Adding duplicate: " + menuOption);
+                                                ZLogger.Message("Adding duplicate: " + menuOption);
                                                 duplicateOptions.Add(menuOption);
                                             }
                                         }
                                         //else
                                         //{
-                                        //    Log.Message($"Failed to get result from {workGiver_Scanner} for {item}");
+                                        //    ZLogger.Message($"Failed to get result from {workGiver_Scanner} for {item}");
                                         //}
                                     }
                                 }
                             }
                         }
-        
+
                         if (flag)
                         {
                             for (int j = 0; j < ___equivalenceGroupTempStorage.Length; j++)
@@ -967,7 +967,7 @@ namespace ZLevels
                 //            var option = opts[num];
                 //            if (inactiveOption.Label != option.Label && option.revalidateClickTarget != null && inactiveOption.Label.Contains(option.revalidateClickTarget.Label))
                 //            {
-                //                Log.Message("Removing " + inactiveOption);
+                //                ZLogger.Message("Removing " + inactiveOption);
                 //                opts.Remove(inactiveOption);
                 //            }
                 //        }
