@@ -39,26 +39,40 @@ namespace ZLevels
         {
             public static bool Prefix(string text, ref bool ignoreStopLoggingLimit)
             {
-                // somehow the game periodically gives this error message when pawns haul between maps
-                // and I really don’t know where the source is and how to fix it. If you know how, then tell me
-                // This error doesnt affect the hauling itself, maybe this error occurs after the completion of the hauling job
-                if (text.Contains("System.Exception: StartCarryThing got availableStackSpace 0 for haulTarg")
-                    || text.Contains("overwriting slot group square") // not really an error, this is what z-level needs to look for things for hauling
-                    || text.Contains("clearing group grid square") // same
-                    || text.Contains("threw exception while executing toil's finish action (0), jobDriver=RimWorld.JobDriver_LayDown")
-                    || text.Contains("threw exception while executing toil's finish action (1), jobDriver=RimWorld.JobDriver_LayDown")
-                    || text.Contains("Haul designation has no target! Deleting.")
-                    )
+                try
                 {
-                    //ZLogger.Message("The error: " + text);
-                    return false;
+                    if (text != null)
+                    {
+                        // somehow the game periodically gives this error message when pawns haul between maps
+                        // and I really don’t know where the source is and how to fix it. If you know how, then tell me
+                        // This error doesnt affect the hauling itself, maybe this error occurs after the completion of the hauling job
+                        if (text.Contains("System.Exception: StartCarryThing got availableStackSpace 0 for haulTarg")
+                            || text.Contains("overwriting slot group square") // not really an error, this is what z-level needs to look for things for hauling
+                            || text.Contains("clearing group grid square") // same
+                            || text.Contains("threw exception while executing toil's finish action (0), jobDriver=RimWorld.JobDriver_LayDown")
+                            || text.Contains("threw exception while executing toil's finish action (1), jobDriver=RimWorld.JobDriver_LayDown")
+                            || text.Contains("Haul designation has no target! Deleting.")
+                            )
+                        {
+                            //ZLogger.Message("The error: " + text);
+                            return false;
+                        }
+
+
+
+                        if (ZLogger.DebugEnabled && Find.TickManager != null)
+                        {
+                            Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
-
-
-
-                if (ZLogger.DebugEnabled)
+                catch
                 {
-                    Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+
                 }
                 return true;
             }
