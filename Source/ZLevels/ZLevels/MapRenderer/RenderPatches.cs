@@ -15,20 +15,24 @@ namespace ZLevels
 		private static CellRect viewRect;
 		public static bool Prefix(ref bool __result, IntVec3 loc, Map map)
 		{
-			if (map.Tile != Find.CurrentMap?.Tile)
-			{
-				__result = false;
+			if (map != null)
+            {
+				if (map.Tile != Find.CurrentMap?.Tile)
+				{
+					__result = false;
+					return false;
+				}
+				if (!loc.InBounds(map))
+				{
+					__result = false;
+					return false;
+				}
+				viewRect = Find.CameraDriver.CurrentViewRect;
+				viewRect = viewRect.ExpandedBy(5);
+				__result = viewRect.Contains(loc);
 				return false;
 			}
-			if (!loc.InBounds(map))
-			{
-				__result = false;
-				return false;
-			}
-			viewRect = Find.CameraDriver.CurrentViewRect;
-			viewRect = viewRect.ExpandedBy(5);
-			__result = viewRect.Contains(loc);
-			return false;
+			return true;
 		}
 	}
 

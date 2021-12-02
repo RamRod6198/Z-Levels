@@ -6,7 +6,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Multiplayer.API;
+using RimWorld;
 using Verse;
+using Verse.AI;
 
 namespace ZLevels
 {
@@ -306,14 +308,135 @@ namespace ZLevels
             {
                 thing.mapIndexOrState = value;
             }
-
             if (thing.positionInt != position)
             {
                 thing.positionInt = position;
             }
         }
 
-		private static ZLevelsManager zTracker;
+        public static void TryFixPawnError(Pawn pawn)
+        {
+            if (pawn.rotationTracker == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_RotationTracker IS NULL. FIXING");
+                pawn.rotationTracker = new Pawn_RotationTracker(pawn);
+            }
+            if (pawn.pather == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_PathFollower IS NULL. FIXING");
+                pawn.pather = new Pawn_PathFollower(pawn);
+            }
+            if (pawn.thinker == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_Thinker IS NULL. FIXING");
+                pawn.thinker = new Pawn_Thinker(pawn);
+            }
+            if (pawn.jobs == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_JobTracker IS NULL. FIXING");
+                pawn.jobs = new Pawn_JobTracker(pawn);
+            }
+            if (pawn.stances == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_StanceTracker IS NULL. FIXING");
+                pawn.stances = new Pawn_StanceTracker(pawn);
+            }
+            if (pawn.natives == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_NativeVerbs IS NULL. FIXING");
+                pawn.natives = new Pawn_NativeVerbs(pawn);
+            }
+            if (pawn.filth == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_FilthTracker IS NULL. FIXING");
+                pawn.filth = new Pawn_FilthTracker(pawn);
+            }
+            if ((int)pawn.RaceProps.intelligence <= 1 && pawn.caller == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_CallTracker IS NULL. FIXING");
+                pawn.caller = new Pawn_CallTracker(pawn);
+            }
+            if (pawn.RaceProps.IsFlesh)
+            {
+                if (pawn.interactions == null)
+                {
+                    ZLogger.Pause(pawn + " Pawn_InteractionsTracker IS NULL. FIXING");
+                    pawn.interactions = new Pawn_InteractionsTracker(pawn);
+                }
+                if (pawn.psychicEntropy == null)
+                {
+                    ZLogger.Pause(pawn + " Pawn_PsychicEntropyTracker IS NULL. FIXING");
+                    pawn.psychicEntropy = new Pawn_PsychicEntropyTracker(pawn);
+                }
+                if (pawn.abilities == null)
+                {
+                    ZLogger.Pause(pawn + " Pawn_AbilityTracker IS NULL. FIXING");
+                    pawn.abilities = new Pawn_AbilityTracker(pawn);
+                }
+            }
+
+            bool flag = pawn.Faction != null && pawn.Faction.IsPlayer;
+            bool flag2 = pawn.HostFaction != null && pawn.HostFaction.IsPlayer;
+            if (pawn.RaceProps.Humanlike && !pawn.Dead)
+            {
+                if (pawn.mindState.wantsToTradeWithColony)
+                {
+                    if (pawn.trader == null)
+                    {
+                        ZLogger.Pause(pawn + " Pawn_TraderTracker IS NULL. FIXING");
+                        pawn.trader = new Pawn_TraderTracker(pawn);
+                    }
+                }
+            }
+            if (pawn.RaceProps.Humanlike)
+            {
+                if ((flag || flag2) && pawn.foodRestriction == null)
+                {
+                    ZLogger.Pause(pawn + " Pawn_FoodRestrictionTracker IS NULL. FIXING");
+
+                    pawn.foodRestriction = new Pawn_FoodRestrictionTracker(pawn);
+                }
+                if (flag)
+                {
+                    if (pawn.outfits == null)
+                    {
+                        ZLogger.Pause(pawn + " Pawn_OutfitTracker IS NULL. FIXING");
+
+                        pawn.outfits = new Pawn_OutfitTracker(pawn);
+                    }
+                    if (pawn.drugs == null)
+                    {
+                        ZLogger.Pause(pawn + " Pawn_DrugPolicyTracker IS NULL. FIXING");
+
+                        pawn.drugs = new Pawn_DrugPolicyTracker(pawn);
+                    }
+                    if (pawn.timetable == null)
+                    {
+                        ZLogger.Pause(pawn + " Pawn_TimetableTracker IS NULL. FIXING");
+
+                        pawn.timetable = new Pawn_TimetableTracker(pawn);
+                    }
+                    if (pawn.drafter == null)
+                    {
+                        ZLogger.Pause(pawn + " Pawn_DraftController IS NULL. FIXING");
+
+                        pawn.drafter = new Pawn_DraftController(pawn);
+                    }
+                }
+            }
+            if ((flag || flag2) && pawn.playerSettings == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_PlayerSettings IS NULL. FIXING");
+                pawn.playerSettings = new Pawn_PlayerSettings(pawn);
+            }
+            if ((int)pawn.RaceProps.intelligence <= 1 && pawn.Faction != null && !pawn.RaceProps.IsMechanoid && pawn.training == null)
+            {
+                ZLogger.Pause(pawn + " Pawn_TrainingTracker IS NULL. FIXING");
+                pawn.training = new Pawn_TrainingTracker(pawn);
+            }
+        }
+
+        private static ZLevelsManager zTracker;
 	}
 }
 

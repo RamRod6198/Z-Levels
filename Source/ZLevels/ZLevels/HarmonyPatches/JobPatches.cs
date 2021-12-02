@@ -365,9 +365,7 @@ namespace ZLevels
                         {
                             if (pawn.MentalStateDef != null)
                             {
-                                result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap,
-                                    ___maxLevelPercentage, ___minCategory);
-                                ZLogger.Pause(pawn + " in mental state, result: " + result);
+                                result = JobGiver_GetFoodPatch.TryGiveJob(pawn, __instance.forceScanWholeMap, ___maxLevelPercentage, ___minCategory);
                                 if (result != null && result.targetA.Thing != null && result.targetA.Thing.Map == pawn.Map)
                                 {
                                     __result = result;
@@ -555,7 +553,6 @@ namespace ZLevels
                         if (pawn.MentalStateDef != null)
                         {
                             __result = TryGiveJob(pawn, CanDoDuringMedicalRest, InBed, ___joyGiverChances, __instance);
-                            ZLogger.Pause(pawn + " in mental state, result: " + __result);
                             return false;
                         }
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrder(pawn, oldMap, oldPosition))
@@ -754,7 +751,6 @@ namespace ZLevels
                             if (pawn.MentalStateDef != null)
                             {
                                 result = JobGiver_GetRestPatch.TryGiveJob(pawn, ___minCategory, ___maxLevelPercentage);
-                                ZLogger.Pause(pawn + " in mental state, result: " + result);
                                 if (result.targetA.Thing == null && result.targetA.Thing.Map == pawn.Map)
                                 {
                                     __result = result;

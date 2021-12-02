@@ -72,7 +72,7 @@ namespace ZLevels
                 this.jobTracker = new Dictionary<Pawn, JobTracker>();
             }
 
-            foreach (var tile in this.ZLevelsTracker.Keys)
+            foreach (var tile in this.ZLevelsTracker.Keys.ToList())
             {
                 ReCheckStairs(tile);
             }
@@ -1427,6 +1427,10 @@ namespace ZLevels
             StealAIDebugDrawer.Notify_ThingChanged(pawnToTeleport);
             mapToTeleport.dynamicDrawManager.RegisterDrawable(pawnToTeleport);
             mapToTeleport.mapPawns.RegisterPawn(pawnToTeleport);
+            if (pawnToTeleport.pather is null)
+            {
+                pawnToTeleport.pather = new Pawn_PathFollower(pawnToTeleport);
+            }
         }
 
 

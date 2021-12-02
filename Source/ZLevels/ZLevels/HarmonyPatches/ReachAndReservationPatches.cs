@@ -41,7 +41,7 @@ namespace ZLevels
         {
             __state = false;
             var pawn = traverseParams.pawn;
-            if (pawn != null)
+            if (pawn != null && pawn.Map != null)
             {
                 if (dest.HasThing && dest.thingInt.Map != null)
                 {
@@ -142,7 +142,7 @@ namespace ZLevels
         private static bool Prefix(ref bool __result, ReservationManager __instance, Pawn claimant, LocalTargetInfo target, out bool __state, int maxPawns = 1, int stackCount = -1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
         {
             __state = false;
-            if (claimant.RaceProps.Humanlike)
+            if (claimant.RaceProps.Humanlike && claimant.Map != null)
             {
                 if (target.HasThing)
                 {
@@ -179,13 +179,6 @@ namespace ZLevels
                             return false;
                         }
                     }
-                    //else
-                    //{
-                    //    if (ZUtils.ZTracker.jobTracker.TryGetValue(claimant, out var job))
-                    //    {
-                    //    }
-                    //    ZLogger.Pause($"2 Unsupported target (most likely cell), claimant: {claimant}, target {target}");
-                    //}
                 }
             }
             return true;

@@ -54,14 +54,11 @@ namespace ZLevels
 			Log.Error(ZLogger.Prefix + message, true);
 		}
 
-		[Conditional("Debug")]
+		//[Conditional("Debug")]
 		public static void Pause(string reason)
 		{
-			if (ZLogger.DebugEnabled)
-			{
-				Log.Error("Pausing, reason: " + reason, true);
-				Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-			}
+			Log.Error("Pausing, reason: " + reason, true);
+			Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
 		}
 
 		public static bool DebugEnabled => ZLevelsMod.settings.DebugEnabled;
