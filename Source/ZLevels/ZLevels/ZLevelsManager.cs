@@ -438,15 +438,16 @@ namespace ZLevels
 
         public string ShowJobData(Job job, Pawn pawn, Map dest)
         {
+            var pawnJobTracker = this.jobTracker[pawn];
             string str = "-------------------------\n";
             try
             {
                 str += "PAWN's job data: " + pawn + " - " + job + "\n";
                 str += "Pawn map: " + pawn.Map + "\n";
-                str += "ZTracker dest map: " + this.jobTracker[pawn].targetDest + "\n";
+                str += "ZTracker dest map: " + pawnJobTracker.targetDest + "\n";
                 str += "Dest map: " + dest + "\n";
-                str += "lookedAtMap: " + this.jobTracker[pawn].mapDest + "\n";
-                str += "lookedAtLocalCell: " + this.jobTracker[pawn].lookedAtLocalCellMap + "\n";
+                str += "lookedAtMap: " + pawnJobTracker.mapDest + "\n";
+                str += "lookedAtLocalCell: " + pawnJobTracker.lookedAtLocalCellMap + "\n";
                 str += "Job.workGiverDef: " + job.workGiverDef + "\n";
                 str += "Job.jobGiver: " + job.jobGiver + "\n";
                 str += "Job.count: " + job.count + "\n";
@@ -504,8 +505,7 @@ namespace ZLevels
             ZLogger.Message(pawn + " is starting reserving things for " + job, debugLevel: DebugLevel.Jobs);
             if (!this.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
             {
-                jobTracker = new JobTracker();
-                this.jobTracker[pawn] = jobTracker;
+                this.jobTracker[pawn] = jobTracker = new JobTracker();
             }
             if (job.targetA != null)
             {
@@ -552,6 +552,7 @@ namespace ZLevels
         }
         public void BuildJobListFor(Pawn pawn, Map dest, Job jobToDo)
         {
+            var pawnJobTracker = this.jobTracker[pawn];
             LocalTargetInfo_Constructor_Patch.curPawnJobTracker = null;
             this.ReserveTargets(pawn, jobToDo);
             List<Job> tempJobs = new List<Job>();
@@ -560,8 +561,8 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 1");
                 log += "Job method 1\n";
-                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
-                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetA.Thing + " to " + this.jobTracker[pawn].targetDest);
+                pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
+                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetA.Thing + " to " + pawnJobTracker.targetDest);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.haulOpportunisticDuplicates = false;
                 job.count = jobToDo.count;
@@ -571,8 +572,8 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 1.1");
                 log += "Job method 1.1\n";
-                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Thing);
-                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetA.Thing + " to " + this.jobTracker[pawn].targetDest);
+                pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetB.Thing);
+                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetA.Thing + " to " + pawnJobTracker.targetDest);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = jobToDo.count;
                 job.targetQueueA = jobToDo.targetQueueA;
@@ -582,8 +583,8 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 1.5: " + jobToDo.targetA.Thing);
                 log += "Job method 1.5: " + jobToDo.targetA.Thing + "\n";
-                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Thing);
-                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetA.Thing + " to " + this.jobTracker[pawn].targetDest);
+                pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetB.Thing);
+                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetA.Thing + " to " + pawnJobTracker.targetDest);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetA.Thing);
                 job.count = 1;
                 tempJobs.Add(job);
@@ -592,9 +593,9 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 1.7");
                 log += "Job method 1.7" + "\n";
-                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Thing);
+                pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetA.Thing);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetB.Thing);
-                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetB.Thing + " to " + this.jobTracker[pawn].targetDest);
+                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetB.Thing + " to " + pawnJobTracker.targetDest);
                 job.count = jobToDo.GetTarget(TargetIndex.A).Thing.TryGetComp<CompRefuelable>().GetFuelCountToFullyRefuel();
                 tempJobs.Add(job);
             }
@@ -604,8 +605,8 @@ namespace ZLevels
                 {
                     ZLogger.Message("Job method 1.75");
                     log += "Job method 1.75\n";
-                    this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Thing);
-                    ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + this.jobTracker[pawn].targetDest);
+                    pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetA.Thing);
+                    ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + pawnJobTracker.targetDest);
                     tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
                 }
                 else
@@ -615,8 +616,8 @@ namespace ZLevels
                     {
                         ZLogger.Message("Job method 1.76");
                         log += "Job method 1.76\n";
-                        this.jobTracker[pawn].targetDest = new TargetInfo(target.Thing);
-                        ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + this.jobTracker[pawn].targetDest);
+                        pawnJobTracker.targetDest = new TargetInfo(target.Thing);
+                        ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + pawnJobTracker.targetDest);
                         tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
                     }
                 }
@@ -628,8 +629,8 @@ namespace ZLevels
                 {
                     ZLogger.Message("Job method 1.77");
                     log += "Job method 1.79\n";
-                    this.jobTracker[pawn].targetDest = new TargetInfo(target.Thing);
-                    ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + this.jobTracker[pawn].targetDest);
+                    pawnJobTracker.targetDest = new TargetInfo(target.Thing);
+                    ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + pawnJobTracker.targetDest);
                     tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
                 }
             }
@@ -637,10 +638,10 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 1.78");
                 log += "Job method 1.78" + "\n";
-                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Thing);
+                pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetA.Thing);
                 Job job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, jobToDo.targetB.Thing);
                 job.count = Medicine.GetMedicineCountToFullyHeal(jobToDo.targetA.Thing as Pawn);
-                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetB.Thing + " to " + this.jobTracker[pawn].targetDest);
+                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + jobToDo.targetB.Thing + " to " + pawnJobTracker.targetDest);
                 tempJobs.Add(job);
             }
             else if (jobToDo?.targetQueueA?.Count > 0
@@ -660,24 +661,24 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
+                                    pawnJobTracker.targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
                                 {
                                     if (jobToDo.targetA.Cell.IsValid)
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
                                     }
                                     else
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
                                 job.count = jobToDo.countQueue[i];
-                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + this.jobTracker[pawn].targetDest);
+                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + pawnJobTracker.targetDest);
                                 tempJobs.Add(job);
                             }
                         }
@@ -691,23 +692,23 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
+                                    pawnJobTracker.targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
                                 {
                                     if (jobToDo.targetA.Cell.IsValid)
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
                                     }
                                     else
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
-                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + this.jobTracker[pawn].targetDest);
+                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + pawnJobTracker.targetDest);
                                 tempJobs.Add(job);
                             }
                         }
@@ -725,24 +726,24 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
+                                    pawnJobTracker.targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
                                 {
                                     if (jobToDo.targetA.Cell.IsValid)
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
                                     }
                                     else
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
                                 job.count = jobToDo.countQueue[i];
-                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + this.jobTracker[pawn].targetDest);
+                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + pawnJobTracker.targetDest);
                                 tempJobs.Add(job);
                             }
 
@@ -757,23 +758,23 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
+                                    pawnJobTracker.targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
                                 {
                                     if (jobToDo.targetA.Cell.IsValid)
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetA.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetA.Cell);
                                     }
                                     else
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
-                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + this.jobTracker[pawn].targetDest);
+                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + pawnJobTracker.targetDest);
                                 tempJobs.Add(job);
                             }
                         }
@@ -797,24 +798,24 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
+                                    pawnJobTracker.targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
                                 {
                                     if (jobToDo.targetB.Cell.IsValid)
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
                                     }
                                     else
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
                                 job.count = jobToDo.countQueue[i];
-                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + this.jobTracker[pawn].targetDest);
+                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + pawnJobTracker.targetDest);
                                 tempJobs.Add(job);
                             }
                         }
@@ -829,23 +830,23 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
+                                    pawnJobTracker.targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
                                 {
                                     if (jobToDo.targetB.Cell.IsValid)
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
                                     }
                                     else
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
-                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + this.jobTracker[pawn].targetDest);
+                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + pawnJobTracker.targetDest);
                                 tempJobs.Add(job);
                             }
                         }
@@ -863,24 +864,24 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
+                                    pawnJobTracker.targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
                                 {
                                     if (jobToDo.targetB.Cell.IsValid)
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
                                     }
                                     else
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
                                 job.count = jobToDo.countQueue[i];
-                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + this.jobTracker[pawn].targetDest);
+                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + pawnJobTracker.targetDest);
                                 tempJobs.Add(job);
                             }
                         }
@@ -894,23 +895,23 @@ namespace ZLevels
                                 Job job;
                                 if (t.Thing is Filth)
                                 {
-                                    this.jobTracker[pawn].targetDest = new TargetInfo(t.Thing);
+                                    pawnJobTracker.targetDest = new TargetInfo(t.Thing);
                                     job = JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap);
                                 }
                                 else
                                 {
                                     if (jobToDo.targetB.Cell.IsValid)
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetB.Cell, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulToCell, t.Thing, jobToDo.targetB.Cell);
                                     }
                                     else
                                     {
-                                        this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
+                                        pawnJobTracker.targetDest = new TargetInfo(pawn.Position, dest);
                                         job = JobMaker.MakeJob(ZLevelsDefOf.ZL_HaulThingToDest, t.Thing);
                                     }
                                 }
-                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + this.jobTracker[pawn].targetDest);
+                                ZLogger.Message(pawn + " is doing ZL_HaulThingToDest " + t.Thing + " to " + pawnJobTracker.targetDest);
                                 tempJobs.Add(job);
                             }
                         }
@@ -921,8 +922,8 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 3: " + jobToDo.targetA.Thing);
                 log += "Job method 3: " + jobToDo.targetA.Thing + "\n";
-                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetA.Thing);
-                ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + this.jobTracker[pawn].targetDest);
+                pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetA.Thing);
+                ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + pawnJobTracker.targetDest);
 
                 tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
             }
@@ -930,21 +931,21 @@ namespace ZLevels
             {
                 ZLogger.Message("Job method 4: " + jobToDo.targetB.Thing);
                 log += "Job method 4: " + jobToDo.targetB.Thing + "\n";
-                this.jobTracker[pawn].targetDest = new TargetInfo(jobToDo.targetB.Thing);
+                pawnJobTracker.targetDest = new TargetInfo(jobToDo.targetB.Thing);
                 tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
-                ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + this.jobTracker[pawn].targetDest);
+                ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + pawnJobTracker.targetDest);
             }
             else if (dest != null)
             {
                 ZLogger.Message("Job method 5");
                 log += "Job method 5\n";
-                this.jobTracker[pawn].targetDest = new TargetInfo(pawn.Position, dest);
+                pawnJobTracker.targetDest = new TargetInfo(pawn.Position, dest);
                 tempJobs.Add(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
-                ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + this.jobTracker[pawn].targetDest);
+                ZLogger.Message(pawn + " is doing ZL_GoToMap " + " to " + pawnJobTracker.targetDest);
             }
             tempJobs.Add(jobToDo);
-            this.jobTracker[pawn].activeJobs = tempJobs;
-            this.jobTracker[pawn].mainJob = jobToDo;
+            pawnJobTracker.activeJobs = tempJobs;
+            pawnJobTracker.mainJob = jobToDo;
             foreach (var j in tempJobs)
             {
                 log += "Added job: " + j + "\n";
@@ -985,10 +986,10 @@ namespace ZLevels
             }
             else
             {
-                this.jobTracker[pawn] = new JobTracker();
+                this.jobTracker[pawn] = jobTracker = new JobTracker();
             }
 
-            LocalTargetInfo_Constructor_Patch.curPawnJobTracker = this.jobTracker[pawn];
+            LocalTargetInfo_Constructor_Patch.curPawnJobTracker = jobTracker;
         }
 
         public bool TryTakeFirstJob(Pawn pawn, bool forced = false)
@@ -997,14 +998,14 @@ namespace ZLevels
             ZLogger.Message(pawn + " - START TryTakeFirstJob");
             if (this.jobTracker.TryGetValue(pawn, out var pawnJobTracker) && pawnJobTracker.activeJobs != null && pawnJobTracker.activeJobs.Any())
             {
-                job = this.jobTracker[pawn].activeJobs[0];
+                job = pawnJobTracker.activeJobs[0];
                 if (job?.def != null)
                 {
                     ZLogger.Message(pawn + " taking first job " + job);
                     if (pawn?.carryTracker?.CarriedThing != null)
                     {
                         ZLogger.Message(pawn + " CarriedThing " + pawn?.carryTracker?.CarriedThing);
-                        if (pawnJobTracker.mainJob.targetQueueB != null)
+                        if (pawnJobTracker.mainJob.targetQueueB != null && pawnJobTracker.mainJob.countQueue != null)
                         {
                             ZLogger.Message("--------------------------");
                             for (int i = pawnJobTracker.mainJob.targetQueueB.Count - 1; i >= 0; i--)
@@ -1013,7 +1014,7 @@ namespace ZLevels
                                 ZLogger.Message("0 BEFORE job.targetQueueB: " + target.Thing);
                                 ZLogger.Message("0 BEFORE job.targetQueueB.Map: " + target.Thing.Map);
                                 ZLogger.Message("0 BEFORE job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                                ZLogger.Message("0 BEFORE job.targetQueueB.countQueue: " + this.jobTracker[pawn].mainJob.countQueue[i]);
+                                ZLogger.Message("0 BEFORE job.targetQueueB.countQueue: " + pawnJobTracker.mainJob.countQueue[i]);
                             }
                         }
             
@@ -1043,86 +1044,100 @@ namespace ZLevels
                             ZLogger.Message(newThing + " 0 job.targetB is not same: " + job.targetB.Thing);
                             job.targetB = new LocalTargetInfo(newThing);
                         }
-                        for (int i = job.targetQueueA.Count - 1; i >= 0; i--)
+                        if (job.targetQueueA != null)
                         {
-                            var target = job.targetQueueA[i];
-                            ZLogger.Message("0 job.targetQueueA: " + target.Thing + " - " + target.Thing.Map);
-                            if (newThing != null && target.Thing == savedThing && savedThing != newThing)
+                            for (int i = job.targetQueueA.Count - 1; i >= 0; i--)
                             {
-                                ZLogger.Message(newThing + " 0 job.targetQueueA is not same: " + target.Thing);
-                                job.targetQueueA[i] = new LocalTargetInfo(newThing);
-                            }
-                        }
-            
-                        ZLogger.Message("--------------------------");
-                        for (int i = job.targetQueueB.Count - 1; i >= 0; i--)
-                        {
-                            var target = job.targetQueueB[i];
-                            ZLogger.Message("17 job.targetQueueB: " + target.Thing);
-                            ZLogger.Message("17 job.targetQueueB.Map: " + target.Thing.Map);
-                            ZLogger.Message("17 job.targetQueueB.stackCount: " + target.Thing.stackCount);
-                            if (job.countQueue != null)
-                            {
-                                foreach (var c in job.countQueue)
-                                {
-                                    ZLogger.Message("17 job.targetQueueB.countQueue: " + c);
-                                }
-                            }
-                            if (newThing != null && target.Thing == savedThing && savedThing != newThing)
-                            {
-                                ZLogger.Message(newThing + " 0 job.targetQueueB is not same: " + target.Thing);
-                                job.targetQueueB[i] = new LocalTargetInfo(newThing);
-                                job.countQueue[i] = newThing.stackCount;
-            
-                            }
-                        }
-                        if (job != this.jobTracker[pawn].mainJob)
-                        {
-                            if (newThing != null && this.jobTracker[pawn].mainJob.targetA.Thing == savedThing && savedThing != newThing)
-                            {
-                                ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetA is not same: " + this.jobTracker[pawn].mainJob.targetA.Thing);
-                                this.jobTracker[pawn].mainJob.targetA = new LocalTargetInfo(newThing);
-                            }
-            
-                            if (newThing != null && this.jobTracker[pawn].mainJob.targetB.Thing == savedThing && savedThing != newThing)
-                            {
-                                ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetB is not same: " + this.jobTracker[pawn].mainJob.targetB.Thing);
-                                this.jobTracker[pawn].mainJob.targetB = new LocalTargetInfo(newThing);
-                            }
-                            for (int i = this.jobTracker[pawn].mainJob.targetQueueA.Count - 1; i >= 0; i--)
-                            {
-                                var target = this.jobTracker[pawn].mainJob.targetQueueA[i];
-                                ZLogger.Message("0 this.jobTracker[pawn].mainJob.targetQueueA: " + target.Thing + " - " + target.Thing.Map);
+                                var target = job.targetQueueA[i];
+                                ZLogger.Message("0 job.targetQueueA: " + target.Thing + " - " + target.Thing.Map);
                                 if (newThing != null && target.Thing == savedThing && savedThing != newThing)
                                 {
-                                    ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetQueueA is not same: " + target.Thing);
-                                    this.jobTracker[pawn].mainJob.targetQueueA[i] = new LocalTargetInfo(newThing);
-                                }
-                            }
-            
-                            for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
-                            {
-                                var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
-                                ZLogger.Message("0 this.jobTracker[pawn].mainJob.targetQueueB: " + target.Thing);
-                                if (newThing != null && target.Thing == savedThing && savedThing != newThing)
-                                {
-                                    ZLogger.Message(newThing + " 0 this.jobTracker[pawn].mainJob.targetQueueB is not same: " + target.Thing);
-                                    this.jobTracker[pawn].mainJob.targetQueueB[i] = new LocalTargetInfo(newThing);
-                                    this.jobTracker[pawn].mainJob.countQueue[i] = newThing.stackCount;
+                                    ZLogger.Message(newThing + " 0 job.targetQueueA is not same: " + target.Thing);
+                                    job.targetQueueA[i] = new LocalTargetInfo(newThing);
                                 }
                             }
                         }
-                        var mainJob = this.jobTracker[pawn].mainJob;
+
+                        if (job.targetQueueB != null)
+                        {
+                            ZLogger.Message("--------------------------");
+                            for (int i = job.targetQueueB.Count - 1; i >= 0; i--)
+                            {
+                                var target = job.targetQueueB[i];
+                                ZLogger.Message("17 job.targetQueueB: " + target.Thing);
+                                ZLogger.Message("17 job.targetQueueB.Map: " + target.Thing.Map);
+                                ZLogger.Message("17 job.targetQueueB.stackCount: " + target.Thing.stackCount);
+                                if (job.countQueue != null)
+                                {
+                                    foreach (var c in job.countQueue)
+                                    {
+                                        ZLogger.Message("17 job.targetQueueB.countQueue: " + c);
+                                    }
+                                }
+                                if (newThing != null && target.Thing == savedThing && savedThing != newThing)
+                                {
+                                    ZLogger.Message(newThing + " 0 job.targetQueueB is not same: " + target.Thing);
+                                    job.targetQueueB[i] = new LocalTargetInfo(newThing);
+                                    job.countQueue[i] = newThing.stackCount;
+
+                                }
+                            }
+                        }
+
+                        if (job != pawnJobTracker.mainJob)
+                        {
+                            if (newThing != null && pawnJobTracker.mainJob.targetA.Thing == savedThing && savedThing != newThing)
+                            {
+                                ZLogger.Message(newThing + " 0 pawnJobTracker.mainJob.targetA is not same: " + pawnJobTracker.mainJob.targetA.Thing);
+                                pawnJobTracker.mainJob.targetA = new LocalTargetInfo(newThing);
+                            }
             
-                        if (mainJob.countQueue != null && mainJob.countQueue?.Count == mainJob.targetQueueB?.Count)
+                            if (newThing != null && pawnJobTracker.mainJob.targetB.Thing == savedThing && savedThing != newThing)
+                            {
+                                ZLogger.Message(newThing + " 0 pawnJobTracker.mainJob.targetB is not same: " + pawnJobTracker.mainJob.targetB.Thing);
+                                pawnJobTracker.mainJob.targetB = new LocalTargetInfo(newThing);
+                            }
+                            if (pawnJobTracker.mainJob.targetQueueA != null)
+                            {
+                                for (int i = pawnJobTracker.mainJob.targetQueueA.Count - 1; i >= 0; i--)
+                                {
+                                    var target = pawnJobTracker.mainJob.targetQueueA[i];
+                                    ZLogger.Message("0 pawnJobTracker.mainJob.targetQueueA: " + target.Thing + " - " + target.Thing.Map);
+                                    if (newThing != null && target.Thing == savedThing && savedThing != newThing)
+                                    {
+                                        ZLogger.Message(newThing + " 0 pawnJobTracker.mainJob.targetQueueA is not same: " + target.Thing);
+                                        pawnJobTracker.mainJob.targetQueueA[i] = new LocalTargetInfo(newThing);
+                                    }
+                                }
+
+                            }
+                            if (pawnJobTracker.mainJob.targetQueueB != null)
+                            {
+                                for (int i = pawnJobTracker.mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                                {
+                                    var target = pawnJobTracker.mainJob.targetQueueB[i];
+                                    ZLogger.Message("0 pawnJobTracker.mainJob.targetQueueB: " + target.Thing);
+                                    if (newThing != null && target.Thing == savedThing && savedThing != newThing)
+                                    {
+                                        ZLogger.Message(newThing + " 0 pawnJobTracker.mainJob.targetQueueB is not same: " + target.Thing);
+                                        pawnJobTracker.mainJob.targetQueueB[i] = new LocalTargetInfo(newThing);
+                                        pawnJobTracker.mainJob.countQueue[i] = newThing.stackCount;
+                                    }
+                                }
+                            }
+
+                        }
+                        var mainJob = pawnJobTracker.mainJob;
+            
+                        if (mainJob.targetQueueB != null && mainJob.countQueue != null && mainJob.countQueue?.Count == mainJob.targetQueueB?.Count)
                         {
                             bool repeat = true;
                             int num = 0;
             
                             ZLogger.Message("--------------------------");
-                            for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                            for (int i = pawnJobTracker.mainJob.targetQueueB.Count - 1; i >= 0; i--)
                             {
-                                var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
+                                var target = pawnJobTracker.mainJob.targetQueueB[i];
             
                                 ZLogger.Message("BEFORE job.targetQueueB: " + target.Thing);
                                 ZLogger.Message("BEFORE job.targetQueueB.Map: " + target.Thing.Map);
@@ -1185,9 +1200,9 @@ namespace ZLevels
                             }
             
                             ZLogger.Message("--------------------------");
-                            for (int i = this.jobTracker[pawn].mainJob.targetQueueB.Count - 1; i >= 0; i--)
+                            for (int i = pawnJobTracker.mainJob.targetQueueB.Count - 1; i >= 0; i--)
                             {
-                                var target = this.jobTracker[pawn].mainJob.targetQueueB[i];
+                                var target = pawnJobTracker.mainJob.targetQueueB[i];
             
                                 ZLogger.Message("AFTER job.targetQueueB: " + target.Thing);
                                 ZLogger.Message("AFTER job.targetQueueB.Map: " + target.Thing.Map);
@@ -1208,7 +1223,7 @@ namespace ZLevels
                     {
                         pawn.ClearReservationsForJob(pawn.CurJob);
                     }
-                    if (job == this.jobTracker[pawn].mainJob && this.jobTracker[pawn].forceGoToDestMap && pawn.Map != this.jobTracker[pawn].targetDest.Map)
+                    if (job == pawnJobTracker.mainJob && pawnJobTracker.forceGoToDestMap && pawn.Map != pawnJobTracker.targetDest.Map)
                     {
                         ZLogger.Message(pawn + " force taking go to map " + job + " in " + this.GetMapInfo(pawn.Map));
                         pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(ZLevelsDefOf.ZL_GoToMap));
@@ -1225,7 +1240,7 @@ namespace ZLevels
                             pawn.jobs.jobQueue.EnqueueLast(job);
                         }
                         ZLogger.Message(pawn + " taking " + job + " from TryTakeFirstJob");
-                        this.jobTracker[pawn].activeJobs.RemoveAt(0);
+                        pawnJobTracker.activeJobs.RemoveAt(0);
                     }
                     else
                     {

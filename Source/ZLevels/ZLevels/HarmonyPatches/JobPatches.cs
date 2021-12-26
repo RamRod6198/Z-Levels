@@ -286,7 +286,7 @@ namespace ZLevels
                 __result = list;
             }
         }
-        /*
+
         [HarmonyPatch(typeof(JobGiver_GetFood), "TryGiveJob")]
         public class JobGiver_GetFoodPatch
         {
@@ -406,7 +406,7 @@ namespace ZLevels
             private static Job TryGiveJob(Pawn pawn, bool forceScanWholeMap, float maxLevelPercentage, HungerCategory minCategory)
             {
                 Need_Food food = pawn.needs.food;
-                if (food == null || food.CurCategory < minCategory || food.CurLevelPercentage > maxLevelPercentage)
+                if (food == null || (int)food.CurCategory < (int)minCategory || food.CurLevelPercentage > maxLevelPercentage)
                 {
                     return null;
                 }
@@ -417,28 +417,26 @@ namespace ZLevels
                 }
                 else
                 {
-                    Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Malnutrition, false);
-                    allowCorpse = (firstHediffOfDef != null && firstHediffOfDef.Severity > 0.4f);
+                    Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Malnutrition);
+                    allowCorpse = firstHediffOfDef != null && firstHediffOfDef.Severity > 0.4f;
                 }
                 bool desperate = pawn.needs.food.CurCategory == HungerCategory.Starving;
-                Thing thing;
-                ThingDef thingDef;
-                if (!FoodUtility.TryFindBestFoodSourceFor(pawn, pawn, desperate, out thing, out thingDef, true, true, false, allowCorpse, false, pawn.IsWildMan(), forceScanWholeMap, false, FoodPreferability.Undefined))
+                if (!FoodUtility.TryFindBestFoodSourceFor_NewTemp(pawn, pawn, desperate, out var foodSource, out var foodDef, canRefillDispenser: true, canUseInventory: true, canUsePackAnimalInventory: true, allowForbidden: false, allowCorpse, allowSociallyImproper: false, pawn.IsWildMan(), forceScanWholeMap))
                 {
                     return null;
                 }
-                Pawn pawn2 = thing as Pawn;
+                Pawn pawn2 = foodSource as Pawn;
                 if (pawn2 != null)
                 {
                     Job job = JobMaker.MakeJob(JobDefOf.PredatorHunt, pawn2);
                     job.killIncappedTarget = true;
                     return job;
                 }
-                if (thing is Plant && thing.def.plant.harvestedThingDef == thingDef)
+                if (foodSource is Plant && foodSource.def.plant.harvestedThingDef == foodDef)
                 {
-                    return JobMaker.MakeJob(JobDefOf.Harvest, thing);
+                    return JobMaker.MakeJob(JobDefOf.Harvest, foodSource);
                 }
-                Building_NutrientPasteDispenser building_NutrientPasteDispenser = thing as Building_NutrientPasteDispenser;
+                Building_NutrientPasteDispenser building_NutrientPasteDispenser = foodSource as Building_NutrientPasteDispenser;
                 if (building_NutrientPasteDispenser != null && !building_NutrientPasteDispenser.HasEnoughFeedstockInHoppers())
                 {
                     Building building = building_NutrientPasteDispenser.AdjacentReachableHopper(pawn);
@@ -451,19 +449,25 @@ namespace ZLevels
                             return job2;
                         }
                     }
-                    thing = FoodUtility.BestFoodSourceOnMap(pawn, pawn, desperate, out thingDef, FoodPreferability.MealLavish, false, !pawn.IsTeetotaler(), false, false, false, false, false, false, forceScanWholeMap, false, FoodPreferability.Undefined);
-                    if (thing == null)
+                    foodSource = FoodUtility.BestFoodSourceOnMap(pawn, pawn, desperate, out foodDef, FoodPreferability.MealLavish, allowPlant: false, !pawn.IsTeetotaler(), allowCorpse: false, allowDispenserFull: false, allowDispenserEmpty: false, allowForbidden: false, allowSociallyImproper: false, allowHarvest: false, forceScanWholeMap);
+                    if (foodSource == null)
                     {
                         return null;
                     }
                 }
-                float nutrition = FoodUtility.GetNutrition(thing, thingDef);
-                Job job3 = JobMaker.MakeJob(JobDefOf.Ingest, thing);
-                job3.count = FoodUtility.WillIngestStackCountOf(pawn, thingDef, nutrition);
-                return job3;
+                float nutrition = FoodUtility.GetNutrition(foodSource, foodDef);
+                Pawn pawn3 = (foodSource.ParentHolder as Pawn_InventoryTracker)?.pawn;
+                if (pawn3 != null && pawn3 != pawn)
+                {
+                    Job job3 = JobMaker.MakeJob(JobDefOf.TakeFromOtherInventory, foodSource, pawn3);
+                    job3.count = FoodUtility.WillIngestStackCountOf(pawn, foodDef, nutrition);
+                    return job3;
+                }
+                Job job4 = JobMaker.MakeJob(JobDefOf.Ingest, foodSource);
+                job4.count = FoodUtility.WillIngestStackCountOf(pawn, foodDef, nutrition);
+                return job4;
             }
         }
-        */
 
         [HarmonyPatch(typeof(JobGiver_GetJoy), "TryGiveJob")]
         public class JobGiver_GetJoyPatch
@@ -1068,11 +1072,19 @@ namespace ZLevels
                 {
                     try
                     {
-                        ZLogger.Message(___pawn + " starts " + newJob);
+                        var jobString = ___pawn.CurJob.ToString();
+                        if (jobString.Length > 0)
+                        {
+                            ZLogger.Message(___pawn + " starts job " + ___pawn.CurJob);
+                        }
+                        else
+                        {
+                            ZLogger.Message(___pawn + " starts job " + ___pawn.CurJob?.def);
+                        }
                     }
                     catch
                     {
-                        ZLogger.Message(___pawn + " starts " + newJob.def);
+                        ZLogger.Message(___pawn + " starts job " + ___pawn.CurJob?.def);
                     }
                 }
             }

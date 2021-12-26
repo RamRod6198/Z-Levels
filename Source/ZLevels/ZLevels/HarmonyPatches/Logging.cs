@@ -35,7 +35,6 @@ namespace ZLevels
     }
 
     [HarmonyPatch(typeof(Log), nameof(Log.Error), new Type[] { typeof(string) })]
-    [HarmonyPatch()]
     static class Log_Error_Patch
     {
         public static bool Prefix(string text)
@@ -80,5 +79,37 @@ namespace ZLevels
             }
         }
     }
+
+    [HarmonyPatch(typeof(WildAnimalSpawner))]
+    [HarmonyPatch(nameof(WildAnimalSpawner.WildAnimalSpawnerTick))]
+    static class WildAnimalSpawner_WildAnimalSpawnerTick
+    {
+        public static bool Prefix()
+        {
+            if (ZLogger.DebugEnabled)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Pawn))]
+    [HarmonyPatch(nameof(Pawn.SpawnSetup))]
+    static class Pawn_SpawnSetup
+    {
+        public static bool Prefix(Pawn __instance)
+        {
+            if (ZLogger.DebugEnabled)
+            {
+                if (__instance.RaceProps.Animal)
+                {
+                    Log.Message("Spawning: " + __instance);
+                    return false;
+                }
+            }
+            return true;
+        }
+    }            
 }
 

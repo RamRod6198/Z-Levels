@@ -40,21 +40,17 @@ namespace ZLevels
 
 		public static void Error(string message)
 		{
-			if (DebugEnabled)
-				Log.Error(ZLogger.Prefix + message);
-
+			Log.Error(ZLogger.Prefix + message);
 		}
 
 		public static void Error(string message, Exception e)
 		{
-			if (DebugEnabled)
-				Log.Error(ZLogger.Prefix + message + "\n" + (e?.ToString()));
+			Log.Error(ZLogger.Prefix + message + "\n" + (e?.ToString()));
 		}
 
 		public static void ErrorOnce(string message)
 		{
-			if (DebugEnabled)
-				Log.Error(ZLogger.Prefix + message);
+			Log.Error(ZLogger.Prefix + message);
 		}
 
 		public static bool DebugEnabled => ZLevelsMod.settings.DebugEnabled;

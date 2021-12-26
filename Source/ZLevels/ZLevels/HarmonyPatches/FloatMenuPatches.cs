@@ -703,8 +703,7 @@ namespace ZLevels
         }
 
 
-        [HarmonyPatch(typeof(FloatMenuMakerMap))]
-        [HarmonyPatch("AddJobGiverWorkOrders_NewTmp")]
+        [HarmonyPatch(typeof(FloatMenuMakerMap), "AddJobGiverWorkOrders")]
         internal static class FloatMenuMakerMap_AddJobGiverWorkOrders_Patch
         {
             private static bool Prefix(Vector3 clickPos, Pawn pawn, ref List<FloatMenuOption> opts, bool drafted, ref FloatMenuOption[] ___equivalenceGroupTempStorage)
@@ -728,7 +727,6 @@ namespace ZLevels
                     targetingParameters.canTargetItems = true;
                     targetingParameters.mapObjectTargetsMustBeAutoAttackable = false;
                     var ZTracker = ZUtils.ZTracker;
-                    ZTracker.ResetJobTrackerFor(pawn);
                     if (!ZTracker.jobTracker.TryGetValue(pawn, out var jobTracker))
                     {
                         jobTracker = new JobTracker();
@@ -877,6 +875,7 @@ namespace ZLevels
                                                             {
                                                                 ZTracker.jobTracker[pawn] = new JobTracker();
                                                             }
+                                                            ZTracker.ResetJobTrackerFor(pawn);
                                                             if (dest != null)
                                                             {
                                                                 ZLogger.Message("1 Dest: " + dest);
@@ -917,27 +916,20 @@ namespace ZLevels
                                                     if (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] == null
                                                         || (___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index].Disabled && !menuOption.Disabled))
                                                     {
-                                                        ZLogger.Message("2 Adding menuOption: " + menuOption);
                                                         ___equivalenceGroupTempStorage[workGiver2.equivalenceGroup.index] = menuOption;
                                                         flag = true;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    ZLogger.Message("Adding menuOption: " + menuOption);
                                                     opts.Add(menuOption);
                                                 }
                                             }
                                             else
                                             {
-                                                ZLogger.Message("Adding duplicate: " + menuOption);
                                                 duplicateOptions.Add(menuOption);
                                             }
                                         }
-                                        //else
-                                        //{
-                                        //    ZLogger.Message($"Failed to get result from {workGiver_Scanner} for {item}");
-                                        //}
                                     }
                                 }
                             }
