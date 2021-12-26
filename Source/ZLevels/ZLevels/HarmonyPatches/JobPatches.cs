@@ -152,7 +152,7 @@ namespace ZLevels
                 {
                     return null;
                 }
-                if (!followee.Spawned || !pawn.CanReach(followee, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+                if (!followee.Spawned || !pawn.CanReach(followee, PathEndMode.OnCell, Danger.Deadly, false))
                 {
                     return null;
                 }
@@ -286,7 +286,7 @@ namespace ZLevels
                 __result = list;
             }
         }
-
+        /*
         [HarmonyPatch(typeof(JobGiver_GetFood), "TryGiveJob")]
         public class JobGiver_GetFoodPatch
         {
@@ -341,18 +341,6 @@ namespace ZLevels
                                 __result = jobTracker.activeJobs[0];
                                 jobTracker.activeJobs.RemoveAt(0);
                                 return false;
-                                //ZLogger.Message("1 RESETTING JOB TRACKER FOR " + pawn);
-                                //ZLogger.Message(pawn + " - pawn.jobs.curJob: " + pawn.jobs.curJob);
-                                //ZLogger.Message(pawn + " - jobTracker.activeJobs[0]: " + jobTracker.activeJobs[0]);
-                                //foreach (var job in pawn.jobs.jobQueue)
-                                //{
-                                //    ZLogger.Message(pawn + " - job in pawn queue: " + job.job);
-                                //}
-                                //foreach (var job in jobTracker.activeJobs)
-                                //{
-                                //    ZLogger.Message(pawn + " - job in ZTracker queue: " + job);
-                                //}
-                                //ZTracker.ResetJobTrackerFor(pawn);
                             }
                         }
                         Job result;
@@ -475,6 +463,7 @@ namespace ZLevels
                 return job3;
             }
         }
+        */
 
         [HarmonyPatch(typeof(JobGiver_GetJoy), "TryGiveJob")]
         public class JobGiver_GetJoyPatch
@@ -651,7 +640,7 @@ namespace ZLevels
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("Error in JobGiver_GetJoy: " + ex + " - " + result, true);
+                        Log.Error("Error in JobGiver_GetJoy: " + ex + " - " + result);
                     }
                 }
                 return null;
@@ -854,7 +843,7 @@ namespace ZLevels
                         return result;
                     }
                 }
-                return CellFinder.RandomClosewalkCellNearNotForbidden(pawn.Position, map, 4, pawn);
+                return CellFinder.RandomClosewalkCellNearNotForbidden(pawn, 4);
             }
         }
 
@@ -919,7 +908,7 @@ namespace ZLevels
             }
         }
 
-        [HarmonyPatch(typeof(GenConstruct), "CanConstruct")]
+        [HarmonyPatch(typeof(GenConstruct), "CanConstruct", new Type[] { typeof(Thing), typeof(Pawn), typeof(bool), typeof(bool)})]
         public static class CanConstructPatch
         {
             private static Map oldMap;
@@ -1211,7 +1200,7 @@ namespace ZLevels
                         }
                         catch (Exception ex)
                         {
-                            ZLogger.Message("Exception in TryIssueJobPackagePatch: " + ex);
+                            ZLogger.Error("Exception in TryIssueJobPackagePatch: " + ex);
                         }
 
                         ZUtils.TeleportThing(pawn, oldMap, oldPosition);
@@ -1430,7 +1419,7 @@ namespace ZLevels
                     return null;
                 }
 
-                Job job2 = scanner.ResourceDeliverJobFor(pawn, frame, true);
+                Job job2 = scanner.ResourceDeliverJobFor(pawn, frame);
                 if (job2 == null)
                 {
                     var oldMap = pawn.Map;
@@ -1439,7 +1428,7 @@ namespace ZLevels
                     {
                         if (otherMap != oldMap)
                         {
-                            job2 = scanner.ResourceDeliverJobFor(pawn, frame, true);
+                            job2 = scanner.ResourceDeliverJobFor(pawn, frame);
                             if (job2 != null)
                             {
                                 break;
@@ -1509,7 +1498,7 @@ namespace ZLevels
                     return;
                 }
                 //ZLogger.Message(slotGroup.parent + " - priority: " + slotGroup.Settings.Priority
-                //    + " - " + slotGroup.parent.Map + " accepts " + t + " - " + t.Map, true);
+                //    + " - " + slotGroup.parent.Map + " accepts " + t + " - " + t.Map);
 
                 IntVec3 a = t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld;
                 List<IntVec3> cellsList = slotGroup.CellsList;
@@ -1537,7 +1526,7 @@ namespace ZLevels
                         //var ZTracker = Current.Game.GetComponent<ZLevelsManager>();
                         //ZLogger.Message("RESULT: " + carrier + " - " + slotGroup.parent + " - priority: "
                         //    + slotGroup.Settings.Priority + " - " + ZTracker.GetMapInfo(slotGroup.parent.Map)
-                        //    + " accepts " + t + " in " + ZTracker.GetMapInfo(dest), true);
+                        //    + " accepts " + t + " in " + ZTracker.GetMapInfo(dest));
                         if (i >= num)
                         {
                             break;

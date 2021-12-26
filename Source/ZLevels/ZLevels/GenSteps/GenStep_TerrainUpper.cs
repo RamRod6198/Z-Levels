@@ -278,7 +278,7 @@ namespace ZLevels
 						}
 						if (num6 == -2147483648)
 						{
-							ZLogger.ErrorOnce("Failed to find all necessary river flow data", true);
+							ZLogger.ErrorOnce("Failed to find all necessary river flow data");
 						}
 						array[num5] = zero.x;
 						array[num5 + 1] = zero.y;

@@ -279,7 +279,7 @@ namespace ZLevels
 	
 		public void BasePrint(Thing thing, SectionLayer layer, Graphic newGraphic)
         {
-			newGraphic.Print(layer, thing);
+			newGraphic.Print(layer, thing, 0);
 		}
 		public void Print(ThingWithComps thingWithComps, SectionLayer layer, Graphic newGraphic)
 		{
@@ -327,7 +327,7 @@ namespace ZLevels
 					Vector2 drawSize = t.Graphic.drawSize;
 					drawSize.x *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
 					drawSize.y *= 1f - (((float)(curLevel) - (float)baseLevel) / 5f);
-					var newGraphic = t.Graphic.GetCopy(drawSize);
+					var newGraphic = t.Graphic.GetCopy(drawSize, t.Graphic.Shader);
 					if (t is Blight blight)
                     {
 						Print(blight, this, newGraphic);

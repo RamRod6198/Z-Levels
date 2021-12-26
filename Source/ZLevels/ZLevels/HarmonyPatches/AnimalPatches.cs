@@ -72,7 +72,7 @@ namespace ZLevels
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("[Z-Levels] SpawnAnimalPrefix patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                        Log.Error("[Z-Levels] SpawnAnimalPrefix patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex);
                     }
                     return false;
                 }
@@ -130,7 +130,7 @@ namespace ZLevels
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("[Z-Levels] Patch_Infestation_TryExecuteWorker patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                        Log.Error("[Z-Levels] Patch_Infestation_TryExecuteWorker patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex);
                     }
                     return false;
                 }

@@ -35,7 +35,7 @@ namespace ZLevels
 			}
 			if (thingDef == null)
 			{
-				ZLogger.ErrorOnce("Did not get rock def to generate at " + c, true);
+				ZLogger.ErrorOnce("Did not get rock def to generate at " + c);
 				thingDef = ThingDefOf.Sandstone;
 			}
 			return thingDef;

@@ -121,7 +121,7 @@ namespace ZLevels
 			terrainDef2 = TerrainThreshold.TerrainAtValue(map.Biome.terrainsByFertility, fertility);
 			if (terrainDef2 != null)
 			{
-				ZLogger.Message("8 Terrain: " + terrainDef2 + " - Loc: " + c, true);
+				ZLogger.Message("8 Terrain: " + terrainDef2 + " - Loc: " + c);
 				return terrainDef2;
 			}
 			if (!debug_WarnedMissingTerrain)

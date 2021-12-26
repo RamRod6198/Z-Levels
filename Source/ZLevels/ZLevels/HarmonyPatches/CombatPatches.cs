@@ -50,9 +50,8 @@ namespace ZLevels
         public static bool multiMapSearch = false;
         public static bool Prefix(ref IAttackTarget __result, List<IAttackTarget> ___tmpTargets, List<Pair<IAttackTarget, float>> ___availableShootingTargets,
                 List<float> ___tmpTargetScores, List<bool> ___tmpCanShootAtTarget, List<IntVec3> ___tempDestList, List<IntVec3> ___tempSourceList,
-                IAttackTargetSearcher searcher, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f,
-                float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.40282347E+38f, bool canBash = false,
-                bool canTakeTargetsCloserThanEffectiveMinRange = true)
+                IAttackTargetSearcher searcher, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default(IntVec3), 
+                float maxTravelRadiusFromLocus = float.MaxValue, bool canBashDoors = false, bool canTakeTargetsCloserThanEffectiveMinRange = true, bool canBashFences = false)
         {
             bool result = true;
             if (!recursiveTrap && multiMapSearch)
@@ -73,7 +72,7 @@ namespace ZLevels
                             CanBeSeenOverFast_Patch.caster = searcher.Thing;
                         }
                         var target = AttackTargetFinder.BestAttackTarget(searcher, flags, validator, minDist,
-                                maxDist, locus, maxTravelRadiusFromLocus, canBash, canTakeTargetsCloserThanEffectiveMinRange);
+                                maxDist, locus, maxTravelRadiusFromLocus, canBashDoors, canTakeTargetsCloserThanEffectiveMinRange, canBashFences);
                         //ZLogger.Message(searcher.Thing + " - 1: " + ZUtils.ZTracker.GetMapInfo(searcher.Thing.Map) + " - result: " + target);
                         if (target != null)
                         {
@@ -83,7 +82,7 @@ namespace ZLevels
                         }
                     }
                 }
-                //ZLogger.Message("1 Trying to get " + searcher.Thing + " back to " + oldMap + " - " + oldPosition, true);
+                //ZLogger.Message("1 Trying to get " + searcher.Thing + " back to " + oldMap + " - " + oldPosition);
                 ZUtils.TeleportThing(searcher.Thing, oldMap, oldPosition);
                 recursiveTrap = false;
                 CanBeSeenOverFast_Patch.checkLevels = false;
@@ -114,20 +113,20 @@ namespace ZLevels
             }
             if (checkLevels && c.GetTerrain(upperMap) == ZLevelsDefOf.ZL_OutsideTerrain)
             {
-                ZLogger.Message(c + " - Return true: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap), true);
-                ZLogger.Message(c + " - Return true: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap), true);
+                ZLogger.Message(c + " - Return true: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap));
+                ZLogger.Message(c + " - Return true: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap));
                 __result = true;
                 return false;
             }
             else if (checkLevels && c != caster.positionInt)
             {
-                ZLogger.Message(caster + " - " + c + " - Return false: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap), true);
-                ZLogger.Message(caster + " - " + c + " - Return false: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap), true);
+                ZLogger.Message(caster + " - " + c + " - Return false: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap));
+                ZLogger.Message(caster + " - " + c + " - Return false: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap));
             }
             else if (checkLevels && c == caster.positionInt)
             {
-                ZLogger.Message(c + " - Return true: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap), true);
-                ZLogger.Message(c + " - Return true: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap), true);
+                ZLogger.Message(c + " - Return true: upper - " + c.GetFirstBuilding(upperMap) + " - " + c.GetTerrain(upperMap));
+                ZLogger.Message(c + " - Return true: lower - " + c.GetFirstBuilding(lowerMap) + " - " + c.GetTerrain(lowerMap));
                 __result = true;
                 return false;
             }
@@ -144,13 +143,13 @@ namespace ZLevels
         public static bool teleportBack;
         public static void Prefix(Verb_LaunchProjectile __instance, List<IntVec3> ___tempLeanShootSources, List<IntVec3> ___tempDestList, LocalTargetInfo ___currentTarget, ref bool __result)
         {
-            //ZLogger.Message("__instance.caster: " + __instance.caster, true);
-            //ZLogger.Message("__instance.caster.Map: " + __instance.caster.Map, true);
-            //ZLogger.Message("__instance.caster.Map.Tile: " + __instance.caster.Map.Tile, true);
+            //ZLogger.Message("__instance.caster: " + __instance.caster);
+            //ZLogger.Message("__instance.caster.Map: " + __instance.caster.Map);
+            //ZLogger.Message("__instance.caster.Map.Tile: " + __instance.caster.Map.Tile);
             //
-            //ZLogger.Message("___currentTarget.Thing: " + ___currentTarget.Thing, true);
-            //ZLogger.Message("___currentTarget.Thing?.Map: " + ___currentTarget.Thing?.Map, true);
-            //ZLogger.Message("___currentTarget.Thing?.Map.Tile: " + ___currentTarget.Thing?.Map.Tile, true);
+            //ZLogger.Message("___currentTarget.Thing: " + ___currentTarget.Thing);
+            //ZLogger.Message("___currentTarget.Thing?.Map: " + ___currentTarget.Thing?.Map);
+            //ZLogger.Message("___currentTarget.Thing?.Map.Tile: " + ___currentTarget.Thing?.Map.Tile);
         
             if (__instance.caster.Map != ___currentTarget.Thing?.Map && __instance.caster.Map.Tile == ___currentTarget.Thing?.Map?.Tile)
             {
@@ -209,14 +208,14 @@ namespace ZLevels
     //    {
     //        if (TryCastShot_Patch.targetOldMap != null && launcher.Map != TryCastShot_Patch.targetOldMap)
     //        {
-    //            ZLogger.Message("TryCastShot_Patch.targetOldMap: " + TryCastShot_Patch.targetOldMap, true);
+    //            ZLogger.Message("TryCastShot_Patch.targetOldMap: " + TryCastShot_Patch.targetOldMap);
     //            RoofAndFloorPatches.Patch_SpawnSetup.doTeleport = false;
     //            ZUtils.ZTracker.TeleportThing(__instance, __instance.Position, TryCastShot_Patch.targetOldMap);
     //            RoofAndFloorPatches.Patch_SpawnSetup.doTeleport = true;
     //        }
     //        else if (TryCastShot_Patch.casterOldMap != null && intendedTarget.Thing.Map != TryCastShot_Patch.casterOldMap)
     //        {
-    //            ZLogger.Message("intendedTarget.Thing.Map: " + intendedTarget.Thing.Map, true);
+    //            ZLogger.Message("intendedTarget.Thing.Map: " + intendedTarget.Thing.Map);
     //            RoofAndFloorPatches.Patch_SpawnSetup.doTeleport = false;
     //            ZUtils.ZTracker.TeleportThing(__instance, __instance.Position, intendedTarget.Thing.Map);
     //            RoofAndFloorPatches.Patch_SpawnSetup.doTeleport = true;
@@ -229,7 +228,7 @@ namespace ZLevels
     {
         public static void Postfix(ref Building_TurretGun __instance, ref LocalTargetInfo __result)
         {
-            //ZLogger.Message(__instance + " got target " + __result, true);
+            //ZLogger.Message(__instance + " got target " + __result);
         }
     }
     
@@ -306,14 +305,14 @@ namespace ZLevels
                     {
                         if (points[i].GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain)
                         {
-                            ZLogger.Message("1: " + caster + " - " + i + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map, true);
+                            ZLogger.Message("1: " + caster + " - " + i + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map);
                             return false;
                         }
                     }
                 }
                 if (resultingLine.dest.GetCover(map)?.def?.Fillage == FillCategory.Full)
                 {
-                    ZLogger.Message("3: " + caster + " - " + resultingLine.dest + " - " + resultingLine.dest.GetCover(map) + " - " + map, true);
+                    ZLogger.Message("3: " + caster + " - " + resultingLine.dest + " - " + resultingLine.dest.GetCover(map) + " - " + map);
                     return false;
                 }
             }
@@ -325,14 +324,14 @@ namespace ZLevels
                     {
                         if (points[i].GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain)
                         {
-                            ZLogger.Message("4: " + caster + " - " + i + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map, true);
+                            ZLogger.Message("4: " + caster + " - " + i + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map);
                             return false;
                         }
                     }
                 }
                 if (resultingLine.dest.GetCover(map)?.def?.Fillage == FillCategory.Full)
                 {
-                    ZLogger.Message("5: " + caster + " - " + resultingLine.dest + " - " + resultingLine.dest.GetCover(map) + " - " + map, true);
+                    ZLogger.Message("5: " + caster + " - " + resultingLine.dest + " - " + resultingLine.dest.GetCover(map) + " - " + map);
                     return false;
                 }
             }
@@ -350,19 +349,19 @@ namespace ZLevels
                     {
                         if (i < points.Count - 1 && points[i].GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain)
                         {
-                            //ZLogger.Message("6: " + caster + " - " + " - " + i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map, true);
+                            //ZLogger.Message("6: " + caster + " - " + " - " + i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map);
                             return false;
                         }
                         else if (i == points.Count - 1 && points[i].GetCover(map)?.def?.Fillage == FillCategory.Full)
                         {
-                            ZLogger.Message("7: " + caster + " - " + i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetCover(map) + " - " + map, true);
+                            ZLogger.Message("7: " + caster + " - " + i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetCover(map) + " - " + map);
                             return false;
                         }
                     }
                 }
                 if (resultingLine.dest.GetCover(map)?.def?.Fillage == FillCategory.Full)
                 {
-                    ZLogger.Message("8: " + caster + " - " + resultingLine.dest + " - " + resultingLine.dest.GetCover(map) + " - " + map, true);
+                    ZLogger.Message("8: " + caster + " - " + resultingLine.dest + " - " + resultingLine.dest.GetCover(map) + " - " + map);
                     return false;
                 }
             }
@@ -374,14 +373,14 @@ namespace ZLevels
                     {
                         if (points[i].GetTerrain(map) != ZLevelsDefOf.ZL_OutsideTerrain)
                         {
-                            ZLogger.Message("9: " + caster + " - " + i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map, true);
+                            ZLogger.Message("9: " + caster + " - " + i + " - " + points.Count + " - " + points[i] + " - " + points[i].GetTerrain(map) + " - " + map);
                             return false;
                         }
                     }
                 }
                 if (resultingLine.dest.GetCover(map)?.def?.Fillage == FillCategory.Full)
                 {
-                    ZLogger.Message("10: " + caster + " - " + resultingLine.dest + " - " + resultingLine.dest.GetCover(map) + " - " + map, true);
+                    ZLogger.Message("10: " + caster + " - " + resultingLine.dest + " - " + resultingLine.dest.GetCover(map) + " - " + map);
                     return false;
                 }
             }
@@ -404,7 +403,7 @@ namespace ZLevels
                 var job = __instance.TryGiveJob(pawn);
                 if (job != null)
                 {
-                    ZLogger.Message("Second block: " + job, true);
+                    ZLogger.Message("Second block: " + job);
                     if (job.targetA.Thing?.Map != null && job.targetA.Thing.Map != pawn.Map)
                     {
                         ZUtils.ZTracker.ResetJobTrackerFor(pawn);
@@ -424,7 +423,7 @@ namespace ZLevels
             }
             else if (__result != null && __result.targetA.Thing?.Map != null && __result.targetA.Thing.Map != pawn.Map)
             {
-                ZLogger.Message("Second block: " + __result, true);
+                ZLogger.Message("Second block: " + __result);
                 ZUtils.ZTracker.ResetJobTrackerFor(pawn);
                 ZUtils.ZTracker.BuildJobListFor(pawn, __result.targetA.Thing.Map, __result);
                 ZUtils.ZTracker.jobTracker[pawn].targetDest = new TargetInfo(__result.targetA.Thing);
@@ -443,7 +442,7 @@ namespace ZLevels
         [HarmonyPostfix]
         private static void JobGiver_AIGotoNearestHostilePostfix(JobGiver_AIGotoNearestHostile __instance, ref Job __result, Pawn pawn)
         {
-            ZLogger.Message(pawn + " got response 4: " + __result, true);
+            ZLogger.Message(pawn + " got response 4: " + __result);
             if (__result == null && !recursiveTrap)
             {
                 recursiveTrap = true;
@@ -451,7 +450,7 @@ namespace ZLevels
                 var job = __instance.TryGiveJob(pawn);
                 if (job != null)
                 {
-                    ZLogger.Message("Second block: " + job, true);
+                    ZLogger.Message("Second block: " + job);
                     if (job.targetA.Thing?.Map != null && job.targetA.Thing.Map != pawn.Map)
                     {
                         ZUtils.ZTracker.ResetJobTrackerFor(pawn);
@@ -471,7 +470,7 @@ namespace ZLevels
             }
             else if (__result != null && __result.targetA.Thing?.Map != null && __result.targetA.Thing.Map != pawn.Map)
             {
-                ZLogger.Message("Second block: " + __result, true);
+                ZLogger.Message("Second block: " + __result);
                 ZUtils.ZTracker.ResetJobTrackerFor(pawn);
                 ZUtils.ZTracker.BuildJobListFor(pawn, __result.targetA.Thing.Map, __result);
                 ZUtils.ZTracker.jobTracker[pawn].targetDest = new TargetInfo(__result.targetA.Thing);
@@ -479,7 +478,7 @@ namespace ZLevels
                 __result = ZUtils.ZTracker.jobTracker[pawn].activeJobs[0];
                 ZUtils.ZTracker.jobTracker[pawn].activeJobs.RemoveAt(0);
             }
-            ZLogger.Message(pawn + " got result 4: " + __result + " in " + pawn.Map + " - " + __result?.targetA.Thing?.Map + " - mind enemy: " + pawn.mindState.enemyTarget, true);
+            ZLogger.Message(pawn + " got result 4: " + __result + " in " + pawn.Map + " - " + __result?.targetA.Thing?.Map + " - mind enemy: " + pawn.mindState.enemyTarget);
         }
     }
     
@@ -505,7 +504,7 @@ namespace ZLevels
                 var job = __instance.TryGiveJob(pawn);
                 if (job != null)
                 {
-                    ZLogger.Message("Second block: " + job, true);
+                    ZLogger.Message("Second block: " + job);
                     if (job.targetA.Thing?.Map != null && job.targetA.Thing.Map != pawn.Map)
                     {
                         if (!ZUtils.ZTracker.jobTracker.ContainsKey(pawn)) ZUtils.ZTracker.jobTracker[pawn] = new JobTracker
@@ -529,7 +528,7 @@ namespace ZLevels
             }
             else if (__result != null && __result.targetA.Thing?.Map != null && __result.targetA.Thing.Map != pawn.Map)
             {
-                ZLogger.Message("Second block: " + __result, true);
+                ZLogger.Message("Second block: " + __result);
                 if (!ZUtils.ZTracker.jobTracker.ContainsKey(pawn)) ZUtils.ZTracker.jobTracker[pawn] = new JobTracker
                 {
                     activeJobs = new List<Job>()
@@ -543,7 +542,7 @@ namespace ZLevels
             }
             else if (__result == null && pawn.mindState.enemyTarget?.Map != null && pawn.mindState.enemyTarget.Map != pawn.Map)
             {
-                ZLogger.Message("Third block: " + __result, true);
+                ZLogger.Message("Third block: " + __result);
                 if (!ZUtils.ZTracker.jobTracker.ContainsKey(pawn)) ZUtils.ZTracker.jobTracker[pawn] = new JobTracker
                 {
                     activeJobs = new List<Job>()
@@ -555,7 +554,7 @@ namespace ZLevels
                 ZUtils.ZTracker.jobTracker[pawn].failIfTargetMapIsNotDest = true;
                 ZUtils.ZTracker.jobTracker[pawn].target = pawn.mindState.enemyTarget;
             }
-            ZLogger.Message(pawn + " got result 5: " + __result + " in " + pawn.Map + " - " + __result?.targetA.Thing?.Map + " - mind enemy: " + pawn.mindState.enemyTarget, true);
+            ZLogger.Message(pawn + " got result 5: " + __result + " in " + pawn.Map + " - " + __result?.targetA.Thing?.Map + " - mind enemy: " + pawn.mindState.enemyTarget);
         }
     }
 }

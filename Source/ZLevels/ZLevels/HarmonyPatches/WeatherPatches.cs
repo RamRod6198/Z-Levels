@@ -60,7 +60,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("[Z-Levels] Patch_ChooseNextWeather patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                    Log.Error("[Z-Levels] Patch_ChooseNextWeather patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex);
                 }
             }
         }
@@ -109,7 +109,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("[Z-Levels] Patch_TransitionTo patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                    Log.Error("[Z-Levels] Patch_TransitionTo patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex);
                 }
             }
         }
@@ -137,7 +137,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("[Z-Levels] Patch_WeatherManager patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                    Log.Error("[Z-Levels] Patch_WeatherManager patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex);
                 }
                 return true;
             }
@@ -160,7 +160,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("[Z-Levels] Patch_WeatherManager patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                    Log.Error("[Z-Levels] Patch_WeatherManager patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex);
                 }
                 return true;
             }
@@ -230,7 +230,7 @@ namespace ZLevels
                                 newCond.Permanent = cond.Permanent;
                                 newCond.startTick = cond.startTick;
                                 newCond.quest = cond.quest;
-                                ZLogger.Message("Register: " + newCond + " in the " + ZUtils.ZTracker.GetMapInfo(map), true);
+                                ZLogger.Message("Register: " + newCond + " in the " + ZUtils.ZTracker.GetMapInfo(map));
                                 map.gameConditionManager.RegisterCondition(newCond);
                             }
                         }

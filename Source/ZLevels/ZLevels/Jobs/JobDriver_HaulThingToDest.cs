@@ -28,12 +28,27 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    if (pawn.Map == this.job.targetA.Thing?.Map && pawn.Map == ZTracker.jobTracker[pawn].targetDest.Map)
+                    Log.Message("Test -1");
+                    if (this.job is null)
+                    {
+                        ZLogger.Error("JobDriver_HaulThingToDest: job is null, this should never happen.");
+                    }
+                    else if (this.job.targetA.Thing is null)
+                    {
+                        ZLogger.Error("JobDriver_HaulThingToDest: targetA.Thing is null, this should never happen.");
+                    }
+                    Log.Message("Test 0");
+                    if (pawn.Map == this.job.targetA.Thing.Map && pawn.Map == ZTracker.jobTracker[pawn].targetDest.Map)
                     {
                         ZLogger.Message("pawn map and thing map and dest map are same, yield breaking in JobDriver_HaulThingToDest");
                         this.EndJobWith(JobCondition.InterruptForced);
                     }
-                    this.savedThing = this.job.targetA.Thing;
+                    else
+                    {
+                        Log.Message("Test 1");
+                        this.savedThing = this.job.targetA.Thing;
+                        Log.Message("Test 2");
+                    }
                 }
             };
 
@@ -59,7 +74,7 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    if (ZTracker.jobTracker.TryGetValue(pawn, out JobTracker jobTracker))
+                    if (ZTracker.jobTracker.TryGetValue(pawn, out JobTracker jobTracker) && jobTracker.mainJob != null)
                     {
                         if (jobTracker.mainJob.targetA.Thing != null && jobTracker.mainJob.targetA.Thing == this.savedThing && jobTracker.mainJob.targetA.Thing != TargetA.Thing)
                         {

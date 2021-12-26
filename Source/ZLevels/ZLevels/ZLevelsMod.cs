@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,10 +11,13 @@ namespace ZLevels
 {
     class ZLevelsMod : Mod
     {
+        public static Harmony harmony;
         public static ZLevelsSettings settings;
         public ZLevelsMod(ModContentPack pack) : base(pack)
         {
             settings = GetSettings<ZLevelsSettings>();
+            harmony = new Harmony("ZLevels.Mod");
+            harmony.PatchAll();
         }
 
         public override void DoSettingsWindowContents(Rect inRect)
@@ -21,11 +25,9 @@ namespace ZLevels
             base.DoSettingsWindowContents(inRect);
             settings.DoSettingsWindowContents(inRect);
         }
-
-        // Return the name of the mod in the settings tab in game
         public override string SettingsCategory()
         {
-            return "Z-Levels";
+            return this.Content.Name;
         }
     }
 }

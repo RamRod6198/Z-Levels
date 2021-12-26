@@ -96,8 +96,6 @@ namespace ZLevels
 	[HarmonyPatch(typeof(DynamicDrawManager), "DrawDynamicThings")]
 	public static class DrawDynamicThings
 	{
-		private static Dictionary<Pawn, PawnRendererScaled> cachedPawnRenderers = new Dictionary<Pawn, PawnRendererScaled>();
-		private static Dictionary<Pawn, PawnRendererScaled> cachedCorpseRenderers = new Dictionary<Pawn, PawnRendererScaled>();
 		private static Dictionary<Thing, Dictionary<int, Graphic>> cachedGraphics = new Dictionary<Thing, Dictionary<int, Graphic>>();
 
 		[TweakValue("0ZLevels", 0, 20)] public static float turretDrawZOffset = 1.9f;
@@ -171,25 +169,7 @@ namespace ZLevels
 											newDrawPos.z += (baseLevel - curLevel) / pawnZOffset;
 											newDrawPos.y -= baseLevel - curLevel;
 											newDrawPos.y -= pawnYOffset;
-											if (cachedPawnRenderers.TryGetValue(pawn, out var pawnRenderer))
-											{
-												pawnRenderer.RenderPawnAt(newDrawPos, curLevel, baseLevel);
-											}
-											else
-											{
-												var newRenderer = new PawnRendererScaled(pawn, pawn.Drawer.renderer.wiggler);
-												pawn.Drawer.renderer.graphics.ResolveAllGraphics();
-												newRenderer.graphics.nakedGraphic = pawn.Drawer.renderer.graphics.nakedGraphic;
-												newRenderer.graphics.headGraphic = pawn.Drawer.renderer.graphics.headGraphic;
-												newRenderer.graphics.hairGraphic = pawn.Drawer.renderer.graphics.hairGraphic;
-												newRenderer.graphics.rottingGraphic = pawn.Drawer.renderer.graphics.rottingGraphic;
-												newRenderer.graphics.dessicatedGraphic = pawn.Drawer.renderer.graphics.dessicatedGraphic;
-												newRenderer.graphics.apparelGraphics = pawn.Drawer.renderer.graphics.apparelGraphics;
-												newRenderer.graphics.packGraphic = pawn.Drawer.renderer.graphics.packGraphic;
-												newRenderer.graphics.flasher = pawn.Drawer.renderer.graphics.flasher;
-												newRenderer.RenderPawnAt(newDrawPos, curLevel, baseLevel);
-												cachedPawnRenderers[pawn] = newRenderer;
-											}
+											// TODO Transpile PawnRenderer
 										}
 										else if (thing is Corpse corpse)
 										{
@@ -198,25 +178,7 @@ namespace ZLevels
 											newDrawPos.z += (baseLevel - curLevel) / pawnZOffset;
 											newDrawPos.y -= baseLevel - curLevel;
 											newDrawPos.y -= 4f;
-											if (cachedCorpseRenderers.TryGetValue(corpse.InnerPawn, out var pawnRenderer))
-											{
-												pawnRenderer.RenderPawnAt(newDrawPos, curLevel, baseLevel);
-											}
-											else
-											{
-												var newRenderer = new PawnRendererScaled(corpse.InnerPawn, corpse.InnerPawn.Drawer.renderer.wiggler);
-												corpse.InnerPawn.Drawer.renderer.graphics.ResolveAllGraphics();
-												newRenderer.graphics.nakedGraphic = corpse.InnerPawn.Drawer.renderer.graphics.nakedGraphic;
-												newRenderer.graphics.headGraphic = corpse.InnerPawn.Drawer.renderer.graphics.headGraphic;
-												newRenderer.graphics.hairGraphic = corpse.InnerPawn.Drawer.renderer.graphics.hairGraphic;
-												newRenderer.graphics.rottingGraphic = corpse.InnerPawn.Drawer.renderer.graphics.rottingGraphic;
-												newRenderer.graphics.dessicatedGraphic = corpse.InnerPawn.Drawer.renderer.graphics.dessicatedGraphic;
-												newRenderer.graphics.apparelGraphics = corpse.InnerPawn.Drawer.renderer.graphics.apparelGraphics;
-												newRenderer.graphics.packGraphic = corpse.InnerPawn.Drawer.renderer.graphics.packGraphic;
-												newRenderer.graphics.flasher = corpse.InnerPawn.Drawer.renderer.graphics.flasher;
-												newRenderer.RenderPawnAt(newDrawPos, curLevel, baseLevel);
-												cachedCorpseRenderers[corpse.InnerPawn] = newRenderer;
-											}
+											// TODO Transpile PawnRenderer
 										}
 										else if (thing.def.projectile == null && !thing.def.IsDoor)
 										{
@@ -233,12 +195,12 @@ namespace ZLevels
 
 												if (thing.Graphic is Graphic_RandomRotated graphicRandomRotated)
 												{
-													graphic = graphicRandomRotated.subGraphic.GetCopy(drawSize);
+													graphic = graphicRandomRotated.subGraphic.GetCopy(drawSize, graphicRandomRotated.Shader);
 													graphic.data = graphicRandomRotated.subGraphic.data;
 												}
 												else
                                                 {
-													graphic = thing.Graphic.GetCopy(drawSize);
+													graphic = thing.Graphic.GetCopy(drawSize, thing.Graphic.Shader);
 													graphic.data = thing.Graphic.data;
                                                 }
 												graphic.data.drawSize = drawSize;
@@ -272,7 +234,7 @@ namespace ZLevels
 											thing,
 											": ",
 											ex.ToString()
-										}), false);
+										}));
 									}
 									DrawPos_Patch.ChangeDrawPos = false;
 								}

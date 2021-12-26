@@ -62,7 +62,6 @@ namespace ZLevels
                     || Find.WorldGrid[map.Tile].hilliness == Hilliness.Mountainous
                     || Find.WorldGrid[map.Tile].hilliness == Hilliness.Impassable))
                 {
-                    ZLogger.Message("The map has caves below now");
                     this.hasCavesBelow = true;
                 }
             }
@@ -70,19 +69,7 @@ namespace ZLevels
             var ZTracker = ZUtils.ZTracker;
             if (ZTracker.ZLevelsTracker == null)
             {
-                ZLogger.Message("1 Resetting ZLevelsTracker");
                 ZTracker.ZLevelsTracker = new Dictionary<int, ZLevelData>();
-            }
-
-            foreach (var tile in ZTracker.ZLevelsTracker)
-            {
-                foreach (var zData in ZTracker.ZLevelsTracker[tile.Key].ZLevels)
-                {
-                    ZLogger.Message("2 Tile: " + tile.Key + " - Map: " + ZTracker.GetMapInfo(zData.Value));
-                    ZLogger.Message("Map null: " + (zData.Value == null).ToString());
-                    ZLogger.Message("Map.Pawns null: " + (zData.Value.mapPawns == null).ToString());
-                    ZLogger.Message("2 Map.Pawns null: " + (this.map.mapPawns == null).ToString());
-                }
             }
 
             if (!ZTracker.ZLevelsTracker.ContainsKey(this.map.Tile) && ZTracker.TryRegisterMap(this.map, 0))

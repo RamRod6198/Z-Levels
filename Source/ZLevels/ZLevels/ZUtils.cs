@@ -56,7 +56,6 @@ namespace ZLevels
             var jobTracker = thing is Pawn p ? zTracker.jobTracker.TryGetValue(p, out var value) ? value : null : null;
             foreach (var otherMap in zTracker.GetAllMapsInClosestOrder(oldMap))
             {
-                ZLogger.Message("otherMap: " + otherMap);
                 if (!dontCheckForStairs)
                 {
                     var stairs = new List<Building_Stairs>();

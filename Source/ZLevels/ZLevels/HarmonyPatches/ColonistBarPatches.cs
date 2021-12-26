@@ -12,7 +12,7 @@ using static RimWorld.ColonistBar;
 namespace ZLevels
 {
 
-    [HarmonyPatch(typeof(ColonistBarDrawLocsFinder), "CalculateColonistsInGroup")]
+    [HarmonyPatch(typeof(ColonistBarDrawLocsFinder), "CalculateColonistsInGroup", new Type[] { typeof(int) })]
     public static class CalculateColonistsInGroupPatches
     {
         [HarmonyPrefix]
@@ -23,7 +23,6 @@ namespace ZLevels
             {
                 list = Find.ColonistBar.cachedEntries.OrderBy(x => x.map != null ? ZUtils.ZTracker.GetZIndexFor(x.map) : 9999).ToList();
             }
-            catch { }
             finally 
             {
                 Find.ColonistBar.cachedEntries = list;
@@ -34,7 +33,7 @@ namespace ZLevels
     [HarmonyPatch(typeof(ColonistBar), "ColonistBarOnGUI")]
     public static class ColonistBarOnGUIPatch
     {
-        public static Texture2D AbandonButtonTex = ContentFinder<Texture2D>.Get("UI/Buttons/Abandon", true);
+        public static Texture2D AbandonButtonTex = ContentFinder<Texture2D>.Get("UI/Buttons/Abandon");
         [HarmonyPrefix]
         public static void Prefix(ColonistBar __instance, ref List<ColonistBar.Entry> ___cachedEntries, 
             ref List<Vector2> ___cachedDrawLocs)

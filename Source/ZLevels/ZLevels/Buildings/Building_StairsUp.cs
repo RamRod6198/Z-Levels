@@ -49,7 +49,7 @@ namespace ZLevels
                 Building_Stairs matchingStair = GetMatchingStair();
                 if (matchingStair != null)
                 {
-                    ZLogger.Message(matchingStair + ".HitPoints -= " + (int)totalDamageDealt, true);
+                    ZLogger.Message(matchingStair + ".HitPoints -= " + (int)totalDamageDealt);
                     matchingStair.syncDamage = false;
                     matchingStair.TakeDamage(new DamageInfo(dinfo.Def, dinfo.Amount));
                     matchingStair.syncDamage = true;

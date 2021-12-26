@@ -73,7 +73,7 @@ namespace ZLevels
                 yield break;
             }
             ZLogger.Message($"JobDriver HaulThingToDestAndCell1 About to call findRouteWithStairs, with pawn {GetActor()}, dest {new TargetInfo(TargetA.Thing)}, instance {this}");
-            Log.Message("1 - pawn.Map: " + pawn.Map + " - dest: " + new TargetInfo(TargetA.Thing).Map, true);
+            Log.Message("1 - pawn.Map: " + pawn.Map + " - dest: " + new TargetInfo(TargetA.Thing).Map);
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), new TargetInfo(TargetA.Thing).Map, this))
             {
                 yield return toil;
@@ -99,7 +99,7 @@ namespace ZLevels
             {
                 initAction = delegate ()
                 {
-                    ZLogger.Message("JobDriver_HaulThingToDestAndToCell 1: " + pawn + " trying to reserve: " + TargetA, true);
+                    ZLogger.Message("JobDriver_HaulThingToDestAndToCell 1: " + pawn + " trying to reserve: " + TargetA);
                 }
             };
             yield return reserveTargetA;
@@ -118,13 +118,13 @@ namespace ZLevels
                 {
                     initAction = delegate ()
                     {
-                        ZLogger.Message("JobDriver_HaulThingToDestAndToCell 2: " + pawn + " trying to reserve other things: " + TargetA, true);
+                        ZLogger.Message("JobDriver_HaulThingToDestAndToCell 2: " + pawn + " trying to reserve other things: " + TargetA);
                     }
                 };
                 yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveTargetA, TargetIndex.A, TargetIndex.B);
             }
             ZLogger.Message($"JobDriver HaulThingToDestAndCell2 About to call findRouteWithStairs, with pawn {GetActor()}, dest {ZTracker.jobTracker[pawn].targetDest}, instance {this}");
-            Log.Message("2 - pawn.Map: " + pawn.Map + " - dest: " + ZTracker.jobTracker[pawn].targetDest.Map, true);
+            Log.Message("2 - pawn.Map: " + pawn.Map + " - dest: " + ZTracker.jobTracker[pawn].targetDest.Map);
             foreach (var toil in Toils_ZLevels.GoToMap(GetActor(), ZTracker.jobTracker[pawn].targetDest.Map, this))
             {
                 yield return toil;

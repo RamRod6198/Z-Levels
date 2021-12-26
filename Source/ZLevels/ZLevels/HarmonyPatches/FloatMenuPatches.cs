@@ -546,11 +546,11 @@ namespace ZLevels
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap,
                             oldPosition1, victim, oldMap, oldPosition2))
                         {
-                            building_Bed3 = RestUtility.FindBedFor(pTarg2, pawn, sleeperWillBePrisoner: true,
+                            building_Bed3 = RestUtility.FindBedFor(pTarg2, pawn, guestStatus: GuestStatus.Prisoner,
                                 checkSocialProperness: false);
                             if (building_Bed3 == null)
                             {
-                                building_Bed3 = RestUtility.FindBedFor(pTarg2, pawn, sleeperWillBePrisoner: true,
+                                building_Bed3 = RestUtility.FindBedFor(pTarg2, pawn, guestStatus: GuestStatus.Prisoner,
                                     checkSocialProperness: false, ignoreOtherReservations: true);
                             }
 
@@ -607,10 +607,10 @@ namespace ZLevels
                         foreach (var otherMap in ZUtils.GetAllMapsInClosestOrderForTwoThings(pawn, oldMap, oldPosition1,
                             victim, oldMap, oldPosition2))
                         {
-                            building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, false);
+                            building_Bed = RestUtility.FindBedFor(victim, pawn, true, false);
                             if (building_Bed == null)
                             {
-                                building_Bed = RestUtility.FindBedFor(victim, pawn, true, false, true);
+                                building_Bed = RestUtility.FindBedFor(victim, pawn, true, false);
                             }
 
                             if (building_Bed != null) break;
@@ -664,11 +664,11 @@ namespace ZLevels
                         {
                             ZLogger.Message("Searching rest job for " + pawn + " in " + ZTracker.GetMapInfo(otherMap)
                                             + " for " + ZTracker.GetMapInfo(oldMap));
-                            building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false,
+                            building_Bed = RestUtility.FindBedFor(victim, pawn,
                                 checkSocialProperness: false);
                             if (building_Bed == null)
                             {
-                                building_Bed = RestUtility.FindBedFor(victim, pawn, sleeperWillBePrisoner: false,
+                                building_Bed = RestUtility.FindBedFor(victim, pawn,
                                     checkSocialProperness: false, ignoreOtherReservations: true);
                             }
 

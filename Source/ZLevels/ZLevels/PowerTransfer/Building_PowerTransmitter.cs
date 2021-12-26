@@ -114,13 +114,8 @@ namespace ZLevels
 
         private Sustainer wickSustainer;
 
-        Thing upperTransmitter;
-
-        Thing lowerTransmitter;
-
         CompPowerZTransmitter upperPowerComp = null;
 
         CompPowerZTransmitter lowerPowerComp = null;
-
     }
 }

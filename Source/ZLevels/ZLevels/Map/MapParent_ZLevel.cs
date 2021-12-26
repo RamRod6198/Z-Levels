@@ -53,7 +53,7 @@ namespace ZLevels
             }
         }
 
-        public void Abandon()
+        public override void Abandon()
         {
             this.shouldBeDeleted = true;
             this.CheckRemoveMapNow();

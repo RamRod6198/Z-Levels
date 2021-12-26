@@ -75,7 +75,7 @@ namespace ZLevels
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("[Z-Levels] UpdateResourceCounts patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex, true);
+                    Log.Error("[Z-Levels] UpdateResourceCounts patch produced an error. That should not happen and will break things. Send a Hugslib log to the Z-Levels developers. Error message: " + ex);
                 };
                 return true;
             }

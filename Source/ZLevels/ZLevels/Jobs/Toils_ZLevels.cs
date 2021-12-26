@@ -34,7 +34,7 @@ namespace ZLevels
             var goToStairs = Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.OnCell);
             if (pawn.HostileTo(Faction.OfPlayer))
             {
-                pawn.CurJob.canBash = true;
+                pawn.CurJob.canBashDoors = true;
             }
             Toil useStairs = Toils_General.Wait(60, 0);
             useStairs.WithProgressBarToilDelay(TargetIndex.C, false, -0.5f);
