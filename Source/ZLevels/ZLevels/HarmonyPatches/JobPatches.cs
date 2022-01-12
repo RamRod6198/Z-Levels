@@ -839,6 +839,9 @@ namespace ZLevels
             private static IntVec3 FindGroundSleepSpotFor(Pawn pawn)
             {
                 Map map = pawn.Map;
+                ZUtils.currentLookedIntoMap = map;
+                //ZUtils.ZTracker.jobTracker.TryGetValue( pawn, out var jobTracker );
+                //var localCellMap = jobTracker?.lookedAtLocalCellMap;
                 for (int i = 0; i < 2; i++)
                 {
                     int radius = (i == 0) ? 4 : 12;
